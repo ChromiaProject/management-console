@@ -6,7 +6,7 @@
         <format>dir</format>
     </formats>
 
-    <baseDirectory>postchain-mc</baseDirectory>
+    <baseDirectory>management-console</baseDirectory>
 
     <dependencySets>
         <dependencySet>

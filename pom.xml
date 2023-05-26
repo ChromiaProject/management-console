@@ -2,36 +2,75 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>postchain-mc</artifactId>
-        <groupId>net.postchain</groupId>
-        <version>3.11.0-SNAPSHOT</version>
-    </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>pmc-common</artifactId>
-    <name>Management Console - Common</name>
-    <description>Common parts of the CLI</description>
+    <groupId>net.postchain.mc</groupId>
+    <artifactId>management-console</artifactId>
+    <name>Management Console</name>
+    <description>Management Console for Chromia Network</description>
+    <url>https://docs.chromia.com</url>
+    <version>${revision}</version>
 
     <properties>
-    </properties>
+        <revision>dev</revision>
+        <postchain.client.version>3.10.0</postchain.client.version>
+        <main-class>net.postchain.mc.Directory1Kt</main-class>
+        <directory1.version>3.11.0-20230526.030255-8</directory1.version>
+        <directory1.artifact>true</directory1.artifact>
+        <directory1.source>${project.build.directory}/dependency/directory1/rell/src</directory1.source>
 
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.outputTimestamp>1684864722</project.build.outputTimestamp>
+        <kotlin.version>1.8.10</kotlin.version>
+        <kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>
+        <kotlin.code.style>obsolete</kotlin.code.style> <!-- Kotlin obsolete IntelliJ IDEA codestyle -->
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.postchain</groupId>
+                <artifactId>postchain</artifactId>
+                <version>3.10.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.9.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-bom</artifactId>
+                <version>${kotlin.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
         </dependency>
 
         <!-- Postchain -->
         <dependency>
             <groupId>net.postchain.client</groupId>
             <artifactId>postchain-client</artifactId>
+            <version>${postchain.client.version}</version>
         </dependency>
 
         <!-- Cli -->
         <dependency>
             <groupId>com.github.ajalt.clikt</groupId>
             <artifactId>clikt-jvm</artifactId>
+            <version>3.5.0</version>
         </dependency>
 
         <!-- logging -->
@@ -44,11 +83,13 @@
         <dependency>
             <groupId>io.github.java-diff-utils</groupId>
             <artifactId>java-diff-utils</artifactId>
+            <version>4.12</version>
         </dependency>
 
         <dependency>
             <groupId>org.bitcoinj</groupId>
             <artifactId>bitcoinj-core</artifactId>
+            <version>0.16.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
@@ -68,6 +109,7 @@
         <dependency>
             <groupId>de.m3y.kformat</groupId>
             <artifactId>kformat</artifactId>
+            <version>0.9</version>
         </dependency>
 
         <dependency>
@@ -88,16 +130,47 @@
     </dependencies>
 
     <build>
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>make-archive</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assembly/targz.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <mainClass>${main-class}</mainClass>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>net.postchain.rell</groupId>
                 <artifactId>rell-maven-plugin</artifactId>
+                <version>0.10.1</version>
                 <configuration>
-                    <source>${project.parent.parent.basedir}/chain0-impl/rell/src</source>
+                    <source>${directory1.source}</source>
                 </configuration>
                 <executions>
                     <execution>
                         <id>rell-client-gen</id>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>rell-generate-client</goal>
                         </goals>
@@ -108,6 +181,7 @@
                     </execution>
                     <execution>
                         <id>rell-anchoring-client</id>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>rell-generate-client</goal>
                         </goals>
@@ -119,7 +193,116 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>test-compile</id>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>artifact</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>directory1.artifact</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>net.postchain.chain0</groupId>
+                    <artifactId>directory1</artifactId>
+                    <version>${directory1.version}</version>
+                    <classifier>sources</classifier>
+                    <type>tar.gz</type>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <artifact>net.postchain.chain0:directory1:${directory1.version}:tar.gz:sources</artifact>
+                        </configuration>
+                        <dependencies>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>local</id>
+            <properties>
+                <directory1.artifact>false</directory1.artifact>
+                <directory1.source>${project.basedir}/../postchain-chromia/chain0-impl/rell/src</directory1.source>
+            </properties>
+        </profile>
+    </profiles>
+
+    <repositories>
+        <repository>
+            <id>postchain-client</id>
+            <name>Postchain Client GitLab Registry</name>
+            <url>https://gitlab.com/api/v4/projects/46288950/packages/maven</url>
+        </repository>
+        <repository>
+            <id>postchain</id>
+            <name>Postchain GitLab Registry</name>
+            <url>https://gitlab.com/api/v4/projects/32294340/packages/maven</url>
+        </repository>
+        <repository>
+            <id>Postchain Chromia</id>
+            <url>https://gitlab.com/api/v4/projects/33481005/packages/maven</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>rellmaven</id>
+            <url>https://gitlab.com/api/v4/projects/37668820/packages/maven</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 </project>
