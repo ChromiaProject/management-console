@@ -242,7 +242,7 @@
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.3.2</version>
                     <configuration>
                         <allowInsecureRegistries>false</allowInsecureRegistries>
                         <from>
@@ -408,9 +408,6 @@
                                                 <username>${env.CI_REGISTRY_USER}</username>
                                                 <password>${env.CI_REGISTRY_PASSWORD}</password>
                                             </auth>
-                                            <tags>
-                                                <tag>${latest.tag}</tag>
-                                            </tags>
                                         </to>
                                     </configuration>
                                 </execution>
@@ -445,5 +442,18 @@
             <url>https://gitlab.com/api/v4/projects/37668820/packages/maven</url>
         </pluginRepository>
     </pluginRepositories>
+
+    <distributionManagement>
+        <repository>
+            <id>gitlab-maven</id>
+            <!--suppress UnresolvedMavenProperty -->
+            <url>https://gitlab.com/api/v4/projects/46346037/packages/maven</url>
+        </repository>
+        <snapshotRepository>
+            <id>gitlab-maven</id>
+            <!--suppress UnresolvedMavenProperty -->
+            <url>https://gitlab.com/api/v4/projects/46346037/packages/maven</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>
