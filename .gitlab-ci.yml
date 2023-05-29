@@ -37,6 +37,7 @@ image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.0.
 stages:
   - build
   - deploy
+  - dependency-check
   - release
 
 deploy:
@@ -64,6 +65,20 @@ build:
       $MAVEN_CLI_OPTS
       --activate-profiles docker
       verify
+
+dependency-check:
+  extends: .setup
+  stage: dependency-check
+  interruptible: true
+  script:
+    - mvn
+      $MAVEN_CLI_OPTS
+      --activate-profiles dependency-check
+      -DskipTests
+      verify
+  # only:
+  #   variables:
+  #     - $RUN_DEPENDENCY_CHECK == "true"
 
 release-minor:
   extends: .release
