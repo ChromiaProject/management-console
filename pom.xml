@@ -16,9 +16,9 @@
         <revision>dev</revision>
         <postchain.client.version>3.10.0</postchain.client.version>
         <main-class>net.postchain.mc.Directory1Kt</main-class>
-        <directory1.version>3.11.0-20230526.030255-8</directory1.version>
+        <directory.chain.version>1.4.0</directory.chain.version>
         <directory1.artifact>true</directory1.artifact>
-        <directory1.source>${project.build.directory}/dependency/directory1/rell/src</directory1.source>
+        <directory.source>${project.build.directory}/directory-chain/src</directory.source>
 
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -174,7 +174,7 @@
                 <artifactId>rell-maven-plugin</artifactId>
                 <version>0.10.1</version>
                 <configuration>
-                    <source>${directory1.source}</source>
+                    <source>${directory.source}</source>
                 </configuration>
                 <executions>
                     <execution>
@@ -285,35 +285,27 @@
                     <name>!local</name>
                 </property>
             </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>net.postchain.chain0</groupId>
-                    <artifactId>directory1</artifactId>
-                    <version>${directory1.version}</version>
-                    <classifier>sources</classifier>
-                    <type>tar.gz</type>
-                    <scope>provided</scope>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>3.6.0</version>
+                        <artifactId>maven-scm-plugin</artifactId>
+                        <version>1.11.2</version>
                         <executions>
                             <execution>
-                                <phase>process-sources</phase>
+                                <id>d1-resources</id>
+                                <phase>generate-sources</phase>
                                 <goals>
-                                    <goal>unpack</goal>
+                                    <goal>checkout</goal>
                                 </goals>
+                                <configuration>
+                                    <connectionUrl>scm:git:https://gitlab.com/chromaway/core/directory-chain.git</connectionUrl>
+                                    <checkoutDirectory>${project.build.directory}/directory-chain</checkoutDirectory>
+                                    <scmVersion>${directory.chain.version}</scmVersion>
+                                    <scmVersionType>tag</scmVersionType>
+                                </configuration>
                             </execution>
                         </executions>
-                        <configuration>
-                            <artifact>net.postchain.chain0:directory1:${directory1.version}:tar.gz:sources</artifact>
-                        </configuration>
-                        <dependencies>
-                        </dependencies>
                     </plugin>
                 </plugins>
             </build>
@@ -326,7 +318,7 @@
                 </property>
             </activation>
             <properties>
-                <directory1.source>${project.basedir}/../postchain-chromia/chain0-impl/rell/src</directory1.source>
+                <directory.source>${project.basedir}/../directory-chain/src</directory.source>
             </properties>
         </profile>
         <profile>
