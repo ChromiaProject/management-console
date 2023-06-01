@@ -2,6 +2,7 @@ package net.postchain.mc.cli.util
 
 import net.postchain.common.types.WrappedByteArray
 import net.postchain.common.wrap
+import net.postchain.gtv.Gtv
 import net.postchain.gtv.GtvEncoder
 import net.postchain.gtv.GtvFactory
 import net.postchain.gtv.gtvml.GtvMLParser
@@ -27,8 +28,14 @@ class BlockchainConfig(
                 gtv to data
             }
 
-            val hash = gtv.merkleHash(GtvMerkleHashCalculator(cryptoSystem))
-            return BlockchainConfig(hash.wrap(), data)
+            return create(gtv, data)
         }
+
+        fun readFromByteArray(data: ByteArray): BlockchainConfig = create(GtvFactory.decodeGtv(data), data)
+
+        private fun create(gtv: Gtv, data: ByteArray): BlockchainConfig = BlockchainConfig(
+                gtv.merkleHash(GtvMerkleHashCalculator(cryptoSystem)).wrap(),
+                data
+        )
     }
 }

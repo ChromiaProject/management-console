@@ -11,7 +11,7 @@ import net.postchain.mc.cli.util.proposalDescriptionOption
 
 class CommandProposeResumeBlockchain : CliktCommand(
         name = "start",
-        help = "Propose starting a chain that has previously been stopped."
+        help = "Propose starting a blockchain that has previously been stopped."
 ) {
     private val client by nopClientOption()
 

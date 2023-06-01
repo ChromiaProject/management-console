@@ -10,6 +10,7 @@ import net.postchain.chain0.proposal.ProposalType
 import net.postchain.chain0.proposal.getProposal
 import net.postchain.chain0.proposal.getProposalVotingResults
 import net.postchain.chain0.proposal_blockchain.getBlockchainActionProposal
+import net.postchain.chain0.proposal_blockchain.getBlockchainImportProposal
 import net.postchain.chain0.proposal_blockchain.getBlockchainProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposalAt
@@ -231,6 +232,16 @@ class CommandGetProposal : CliktCommand(
             ProposalType.container_remove -> {
                 val container = client.getContainerRemoveProposal(proposal.id) ?: return ""
                 return "Container to remove: $container"
+            }
+
+            ProposalType.blockchain_import -> {
+                val bip = client.getBlockchainImportProposal(proposal.id) ?: return ""
+                return table {
+                    row("Blockchain name:", bip.name)
+                    row("Blockchain RID:", bip.blockchainRid.toString())
+                    row("Container:", bip.container)
+                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
+                }.render().toString()
             }
 
             ProposalType.other -> "No details"
