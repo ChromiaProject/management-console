@@ -15,7 +15,7 @@ import net.postchain.mc.cli.util.proposalDescriptionOption
 
 class CommandProposeBlockchain : CliktCommand(
         name = "add",
-        help = "propose a new blockchain in a specific container. Change will be applied after voting within the deployer voter set of the cluster that the container belongs to."
+        help = "Propose a new blockchain in a specific container. Change will be applied after voting within the deployer voter set of the cluster that the container belongs to."
 ) {
     private val client by nopClientOption()
 
