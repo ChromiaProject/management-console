@@ -12,8 +12,10 @@ import net.postchain.chain0.proposal.getProposalVotingResults
 import net.postchain.chain0.proposal_blockchain.getBlockchainActionProposal
 import net.postchain.chain0.proposal_blockchain.getBlockchainImportProposal
 import net.postchain.chain0.proposal_blockchain.getBlockchainProposal
+import net.postchain.chain0.proposal_blockchain.getConfigurationImportProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposalAt
+import net.postchain.chain0.proposal_blockchain.getFinishBlockchainImportProposal
 import net.postchain.chain0.proposal_cluster.getClusterLimitsProposal
 import net.postchain.chain0.proposal_cluster.getClusterProviderProposal
 import net.postchain.chain0.proposal_cluster.getClusterRemoveProposal
@@ -236,12 +238,19 @@ class CommandGetProposal : CliktCommand(
 
             ProposalType.blockchain_import -> {
                 val bip = client.getBlockchainImportProposal(proposal.id) ?: return ""
-                return table {
-                    row("Blockchain name:", bip.name)
-                    row("Blockchain RID:", bip.blockchainRid.toString())
-                    row("Container:", bip.container)
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+                val conf = GtvDecoder.decodeGtv(bip.configData.data)
+                return "Blockchain RID:\n${bip.blockchainRid}\n\nName: ${bip.name}\nContainer: ${bip.container}\nData: $conf"
+            }
+
+            ProposalType.configuration_import -> {
+                val cip = client.getConfigurationImportProposal(proposal.id) ?: return ""
+                val conf = GtvDecoder.decodeGtv(cip.configData.data)
+                return "Blockchain RID:\n${cip.blockchainRid}\nHeight: ${cip.height}\nData: $conf"
+            }
+
+            ProposalType.finish_blockchain_import -> {
+                val fbi = client.getFinishBlockchainImportProposal(proposal.id) ?: return ""
+                return "Blockchain RID: ${fbi.blockchainRid}"
             }
 
             ProposalType.other -> "No details"
