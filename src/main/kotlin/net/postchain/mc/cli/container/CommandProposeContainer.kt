@@ -12,7 +12,11 @@ import net.postchain.chain0.direct_container.createContainerWithUnitsOperation
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.*
+import net.postchain.mc.cli.util.VoterSetOrPubkeysOption
+import net.postchain.mc.cli.util.containerUnitsOption
+import net.postchain.mc.cli.util.nameOrGenerateOption
+import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.pubkeysOrVotersetOption
 
 
 class CommandProposeContainer : CliktCommand(
