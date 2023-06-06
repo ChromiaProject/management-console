@@ -49,9 +49,9 @@ class CommandGetClusterInfo : CliktCommand(
         val clusterNodes = client.getClusterNodes(name)
         if (clusterNodes.isNotEmpty()) {
             table {
-                header("Node", "Address")
+                header("Node", "Host", "API url")
                 clusterNodes.forEach { node ->
-                    row(node.pubkey.toString(), "${node.host}:${node.port} / ${node.apiUrl}")
+                    row(node.pubkey.toString(), "${node.host}:${node.port}", node.apiUrl)
                 }
                 defaultHints()
             }.render().also { echo(it) }

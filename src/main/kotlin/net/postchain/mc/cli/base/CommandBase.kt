@@ -20,4 +20,9 @@ object CommandBase {
         return string.matches(regex.toRegex())
     }
 
+    fun isContainerNameValid(string: String): Boolean {
+        val regex = "^[a-zA-Z0-9_]*$"
+        return string.matches(regex.toRegex())
+    }
+
 }

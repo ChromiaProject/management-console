@@ -60,6 +60,11 @@ fun validateAlphaNumeric(): OptionTransformContext.(String) -> Unit = {
     require(it.length <= NAME_LENGTH_MAX) { "Name is too long, maximum allowed length is $NAME_LENGTH_MAX" }
 }
 
+fun validateContainerName(): OptionTransformContext.(String) -> Unit = {
+    require(CommandBase.isContainerNameValid(it)) { "Name can only contain letters, numerals, and underscores. " }
+    require(it.length <= NAME_LENGTH_MAX) { "Name is too long, maximum allowed length is $NAME_LENGTH_MAX" }
+}
+
 fun CliktCommand.urlOption(helpMessage: String) = option("--url", help = helpMessage)
         .validate(validateUrl())
 
