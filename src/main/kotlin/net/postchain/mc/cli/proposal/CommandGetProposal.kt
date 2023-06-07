@@ -31,10 +31,15 @@ import net.postchain.chain0.proposal_provider.getSystemProviderProposal
 import net.postchain.chain0.proposal_voter_set.getVoterSetUpdateProposal
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.types.RowId
+import net.postchain.common.types.WrappedByteArray
+import net.postchain.common.wrap
 import net.postchain.crypto.PubKey
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.GtvDictionary
+import net.postchain.gtv.merkle.GtvMerkleHashCalculator
+import net.postchain.gtv.merkleHash
 import net.postchain.mc.cli.base.ClientUtil
+import net.postchain.mc.cli.base.cryptoSystem
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
 import net.postchain.mc.cli.util.configOption
 import net.postchain.mc.cli.votingupdates.formatThreshold
@@ -79,9 +84,8 @@ class CommandGetProposal : CliktCommand(
     private fun formatProposal(client: PostchainClient, proposal: GetProposalResult): String {
         return when (proposal.type) {
             ProposalType.bc -> {
-                val p = client.getBlockchainProposal(proposal.id) ?: return ""
-                val conf = GtvDecoder.decodeGtv(p.data.data)
-                "Container: ${p.container}\nData: $conf"
+                val bp = client.getBlockchainProposal(proposal.id) ?: return ""
+                "Container: ${bp.container}\nConfig hash: ${getDataHash(bp.data)}"
             }
 
             ProposalType.configuration -> {
@@ -239,13 +243,12 @@ class CommandGetProposal : CliktCommand(
             ProposalType.blockchain_import -> {
                 val bip = client.getBlockchainImportProposal(proposal.id) ?: return ""
                 val conf = GtvDecoder.decodeGtv(bip.configData.data)
-                return "Blockchain RID:\n${bip.blockchainRid}\n\nName: ${bip.name}\nContainer: ${bip.container}\nData: $conf"
+                return "Blockchain RID:\n${bip.blockchainRid}\n\nName: ${bip.name}\nContainer: ${bip.container}\nConfig hash: ${getDataHash(bip.configData)}"
             }
 
             ProposalType.configuration_import -> {
                 val cip = client.getConfigurationImportProposal(proposal.id) ?: return ""
-                val conf = GtvDecoder.decodeGtv(cip.configData.data)
-                return "Blockchain RID:\n${cip.blockchainRid}\nHeight: ${cip.height}\nData: $conf"
+                return "Blockchain RID:\n${cip.blockchainRid}\nHeight: ${cip.height}\nConfig hash: ${getDataHash(cip.configData)}"
             }
 
             ProposalType.finish_blockchain_import -> {
@@ -256,4 +259,8 @@ class CommandGetProposal : CliktCommand(
             ProposalType.other -> "No details"
         }
     }
+
+    private fun getDataHash(configData: WrappedByteArray) = GtvDecoder.decodeGtv(configData.data)
+            .merkleHash(GtvMerkleHashCalculator(cryptoSystem))
+            .wrap()
 }

@@ -6,10 +6,10 @@ import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.operations.addReplicaNodeToClusterOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
+import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.nopClientOption
 import net.postchain.mc.cli.util.pubkeyOption
-import net.postchain.mc.cli.util.validateAlphaNumeric
 
 class CommandAddClusterReplica : CliktCommand(
         name = "add",
@@ -18,7 +18,7 @@ class CommandAddClusterReplica : CliktCommand(
 
     private val client by nopClientOption()
 
-    private val name by nameOption("Cluster Name").required().validate(validateAlphaNumeric())
+    private val name by nameOption("Cluster Name").required().validate(entityNameValidator())
 
     private val nodePubKey by pubkeyOption().required()
 
