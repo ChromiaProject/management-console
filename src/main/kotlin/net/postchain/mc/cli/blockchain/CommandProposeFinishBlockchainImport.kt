@@ -14,7 +14,8 @@ import net.postchain.mc.network.requireApiVersion
 
 class CommandProposeFinishBlockchainImport : CliktCommand(
         name = "finish-import",
-        help = "Propose finishing import of a blockchain. Change will be applied after voting within the deployer voter set of the cluster that the container belongs to."
+        help = "Propose finishing import of a blockchain. Change will be applied after voting within the deployer voter set of the cluster that the container belongs to.",
+        hidden = true
 ) {
     private val client by nopClientOption()
 
