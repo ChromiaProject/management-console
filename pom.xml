@@ -272,9 +272,6 @@
                             <appRoot>/opt/chromaway/postchain</appRoot>
                             <workingDirectory>/opt/chromaway/postchain</workingDirectory>
                             <mainClass>${main-class}</mainClass>
-                            <environment>
-                                <LOG4J_CONFIGURATION_FILE>/opt/chromaway/postchain/log4j2.yml</LOG4J_CONFIGURATION_FILE>
-                            </environment>
                         </container>
                         <containerizingMode>packaged</containerizingMode>
                     </configuration>
