@@ -7,7 +7,8 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.proposal_blockchain.proposeImportBlockchainOperation
 import net.postchain.chain0.proposal_blockchain.proposeImportConfigurationOperation
-import net.postchain.client.core.TransactionResult
+import net.postchain.client.core.TxRid
+import net.postchain.client.transaction.TransactionBuilder
 import net.postchain.common.BlockchainRid
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.gtv.GtvDecoder
@@ -44,36 +45,55 @@ class CommandProposeImportBlockchain : CliktCommand(
             val initialConfig = GtvDecoder.decodeGtv(it)
             require(initialConfig.asArray()[0].asInteger() == 0L)
             val initialConfigData = initialConfig.asArray()[1].asByteArray()
-            val txBuilder = client.transactionBuilder()
+            var txBuilder = client.transactionBuilder()
             txBuilder.proposeImportBlockchainOperation(
                     client.pubkey, initialConfigData, blockchainRid, name, container, description)
             var numConfigs = 1
-            while (true) {
-                val gtv = GtvDecoder.decodeGtv(it)
-                if (gtv.isNull()) {
-                    break
+            val txs = buildList {
+                while (true) {
+                    val gtv = GtvDecoder.decodeGtv(it)
+                    if (gtv.isNull()) {
+                        break
+                    }
+                    val height = gtv.asArray()[0].asInteger()
+                    require(height > 0)
+                    val configData = gtv.asArray()[1].asByteArray()
+                    val wasAdded = tryAddConfiguration(txBuilder, blockchainRid, height, configData)
+                    if (!wasAdded) {
+                        add(postTransaction(txBuilder))
+                        txBuilder = client.transactionBuilder()
+                        if (!tryAddConfiguration(txBuilder, blockchainRid, height, configData)) {
+                            throw CliktError("Configuration does not fit in new transaction")
+                        }
+                    }
+                    numConfigs++
                 }
-                val height = gtv.asArray()[0].asInteger()
-                require(height > 0)
-                val configData = gtv.asArray()[1].asByteArray()
-                txBuilder.proposeImportConfigurationOperation(client.pubkey, blockchainRid, height, configData, description)
-                numConfigs++
+                add(postTransaction(txBuilder))
             }
-            // TODO split into multiple transactions to not overflow maxTxSize
-            txBuilder.postAwaitConfirmation().printResultPolitely(numConfigs)
+            for (tx in txs) {
+                client.awaitConfirmation(tx, client.config.statusPollCount, client.config.statusPollInterval).printResult(
+                        "Transaction ${tx.rid} confirmed",
+                        "Cannot import blockchain config(s)"
+                )
+            }
+            echo("Blockchain $name with $numConfigs blockchain configuration(s) imported")
         }
     }
 
-    private fun TransactionResult.printResultPolitely(numConfigs: Int) {
-        val onSuccess = "Blockchain $name with $numConfigs blockchain configuration(s) imported"
-        val onFail = "Cannot import blockchain config(s)"
-        try {
-            printResult(onSuccess, onFail)
-        } catch (e: CliktError) {
-            when (status) {
-                TransactionStatus.CONFIRMED -> echo(onSuccess)
-                else -> throw e
+    private fun tryAddConfiguration(txBuilder: TransactionBuilder, blockchainRid: BlockchainRid, height: Long, configData: ByteArray) =
+            try {
+                txBuilder.proposeImportConfigurationOperation(client.pubkey, blockchainRid, height, configData, description)
+                true
+            } catch (e: IllegalStateException) {
+                false
             }
+
+    private fun postTransaction(txBuilder: TransactionBuilder): TxRid {
+        val txResult = txBuilder.post()
+        if (txResult.status == TransactionStatus.REJECTED) {
+            throw CliktError("Cannot import blockchain config(s): ${txResult.rejectReason}")
         }
+        echo("Transaction ${txResult.txRid} submitted")
+        return txResult.txRid
     }
 }
