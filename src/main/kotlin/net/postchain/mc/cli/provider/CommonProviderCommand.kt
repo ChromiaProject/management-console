@@ -26,6 +26,5 @@ fun providerCommands() = CommonProviderCommand().subcommands(
         CommandProposeEnableProvider(),
         CommandPromoteProvider(),
         CommandProposeDisableProvider(),
-        CommandProposeRemoveProvider(),
         CommandTransferActionPoints(),
 )
