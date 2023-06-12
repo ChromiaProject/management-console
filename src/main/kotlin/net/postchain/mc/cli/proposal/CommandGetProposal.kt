@@ -25,7 +25,6 @@ import net.postchain.chain0.proposal_container.getContainerRemoveProposal
 import net.postchain.chain0.proposal_container.proposal_container_limits.getContainerLimitsProposal
 import net.postchain.chain0.proposal_provider.getProviderBatchProposal
 import net.postchain.chain0.proposal_provider.getProviderQuotaProposal
-import net.postchain.chain0.proposal_provider.getProviderRemoveProposal
 import net.postchain.chain0.proposal_provider.getProviderStateProposal
 import net.postchain.chain0.proposal_provider.getSystemProviderProposal
 import net.postchain.chain0.proposal_voter_set.getVoterSetUpdateProposal
@@ -165,15 +164,6 @@ class CommandGetProposal : CliktCommand(
                 return info + providers
             }
 
-            ProposalType.provider_remove -> {
-                val prp = client.getProviderRemoveProposal(proposal.id) ?: return ""
-                return table {
-                    row("Provider:", prp.provider.toHex())
-                    row("Provider name:", prp.providerName)
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
-            }
-
             ProposalType.container_limits -> {
                 val pcl = client.getContainerLimitsProposal(proposal.id) ?: return ""
                 return table {
@@ -255,8 +245,6 @@ class CommandGetProposal : CliktCommand(
                 val fbi = client.getStartBlockchainImportProposal(proposal.id) ?: return ""
                 return "Blockchain RID: ${fbi.blockchainRid}"
             }
-
-            ProposalType.other -> "No details"
         }
     }
 
