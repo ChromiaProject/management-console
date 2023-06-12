@@ -15,7 +15,7 @@ import net.postchain.chain0.proposal_blockchain.getBlockchainProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationImportProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposalAt
-import net.postchain.chain0.proposal_blockchain.getFinishBlockchainImportProposal
+import net.postchain.chain0.proposal_blockchain.getStartBlockchainImportProposal
 import net.postchain.chain0.proposal_cluster.getClusterLimitsProposal
 import net.postchain.chain0.proposal_cluster.getClusterProviderProposal
 import net.postchain.chain0.proposal_cluster.getClusterRemoveProposal
@@ -251,8 +251,8 @@ class CommandGetProposal : CliktCommand(
                 return "Blockchain RID:\n${cip.blockchainRid}\nHeight: ${cip.height}\nConfig hash: ${getDataHash(cip.configData)}"
             }
 
-            ProposalType.finish_blockchain_import -> {
-                val fbi = client.getFinishBlockchainImportProposal(proposal.id) ?: return ""
+            ProposalType.start_blockchain_import -> {
+                val fbi = client.getStartBlockchainImportProposal(proposal.id) ?: return ""
                 return "Blockchain RID: ${fbi.blockchainRid}"
             }
 

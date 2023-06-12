@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.proposal_blockchain.proposeImportBlockchainOperation
 import net.postchain.chain0.proposal_blockchain.proposeImportConfigurationOperation
+import net.postchain.chain0.proposal_blockchain.proposeStartImportBlockchainOperation
 import net.postchain.client.core.TxRid
 import net.postchain.client.transaction.TransactionBuilder
 import net.postchain.common.BlockchainRid
@@ -49,27 +50,31 @@ class CommandProposeImportBlockchain : CliktCommand(
             txBuilder.proposeImportBlockchainOperation(
                     client.pubkey, initialConfigData, blockchainRid, name, container, description)
             var numConfigs = 1
-            val txs = buildList {
-                while (true) {
-                    val gtv = GtvDecoder.decodeGtv(it)
-                    if (gtv.isNull()) {
-                        break
-                    }
-                    val height = gtv.asArray()[0].asInteger()
-                    require(height > 0)
-                    val configData = gtv.asArray()[1].asByteArray()
-                    val wasAdded = tryAddConfiguration(txBuilder, blockchainRid, height, configData)
-                    if (!wasAdded) {
-                        add(postTransaction(txBuilder))
-                        txBuilder = client.transactionBuilder()
-                        if (!tryAddConfiguration(txBuilder, blockchainRid, height, configData)) {
-                            throw CliktError("Configuration does not fit in new transaction")
-                        }
-                    }
-                    numConfigs++
+            val txs = mutableListOf<TxRid>()
+            while (true) {
+                val gtv = GtvDecoder.decodeGtv(it)
+                if (gtv.isNull()) {
+                    break
                 }
-                add(postTransaction(txBuilder))
+                val height = gtv.asArray()[0].asInteger()
+                require(height > 0)
+                val configData = gtv.asArray()[1].asByteArray()
+                val wasAdded = tryAddConfiguration(txBuilder, blockchainRid, height, configData)
+                if (!wasAdded) {
+                    txs.add(postTransaction(txBuilder))
+                    txBuilder = client.transactionBuilder()
+                    if (!tryAddConfiguration(txBuilder, blockchainRid, height, configData)) {
+                        throw CliktError("Configuration does not fit in new transaction")
+                    }
+                }
+                numConfigs++
             }
+            txs.add(postTransaction(txBuilder))
+
+            txBuilder = client.transactionBuilder()
+            txBuilder.proposeStartImportBlockchainOperation(client.pubkey, blockchainRid, description)
+            txs.add(postTransaction(txBuilder))
+
             for (tx in txs) {
                 client.awaitConfirmation(tx, client.config.statusPollCount, client.config.statusPollInterval).printResult(
                         "Transaction ${tx.rid} confirmed",
