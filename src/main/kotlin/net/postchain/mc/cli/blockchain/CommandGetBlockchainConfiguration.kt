@@ -3,6 +3,7 @@ package net.postchain.mc.cli.blockchain
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.common.queries.getBlockchainLastHeight
 import net.postchain.chain0.nm_api.nmGetBlockchainConfiguration
@@ -18,7 +19,7 @@ class CommandGetBlockchainConfiguration : CliktCommand(
 ) {
     private val client by clientOption()
 
-    private val blockchainRID by blockchainRidOption()
+    private val blockchainRID by blockchainRidOption().required()
 
     private val height by heightOption().default(-1L)
 

@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.blockchain
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.queries.getBlockchainSigners
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.includeInactiveOption
@@ -13,7 +14,7 @@ class CommandListBlockchainSigners : CliktCommand(
 ) {
     private val client by clientOption()
 
-    private val blockchainRID by blockchainRidOption()
+    private val blockchainRID by blockchainRidOption().required()
 
     private val includeInactive by includeInactiveOption()
 

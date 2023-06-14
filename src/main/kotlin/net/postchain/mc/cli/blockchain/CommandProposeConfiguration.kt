@@ -33,7 +33,7 @@ class CommandProposeConfiguration : CliktCommand(
             .file(mustExist = true, mustBeReadable = true, canBeDir = false)
             .required()
 
-    private val blockchainRID by blockchainRidOption()
+    private val blockchainRID by blockchainRidOption().required()
 
     private val height by heightOption()
 

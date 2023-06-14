@@ -2,9 +2,9 @@ package net.postchain.mc.cli.blockchain
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
-import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.proposal_blockchain.proposeImportBlockchainOperation
 import net.postchain.chain0.proposal_blockchain.proposeImportConfigurationOperation
 import net.postchain.client.core.TxRid
@@ -12,8 +12,8 @@ import net.postchain.client.transaction.TransactionBuilder
 import net.postchain.common.BlockchainRid
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.gtv.GtvDecoder
-import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
+import net.postchain.mc.cli.util.configurationsFileOption
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.nopClientOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
@@ -23,13 +23,11 @@ import java.io.FileInputStream
 
 class CommandProposeImportBlockchain : CliktCommand(
         name = "import",
-        help = "Propose importing a blockchain in a specific container. Change will be applied after voting within the deployer voter set of the cluster that the container belongs to.",
-        hidden = true
+        help = "Propose importing a blockchain in a specific container. Change will be applied after voting within the deployer voter set of the cluster that the container belongs to."
 ) {
     private val client by nopClientOption()
 
-    private val configurationsFile by option("--configurations-file", help = "File to import blockchain configurations from")
-            .path(mustExist = true, canBeDir = false, canBeFile = true, mustBeReadable = true).required()
+    private val configurationsFile by configurationsFileOption().required()
 
     private val container by option("-c", "--container", help = "Name of container to run in").required()
 
@@ -45,9 +43,10 @@ class CommandProposeImportBlockchain : CliktCommand(
             val initialConfig = GtvDecoder.decodeGtv(it)
             require(initialConfig.asArray()[0].asInteger() == 0L)
             val initialConfigData = initialConfig.asArray()[1].asByteArray()
+
+            proposeImportBlockchain(blockchainRid, initialConfigData)
+
             var txBuilder = client.transactionBuilder()
-            txBuilder.proposeImportBlockchainOperation(
-                    client.pubkey, initialConfigData, blockchainRid, name, container, description)
             var numConfigs = 1
             val txs = buildList {
                 while (true) {
@@ -71,12 +70,28 @@ class CommandProposeImportBlockchain : CliktCommand(
                 add(postTransaction(txBuilder))
             }
             for (tx in txs) {
-                client.awaitConfirmation(tx, client.config.statusPollCount, client.config.statusPollInterval).printResult(
-                        "Transaction ${tx.rid} confirmed",
-                        "Cannot import blockchain config(s)"
-                )
+                val result = client.awaitConfirmation(tx, client.config.statusPollCount, client.config.statusPollInterval)
+                when (result.status) {
+                    TransactionStatus.CONFIRMED -> echo("Transaction ${tx.rid} confirmed")
+                    TransactionStatus.REJECTED -> throw CliktError("Cannot import blockchain config(s): ${result.rejectReason}")
+                    TransactionStatus.WAITING -> throw PrintMessage("Transaction not complete")
+                    else -> throw CliktError("Cannot find status for this transaction")
+                }
             }
             echo("Blockchain $name with $numConfigs blockchain configuration(s) imported")
+        }
+    }
+
+    private fun proposeImportBlockchain(blockchainRid: BlockchainRid, initialConfigData: ByteArray) {
+        val txBuilder = client.transactionBuilder()
+        txBuilder.proposeImportBlockchainOperation(
+                client.pubkey, initialConfigData, blockchainRid, name, container, description)
+        val result = txBuilder.postAwaitConfirmation()
+        when (result.status) {
+            TransactionStatus.CONFIRMED -> echo("Blockchain import started")
+            TransactionStatus.REJECTED -> throw CliktError("Cannot import blockchain config(s): ${result.rejectReason}")
+            TransactionStatus.WAITING -> throw PrintMessage("Transaction not complete")
+            else -> throw CliktError("Cannot find status for this transaction")
         }
     }
 

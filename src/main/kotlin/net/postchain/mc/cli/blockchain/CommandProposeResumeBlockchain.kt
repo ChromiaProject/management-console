@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.blockchain
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_blockchain.BlockchainAction
 import net.postchain.chain0.proposal_blockchain.proposeBlockchainActionOperation
 import net.postchain.mc.cli.base.printResult
@@ -15,7 +16,7 @@ class CommandProposeResumeBlockchain : CliktCommand(
 ) {
     private val client by nopClientOption()
 
-    private val blockchainRID by blockchainRidOption()
+    private val blockchainRID by blockchainRidOption().required()
 
     private val description by proposalDescriptionOption()
 

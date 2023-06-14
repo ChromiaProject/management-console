@@ -14,6 +14,7 @@ import com.github.ajalt.clikt.parameters.options.split
 import com.github.ajalt.clikt.parameters.options.switch
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
+import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.model.ProviderQuotaType
 import net.postchain.client.config.PostchainClientConfig
 import net.postchain.client.impl.PostchainClientImpl
@@ -116,3 +117,6 @@ fun CliktCommand.providerQuotaTypeOption() = option(help = "Provider quota type"
 
 fun CliktCommand.proposalDescriptionOption(helpMessage: String = "Proposal description", default: String = "") = option("--description", help = helpMessage)
         .default(default)
+
+fun CliktCommand.configurationsFileOption() = option("--configurations-file", help = "File to import blockchain configurations from")
+        .path(mustExist = true, canBeDir = false, canBeFile = true, mustBeReadable = true)
