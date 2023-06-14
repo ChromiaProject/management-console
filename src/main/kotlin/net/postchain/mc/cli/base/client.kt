@@ -10,7 +10,7 @@ import net.postchain.client.impl.PostchainClientProviderImpl
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.mc.cli.util.NopPostchainClient
 
-fun TransactionResult.printResult(onSuccess: String, onFail: String): Nothing{
+fun TransactionResult.printResult(onSuccess: String, onFail: String): Nothing {
     when (status) {
         TransactionStatus.CONFIRMED -> throw PrintMessage(onSuccess)
         TransactionStatus.REJECTED -> throw CliktError("$onFail: $rejectReason")

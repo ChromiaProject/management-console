@@ -2,9 +2,9 @@ package net.postchain.mc.cli.container
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
-import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.direct_container.createContainerFromOperation
 import net.postchain.chain0.direct_container.createContainerFromWithUnitsOperation
 import net.postchain.chain0.direct_container.createContainerOperation
@@ -32,7 +32,10 @@ class CommandProposeContainer : CliktCommand(
             help = "Name of cluster to put container in. Must exist in database"
     ).required()
 
-    private val consensus by option().flag()
+    private val consensusThreshold by option(
+            "--consensus-threshold",
+            help = "Consensus threshold: majority (-1), super majority (0, default) or custom (1..deployers.size)"
+    ).long().default(0)
 
     private val deployerOption by pubkeysOrVotersetOption()
 
@@ -40,7 +43,6 @@ class CommandProposeContainer : CliktCommand(
 
     override fun run() {
         val apiVersion = client.apiVersion()
-        val threshold = if (consensus) -1L else 1L
         client.transactionBuilder()
                 .apply {
                     when {
@@ -48,7 +50,10 @@ class CommandProposeContainer : CliktCommand(
                             when (deployerOption) {
                                 is VoterSetOrPubkeysOption.Pubkeys -> {
                                     createContainerWithUnitsOperation(
-                                            client.pubkey, name, clusterName, threshold,
+                                            client.pubkey,
+                                            name,
+                                            clusterName,
+                                            consensusThreshold,
                                             (deployerOption as VoterSetOrPubkeysOption.Pubkeys).pubkeys,
                                             containerUnits
                                     )
@@ -59,7 +64,7 @@ class CommandProposeContainer : CliktCommand(
                                             client.pubkey,
                                             name,
                                             clusterName,
-                                            threshold,
+                                            consensusThreshold,
                                             (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
                                             containerUnits
                                     )
@@ -71,7 +76,10 @@ class CommandProposeContainer : CliktCommand(
                             when (deployerOption) {
                                 is VoterSetOrPubkeysOption.Pubkeys -> {
                                     createContainerOperation(
-                                            client.pubkey, name, clusterName, threshold,
+                                            client.pubkey,
+                                            name,
+                                            clusterName,
+                                            consensusThreshold,
                                             (deployerOption as VoterSetOrPubkeysOption.Pubkeys).pubkeys
                                     )
                                 }
@@ -81,7 +89,7 @@ class CommandProposeContainer : CliktCommand(
                                             client.pubkey,
                                             name,
                                             clusterName,
-                                            threshold,
+                                            consensusThreshold,
                                             (deployerOption as VoterSetOrPubkeysOption.VoterSet).data
                                     )
                                 }

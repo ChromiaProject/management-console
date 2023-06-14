@@ -12,7 +12,7 @@ import net.postchain.chain0.nm_api.nmGetContainerLimits
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.util.clientOption
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.validateAlphaNumeric
+import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.compatibility.ApiCompatV3.getContainerBlockchainV3
 
 class CommandGetContainerInfo : CliktCommand(
@@ -22,7 +22,7 @@ class CommandGetContainerInfo : CliktCommand(
 
     private val client by clientOption()
 
-    private val name by nameOption("Container Name").required().validate(validateAlphaNumeric())
+    private val name by nameOption("Container Name").required().validate(entityNameValidator())
 
     override fun run() {
         val info = client.getContainerData(name)
@@ -69,6 +69,7 @@ class CommandGetContainerInfo : CliktCommand(
                     }.render().also { echo(it) }
                 }
             }
+
             else -> {
                 val blockchains = client.getContainerBlockchainV3(name)
                 if (blockchains.isEmpty()) {

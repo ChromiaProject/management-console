@@ -12,7 +12,7 @@ import net.postchain.chain0.common.queries.getClusterProviders
 import net.postchain.chain0.common.queries.getClusterReplicaNodes
 import net.postchain.mc.cli.util.clientOption
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.validateAlphaNumeric
+import net.postchain.mc.cli.util.entityNameValidator
 
 class CommandGetClusterInfo : CliktCommand(
         name = "info",
@@ -21,7 +21,7 @@ class CommandGetClusterInfo : CliktCommand(
 
     private val client by clientOption()
 
-    private val name by nameOption("Cluster Name").required().validate(validateAlphaNumeric())
+    private val name by nameOption("Cluster Name").required().validate(entityNameValidator())
 
     override fun run() {
         val info = client.getClusterData(name)
@@ -49,9 +49,9 @@ class CommandGetClusterInfo : CliktCommand(
         val clusterNodes = client.getClusterNodes(name)
         if (clusterNodes.isNotEmpty()) {
             table {
-                header("Node", "Address")
+                header("Node", "Host", "API url")
                 clusterNodes.forEach { node ->
-                    row(node.pubkey.toString(), "${node.host}:${node.port} / ${node.apiUrl}")
+                    row(node.pubkey.toString(), "${node.host}:${node.port}", node.apiUrl)
                 }
                 defaultHints()
             }.render().also { echo(it) }

@@ -50,6 +50,7 @@ object PmcConfigProvider {
             properties["pubkey"] = pubKey.toHex()
             properties["api.url"] = ""
             properties["brid"] = blockchainRid?.toHex() ?: ""
+            properties["max.tx.size"] = 25 * 1024 * 1024 // 25 MiB
 
             outputStream().use {
                 properties.store(it, "Keypair generated using secp256k1 for postchain management console")

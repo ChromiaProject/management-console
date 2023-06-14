@@ -9,13 +9,15 @@ class BlockchainCommand : CliktCommand("Interactions with blockchains") {
 }
 
 fun blockchainCommands() = BlockchainCommand().subcommands(
-    CommandProposeBlockchain(),
-    CommandProposeConfiguration(),
-    CommandProposePauseBlockchain(),
-    CommandProposeResumeBlockchain(),
-    CommandListBlockchainReplicas(),
-    CommandListBlockchainSigners(),
-    CommandListBlockchains(),
-    CommandGetBlockchainConfiguration(),
-    blockchainReplicaCommands()
+        CommandProposeBlockchain(),
+        CommandProposeImportBlockchain(),
+        CommandProposeFinishBlockchainImport(),
+        CommandProposeConfiguration(),
+        CommandProposePauseBlockchain(),
+        CommandProposeResumeBlockchain(),
+        CommandListBlockchainReplicas(),
+        CommandListBlockchainSigners(),
+        CommandListBlockchains(),
+        CommandGetBlockchainConfiguration(),
+        blockchainReplicaCommands()
 )

@@ -44,7 +44,7 @@ class CommandUpdateNode : CliktCommand(
     private val removeCapability by option(help = "Node capability").enum<NodeCapabilityType>()
 
     override fun run() {
-        if (host == null && port == null && apiUrl == null && clusterName == null && addCapability == null && removeCapability == null) {
+        if (host == null && port == null && apiUrl == null && clusterUnits == null && clusterName == null && addCapability == null && removeCapability == null) {
             echo("No properties to update. At least one node's property should be specified")
             return
         }
