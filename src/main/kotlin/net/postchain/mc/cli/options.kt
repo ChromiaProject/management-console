@@ -2,6 +2,7 @@ package net.postchain.mc.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -10,10 +11,14 @@ import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.common.BlockchainRid
 import net.postchain.crypto.PubKey
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 fun CliktCommand.includeInactiveOption() = option(
-    "-i", "--includeinactive",
-    help = "Include disabled/removed clusters (not implemented yet)"
+        "-i", "--includeinactive",
+        help = "Include disabled/removed clusters (not implemented yet)"
 ).flag()
 
 fun CliktCommand.blockchainRidOption() =
@@ -38,3 +43,13 @@ fun CliktCommand.requiredPubkeyOption() = option("-pk", "--pubkey", help = "Publ
 fun CliktCommand.hostOption() = option("-h", "--host", help = "Host", envvar = "POSTCHAIN_HOST")
 
 fun CliktCommand.portOption() = option("-p", "--port", help = "Port").int()
+
+fun CliktCommand.dateToTimestampOption(helpMessage: String, default: Long = 0, defaultString: String = "1970-01-01", daysOffset: Long = 0) =
+        option(help = helpMessage).convert {
+            val date = try {
+                LocalDate.parse(it, DateTimeFormatter.ISO_LOCAL_DATE).plusDays(daysOffset).atStartOfDay(ZoneOffset.systemDefault())
+            } catch (e: Exception) {
+                fail("$it is not a date on the valid format YYYY-MM-DD")
+            }
+            Instant.from(date).toEpochMilli()
+        }.default(default, defaultString)
