@@ -1,9 +1,10 @@
 image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.0.0
-
-.git_template: &git_setup |
-  git remote set-url --push origin "https://oauth2:${BUILD_USER_GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
-  git config user.name "build-user core-dev"
-  git config user.email build_user@chromaway.com
+include:
+  - project: "chromaway/core-infra/gitlab-automation"
+    ref: 1.1.0
+    file:
+      - templates/release.yml
+      - templates/dependency-scanning.yml
 
 .setup:
   # Necessary to be able to launch PostgreSQL in Docker manually. PostgreSQL is
@@ -23,16 +24,6 @@ image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.0.
         - "**/target/failsafe-reports/TEST-*.xml"
         - "**/target/rell-reports/rell-tests.xml"
     expire_in: 1 week
-
-.release:
-  stage: release
-  when: manual
-  before_script:
-    - set -eu
-    - *git_setup
-    - git checkout $CI_COMMIT_REF_NAME
-    - CURRENT_VERSION=$(git describe --tags --abbrev=0)
-    - IFS=. read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
 stages:
   - build
@@ -67,35 +58,20 @@ build:
       verify
 
 dependency-check:
-  extends: .setup
+  extends: .maven-dependency-check
   stage: dependency-check
   interruptible: true
-  script:
-    - mvn
-      $MAVEN_CLI_OPTS
-      --activate-profiles dependency-check
-      -DskipTests
-      verify
-  # only:
-  #   variables:
-  #     - $RUN_DEPENDENCY_CHECK == "true"
-
-release-minor:
-  extends: .release
-  script:
-    - git tag $MAJOR.$((MINOR + 1)).0
-    - git push --tags
   only:
-    - dev
+    variables:
+      - $RUN_DEPENDENCY_CHECK == "true"
 
-release-patch:
-  extends: .release
-  script:
-    - git tag $MAJOR.$MINOR.$((PATCH + 1))
-    - git push --tags
-  only:
-    - dev
-    - /^support\/.*$/
+container-scanning:
+  variables:
+    REGISTRY: registry.gitlab.com/chromaway/core-tools/management-console
+  parallel:
+    matrix:
+      - IMAGE: [ pmc ]
+        VERSION: [ 3.11.0 ]
 
 variables:
   # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
