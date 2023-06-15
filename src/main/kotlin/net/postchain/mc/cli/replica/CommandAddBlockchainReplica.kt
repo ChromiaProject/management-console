@@ -16,7 +16,7 @@ class CommandAddBlockchainReplica : CliktCommand(
 
     private val client by nopClientOption()
 
-    private val blockchainRID by blockchainRidOption()
+    private val blockchainRID by blockchainRidOption().required()
 
     private val nodePubKey by pubkeyOption().required()
 

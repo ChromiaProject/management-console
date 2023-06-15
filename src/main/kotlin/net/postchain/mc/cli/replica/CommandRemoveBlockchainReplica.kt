@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.replica
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.operations.removeBlockchainReplicaOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
@@ -14,7 +15,7 @@ class CommandRemoveBlockchainReplica : CliktCommand(
 ) {
     private val client by nopClientOption()
 
-    private val blockchainRID by blockchainRidOption()
+    private val blockchainRID by blockchainRidOption().required()
 
     private val key by requiredPubkeyOption()
 

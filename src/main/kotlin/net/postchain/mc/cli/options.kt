@@ -23,7 +23,7 @@ fun CliktCommand.includeInactiveOption() = option(
 
 fun CliktCommand.blockchainRidOption() =
         option("-brid", "--blockchain-rid", help = "Blockchain RID", envvar = "POSTCHAIN_BRID")
-                .convert { BlockchainRid.buildFromHex(it) }.required()
+                .convert { BlockchainRid.buildFromHex(it) }
 
 fun CliktCommand.heightOption() = option("-h", "--height", envvar = "POSTCHAIN_HEIGHT").long()
 
