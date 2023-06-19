@@ -17,7 +17,7 @@ class CommandListBlockchainsForNode : CliktCommand(
     override fun run() {
         val listBlockchains = client.nmComputeBlockchainList(key.data)
         listBlockchains.forEach { blockchain ->
-            println(blockchain.toHex())
+            echo(blockchain.toHex())
         }
     }
 }

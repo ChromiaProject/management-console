@@ -25,7 +25,7 @@ class CommandListClusters : CliktCommand(
                 hints {
                     borderStyle = Table.BorderStyle.SINGLE_LINE
                 }
-            }.render().also { println(it) }
+            }.render().also { echo(it) }
         }
     }
 }

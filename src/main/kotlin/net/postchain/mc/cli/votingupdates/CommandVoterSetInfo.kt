@@ -25,6 +25,6 @@ class CommandVoterSetInfo : CliktCommand(
             voterSet.members.forEachIndexed { index, bytes -> row("Member $index", bytes.toHex()) }
         }
                 .render()
-                .also { println(it) }
+                .also { echo(it) }
     }
 }
