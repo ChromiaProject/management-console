@@ -19,5 +19,6 @@ fun blockchainCommands() = BlockchainCommand().subcommands(
         CommandListBlockchainSigners(),
         CommandListBlockchains(),
         CommandGetBlockchainConfiguration(),
+        CommandGetProposedBlockchainRid(),
         blockchainReplicaCommands()
 )
