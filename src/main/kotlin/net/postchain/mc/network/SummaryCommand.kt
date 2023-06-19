@@ -14,7 +14,7 @@ class SummaryCommand : CliktCommand(
 
     override fun run() {
         val summary = client.getSummary()
-        println("Network summary:")
+        echo("Network summary:")
         table {
             row("Voter sets", summary.voterSets.toString())
             row("Providers", summary.providers.toString())
@@ -28,6 +28,6 @@ class SummaryCommand : CliktCommand(
             }
         }
                 .render(StringBuilder())
-                .also { println(it) }
+                .also { echo(it) }
     }
 }

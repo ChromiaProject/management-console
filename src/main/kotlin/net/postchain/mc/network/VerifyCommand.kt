@@ -27,8 +27,8 @@ class VerifyCommand : CliktCommand(help = "Verify that all nodes are accessible"
                 val hostResponds = nodeVerifier.verifyHost(node.info)
                 row(
                         node.info.pubkey.toHex(),
-                        "${hostResponds.isOk()}",
-                        "${apiAccessible.isOk()}",
+                        hostResponds.isOk(),
+                        apiAccessible.isOk(),
                         "$height",
                         "$sacHeight"
                 )
@@ -37,7 +37,7 @@ class VerifyCommand : CliktCommand(help = "Verify that all nodes are accessible"
                     defaultAlignment = Table.Hints.Alignment.LEFT
                 }
             }
-        }.render().also { println(it) }
+        }.render().also { echo(it) }
     }
 
     private fun Boolean?.isOk(): String = this?.let { if (this) "OK" else "Bad" } ?: "Bad"

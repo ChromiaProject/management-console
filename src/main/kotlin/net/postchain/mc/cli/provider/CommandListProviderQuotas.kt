@@ -32,7 +32,7 @@ class CommandListProviderQuotas : CliktCommand(
                             quotas[it to NODE_PROVIDER]?.toString() ?: "n/a",
                             quotas[it to COMMUNITY_NODE_PROVIDER]?.toString() ?: "n/a")
                 }
-            }.render(StringBuilder()).also { println(it) }
+            }.render().also { echo(it) }
         }
     }
 }

@@ -41,7 +41,7 @@ class CommandKeygen : CliktCommand(name = "keygen", help = "Generates public/pri
         file?.let {
             saveSecp256k1KeyPair(keyPair, it, nodeFormat)
         }
-        println(
+        echo(
                 """
             |privkey:   ${keyPair.privKey.data.toHex()}
             |pubkey:    ${keyPair.pubKey.data.toHex()}
