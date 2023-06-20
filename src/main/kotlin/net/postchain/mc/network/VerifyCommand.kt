@@ -19,7 +19,7 @@ class VerifyCommand : CliktCommand(help = "Verify that all nodes are accessible"
         client.requireApiVersion(2)
         val nodeVerifier = NodeVerifier(client.config, client.cmGetSystemAnchoringChain()?.let { BlockchainRid(it) })
         table {
-            header("Node", "Network", "Api", "Management chain", "System anchoring")
+            header("Node public key", "Node host", "Node provider", "Network", "Api", "Management chain", "System anchoring")
 
             client.getAllNodes(false).forEach { node ->
                 if (showProgress) echo("Verifying node: ${node.info.apiUrl}, ${node.info.pubkey}")
@@ -27,6 +27,8 @@ class VerifyCommand : CliktCommand(help = "Verify that all nodes are accessible"
                 val hostResponds = nodeVerifier.verifyHost(node.info)
                 row(
                         node.info.pubkey.toHex(),
+                        node.info.host,
+                        "${node.provider.pubkey.toHex()}${if (node.provider.name.isNotEmpty()) " - ${node.provider.name}" else ""}",
                         hostResponds.isOk(),
                         apiAccessible.isOk(),
                         "$height",
