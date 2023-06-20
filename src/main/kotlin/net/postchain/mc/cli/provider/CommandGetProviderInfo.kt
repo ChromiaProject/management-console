@@ -37,7 +37,7 @@ class CommandGetProviderInfo : CliktCommand(
             row("Action points:", actionPoints.toString())
             row("Belongs to cluster(s)", providerClusters.joinToString(","))
             nodesByProvider.forEachIndexed { index, node ->
-                row("Node $index", node.pubkey.toHex())
+                row("Node $index", "${node.pubkey.toHex()} - ${node.host}")
             }
             hints {
                 defaultAlignment = Table.Hints.Alignment.LEFT
