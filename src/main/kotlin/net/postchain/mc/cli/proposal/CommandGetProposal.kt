@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.parameters.options.convert
 import de.m3y.kformat.Table
 import de.m3y.kformat.table
 import net.postchain.chain0.common.queries.getProviderData
+import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.ProposalType
 import net.postchain.chain0.proposal.getProposal
 import net.postchain.chain0.proposal.getProposalVotingResults
@@ -80,9 +81,11 @@ class CommandGetProposal : CliktCommand(
                     echo(it.toString())
                 }
 
-                echo("Proposal details")
-                echo("------------------------------")
-                echo(formatProposal(client, proposal.id, proposal.type))
+                if (proposal.state == ProposalState.PENDING) {
+                    echo("Proposal details")
+                    echo("------------------------------")
+                    echo(formatProposal(client, proposal.id, proposal.type))
+                }
             }
 
             else -> {
