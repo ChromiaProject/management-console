@@ -16,7 +16,7 @@
         <revision>dev</revision>
         <postchain.version>3.11.0</postchain.version>
         <postchain.client.version>3.11.1</postchain.client.version>
-        <directory.chain.version>1.8.0</directory.chain.version>
+        <directory.chain.version>1.9.0</directory.chain.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
 
         <main-class>net.postchain.mc.Directory1Kt</main-class>

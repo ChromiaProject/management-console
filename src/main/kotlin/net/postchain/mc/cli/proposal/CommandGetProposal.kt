@@ -5,9 +5,12 @@ import com.github.ajalt.clikt.parameters.options.convert
 import de.m3y.kformat.Table
 import de.m3y.kformat.table
 import net.postchain.chain0.common.queries.getProviderData
+import net.postchain.chain0.proposal.GetProposalResult
 import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.ProposalType
+import net.postchain.chain0.proposal.ProposalVoter
 import net.postchain.chain0.proposal.getProposal
+import net.postchain.chain0.proposal.getProposalVoterInfo
 import net.postchain.chain0.proposal.getProposalVotingResults
 import net.postchain.chain0.proposal_blockchain.getBlockchainActionProposal
 import net.postchain.chain0.proposal_blockchain.getBlockchainImportProposal
@@ -63,18 +66,13 @@ class CommandGetProposal : CliktCommand(
             apiVersion >= 7 -> {
                 val proposal = client.getProposal(id) ?: return echo("Proposal $id not found")
                 val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
-                val votingResults = client.getProposalVotingResults(proposal.id)
 
                 table {
                     row("Proposal:", "${proposal.id.id} - ${proposal.type.name}")
                     row("Proposed by:", "${proposedBy.pubkey.toHex()}${if (proposedBy.name.isNotEmpty()) " - " + proposedBy.name else ""}")
                     row("Time:", "${Date.from(Instant.ofEpochMilli(proposal.timestamp))}")
                     row("State:", proposal.state.toString())
-                    row("Positive votes:", votingResults.positiveVotes.toString())
-                    row("Negative votes:", votingResults.negativeVotes.toString())
-                    row("Max votes:", votingResults.maxVotes.toString())
-                    row("Threshold:", formatThreshold(votingResults.threshold))
-                    row("Status:", votingResults.votingResult.toString())
+                    printVotingInfo(client, proposal, apiVersion)
                     row("Description:", proposal.description)
                     hints { defaultAlignment = Table.Hints.Alignment.LEFT }
                 }.render().also {
@@ -95,7 +93,7 @@ class CommandGetProposal : CliktCommand(
 
                 table {
                     row("Proposal:", "${proposal.id.id} - ${proposal.type.name}")
-                    row("Proposed by:", "${proposedBy.pubkey.toHex()}${if (proposedBy.name.isNotEmpty()) " - " + proposedBy.name else ""}")
+                    row("Proposed by:", formatProvider(proposedBy.pubkey, proposedBy.name))
                     row("Time:", "${Date.from(Instant.ofEpochMilli(proposal.timestamp))}")
                     row("Positive votes:", votingResults.positiveVotes.toString())
                     row("Negative votes:", votingResults.negativeVotes.toString())
@@ -114,6 +112,24 @@ class CommandGetProposal : CliktCommand(
             }
         }
     }
+
+    private fun Table.printVotingInfo(client: PostchainClient, proposal: GetProposalResult, apiVersion: Long) {
+        if (proposal.state == ProposalState.PENDING) {
+            val votingResults = client.getProposalVotingResults(proposal.id)
+            row("Positive votes:", votingResults.positiveVotes.toString())
+            row("Negative votes:", votingResults.negativeVotes.toString())
+            row("Max votes:", votingResults.maxVotes.toString())
+            row("Threshold:", formatThreshold(votingResults.threshold))
+            row("Status:", votingResults.votingResult.toString())
+        } else if (apiVersion >= 9) {
+            val votingInfo = client.getProposalVoterInfo(proposal.id)
+            row("Providers that accepted:", votingInfo.filter { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
+            row("Providers that rejected:", votingInfo.filterNot { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
+        }
+    }
+
+    private fun formatProvider(providerPubKey: WrappedByteArray, providerName: String) =
+            "${providerPubKey.toHex()}${if (providerName.isNotEmpty()) " - $providerName" else ""}"
 
     private fun formatProposal(client: PostchainClient, proposalId: RowId, proposalType: ProposalType): String {
         return when (proposalType) {
