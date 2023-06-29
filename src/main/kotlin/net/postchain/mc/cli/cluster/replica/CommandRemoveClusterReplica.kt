@@ -13,7 +13,7 @@ import net.postchain.mc.cli.util.nopClientOption
 
 class CommandRemoveClusterReplica : CliktCommand(
         name = "remove",
-        help = "remove replica of a cluster"
+        help = "Remove replica of a cluster"
 ) {
     private val client by nopClientOption()
 

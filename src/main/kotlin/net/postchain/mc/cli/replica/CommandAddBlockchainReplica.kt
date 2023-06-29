@@ -11,7 +11,7 @@ import net.postchain.mc.cli.util.pubkeyOption
 
 class CommandAddBlockchainReplica : CliktCommand(
         name = "add",
-        help = "add replica of a blockchain. The node is verifying but not building blocks."
+        help = "Add replica of a blockchain. The node is verifying but not building blocks."
 ) {
 
     private val client by nopClientOption()

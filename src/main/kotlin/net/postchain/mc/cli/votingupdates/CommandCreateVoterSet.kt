@@ -15,7 +15,7 @@ import net.postchain.mc.cli.util.pubkeysOption
 
 class CommandCreateVoterSet : CliktCommand(
         name = "create",
-        help = "Create a new voter set with a list of providers."
+        help = "Create a new voter set with a list of providers"
 ) {
     private val client by clientOption()
 

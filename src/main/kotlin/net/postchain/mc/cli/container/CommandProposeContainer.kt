@@ -21,7 +21,11 @@ import net.postchain.mc.cli.util.pubkeysOrVotersetOption
 
 class CommandProposeContainer : CliktCommand(
         name = "add",
-        help = "propose a new container in an existing cluster and give authority to deployer voter set to deploy bcs in it."
+        help = """
+            Propose a new container in an existing cluster 
+            
+            This also gives authority to deployer voter set to deploy blockchains in it.
+        """.trimIndent()
 ) {
     private val client by nopClientOption()
 

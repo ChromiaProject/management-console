@@ -11,7 +11,7 @@ import net.postchain.mc.cli.util.urlOption
 
 class CommandUpdateProvider : CliktCommand(
         name = "update",
-        help = "update provider information"
+        help = "Update provider information"
 ) {
     private val client by nopClientOption()
 

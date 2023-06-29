@@ -29,7 +29,6 @@ import net.postchain.mc.cli.util.pubkeyOption
 
 class BatchOptions : OptionGroup() {
 
-    val batch by option(help = "Allows to add a batch of providers with --provider (see examples)").flag()
     val provider by option(
             help = "Multiple objects to register as providers in --batch mode (comma delimited list of objects, see examples)",
             valueSourceKey = "provider"
@@ -43,26 +42,29 @@ class BatchOptions : OptionGroup() {
 
 class CommandRegisterProvider : CliktCommand(
         name = "register",
-        help = """Register new provider with given pubkey. There are three tiers of providers:
-        ```
-        - Community Node Provider: Basic provider, can deploy dapps and add nodes that replicates blockchains (replica) (default)
-        - Node Provider:           Can add block builder nodes
-        - System Provider:         System level permissions and can add node to the system cluster
-        ```
-        
-        Examples:
-        ```
-        (1): pmc provider register -cnp --enable --pubkey aa...
-        ```
-        ```
-        (2): pmc provider register --batch -cnp --enable --provider '{pubkey=x"aa...",name="foo",url="http://foo/api"}' --provider '{pubkey=x"bb...",name="bar"}'
-        ```
-        ```
-        (3): pmc provider register --batch -cnp --enable, where providers will be load from `providers.properties` file:
-                provider={pubkey=x"aa...",name="foo",url="http://foo/api"};{pubkey=x"bb...",name="bar",url="http://bar/api"}
-                provider={pubkey=x"cc...",url="http://foobar/api"}
-        ```
-    """
+        help = """
+            Register new provider with given pubkey
+            
+            There are three tiers of providers:
+            ```
+            - Community Node Provider: Basic provider, can deploy dapps and add nodes that replicates blockchains (replica) (default)
+            - Node Provider:           Can add block builder nodes
+            - System Provider:         System level permissions and can add node to the system cluster
+            ```
+            
+            Examples:
+            ```
+            (1): pmc provider register -cnp --enable --pubkey aa...
+            ```
+            ```
+            (2): pmc provider register --batch -cnp --enable --provider '{pubkey=x"aa...",name="foo",url="http://foo/api"}' --provider '{pubkey=x"bb...",name="bar"}'
+            ```
+            ```
+            (3): pmc provider register --batch -cnp --enable, where providers will be load from `providers.properties` file:
+                    provider={pubkey=x"aa...",name="foo",url="http://foo/api"};{pubkey=x"bb...",name="bar",url="http://bar/api"}
+                    provider={pubkey=x"cc...",url="http://foobar/api"}
+            ```
+    """.trimIndent()
 ) {
     init {
         context {

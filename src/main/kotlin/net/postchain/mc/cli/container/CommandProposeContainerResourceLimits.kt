@@ -23,8 +23,12 @@ import net.postchain.mc.compatibility.ApiCompatV2.proposeContainerLimitsOperatio
 
 class CommandProposeContainerResourceLimits : CliktCommand(
         name = "limits",
-        help = "Propose new resource limits for given container. There are multiple types of limits. " +
-                "Proposal can contain all types of limits or a subset of them."
+        help = """
+            Propose new resource limits for given container
+            
+            There are multiple types of limits. 
+            Proposal can contain all types of limits or a subset of them.
+        """.trimIndent()
 ) {
     private val client by nopClientOption()
 
