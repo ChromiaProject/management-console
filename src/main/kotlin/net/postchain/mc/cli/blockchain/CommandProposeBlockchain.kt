@@ -22,7 +22,11 @@ import net.postchain.mc.cli.util.proposalDescriptionOption
 
 class CommandProposeBlockchain : CliktCommand(
         name = "add",
-        help = "Propose a new blockchain in a specific container. Change will be applied after voting within the deployer voter set of the cluster that the container belongs to."
+        help = """
+            Propose a new blockchain in a specific container
+
+            Change will be applied after voting within the deployer voter set of the cluster that the container belongs to.
+        """.trimIndent()
 ) {
     private val client by nopClientOption()
 
@@ -58,7 +62,7 @@ class CommandProposeBlockchain : CliktCommand(
         if (apiVersion >= 8) {
             val maybeBcRid: ByteArray? = client.findBlockchainRid(txResult.txRid.rid.hexStringToByteArray())
             if (maybeBcRid != null) {
-                echo(if (quiet) maybeBcRid.toHex() else "Blockchain $name has been added, bc-rid: $maybeBcRid.toHex()}")
+                echo(if (quiet) maybeBcRid.toHex() else "Blockchain $name has been added, bc-rid: ${maybeBcRid.toHex()}")
             } else {
                 echo("Blockchain $name has been proposed, tx-rid: ${txResult.txRid.rid}", err = quiet)
             }

@@ -12,9 +12,7 @@ import net.postchain.mc.cli.util.nopClientOption
 
 class CommandProposeClusterAnchoringConfiguration : CliktCommand(
         name = "update",
-        help = """
-        Propose new cluster anchoring configuration. 
-        """.trimIndent()
+        help = "Propose new cluster anchoring configuration"
 ) {
     private val client by nopClientOption()
 

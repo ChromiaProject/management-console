@@ -13,7 +13,12 @@ import net.postchain.mc.cli.util.proposalDescriptionOption
 
 class CommandProposeClusterProvider : CliktCommand(
         name = "provider",
-        help = "proposes an update of a cluster's providers. add = false => remove provider from cluster. Cluster governance voter set has authority to update a cluster's providers"
+        help = """
+            Proposes an update of a cluster's providers
+            
+            To remove provider from cluster set --add to false. 
+            Cluster governance voter set has authority to update a cluster's providers
+        """.trimIndent()
 ) {
     private val client by nopClientOption()
 

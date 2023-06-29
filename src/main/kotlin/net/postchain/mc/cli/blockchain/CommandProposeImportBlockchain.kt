@@ -23,7 +23,12 @@ import java.io.FileInputStream
 
 class CommandProposeImportBlockchain : CliktCommand(
         name = "import",
-        help = "Propose importing a blockchain in a specific container. Change will be applied after voting within the deployer voter set of the cluster that the container belongs to."
+        help = """
+            Propose importing a blockchain in a specific container 
+            
+            Change will be applied after voting within the deployer voter set 
+            of the cluster that the container belongs to.
+        """.trimIndent()
 ) {
     private val client by nopClientOption()
 

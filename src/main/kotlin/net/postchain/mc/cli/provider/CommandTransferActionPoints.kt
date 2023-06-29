@@ -12,7 +12,7 @@ import net.postchain.mc.cli.util.nopClientOption
 
 class CommandTransferActionPoints : CliktCommand(
         name = "transfer-action-points",
-        help = "transfer some of your action points to another provider"
+        help = "Transfer some of your action points to another provider"
 ) {
     private val client by nopClientOption()
 

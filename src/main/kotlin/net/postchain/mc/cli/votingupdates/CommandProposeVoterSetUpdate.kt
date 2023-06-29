@@ -16,7 +16,11 @@ import net.postchain.mc.cli.util.proposalDescriptionOption
 
 class CommandProposeVoterSetUpdate : CliktCommand(
         name = "update",
-        help = "proposes an update of a voter set's governor. New governor must be an existing voter set."
+        help = """
+            Propose an update of a voter set's governor
+            
+            New governor must be an existing voter set.
+        """.trimIndent()
 ) {
     private val client by nopClientOption()
 

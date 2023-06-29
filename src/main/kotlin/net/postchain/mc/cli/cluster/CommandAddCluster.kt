@@ -19,7 +19,7 @@ import net.postchain.mc.cli.util.pubkeysOrVotersetOption
 
 class CommandAddCluster : CliktCommand(
         name = "add",
-        help = "Create a new cluster that can hold containers with blockchains."
+        help = "Create a new cluster that can hold containers with blockchains"
 ) {
 
     private val client by nopClientOption()

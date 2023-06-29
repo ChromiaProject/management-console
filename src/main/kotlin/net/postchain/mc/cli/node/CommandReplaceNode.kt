@@ -19,7 +19,9 @@ import net.postchain.mc.cli.util.nopClientOption
 class CommandReplaceNode : CliktCommand(
         name = "replace",
         help = """
-        Replace a node with a new one (Used to rotate keypairs). Add the keys to the nodes to the client configuration as comma-delimited list:
+        Replace a node with a new one (used to rotate keypairs)
+        
+        Add the keys to the nodes to the client configuration as comma-delimited list:
         pubkey=<key>,<old-node-key>,<new-node-key>
         privkey=<key>,<old-node-key>,<new-node-key>
     """.trimIndent()

@@ -21,7 +21,9 @@ import net.postchain.mc.network.Version
 class CommandProposeConfiguration : CliktCommand(
         name = "update",
         help = """
-        Propose new configuration to blockchain at specific height. 
+        Propose a new configuration to blockchain
+        
+        In the case of chain0 additional height argument can be specified. 
         Height must be > current height and > all previously approved configuration heights.
         Use force flag -f to override previously added configs or to squeeze in a configuration 
         at a height < previously approved config heights. Change will be applied after voting.

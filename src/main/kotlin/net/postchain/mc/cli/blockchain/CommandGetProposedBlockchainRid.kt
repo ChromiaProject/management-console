@@ -20,7 +20,7 @@ class CommandGetProposedBlockchainRid : CliktCommand(
     private val client by clientOption()
 
     private val txRid by option("-tx", "--tx-rid", help = "Transaction RID")
-                    .convert { it.hexStringToByteArray() }.required()
+            .convert { it.hexStringToByteArray() }.required()
 
     private val quiet by option("-q", "--quiet", help = "Print only blockchain RID if succeeds").flag()
 
@@ -33,7 +33,7 @@ class CommandGetProposedBlockchainRid : CliktCommand(
             throw CliktError(e.message)
         }
         if (maybeBcRid != null) {
-            echo(if (quiet) maybeBcRid.toHex() else "bc-rid: $maybeBcRid.toHex()}")
+            echo(if (quiet) maybeBcRid.toHex() else "bc-rid: ${maybeBcRid.toHex()}")
         } else {
             throw CliktError("Blockchain proposal not approved")
         }

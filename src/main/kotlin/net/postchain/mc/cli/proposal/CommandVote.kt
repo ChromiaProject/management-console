@@ -12,7 +12,9 @@ import net.postchain.mc.cli.util.nopClientOption
 
 class CommandVote : CliktCommand(
         name = "vote",
-        help = "Providers decide if proposed configuration changes should be applied. Use this function to vote yes or no to a proposal."
+        help = """
+            Providers decide if proposed changes should be applied. Use this function to vote yes or no to a proposal.
+        """.trimIndent()
 ) {
     private val client by nopClientOption()
 

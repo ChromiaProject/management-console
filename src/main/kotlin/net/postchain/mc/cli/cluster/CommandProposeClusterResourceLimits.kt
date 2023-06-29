@@ -19,7 +19,7 @@ import net.postchain.mc.compatibility.ApiCompatV2.proposeClusterLimitsOperationV
 
 class CommandProposeClusterResourceLimits : CliktCommand(
         name = "limits",
-        help = "Propose new resource limits for given cluster."
+        help = "Propose new resource limits for given cluster"
 ) {
     companion object {
         fun <K> MutableMap<K, Long>.setIfNotNull(key: K, value: Long?) {
