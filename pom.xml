@@ -14,7 +14,7 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.11.0</postchain.version>
+        <postchain.version>3.11.7.3384-pqc</postchain.version>
         <postchain.client.version>3.11.1</postchain.client.version>
         <directory.chain.version>1.9.0</directory.chain.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
