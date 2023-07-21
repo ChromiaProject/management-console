@@ -52,6 +52,21 @@ deploy:
       --activate-profiles docker,docker-push
       deploy
 
+deploy-pqc:
+  extends: .setup
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "pqc/dev"
+  script:
+    - CURRENT_VERSION=$(git describe --tags --abbrev=0)
+    - PQC_VERSION=$CURRENT_VERSION.$CI_PIPELINE_IID-pqc
+    - echo $PQC_VERSION
+    - mvn
+      $MAVEN_CLI_OPTS
+      --activate-profiles docker,docker-push
+      -Drevision=$PQC_VERSION
+      deploy -DskipTests
+
 build:
   extends: .setup
   stage: build
