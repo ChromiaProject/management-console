@@ -45,6 +45,7 @@ class NodeVerifier(private val configTemplate: PostchainClientConfig, private va
             ))
             true to nodeClient.currentBlockHeight()
         } catch (e: Exception) {
+            println(e.message)
             false to null
         }
     }
