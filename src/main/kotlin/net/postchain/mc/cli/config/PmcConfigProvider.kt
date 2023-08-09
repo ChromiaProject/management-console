@@ -12,7 +12,7 @@ import org.apache.commons.configuration2.PropertiesConfiguration
 import org.bitcoinj.crypto.MnemonicCode
 import java.awt.Desktop
 import java.io.File
-import java.util.*
+import java.util.Properties
 
 const val DEFAULT_CONFIG_FILENAME = ".pmc/config"
 

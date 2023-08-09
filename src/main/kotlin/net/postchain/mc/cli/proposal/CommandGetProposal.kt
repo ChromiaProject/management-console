@@ -49,7 +49,7 @@ import net.postchain.mc.cli.votingupdates.formatThreshold
 import net.postchain.mc.compatibility.ApiCompatV6.getProposalV6
 import net.postchain.mc.gtv.diff.GtvDiffFinder
 import java.time.Instant
-import java.util.*
+import java.util.Date
 
 class CommandGetProposal : CliktCommand(
         name = "info",
