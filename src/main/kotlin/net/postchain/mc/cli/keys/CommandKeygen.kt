@@ -14,7 +14,7 @@ import net.postchain.crypto.secp256k1_derivePubKey
 import org.bitcoinj.crypto.MnemonicCode
 import java.io.File
 import java.io.FileOutputStream
-import java.util.*
+import java.util.Properties
 
 class CommandKeygen : CliktCommand(name = "keygen", help = "Generates public/private key pair") {
 

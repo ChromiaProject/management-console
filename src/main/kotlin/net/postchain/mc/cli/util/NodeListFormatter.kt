@@ -5,7 +5,7 @@ import de.m3y.kformat.table
 import net.postchain.common.toHex
 import net.postchain.gtv.Gtv
 import java.time.Instant
-import java.util.*
+import java.util.Date
 
 object NodeListFormatter {
 

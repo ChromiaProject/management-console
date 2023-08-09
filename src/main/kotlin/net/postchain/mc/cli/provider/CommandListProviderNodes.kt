@@ -11,7 +11,7 @@ import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.clientOption
 import java.time.Instant
-import java.util.*
+import java.util.Date
 
 class CommandListProviderNodes : CliktCommand(
         name = "nodes",
