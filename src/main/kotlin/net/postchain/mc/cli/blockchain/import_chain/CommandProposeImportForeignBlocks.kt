@@ -2,6 +2,7 @@ package net.postchain.mc.cli.blockchain.import_chain
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_blockchain_import.proposeForeignBlockchainBlocksImportOperation
 import net.postchain.client.core.TransactionResult
@@ -9,7 +10,7 @@ import net.postchain.common.tx.TransactionStatus
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.requireApiVersion
 
@@ -22,7 +23,9 @@ class CommandProposeImportForeignBlocks : CliktCommand(
             of the cluster that the container belongs to.
         """.trimIndent()
 ) {
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
+
 
     private val blockchainRID by blockchainRidOption().required()
 
