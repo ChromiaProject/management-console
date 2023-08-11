@@ -13,9 +13,12 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.clientOption
 
-class CommandGetBlockchainConfiguration : CliktCommand(
-        name = "get",
-        help = "Get blockchain configuration"
+open class CommandGetBlockchainConfiguration(
+        name: String = "get-configuration",
+        help: String = "Get blockchain configuration"
+) : CliktCommand(
+        name = name,
+        help = help
 ) {
     private val client by clientOption()
 
