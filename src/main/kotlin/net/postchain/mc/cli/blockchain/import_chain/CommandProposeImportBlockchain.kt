@@ -1,4 +1,4 @@
-package net.postchain.mc.cli.blockchain
+package net.postchain.mc.cli.blockchain.import_chain
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
@@ -6,8 +6,8 @@ import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
-import net.postchain.chain0.proposal_blockchain.proposeImportBlockchainOperation
-import net.postchain.chain0.proposal_blockchain.proposeImportConfigurationOperation
+import net.postchain.chain0.proposal_blockchain_import.proposeImportBlockchainOperation
+import net.postchain.chain0.proposal_blockchain_import.proposeImportConfigurationOperation
 import net.postchain.client.core.TxRid
 import net.postchain.client.transaction.TransactionBuilder
 import net.postchain.common.BlockchainRid
