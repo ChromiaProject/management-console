@@ -6,7 +6,6 @@ import net.postchain.common.PropertiesFileLoader
 import net.postchain.common.toHex
 import net.postchain.crypto.Secp256K1CryptoSystem
 import net.postchain.crypto.secp256k1_derivePubKey
-import net.postchain.mc.cli.util.POSTCHAIN_CLIENT_CONFIG
 import org.apache.commons.configuration2.Configuration
 import org.apache.commons.configuration2.PropertiesConfiguration
 import org.bitcoinj.crypto.MnemonicCode

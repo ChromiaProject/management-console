@@ -28,7 +28,7 @@ import java.net.URISyntaxException
 import java.net.URL
 
 
-const val POSTCHAIN_CLIENT_CONFIG = "POSTCHAIN_CLIENT_CONFIG"
+const val CHROMIA_CONFIG = "CHROMIA_CONFIG"
 fun CliktCommand.pubkeyOption(helpMsg: String = "Public key") = option("-pk", "--pubkey", help = helpMsg, envvar = "POSTCHAIN_PUBKEY")
         .convert { PubKey(it) }
 
