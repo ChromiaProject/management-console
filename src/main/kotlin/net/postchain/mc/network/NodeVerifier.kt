@@ -5,7 +5,6 @@ import net.postchain.client.config.PostchainClientConfig
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.EndpointPool
 import net.postchain.common.BlockchainRid
-import org.apache.hc.client5.http.ConnectTimeoutException
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -28,7 +27,6 @@ class NodeVerifier(private val configTemplate: PostchainClientConfig, private va
         }
     }
 
-
     fun verifyApi(node: NodeInfo) = verifyApi(node.apiUrl)
 
     fun verifyApi(url: String = configTemplate.endpointPool.first().url): NodeApiStatus {
@@ -50,7 +48,6 @@ class NodeVerifier(private val configTemplate: PostchainClientConfig, private va
                     endpointPool = EndpointPool.singleUrl(url),
                     blockchainRid = blockchainRid
             ))
-            if (url.contains("node0")) throw ConnectTimeoutException("node is unreachable")
             Triple(true, nodeClient.currentBlockHeight(), null)
         } catch (e: Exception) {
             Triple(false, null, e)
