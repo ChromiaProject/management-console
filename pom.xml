@@ -18,6 +18,7 @@
         <postchain.client.version>3.11.3</postchain.client.version>
         <directory.chain.version>1.9.4</directory.chain.version>
         <chr.version>0.9.2</chr.version>
+        <rell.version>0.13.1</rell.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
 
         <main-class>net.postchain.mc.Directory1Kt</main-class>
@@ -90,7 +91,7 @@
         <dependency>
             <groupId>net.postchain.rell</groupId>
             <artifactId>rell-api-base</artifactId>
-            <version>0.13.1</version>
+            <version>${rell.version}</version>
         </dependency>
 
         <!-- logging -->
