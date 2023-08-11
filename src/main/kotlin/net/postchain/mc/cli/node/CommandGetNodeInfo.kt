@@ -1,9 +1,8 @@
 package net.postchain.mc.cli.node
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
 import net.postchain.chain0.common.queries.getNodeData
 import net.postchain.chain0.common.queries.listClustersOfNode
 import net.postchain.crypto.PubKey
@@ -21,16 +20,17 @@ class CommandGetNodeInfo : CliktCommand(
     override fun run() {
         val client = config.client
         val node = client.getNodeData(key)
-        table {
-            row("Active:", "${node.active}")
-            row("Host:", node.host)
-            row("Port:", "${node.port}")
-            row("REST API:", node.apiUrl)
-            row("Provided by:", node.provider.toHex())
-            node.clusterUnits?.let { row("Cluster Units:", it.toString()) }
-            val clusters = client.listClustersOfNode(PubKey(node.pubkey))
-            row("Used by clusters:", "$clusters")
-            hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-        }.render().also { echo(it) }
+        echo(defaultTable {
+            body {
+                row("Active:", "${node.active}")
+                row("Host:", node.host)
+                row("Port:", "${node.port}")
+                row("REST API:", node.apiUrl)
+                row("Provided by:", node.provider.toHex())
+                node.clusterUnits?.let { row("Cluster Units:", it.toString()) }
+                val clusters = client.listClustersOfNode(PubKey(node.pubkey))
+                row("Used by clusters:", "$clusters")
+            }
+        })
     }
 }

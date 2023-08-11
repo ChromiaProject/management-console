@@ -122,12 +122,6 @@
         </dependency>
 
         <dependency>
-            <groupId>de.m3y.kformat</groupId>
-            <artifactId>kformat</artifactId>
-            <version>0.9</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-configuration2</artifactId>
         </dependency>

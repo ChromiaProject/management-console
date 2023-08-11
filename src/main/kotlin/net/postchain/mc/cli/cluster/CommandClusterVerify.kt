@@ -1,10 +1,9 @@
 package net.postchain.mc.cli.cluster
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
 import net.postchain.anchoring.anchoring_chain_common.getLastAnchoredBlock
 import net.postchain.chain0.cm_api.CmClusterInfo
 import net.postchain.chain0.cm_api.cmGetClusterAnchoringChains
@@ -36,13 +35,12 @@ class CommandClusterVerify : CliktCommand(
         val clusterEndpoints = clusterInfo.peers.map { it.apiUrl }.let { EndpointPool.default(it) }
 
         echo("Verifying cluster $cluster")
-        table {
-            header("Pubkey", "Url")
-            clusterInfo.peers.forEach { row(PubKey(it.pubkey).toShortHex(), it.apiUrl) }
-            hints {
-                defaultAlignment = Table.Hints.Alignment.LEFT
+        echo(defaultTable {
+            header { row("Pubkey", "Url") }
+            body {
+                clusterInfo.peers.forEach { row(PubKey(it.pubkey).toShortHex(), it.apiUrl) }
             }
-        }.render().also { echo(it) }
+        })
 
         val anchoringClient = PostchainClientImpl(client.config.copy(
                 blockchainRid = BlockchainRid(clusterInfo.anchoringChain),
@@ -73,8 +71,8 @@ class CommandClusterVerify : CliktCommand(
 
     private fun analyzeBlockchains(chainsToAnalyze: Collection<ByteArray>, clusterInfo: CmClusterInfo, anchoringClient: PostchainClientImpl) {
         chainsToAnalyze.map { BlockchainRid(it) }.forEach { bc ->
-            table {
-                header("Blockchain", "Anchored height", *clusterInfo.peers.map { PubKey(it.pubkey).toShortHex() }.toTypedArray())
+            echo(defaultTable {
+                header { row("Blockchain", "Anchored height", *clusterInfo.peers.map { PubKey(it.pubkey).toShortHex() }.toTypedArray()) }
 
                 val peerClients = clusterInfo.peers.map {
                     PostchainClientImpl(
@@ -87,16 +85,14 @@ class CommandClusterVerify : CliktCommand(
                     )
                 }
 
-                row(
-                        bc.toShortHex(),
-                        getLastAnchoredBlockHeight(anchoringClient, bc)?.toString() ?: "",
-                        *peerClients.map { getCurrentBlockHeight(it).toString() }.toTypedArray()
-                )
-                hints {
-                    defaultAlignment = Table.Hints.Alignment.LEFT
-                    borderStyle = Table.BorderStyle.SINGLE_LINE
+                body {
+                    row(
+                            bc.toShortHex(),
+                            getLastAnchoredBlockHeight(anchoringClient, bc)?.toString() ?: "",
+                            *peerClients.map { getCurrentBlockHeight(it).toString() }.toTypedArray()
+                    )
                 }
-            }.render().also { echo(it) }
+            })
         }
     }
 
