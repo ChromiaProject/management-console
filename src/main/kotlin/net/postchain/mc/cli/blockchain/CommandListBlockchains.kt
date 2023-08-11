@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import de.m3y.kformat.Table
 import de.m3y.kformat.table
@@ -28,13 +29,14 @@ class CommandListBlockchains : CliktCommand(
                     echo("No blockchains")
                 } else {
                     echo("Blockchains:")
-                    table {
-                        header("Name", "Rid", "State", "Container", "Cluster")
-                        blockchains.forEach {
-                            row(it.name, it.rid.toHex(), it.state.toString(), it.container ?: "N/A", it.cluster ?: "N/A")
+                    echo(defaultTable {
+                        header { row("Name", "Rid", "State", "Container", "Cluster") }
+                        body {
+                            blockchains.forEach {
+                                row(it.name, it.rid.toHex(), it.state, it.container ?: "N/A", it.cluster ?: "N/A")
+                            }
                         }
-                        hints { borderStyle = Table.BorderStyle.SINGLE_LINE }
-                    }.render().also { echo(it) }
+                    })
                 }
             }
 
@@ -44,15 +46,14 @@ class CommandListBlockchains : CliktCommand(
                     echo("No blockchains")
                 } else {
                     echo("Blockchains:")
-                    table {
-                        header("Name", "Rid", "Active", "Container", "Cluster")
-
-                        blockchains.forEach {
-                            row(it.name, it.rid.toHex(), it.active.toString(), it.container, it.cluster)
+                    echo(defaultTable {
+                        header { row("Name", "Rid", "Active", "Container", "Cluster") }
+                        body {
+                            blockchains.forEach {
+                                row(it.name, it.rid.toHex(), it.active.toString(), it.container, it.cluster)
+                            }
                         }
-
-                        hints { borderStyle = Table.BorderStyle.SINGLE_LINE }
-                    }.render().also { echo(it) }
+                    })
                 }
             }
         }

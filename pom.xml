@@ -17,6 +17,7 @@
         <postchain.version>3.11.0</postchain.version>
         <postchain.client.version>3.11.1</postchain.client.version>
         <directory.chain.version>1.9.0</directory.chain.version>
+        <chr.version>0.9.1</chr.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
 
         <main-class>net.postchain.mc.Directory1Kt</main-class>
@@ -79,7 +80,12 @@
         <dependency>
             <groupId>com.github.ajalt.clikt</groupId>
             <artifactId>clikt-jvm</artifactId>
-            <version>3.5.0</version>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.chromia.cli</groupId>
+            <artifactId>chromia-cli-tools</artifactId>
+            <version>${chr.version}</version>
         </dependency>
 
         <!-- logging -->
@@ -498,6 +504,10 @@
         <repository>
             <id>Postchain Chromia</id>
             <url>https://gitlab.com/api/v4/projects/33481005/packages/maven</url>
+        </repository>
+        <repository>
+            <id>Chromia CLI</id>
+            <url>https://gitlab.com/api/v4/projects/39844192/packages/maven</url>
         </repository>
     </repositories>
 

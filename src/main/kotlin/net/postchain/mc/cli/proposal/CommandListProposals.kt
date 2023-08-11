@@ -1,8 +1,6 @@
 package net.postchain.mc.cli.proposal
 
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.context
-import com.github.ajalt.clikt.output.CliktHelpFormatter
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -27,9 +25,6 @@ class CommandListProposals : CliktCommand(
         name = "list",
         help = "List all proposals that you can vote on"
 ) {
-    init {
-        context { helpFormatter = CliktHelpFormatter(showDefaultValues = true) }
-    }
 
     private val client by nopClientOption()
     private val from by dateToTimestampOption("List proposals from date (YYYY-MM-DD)")
