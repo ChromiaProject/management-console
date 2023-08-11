@@ -27,20 +27,20 @@ class CommandNodeVerify : CliktCommand(
 
     private fun Boolean?.isOk(): String = this?.let { if (this) "OK" else "Bad" } ?: "Bad"
     override fun run() {
-
         val node = client.getNodeData(key)
         val nodeVerifier = NodeVerifier(client.config, client.cmGetSystemAnchoringChain()?.let { BlockchainRid(it) })
         val clusters = client.listClustersOfNode(key)
         val clusterAnchorChains = clusters.map { client.cmGetClusterInfo(it) }.associate { it.name to BlockchainRid(it.anchoringChain) }
+        val clusterAnchorChainsHeights = clusterAnchorChains.map { it.key to nodeVerifier.verifyBlockchain(it.value, node.apiUrl).second }
         val nodeStatus = nodeVerifier.verifyApi(node.apiUrl)
 
         table {
             row("Node", "${node.pubkey}")
-            row("Url", "${node.apiUrl}")
-            row("System chains", "${nodeStatus.responds.isOk()}")
+            row("Url", node.apiUrl)
+            row("System chains", nodeStatus.responds.isOk())
             row("Management chain", "${nodeStatus.height}")
             row("System anchoring chain", "${nodeStatus.systemAnchorHeight}")
-            row("Cluster anchor chains", "${clusterAnchorChains.map { it.key to nodeVerifier.verifyBlockchain(it.value, node.apiUrl).second }.joinToString(",")}")
+            row("Cluster anchor chains", if (clusterAnchorChains.isEmpty()) "no clusters node is running in" else clusterAnchorChainsHeights.joinToString(", "))
             hints {
                 defaultAlignment = Table.Hints.Alignment.LEFT
             }
@@ -62,23 +62,25 @@ class CommandNodeVerify : CliktCommand(
             Triple(anchoredHeight, bcHeight.first, bcHeight.second)
         }
 
-        table {
-            header("Blockchain", "Responds", "Height", "Anchored Height", "Synchronized")
-            bcStatuses.forEach { (brid, status) ->
-                row(
-                        brid.toHex(),
-                        "${status.second}",
-                        "${status.third}",
-                        "${status.first}",
-                        status.third?.let { if (it < status.first ?: 0) "NO" else "Yes" } ?: "NO"
-                )
-            }
-            hints {
-                borderStyle = Table.BorderStyle.SINGLE_LINE
-                defaultAlignment = Table.Hints.Alignment.LEFT
-            }
-        }.render().also { echo(it) }
-
-
+        if (blockchains.isEmpty()) {
+            echo("No running chains")
+        } else {
+            table {
+                header("Blockchain", "Responds", "Height", "Anchored Height", "Synchronized")
+                bcStatuses.forEach { (brid, status) ->
+                    row(
+                            brid.toHex(),
+                            "${status.second}",
+                            "${status.third}",
+                            "${status.first}",
+                            status.third?.let { if (it < (status.first ?: 0)) "NO" else "Yes" } ?: "NO"
+                    )
+                }
+                hints {
+                    borderStyle = Table.BorderStyle.SINGLE_LINE
+                    defaultAlignment = Table.Hints.Alignment.LEFT
+                }
+            }.render().also { echo(it) }
+        }
     }
 }

@@ -27,25 +27,30 @@ class NodeVerifier(private val configTemplate: PostchainClientConfig, private va
         }
     }
 
-
     fun verifyApi(node: NodeInfo) = verifyApi(node.apiUrl)
 
     fun verifyApi(url: String = configTemplate.endpointPool.first().url): NodeApiStatus {
         val managementChainStatus = verifyBlockchain(configTemplate.blockchainRid, url)
         val systemAnchorStatus = verifyBlockchain(sacBrid, url)
+
+        when {
+            managementChainStatus.third != null -> println("Node verification failed ($url): " + managementChainStatus.third?.message)
+            systemAnchorStatus.third != null -> println("Node verification failed ($url): " + systemAnchorStatus.third?.message)
+        }
+
         return NodeApiStatus(managementChainStatus.first && systemAnchorStatus.first, managementChainStatus.second, systemAnchorStatus.second)
     }
 
-    fun verifyBlockchain(blockchainRid: BlockchainRid?, url: String): Pair<Boolean, Long?> {
-        if (blockchainRid == null) return true to null
+    fun verifyBlockchain(blockchainRid: BlockchainRid?, url: String): Triple<Boolean, Long?, Exception?> {
+        if (blockchainRid == null) return Triple(true, null, null)
         return try {
             val nodeClient = PostchainClientImpl(configTemplate.copy(
                     endpointPool = EndpointPool.singleUrl(url),
                     blockchainRid = blockchainRid
             ))
-            true to nodeClient.currentBlockHeight()
+            Triple(true, nodeClient.currentBlockHeight(), null)
         } catch (e: Exception) {
-            false to null
+            Triple(false, null, e)
         }
     }
 
