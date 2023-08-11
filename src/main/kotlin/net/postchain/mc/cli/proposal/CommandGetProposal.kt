@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.proposal
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
 import de.m3y.kformat.Table
 import de.m3y.kformat.table
@@ -8,7 +9,6 @@ import net.postchain.chain0.common.queries.getProviderData
 import net.postchain.chain0.proposal.GetProposalResult
 import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.ProposalType
-import net.postchain.chain0.proposal.ProposalVoter
 import net.postchain.chain0.proposal.getProposal
 import net.postchain.chain0.proposal.getProposalVoterInfo
 import net.postchain.chain0.proposal.getProposalVotingResults
@@ -41,10 +41,9 @@ import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.GtvDictionary
 import net.postchain.gtv.merkle.GtvMerkleHashCalculator
 import net.postchain.gtv.merkleHash
-import net.postchain.mc.cli.base.ClientUtil
 import net.postchain.mc.cli.base.cryptoSystem
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
-import net.postchain.mc.cli.util.configOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.votingupdates.formatThreshold
 import net.postchain.mc.compatibility.ApiCompatV6.getProposalV6
 import net.postchain.mc.gtv.diff.GtvDiffFinder
@@ -55,12 +54,12 @@ class CommandGetProposal : CliktCommand(
         name = "info",
         help = "Gets information of a given proposal"
 ) {
-    private val config by configOption()
+    private val config by pmcConfigOption()
+    val client get() = config.client
 
     private val id by proposalIndexOption().convert { RowId(it) }
 
     override fun run() {
-        val client = ClientUtil.fromConfig(config)
         val apiVersion = client.apiVersion()
         when {
             apiVersion >= 7 -> {

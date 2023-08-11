@@ -18,7 +18,6 @@ const val DEFAULT_CONFIG_FILENAME = ".pmc/config"
 
 object PmcConfigProvider {
 
-    fun fromSystemConfig() = PostchainClientConfig.fromConfiguration(collectConfiguration(envConfigurationFile()))
 
     fun collectConfiguration(extraFile: File): Configuration {
         val config = PropertiesConfiguration()
@@ -66,5 +65,4 @@ object PmcConfigProvider {
 
     fun globalConfigurationFile() = File("${System.getProperty("user.home")}/$DEFAULT_CONFIG_FILENAME")
     fun localConfigurationFile() = File(DEFAULT_CONFIG_FILENAME)
-    private fun envConfigurationFile() = File(System.getenv()[POSTCHAIN_CLIENT_CONFIG] ?: "")
 }

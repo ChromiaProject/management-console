@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.container
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import de.m3y.kformat.Table
@@ -10,7 +11,7 @@ import net.postchain.chain0.common.queries.getContainerData
 import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.nm_api.nmGetContainerLimits
 import net.postchain.chain0.version.apiVersion
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.compatibility.ApiCompatV3.getContainerBlockchainV3
@@ -20,7 +21,8 @@ class CommandGetContainerInfo : CliktCommand(
         help = "Get information about a container"
 ) {
 
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val name by nameOption("Container Name").required().validate(entityNameValidator())
 

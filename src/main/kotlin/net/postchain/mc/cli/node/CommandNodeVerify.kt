@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.node
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import de.m3y.kformat.Table
 import de.m3y.kformat.table
 import net.postchain.anchoring.anchoring_chain_common.getLastAnchoredBlock
@@ -14,14 +15,15 @@ import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.SingleEndpointPool
 import net.postchain.common.BlockchainRid
 import net.postchain.mc.cli.requiredPubkeyOption
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.network.NodeVerifier
 
 class CommandNodeVerify : CliktCommand(
         name = "verify",
         help = "Verify node status"
 ) {
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val key by requiredPubkeyOption()
 

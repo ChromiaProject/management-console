@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.cluster
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.deprecated
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -9,13 +10,10 @@ import net.postchain.chain0.proposal_cluster.proposeClusterLimitsOperation
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.clusterUnitsOption
-import net.postchain.mc.cli.util.maxBlockchainsOption
-import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.nopClientOption
-import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.cli.util.*
 import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV2.proposeClusterLimitsOperationV2
+
 
 class CommandProposeClusterResourceLimits : CliktCommand(
         name = "limits",
@@ -27,7 +25,8 @@ class CommandProposeClusterResourceLimits : CliktCommand(
         }
     }
 
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val clusterName by nameOption("Cluster name").required()
 

@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.proposal
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -16,17 +17,19 @@ import net.postchain.chain0.version.apiVersion
 import net.postchain.common.types.RowId
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.dateToTimestampOption
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.compatibility.ApiCompatV6.getProposalsSinceV6
 import net.postchain.mc.compatibility.ApiCompatV6.getProviderVotesV6
 import net.postchain.mc.compatibility.ApiCompatV6.getRelevantProposalsV6
+
 
 class CommandListProposals : CliktCommand(
         name = "list",
         help = "List all proposals that you can vote on"
 ) {
 
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
     private val from by dateToTimestampOption("List proposals from date (YYYY-MM-DD)")
     private val to by dateToTimestampOption("List proposals to date (YYYY-MM-DD)", Long.MAX_VALUE, "9999-12-31", 1)
     private val all by option(help = "Include all proposals, including ones you can not vote on").flag()

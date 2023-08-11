@@ -1,19 +1,22 @@
 package net.postchain.mc.cli.provider
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import de.m3y.kformat.Table
 import de.m3y.kformat.table
 import net.postchain.chain0.common.queries.getProviderQuotas
 import net.postchain.chain0.model.ProviderQuotaType
 import net.postchain.chain0.model.ProviderTier.COMMUNITY_NODE_PROVIDER
 import net.postchain.chain0.model.ProviderTier.NODE_PROVIDER
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
+
 
 class CommandListProviderQuotas : CliktCommand(
         name = "quotas",
         help = "List provider quotas"
 ) {
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     override fun run() {
         val quotas = client.getProviderQuotas().associate {

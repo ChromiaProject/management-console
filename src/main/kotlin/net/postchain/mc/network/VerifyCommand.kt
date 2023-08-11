@@ -1,6 +1,7 @@
 package net.postchain.mc.network
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import de.m3y.kformat.Table
@@ -8,10 +9,11 @@ import de.m3y.kformat.table
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.queries.getAllNodes
 import net.postchain.common.BlockchainRid
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 
 class VerifyCommand : CliktCommand(help = "Verify that all nodes are accessible") {
-    val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val showProgress by option(help = "Show which node is currently being verified").flag()
 

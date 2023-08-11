@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.blockchain
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -10,7 +11,7 @@ import net.postchain.chain0.nm_api.nmGetBlockchainConfiguration
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.gtvml.GtvMLEncoder
 import net.postchain.mc.cli.blockchainRidOption
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import java.io.File
 
 
@@ -18,7 +19,7 @@ class CommandGetAllBlockchainConfigurations : CliktCommand(
         name = "get-all-configurations",
         help = "Download all blockchain configurations and save them to the specified directory"
 ) {
-    private val client by clientOption()
+    private val config by pmcConfigOption()
 
     private val blockchainRID by blockchainRidOption().required()
 
@@ -36,7 +37,7 @@ class CommandGetAllBlockchainConfigurations : CliktCommand(
         }
 
         while (true) {
-            val bcConfig = client.nmGetBlockchainConfiguration(blockchainRID, heights.last())
+            val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, heights.last())
             if (bcConfig == null) {
                 echo("Blockchain configuration at height ${heights.last()} is absent", err = true)
                 return
@@ -45,7 +46,7 @@ class CommandGetAllBlockchainConfigurations : CliktCommand(
             val xmlGtv = GtvMLEncoder.encodeXMLGtv(GtvDecoder.decodeGtv(bcConfig))
             File(save.path, "${heights.last()}.conf.xml").writeText(xmlGtv)
 
-            val nextHeight = client.nmFindNextConfigurationHeight(blockchainRID, heights.last()) ?: break
+            val nextHeight = config.client.nmFindNextConfigurationHeight(blockchainRID, heights.last()) ?: break
             heights.add(nextHeight)
         }
 

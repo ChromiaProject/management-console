@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.blockchain
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
@@ -14,9 +15,10 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.forceOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.Version
+
 
 class CommandProposeConfiguration : CliktCommand(
         name = "update",
@@ -29,7 +31,8 @@ class CommandProposeConfiguration : CliktCommand(
         at a height < previously approved config heights. Change will be applied after voting.
         """.trimIndent()
 ) {
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val blockchainConfigFile by option("-bc", "--blockchain-config", help = "Blockchain config to propose")
             .file(mustExist = true, mustBeReadable = true, canBeDir = false)

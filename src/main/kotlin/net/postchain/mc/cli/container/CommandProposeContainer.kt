@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.container
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -12,11 +13,8 @@ import net.postchain.chain0.direct_container.createContainerWithUnitsOperation
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.VoterSetOrPubkeysOption
-import net.postchain.mc.cli.util.containerUnitsOption
-import net.postchain.mc.cli.util.nameOrGenerateOption
-import net.postchain.mc.cli.util.nopClientOption
-import net.postchain.mc.cli.util.pubkeysOrVotersetOption
+import net.postchain.mc.cli.util.*
+
 
 
 class CommandProposeContainer : CliktCommand(
@@ -27,7 +25,8 @@ class CommandProposeContainer : CliktCommand(
             This also gives authority to deployer voter set to deploy blockchains in it.
         """.trimIndent()
 ) {
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val name by nameOrGenerateOption("Container name")
 

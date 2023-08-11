@@ -3,10 +3,7 @@ package net.postchain.mc.cli.provider
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.context
-import com.github.ajalt.clikt.parameters.groups.OptionGroup
-import com.github.ajalt.clikt.parameters.groups.cooccurring
-import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
-import com.github.ajalt.clikt.parameters.groups.required
+import com.github.ajalt.clikt.parameters.groups.*
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.multiple
@@ -21,11 +18,8 @@ import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtv.parse.GtvParser
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.PropertiesConfigurationValueSource
-import net.postchain.mc.cli.util.ProviderType
-import net.postchain.mc.cli.util.nopClientOption
-import net.postchain.mc.cli.util.proposalDescriptionOption
-import net.postchain.mc.cli.util.pubkeyOption
+import net.postchain.mc.cli.util.*
+
 
 class BatchOptions : OptionGroup() {
 
@@ -72,7 +66,8 @@ class CommandRegisterProvider : CliktCommand(
         }
     }
 
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val pubkey by pubkeyOption("Public key to register as provider")
 

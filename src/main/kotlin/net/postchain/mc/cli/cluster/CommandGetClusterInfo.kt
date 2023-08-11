@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.cluster
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import de.m3y.kformat.Table
@@ -10,7 +11,7 @@ import net.postchain.chain0.common.queries.getClusterData
 import net.postchain.chain0.common.queries.getClusterNodes
 import net.postchain.chain0.common.queries.getClusterProviders
 import net.postchain.chain0.common.queries.getClusterReplicaNodes
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.entityNameValidator
 
@@ -19,7 +20,8 @@ class CommandGetClusterInfo : CliktCommand(
         help = "Get information about a cluster"
 ) {
 
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val name by nameOption("Cluster Name").required().validate(entityNameValidator())
 

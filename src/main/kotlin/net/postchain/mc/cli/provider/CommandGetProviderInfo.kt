@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.provider
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.defaultLazy
 import de.m3y.kformat.Table
 import de.m3y.kformat.table
@@ -8,21 +9,20 @@ import net.postchain.chain0.common.queries.getNodesByProvider
 import net.postchain.chain0.common.queries.getProviderClusters
 import net.postchain.chain0.common.queries.getProviderData
 import net.postchain.chain0.common.queries.getProviderPoints
-import net.postchain.mc.cli.base.ClientUtil
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.configOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeyOption
 
 class CommandGetProviderInfo : CliktCommand(
         name = "info",
         help = "Show provider information"
 ) {
-    private val config by configOption()
+    private val config by pmcConfigOption()
+    val client get() = config.client
 
-    private val pubkey by pubkeyOption().defaultLazy { config.pubkey() }
+    private val pubkey by pubkeyOption().defaultLazy { client.config.pubkey() }
 
     override fun run() {
-        val client = ClientUtil.fromConfig(config)
         val providerData = client.getProviderData(pubkey)
         val actionPoints = client.getProviderPoints(pubkey)
         val providerClusters = client.getProviderClusters(pubkey)
