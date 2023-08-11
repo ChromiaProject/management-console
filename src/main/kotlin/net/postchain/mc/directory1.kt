@@ -9,4 +9,4 @@ fun main(args: Array<String>) = object : ManagementConsole() {
     override fun extraProviderCommands(command: CliktCommand) {
         command.subcommands(CommandUpdateProvider())
     }
-}.main(args)
+}.catchingAllExceptionsMain(args)
