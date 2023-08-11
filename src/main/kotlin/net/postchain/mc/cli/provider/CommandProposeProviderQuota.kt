@@ -8,7 +8,10 @@ import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal_provider.proposeProviderQuotaOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.*
+import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.cli.util.providerQuotaTypeOption
+import net.postchain.mc.cli.util.providerTierOption
 
 
 class CommandProposeProviderQuota : CliktCommand(

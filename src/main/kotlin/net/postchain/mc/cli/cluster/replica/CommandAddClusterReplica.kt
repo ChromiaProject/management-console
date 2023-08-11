@@ -7,7 +7,10 @@ import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.operations.addReplicaNodeToClusterOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.*
+import net.postchain.mc.cli.util.entityNameValidator
+import net.postchain.mc.cli.util.nameOption
+import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pubkeyOption
 
 class CommandAddClusterReplica : CliktCommand(
         name = "add",

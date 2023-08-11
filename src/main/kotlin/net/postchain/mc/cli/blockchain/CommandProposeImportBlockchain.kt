@@ -14,7 +14,10 @@ import net.postchain.common.BlockchainRid
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.gtv.GtvDecoder
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.*
+import net.postchain.mc.cli.util.configurationsFileOption
+import net.postchain.mc.cli.util.nameOption
+import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.requireApiVersion
 
 import java.io.BufferedInputStream

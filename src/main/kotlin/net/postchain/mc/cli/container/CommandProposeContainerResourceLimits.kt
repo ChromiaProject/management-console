@@ -14,7 +14,11 @@ import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.cluster.CommandProposeClusterResourceLimits.Companion.setIfNotNull
-import net.postchain.mc.cli.util.*
+import net.postchain.mc.cli.util.containerUnitsOption
+import net.postchain.mc.cli.util.maxBlockchainsOption
+import net.postchain.mc.cli.util.nameOption
+import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV2.proposeContainerLimitsOperationV2
 

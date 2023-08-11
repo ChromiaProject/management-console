@@ -16,7 +16,10 @@ import net.postchain.common.toHex
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainConfigOption
-import net.postchain.mc.cli.util.*
+import net.postchain.mc.cli.util.BlockchainConfig
+import net.postchain.mc.cli.util.nameOption
+import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.proposalDescriptionOption
 
 
 class CommandProposeBlockchain : CliktCommand(

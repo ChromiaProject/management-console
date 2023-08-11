@@ -12,7 +12,8 @@ import net.postchain.chain0.direct_cluster.createClusterWithUnitsOperation
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.*
+import net.postchain.mc.cli.util.clusterUnitsOption
+import net.postchain.mc.cli.util.pmcConfigOption
 
 
 class CommandAddCluster : CliktCommand(
