@@ -19,6 +19,15 @@ fun TransactionResult.printResult(onSuccess: String, onFail: String): Nothing {
     }
 }
 
+fun TransactionResult.printResultPolitely(onSuccess: String, onFail: String) {
+    when (status) {
+        TransactionStatus.CONFIRMED -> println(onSuccess)
+        TransactionStatus.REJECTED -> throw CliktError("$onFail: $rejectReason")
+        TransactionStatus.WAITING -> throw PrintMessage("Transaction not complete")
+        else -> throw CliktError("Cannot find status for this transaction")
+    }
+}
+
 object ClientUtil {
 
     fun fromConfig(config: PostchainClientConfig): PostchainClient {
