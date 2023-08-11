@@ -1,9 +1,8 @@
 package net.postchain.mc.cli.provider
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
 import net.postchain.chain0.common.queries.getAllProviders
 import net.postchain.mc.cli.util.pmcConfigOption
 
@@ -20,15 +19,14 @@ class CommandListProviders : CliktCommand(
             echo("No providers")
         } else {
             echo("Providers:")
-            table {
-                header("Name", "Url", "Pubkey", "Is System", "Tier", "Active")
-                providers.forEach {
-                    row(it.name, it.url, it.pubkey.toHex(), it.system.toString(), it.tier.toString(), it.active.toString())
+            echo(defaultTable {
+                header { row("Name", "Url", "Pubkey", "Is System", "Tier", "Active") }
+                body {
+                    providers.forEach {
+                        row(it.name, it.url, it.pubkey.toHex(), it.system.toString(), it.tier.toString(), it.active.toString())
+                    }
                 }
-                hints {
-                    borderStyle = Table.BorderStyle.SINGLE_LINE
-                }
-            }.render().also { echo(it) }
+            })
         }
     }
 }

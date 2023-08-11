@@ -1,9 +1,9 @@
 package net.postchain.mc.cli.votingupdates
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
-import de.m3y.kformat.table
 import net.postchain.chain0.common.queries.getVoterSetInfo
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
@@ -19,13 +19,13 @@ class CommandVoterSetInfo : CliktCommand(
 
     override fun run() {
         val voterSet = client.getVoterSetInfo(name)
-        table {
-            row("Voter set", voterSet.name)
-            row("Governed by", voterSet.governor)
-            row("Threshold", formatThreshold(voterSet.threshold))
-            voterSet.members.forEachIndexed { index, bytes -> row("Member $index", bytes.toHex()) }
-        }
-                .render()
-                .also { echo(it) }
+        echo(defaultTable {
+            body {
+                row("Voter set", voterSet.name)
+                row("Governed by", voterSet.governor)
+                row("Threshold", formatThreshold(voterSet.threshold))
+                voterSet.members.forEachIndexed { index, bytes -> row("Member $index", bytes.toHex()) }
+            }
+        })
     }
 }

@@ -1,9 +1,8 @@
 package net.postchain.mc.cli.container
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
 import net.postchain.chain0.common.queries.getBlockchainInfoList
 import net.postchain.chain0.common.queries.getContainers
 import net.postchain.mc.cli.util.pmcConfigOption
@@ -21,13 +20,14 @@ class CommandListContainers : CliktCommand(
             echo("No containers")
         } else {
             val bcs = client.getBlockchainInfoList(false).groupBy { it.container }
-            table {
-                header("Name", "Cluster", "Deployer voter set", "Blockchains")
-                containers.forEach {
-                    row(it.name, it.cluster, it.deployer, bcs[it.name]?.joinToString(", ") { bc -> bc.name } ?: "")
+            echo(defaultTable {
+                header { row("Name", "Cluster", "Deployer voter set", "Blockchains") }
+                body {
+                    containers.forEach {
+                        row(it.name, it.cluster, it.deployer, bcs[it.name]?.joinToString(", ") { bc -> bc.name } ?: "")
+                    }
                 }
-                hints { borderStyle = Table.BorderStyle.SINGLE_LINE }
-            }.render().also { echo(it) }
+            })
         }
     }
 }

@@ -1,9 +1,8 @@
 package net.postchain.mc.cli.node
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
 import net.postchain.anchoring.anchoring_chain_common.getLastAnchoredBlock
 import net.postchain.chain0.cm_api.cmGetClusterInfo
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
@@ -36,17 +35,16 @@ class CommandNodeVerify : CliktCommand(
         val clusterAnchorChains = clusters.map { client.cmGetClusterInfo(it) }.associate { it.name to BlockchainRid(it.anchoringChain) }
         val nodeStatus = nodeVerifier.verifyApi(node.apiUrl)
 
-        table {
-            row("Node", "${node.pubkey}")
-            row("Url", "${node.apiUrl}")
-            row("System chains", "${nodeStatus.responds.isOk()}")
-            row("Management chain", "${nodeStatus.height}")
-            row("System anchoring chain", "${nodeStatus.systemAnchorHeight}")
-            row("Cluster anchor chains", "${clusterAnchorChains.map { it.key to nodeVerifier.verifyBlockchain(it.value, node.apiUrl).second }.joinToString(",")}")
-            hints {
-                defaultAlignment = Table.Hints.Alignment.LEFT
+        echo(defaultTable {
+            body {
+                row("Node", "${node.pubkey}")
+                row("Url", node.apiUrl)
+                row("System chains", "${nodeStatus.responds.isOk()}")
+                row("Management chain", "${nodeStatus.height}")
+                row("System anchoring chain", "${nodeStatus.systemAnchorHeight}")
+                row("Cluster anchor chains", "${clusterAnchorChains.map { it.key to nodeVerifier.verifyBlockchain(it.value, node.apiUrl).second }.joinToString(",")}")
             }
-        }.render().also { echo(it) }
+        })
 
         val blockchains = client.nmComputeBlockchainInfoList(key.data).filter { !it.system }.map { BlockchainRid(it.rid) }
 
@@ -64,23 +62,19 @@ class CommandNodeVerify : CliktCommand(
             Triple(anchoredHeight, bcHeight.first, bcHeight.second)
         }
 
-        table {
-            header("Blockchain", "Responds", "Height", "Anchored Height", "Synchronized")
-            bcStatuses.forEach { (brid, status) ->
-                row(
-                        brid.toHex(),
-                        "${status.second}",
-                        "${status.third}",
-                        "${status.first}",
-                        status.third?.let { if (it < status.first ?: 0) "NO" else "Yes" } ?: "NO"
-                )
+        echo(defaultTable {
+            header { row("Blockchain", "Responds", "Height", "Anchored Height", "Synchronized") }
+            body {
+                bcStatuses.forEach { (brid, status) ->
+                    row(
+                            brid.toHex(),
+                            "${status.second}",
+                            "${status.third}",
+                            "${status.first}",
+                            status.third?.let { if (it < status.first ?: 0) "NO" else "Yes" } ?: "NO"
+                    )
+                }
             }
-            hints {
-                borderStyle = Table.BorderStyle.SINGLE_LINE
-                defaultAlignment = Table.Hints.Alignment.LEFT
-            }
-        }.render().also { echo(it) }
-
-
+        })
     }
 }

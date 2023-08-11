@@ -1,13 +1,12 @@
 package net.postchain.mc.cli.proposal
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.long
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
 import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.ProposalType
 import net.postchain.chain0.proposal.getProposalsRange
@@ -51,15 +50,16 @@ class CommandListProposals : CliktCommand(
 
                 val votes = client.getProviderVotes(from, to, client.pubkey)
 
-                table {
-                    header("Type", "Id", "State", "Your vote")
-                    proposals.forEach { info ->
-                        val vote = votes.find { it.proposal == info.rowId }
-                        val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
-                        row(info.proposalType.toString(), info.rowId.id.toString(), info.state.toString(), voteStatus)
+                echo(defaultTable {
+                    header { row("Type", "Id", "State", "Your vote") }
+                    body {
+                        proposals.forEach { info ->
+                            val vote = votes.find { it.proposal == info.rowId }
+                            val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
+                            row(info.proposalType.toString(), info.rowId.id.toString(), info.state.toString(), voteStatus)
+                        }
                     }
-                    hints { borderStyle = Table.BorderStyle.SINGLE_LINE }
-                }.render().also { echo(it) }
+                })
             }
 
             else -> {
@@ -72,15 +72,16 @@ class CommandListProposals : CliktCommand(
 
                 val votes = client.getProviderVotesV6(client.pubkey)
 
-                table {
-                    header("Type", "Id", "Your vote")
-                    proposals.forEach { (rowid, proposalType) ->
-                        val vote = votes.find { it.proposal == rowid }
-                        val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
-                        row(proposalType.toString(), rowid.id.toString(), voteStatus)
+                echo(defaultTable {
+                    header { row("Type", "Id", "Your vote") }
+                    body {
+                        proposals.forEach { (rowid, proposalType) ->
+                            val vote = votes.find { it.proposal == rowid }
+                            val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
+                            row(proposalType.toString(), rowid.id.toString(), voteStatus)
+                        }
                     }
-                    hints { borderStyle = Table.BorderStyle.SINGLE_LINE }
-                }.render().also { echo(it) }
+                })
             }
         }
     }

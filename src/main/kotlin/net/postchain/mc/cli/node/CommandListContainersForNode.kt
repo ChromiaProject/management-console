@@ -1,9 +1,8 @@
 package net.postchain.mc.cli.node
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
 import net.postchain.chain0.common.queries.getNodeContainers
 import net.postchain.mc.cli.requiredPubkeyOption
 import net.postchain.mc.cli.util.pmcConfigOption
@@ -21,13 +20,14 @@ class CommandListContainersForNode : CliktCommand(
         if (containers.isEmpty()) {
             echo("No containers")
         } else {
-            table {
-                header("Name", "Cluster", "Deployer")
-                containers.forEach {
-                    row(it.name, it.cluster, it.deployer)
+            echo(defaultTable {
+                header { row("Name", "Cluster", "Deployer") }
+                body {
+                    containers.forEach {
+                        row(it.name, it.cluster, it.deployer)
+                    }
                 }
-                hints { borderStyle = Table.BorderStyle.SINGLE_LINE }
-            }.render().also { echo(it) }
+            })
         }
     }
 }
