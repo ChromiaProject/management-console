@@ -8,17 +8,19 @@ import net.postchain.chain0.common.queries.getProviderData
 import net.postchain.chain0.proposal.GetProposalResult
 import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.ProposalType
-import net.postchain.chain0.proposal.ProposalVoter
 import net.postchain.chain0.proposal.getProposal
 import net.postchain.chain0.proposal.getProposalVoterInfo
 import net.postchain.chain0.proposal.getProposalVotingResults
 import net.postchain.chain0.proposal_blockchain.getBlockchainActionProposal
-import net.postchain.chain0.proposal_blockchain.getBlockchainImportProposal
 import net.postchain.chain0.proposal_blockchain.getBlockchainProposal
-import net.postchain.chain0.proposal_blockchain.getConfigurationImportProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposalAt
-import net.postchain.chain0.proposal_blockchain.getFinishBlockchainImportProposal
+import net.postchain.chain0.proposal_blockchain_import.getBlockchainImportProposal
+import net.postchain.chain0.proposal_blockchain_import.getConfigurationImportProposal
+import net.postchain.chain0.proposal_blockchain_import.getFinishBlockchainImportProposal
+import net.postchain.chain0.proposal_blockchain_import.getFinishForeignBlockchainImportProposal
+import net.postchain.chain0.proposal_blockchain_import.getForeignBlockchainBlocksImportProposal
+import net.postchain.chain0.proposal_blockchain_import.getForeignBlockchainImportProposal
 import net.postchain.chain0.proposal_cluster.getClusterLimitsProposal
 import net.postchain.chain0.proposal_cluster.getClusterProviderProposal
 import net.postchain.chain0.proposal_cluster.getClusterRemoveProposal
@@ -295,6 +297,21 @@ class CommandGetProposal : CliktCommand(
             ProposalType.finish_blockchain_import -> {
                 val fbi = client.getFinishBlockchainImportProposal(proposalId) ?: return ""
                 return "Blockchain RID: ${fbi.blockchainRid}"
+            }
+
+            ProposalType.foreign_blockchain_import -> {
+                val proposal = client.getForeignBlockchainImportProposal(proposalId) ?: return ""
+                return "$proposal"
+            }
+
+            ProposalType.foreign_blockchain_blocks_import -> {
+                val proposal = client.getForeignBlockchainBlocksImportProposal(proposalId) ?: return ""
+                return "$proposal"
+            }
+
+            ProposalType.finish_foreign_blockchain_import -> {
+                val proposal = client.getFinishForeignBlockchainImportProposal(proposalId) ?: return ""
+                return "$proposal"
             }
         }
     }
