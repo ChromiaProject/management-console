@@ -17,6 +17,8 @@
         <postchain.version>3.11.9</postchain.version>
         <postchain.client.version>3.11.3</postchain.client.version>
         <directory.chain.version>1.9.4</directory.chain.version>
+        <chr.version>0.9.2</chr.version>
+        <rell.version>0.13.1</rell.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
 
         <main-class>net.postchain.mc.Directory1Kt</main-class>
@@ -79,7 +81,17 @@
         <dependency>
             <groupId>com.github.ajalt.clikt</groupId>
             <artifactId>clikt-jvm</artifactId>
-            <version>3.5.0</version>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.chromia.cli</groupId>
+            <artifactId>chromia-cli-tools</artifactId>
+            <version>${chr.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.postchain.rell</groupId>
+            <artifactId>rell-api-base</artifactId>
+            <version>${rell.version}</version>
         </dependency>
 
         <!-- logging -->
@@ -113,12 +125,6 @@
                     <artifactId>okhttp</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>de.m3y.kformat</groupId>
-            <artifactId>kformat</artifactId>
-            <version>0.9</version>
         </dependency>
 
         <dependency>
@@ -498,6 +504,15 @@
         <repository>
             <id>Postchain Chromia</id>
             <url>https://gitlab.com/api/v4/projects/33481005/packages/maven</url>
+        </repository>
+        <repository>
+            <id>Chromia CLI</id>
+            <url>https://gitlab.com/api/v4/projects/39844192/packages/maven</url>
+        </repository>
+        <repository>
+            <id>Rell</id>
+            <name>Rell Runtime Registry</name>
+            <url>https://gitlab.com/api/v4/projects/32802097/packages/maven</url>
         </repository>
     </repositories>
 

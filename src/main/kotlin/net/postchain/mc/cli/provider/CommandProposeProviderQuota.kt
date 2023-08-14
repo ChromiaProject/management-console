@@ -1,22 +1,25 @@
 package net.postchain.mc.cli.provider
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal_provider.proposeProviderQuotaOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.providerQuotaTypeOption
 import net.postchain.mc.cli.util.providerTierOption
+
 
 class CommandProposeProviderQuota : CliktCommand(
         name = "quota",
         help = "Propose provider quota"
 ) {
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
     private val providerTier by providerTierOption().required()
     private val providerQuotaType by providerQuotaTypeOption().required()
     private val value by option("-v", "--value", help = "quota value").long().required()

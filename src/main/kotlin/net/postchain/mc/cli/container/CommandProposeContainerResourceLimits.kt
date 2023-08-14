@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.container
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.deprecated
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -16,10 +17,11 @@ import net.postchain.mc.cli.cluster.CommandProposeClusterResourceLimits.Companio
 import net.postchain.mc.cli.util.containerUnitsOption
 import net.postchain.mc.cli.util.maxBlockchainsOption
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV2.proposeContainerLimitsOperationV2
+
 
 class CommandProposeContainerResourceLimits : CliktCommand(
         name = "limits",
@@ -30,7 +32,8 @@ class CommandProposeContainerResourceLimits : CliktCommand(
             Proposal can contain all types of limits or a subset of them.
         """.trimIndent()
 ) {
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val containerName by nameOption("Container name").required()
 

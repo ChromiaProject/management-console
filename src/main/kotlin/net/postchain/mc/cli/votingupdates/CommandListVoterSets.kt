@@ -1,16 +1,17 @@
 package net.postchain.mc.cli.votingupdates
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getVoterSets
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandListVoterSets : CliktCommand(
         name = "list",
         help = "List all voter sets"
 ) {
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     override fun run() {
         val voterSets = client.getVoterSets()
@@ -18,15 +19,14 @@ class CommandListVoterSets : CliktCommand(
             echo("No voter sets")
         } else {
             echo("Voter sets:")
-            table {
-                header("Name", "Governor", "Majority level")
-                voterSets.forEach {
-                    row(it.name, it.gorvernor, formatThreshold(it.threshold))
+            echo(defaultTable {
+                header { row("Name", "Governor", "Majority level") }
+                body {
+                    voterSets.forEach {
+                        row(it.name, it.gorvernor, formatThreshold(it.threshold))
+                    }
                 }
-                hints {
-                    borderStyle = Table.BorderStyle.SINGLE_LINE
-                }
-            }.render().also { echo(it) }
+            })
         }
     }
 }

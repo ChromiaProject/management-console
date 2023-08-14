@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.votingupdates
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -9,15 +10,17 @@ import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal.voting.createVoterSetOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pubkeysOption
+
 
 class CommandCreateVoterSet : CliktCommand(
         name = "create",
         help = "Create a new voter set with a list of providers"
 ) {
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val name by nameOption("Name of new voter set").required()
 

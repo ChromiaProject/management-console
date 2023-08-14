@@ -10,7 +10,7 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.mc.cli.config.PmcConfigProvider.collectConfiguration
-import net.postchain.mc.cli.util.POSTCHAIN_CLIENT_CONFIG
+import net.postchain.mc.cli.util.CHROMIA_CONFIG
 import org.apache.commons.configuration2.PropertiesConfiguration
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder
 import org.apache.commons.configuration2.builder.fluent.Parameters
@@ -21,7 +21,7 @@ import java.io.FileWriter
 fun CliktCommand.configFileOption() = mutuallyExclusiveOptions(
         option("--global", help = "use global configuration file").flag().convert { PmcConfigProvider.globalConfigurationFile() },
         option("--local", help = "use project configuration file").flag().convert { PmcConfigProvider.localConfigurationFile() },
-        option("--file", envvar = POSTCHAIN_CLIENT_CONFIG, help = "use given configuration file (env: $POSTCHAIN_CLIENT_CONFIG)")
+        option("--file", envvar = CHROMIA_CONFIG, help = "use given configuration file (env: $CHROMIA_CONFIG)")
                 .file(mustExist = true, canBeDir = false),
         name = "Config file location",
 ).default(PmcConfigProvider.localConfigurationFile())

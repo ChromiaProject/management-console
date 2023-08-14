@@ -2,6 +2,7 @@ package net.postchain.mc.cli.blockchain.import_chain
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
@@ -25,7 +26,7 @@ import net.postchain.mc.cli.hostOption
 import net.postchain.mc.cli.portOption
 import net.postchain.mc.cli.util.NopPostchainClient
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.pubkeyOption
 import net.postchain.mc.network.requireApiVersion
@@ -39,7 +40,8 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
             of the cluster that the container belongs to.
         """.trimIndent()
 ) {
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val key by pubkeyOption("Node pubkey").required()
 

@@ -3,6 +3,7 @@ package net.postchain.mc.cli.blockchain.import_chain
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.PrintMessage
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_blockchain_import.proposeImportBlockchainOperation
@@ -15,9 +16,10 @@ import net.postchain.gtv.GtvDecoder
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.configurationsFileOption
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.requireApiVersion
+
 import java.io.BufferedInputStream
 import java.io.FileInputStream
 
@@ -30,7 +32,8 @@ class CommandProposeImportBlockchain : CliktCommand(
             of the cluster that the container belongs to.
         """.trimIndent()
 ) {
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val configurationsFile by configurationsFileOption().required()
 

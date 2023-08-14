@@ -1,16 +1,16 @@
 package net.postchain.mc.cli.container
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
 import net.postchain.chain0.common.queries.getContainerBlockchain
 import net.postchain.chain0.common.queries.getContainerData
 import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.nm_api.nmGetContainerLimits
 import net.postchain.chain0.version.apiVersion
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.compatibility.ApiCompatV3.getContainerBlockchainV3
@@ -20,37 +20,38 @@ class CommandGetContainerInfo : CliktCommand(
         help = "Get information about a container"
 ) {
 
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val name by nameOption("Container Name").required().validate(entityNameValidator())
 
     override fun run() {
         val info = client.getContainerData(name)
 
-        table {
-            row("Name:", info.name)
-            row("Cluster:", info.cluster)
-            row("Deployer:", info.deployer)
-            row(
-                    "Proposed by:",
-                    listOf(info.proposedByPubkey.toHex(), info.proposedByName)
-                            .filter { it.isNotEmpty() }
-                            .joinToString(" / ")
-            )
-            row("System:", info.system.toString())
-            hints {
-                defaultAlignment = Table.Hints.Alignment.LEFT
+        echo(defaultTable {
+            body {
+                row("Name:", info.name)
+                row("Cluster:", info.cluster)
+                row("Deployer:", info.deployer)
+                row(
+                        "Proposed by:",
+                        listOf(info.proposedByPubkey.toHex(), info.proposedByName)
+                                .filter { it.isNotEmpty() }
+                                .joinToString(" / ")
+                )
+                row("System:", info.system.toString())
             }
-        }.render().also { echo(it) }
+        })
 
-        table {
-            header("Resource type", "Value")
-            val limits = client.nmGetContainerLimits(name)
-            ContainerResourceLimitType.values().forEach {
-                row(it.name, limits[it.name]?.toString() ?: "-1")
+        echo(defaultTable {
+            header { row("Resource type", "Value") }
+            body {
+                val limits = client.nmGetContainerLimits(name)
+                ContainerResourceLimitType.values().forEach {
+                    row(it.name, limits[it.name]?.toString() ?: "-1")
+                }
             }
-            defaultHints()
-        }.render().also { echo(it) }
+        })
 
         val apiVersion = client.apiVersion()
         when {
@@ -60,13 +61,14 @@ class CommandGetContainerInfo : CliktCommand(
                     echo("No blockchains")
                 } else {
                     echo("Blockchains:")
-                    table {
-                        header("Name", "Rid", "System", "State")
-                        blockchains.forEach {
-                            row(it.name, it.rid.toHex(), it.system.toString(), it.state.toString())
+                    echo(defaultTable {
+                        header { row("Name", "Rid", "System", "State") }
+                        body {
+                            blockchains.forEach {
+                                row(it.name, it.rid.toHex(), it.system.toString(), it.state.toString())
+                            }
                         }
-                        defaultHints()
-                    }.render().also { echo(it) }
+                    })
                 }
             }
 
@@ -76,22 +78,16 @@ class CommandGetContainerInfo : CliktCommand(
                     echo("No blockchains")
                 } else {
                     echo("Blockchains:")
-                    table {
-                        header("Name", "Rid", "System", "Active")
-                        blockchains.forEach {
-                            row(it.name, it.rid.toHex(), it.system.toString(), it.active.toString())
+                    echo(defaultTable {
+                        header { row("Name", "Rid", "System", "Active") }
+                        body {
+                            blockchains.forEach {
+                                row(it.name, it.rid.toHex(), it.system.toString(), it.active.toString())
+                            }
                         }
-                        defaultHints()
-                    }.render().also { echo(it) }
+                    })
                 }
             }
-        }
-    }
-
-    private fun Table.defaultHints() {
-        hints {
-            borderStyle = Table.BorderStyle.SINGLE_LINE
-            defaultAlignment = Table.Hints.Alignment.LEFT
         }
     }
 }

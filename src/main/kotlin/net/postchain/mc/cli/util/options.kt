@@ -1,5 +1,7 @@
 package net.postchain.mc.cli.util
 
+import com.chromia.cli.tools.config.ChromiaConfigOption
+import com.chromia.cli.tools.env.cliEnv
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.groups.required
@@ -7,7 +9,6 @@ import com.github.ajalt.clikt.parameters.groups.single
 import com.github.ajalt.clikt.parameters.options.OptionTransformContext
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
-import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.split
@@ -16,39 +17,29 @@ import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.model.ProviderQuotaType
-import net.postchain.client.config.PostchainClientConfig
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.common.hexStringToByteArray
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.CommandBase
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
-import net.postchain.mc.cli.config.PmcConfigProvider.fromSystemConfig
+import net.postchain.rell.api.base.RellCliEnv
 import java.net.MalformedURLException
 import java.net.URISyntaxException
 import java.net.URL
 
 
-const val POSTCHAIN_CLIENT_CONFIG = "POSTCHAIN_CLIENT_CONFIG"
+const val CHROMIA_CONFIG = "CHROMIA_CONFIG"
 fun CliktCommand.pubkeyOption(helpMsg: String = "Public key") = option("-pk", "--pubkey", help = helpMsg, envvar = "POSTCHAIN_PUBKEY")
         .convert { PubKey(it) }
 
 fun CliktCommand.pubkeysOption(helpMsg: String = "Comma delimited list of public keys") = option("--pubkeys", help = helpMsg)
         .convert { PubKey(it) }.split(",")
 
-fun CliktCommand.configOption() = configOptionBase().defaultLazy { fromSystemConfig() }
-fun CliktCommand.clientOption() = clientOptionBase()
-        .defaultLazy { PostchainClientImpl(fromSystemConfig()) }
+fun CliktCommand.pmcConfigOption() = PmcClientConfigOption(cliEnv())
 
-fun CliktCommand.nopClientOption() = clientOptionBase()
-        .convert { NopPostchainClient(it) }
-        .defaultLazy { NopPostchainClient(PostchainClientImpl(fromSystemConfig())) }
-
-private fun CliktCommand.clientOptionBase() = configOptionBase()
-        .convert { PostchainClientImpl(it) }
-
-private fun CliktCommand.configOptionBase() =
-        option("-cfg", "--config", help = "Configuration file for PMC (overrides system configuration)", envvar = POSTCHAIN_CLIENT_CONFIG)
-                .convert { PostchainClientConfig.fromProperties(it) }
+class PmcClientConfigOption(cliEnv: RellCliEnv): ChromiaConfigOption(cliEnv) {
+    val client by lazy { NopPostchainClient(PostchainClientImpl(config.get())) }
+}
 
 fun CliktCommand.nameOption(helpMessage: String) = option("-n", "--name", help = helpMessage)
 

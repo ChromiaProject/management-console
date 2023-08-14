@@ -1,9 +1,13 @@
 package net.postchain.mc.cli.proposal
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
+import com.github.ajalt.mordant.table.SectionBuilder
+import com.github.ajalt.mordant.table.Table
+import com.github.ajalt.mordant.table.TableBuilder
+import com.github.ajalt.mordant.table.table
 import net.postchain.chain0.common.queries.getProviderData
 import net.postchain.chain0.proposal.GetProposalResult
 import net.postchain.chain0.proposal.ProposalState
@@ -43,10 +47,9 @@ import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.GtvDictionary
 import net.postchain.gtv.merkle.GtvMerkleHashCalculator
 import net.postchain.gtv.merkleHash
-import net.postchain.mc.cli.base.ClientUtil
 import net.postchain.mc.cli.base.cryptoSystem
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
-import net.postchain.mc.cli.util.configOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.votingupdates.formatThreshold
 import net.postchain.mc.compatibility.ApiCompatV6.getProposalV6
 import net.postchain.mc.gtv.diff.GtvDiffFinder
@@ -57,29 +60,28 @@ class CommandGetProposal : CliktCommand(
         name = "info",
         help = "Gets information of a given proposal"
 ) {
-    private val config by configOption()
+    private val config by pmcConfigOption()
+    val client get() = config.client
 
     private val id by proposalIndexOption().convert { RowId(it) }
 
     override fun run() {
-        val client = ClientUtil.fromConfig(config)
         val apiVersion = client.apiVersion()
         when {
             apiVersion >= 7 -> {
                 val proposal = client.getProposal(id) ?: return echo("Proposal $id not found")
                 val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
 
-                table {
-                    row("Proposal:", "${proposal.id.id} - ${proposal.type.name}")
-                    row("Proposed by:", "${proposedBy.pubkey.toHex()}${if (proposedBy.name.isNotEmpty()) " - " + proposedBy.name else ""}")
-                    row("Time:", "${Date.from(Instant.ofEpochMilli(proposal.timestamp))}")
-                    row("State:", proposal.state.toString())
-                    printVotingInfo(client, proposal, apiVersion)
-                    row("Description:", proposal.description)
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().also {
-                    echo(it.toString())
-                }
+                echo(defaultTable {
+                    body {
+                        row("Proposal:", "${proposal.id.id} - ${proposal.type.name}")
+                        row("Proposed by:", "${proposedBy.pubkey.toHex()}${if (proposedBy.name.isNotEmpty()) " - " + proposedBy.name else ""}")
+                        row("Time:", "${Date.from(Instant.ofEpochMilli(proposal.timestamp))}")
+                        row("State:", proposal.state.toString())
+                        printVotingInfo(client, proposal, apiVersion)
+                        row("Description:", proposal.description)
+                    }
+                })
 
                 if (proposal.state == ProposalState.PENDING) {
                     echo("Proposal details")
@@ -93,20 +95,19 @@ class CommandGetProposal : CliktCommand(
                 val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
                 val votingResults = client.getProposalVotingResults(proposal.id)
 
-                table {
-                    row("Proposal:", "${proposal.id.id} - ${proposal.type.name}")
-                    row("Proposed by:", formatProvider(proposedBy.pubkey, proposedBy.name))
-                    row("Time:", "${Date.from(Instant.ofEpochMilli(proposal.timestamp))}")
-                    row("Positive votes:", votingResults.positiveVotes.toString())
-                    row("Negative votes:", votingResults.negativeVotes.toString())
-                    row("Max votes:", votingResults.maxVotes.toString())
-                    row("Threshold:", formatThreshold(votingResults.threshold))
-                    row("Status:", votingResults.votingResult.toString())
-                    row("Description:", proposal.description)
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().also {
-                    echo(it.toString())
-                }
+                echo(defaultTable {
+                    body {
+                        row("Proposal:", "${proposal.id.id} - ${proposal.type.name}")
+                        row("Proposed by:", formatProvider(proposedBy.pubkey, proposedBy.name))
+                        row("Time:", "${Date.from(Instant.ofEpochMilli(proposal.timestamp))}")
+                        row("Positive votes:", votingResults.positiveVotes.toString())
+                        row("Negative votes:", votingResults.negativeVotes.toString())
+                        row("Max votes:", votingResults.maxVotes.toString())
+                        row("Threshold:", formatThreshold(votingResults.threshold))
+                        row("Status:", votingResults.votingResult.toString())
+                        row("Description:", proposal.description)
+                    }
+                })
 
                 echo("Proposal details")
                 echo("------------------------------")
@@ -115,7 +116,7 @@ class CommandGetProposal : CliktCommand(
         }
     }
 
-    private fun Table.printVotingInfo(client: PostchainClient, proposal: GetProposalResult, apiVersion: Long) {
+    private fun SectionBuilder.printVotingInfo(client: PostchainClient, proposal: GetProposalResult, apiVersion: Long) {
         if (proposal.state == ProposalState.PENDING) {
             val votingResults = client.getProposalVotingResults(proposal.id)
             row("Positive votes:", votingResults.positiveVotes.toString())
@@ -133,7 +134,7 @@ class CommandGetProposal : CliktCommand(
     private fun formatProvider(providerPubKey: WrappedByteArray, providerName: String) =
             "${providerPubKey.toHex()}${if (providerName.isNotEmpty()) " - $providerName" else ""}"
 
-    private fun formatProposal(client: PostchainClient, proposalId: RowId, proposalType: ProposalType): String {
+    private fun formatProposal(client: PostchainClient, proposalId: RowId, proposalType: ProposalType): Any {
         return when (proposalType) {
             ProposalType.bc -> {
                 val bp = client.getBlockchainProposal(proposalId) ?: return ""
@@ -156,84 +157,92 @@ class CommandGetProposal : CliktCommand(
 
             ProposalType.voter_set_update -> {
                 val vsu = client.getVoterSetUpdateProposal(proposalId.id) ?: return ""
-                val t = table {
-                    row("Voter set:", vsu.voterSet)
-                    row("Governor update:", vsu.governor ?: "")
-                    row("Majority threshold update:", vsu.threshold?.toString() ?: "")
-                    row("New member:", vsu.addMember.joinToString(", ") { it.toHex() })
-                    row("Remove member:", vsu.removeMember.joinToString(", ") { it.toHex() })
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render()
-                return t.toString()
+                return defaultTable {
+                    body {
+                        row("Voter set:", vsu.voterSet)
+                        row("Governor update:", vsu.governor ?: "")
+                        row("Majority threshold update:", vsu.threshold?.toString() ?: "")
+                        row("New member:", vsu.addMember.joinToString(", ") { it.toHex() })
+                        row("Remove member:", vsu.removeMember.joinToString(", ") { it.toHex() })
+                    }
+                }
             }
 
             ProposalType.cluster_provider -> {
                 val cpc = client.getClusterProviderProposal(proposalId) ?: return ""
                 return table {
-                    row("Cluster:", cpc.cluster)
-                    row("Provider:", cpc.provider.toHex())
-                    row("Add/Remove:", if (cpc.add) "Add" else "remove")
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+                    body {
+                        row("Cluster:", cpc.cluster)
+                        row("Provider:", cpc.provider.toHex())
+                        row("Add/Remove:", if (cpc.add) "Add" else "remove")
+                    }
+                }
             }
 
             ProposalType.provider_is_system -> {
                 val pis = client.getSystemProviderProposal(proposalId) ?: return ""
-                return table {
-                    row("Provider:", pis.provider.toHex())
-                    row("Add/Remove:", if (pis.add) "Add" else "remove")
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+                return defaultTable {
+                    body {
+                        row("Provider:", pis.provider.toHex())
+                        row("Add/Remove:", if (pis.add) "Add" else "remove")
+                    }
+                }
             }
 
             ProposalType.provider_quota -> {
                 val ppq = client.getProviderQuotaProposal(proposalId) ?: return ""
-                return table {
-                    row("Provider tier:", ppq.tier.name)
-                    row("Quota type:", ppq.quotaType.name)
-                    row("Value:", ppq.value.toString())
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+                return defaultTable {
+                    body {
+                        row("Provider tier:", ppq.tier.name)
+                        row("Quota type:", ppq.quotaType.name)
+                        row("Value:", ppq.value.toString())
+                    }
+                }
             }
 
             ProposalType.provider_batch -> {
                 val ppb = client.getProviderBatchProposal(proposalId) ?: return ""
 
-                val info = table {
-                    row("Provider tier:", ppb.tier.toString())
-                    row("System:", ppb.system.toString())
-                    row("Active:", ppb.active.toString())
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
-
-                val providers = table {
-                    header("Pubkey", "Name", "Url")
-                    ppb.providerInfos.forEach {
-                        row(it.pubkey.toString(), it.name, it.url)
+                echo(defaultTable {
+                    body {
+                        row("Provider tier:", ppb.tier.toString())
+                        row("System:", ppb.system.toString())
+                        row("Active:", ppb.active.toString())
                     }
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+                })
 
-                return info + providers
+                val providers = defaultTable {
+                    header { row("Pubkey", "Name", "Url") }
+                    body {
+
+                        ppb.providerInfos.forEach {
+                            row(it.pubkey.toString(), it.name, it.url)
+                        }
+                    }
+                }
+
+                return providers
             }
 
             ProposalType.container_limits -> {
                 val pcl = client.getContainerLimitsProposal(proposalId) ?: return ""
-                return table {
-                    row("Container:", pcl.container)
-                    row("Container Units:", pcl.containerUnits.toString())
-                    row("Max blockchains:", pcl.maxBlockchains.toString())
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+                return defaultTable {
+                    body {
+                        row("Container:", pcl.container)
+                        row("Container Units:", pcl.containerUnits.toString())
+                        row("Max blockchains:", pcl.maxBlockchains.toString())
+                    }
+                }
             }
 
             ProposalType.cluster_limits -> {
                 val pcl = client.getClusterLimitsProposal(proposalId) ?: return ""
-                return table {
-                    row("Cluster:", pcl.cluster)
-                    row("Cluster Units:", pcl.clusterUnits.toString())
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+                return defaultTable {
+                    body {
+                        row("Cluster:", pcl.cluster)
+                        row("Cluster Units:", pcl.clusterUnits.toString())
+                    }
+                }
             }
 
             ProposalType.cluster_remove -> {
@@ -243,22 +252,24 @@ class CommandGetProposal : CliktCommand(
 
             ProposalType.provider_state -> {
                 val pps = client.getProviderStateProposal(proposalId) ?: return ""
-                return table {
-                    row("Provider:", pps.provider.toHex())
-                    row("Provider name:", pps.providerName)
-                    row("Enable/Disable:", if (pps.active) "Enable" else "Disable")
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+                return defaultTable {
+                    body {
+                        row("Provider:", pps.provider.toHex())
+                        row("Provider name:", pps.providerName)
+                        row("Enable/Disable:", if (pps.active) "Enable" else "Disable")
+                    }
+                }
             }
 
             ProposalType.blockchain_action -> {
                 val pba = client.getBlockchainActionProposal(proposalId) ?: return ""
-                return table {
-                    row("Blockchain:", pba.blockchain.toHex())
-                    row("Blockchain name:", pba.blockchainName)
-                    row("Action:", pba.action.name)
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+                return defaultTable {
+                    body {
+                        row("Blockchain:", pba.blockchain.toHex())
+                        row("Blockchain name:", pba.blockchainName)
+                        row("Action:", pba.action.name)
+                    }
+                }
             }
 
             ProposalType.cluster_anchoring_configuration -> {
@@ -270,12 +281,13 @@ class CommandGetProposal : CliktCommand(
 
             ProposalType.container -> {
                 val pc = client.getContainerProposal(proposalId) ?: return ""
-                return table {
-                    row("Container:", pc.container)
-                    row("Container Units:", pc.containerUnits.toString())
-                    row("Max blockchains:", pc.maxBlockchains.toString())
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+                return defaultTable {
+                    body {
+                        row("Container:", pc.container)
+                        row("Container Units:", pc.containerUnits.toString())
+                        row("Max blockchains:", pc.maxBlockchains.toString())
+                    }
+                }
             }
 
             ProposalType.container_remove -> {

@@ -1,33 +1,38 @@
 package net.postchain.mc.network
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.mordant.rendering.TextStyle
+import com.github.ajalt.mordant.table.Borders
 import net.postchain.chain0.common.queries.getSummary
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
+
 
 class SummaryCommand : CliktCommand(
         help = "Show summary of the network"
 ) {
 
-    val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     override fun run() {
         val summary = client.getSummary()
-        echo("Network summary:")
-        table {
-            row("Voter sets", summary.voterSets.toString())
-            row("Providers", summary.providers.toString())
-            row("Clusters", summary.clusters.toString())
-            row("Containers", summary.containers.toString())
-            row("Nodes", summary.nodes.toString())
-            row("Blockchains", summary.blockchains.toString())
-            hints {
-                borderStyle = Table.BorderStyle.SINGLE_LINE
-                alignment(0, Table.Hints.Alignment.LEFT)
+        echo(defaultTable {
+            header {
+                row {
+                    this.cellBorders = Borders.NONE
+                    cell("Network Summary")
+                }
             }
-        }
-                .render(StringBuilder())
-                .also { echo(it) }
+            body {
+                row("Voter sets", summary.voterSets)
+                row("Providers", summary.providers)
+                row("Clusters", summary.clusters)
+                row("Containers", summary.containers)
+                row("Nodes", summary.nodes)
+                row("Blockchains", summary.blockchains)
+            }
+        })
     }
 }

@@ -6,7 +6,6 @@ import net.postchain.common.PropertiesFileLoader
 import net.postchain.common.toHex
 import net.postchain.crypto.Secp256K1CryptoSystem
 import net.postchain.crypto.secp256k1_derivePubKey
-import net.postchain.mc.cli.util.POSTCHAIN_CLIENT_CONFIG
 import org.apache.commons.configuration2.Configuration
 import org.apache.commons.configuration2.PropertiesConfiguration
 import org.bitcoinj.crypto.MnemonicCode
@@ -18,7 +17,6 @@ const val DEFAULT_CONFIG_FILENAME = ".pmc/config"
 
 object PmcConfigProvider {
 
-    fun fromSystemConfig() = PostchainClientConfig.fromConfiguration(collectConfiguration(envConfigurationFile()))
 
     fun collectConfiguration(extraFile: File): Configuration {
         val config = PropertiesConfiguration()
@@ -66,5 +64,4 @@ object PmcConfigProvider {
 
     fun globalConfigurationFile() = File("${System.getProperty("user.home")}/$DEFAULT_CONFIG_FILENAME")
     fun localConfigurationFile() = File(DEFAULT_CONFIG_FILENAME)
-    private fun envConfigurationFile() = File(System.getenv()[POSTCHAIN_CLIENT_CONFIG] ?: "")
 }
