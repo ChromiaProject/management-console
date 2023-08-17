@@ -20,7 +20,7 @@ class CommandRevokeProposal : CliktCommand(
     private val idx by proposalIndexOption().required()
 
     override fun run() {
-        client.client.transactionBuilder()
+        client.transactionBuilder()
                 .revokeProposalOperation(client.pubkey, RowId(idx))
                 .postAwaitConfirmation()
                 .printResult(

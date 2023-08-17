@@ -17,7 +17,6 @@ import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.model.ProviderQuotaType
-import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.common.hexStringToByteArray
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.CommandBase
@@ -37,8 +36,8 @@ fun CliktCommand.pubkeysOption(helpMsg: String = "Comma delimited list of public
 
 fun CliktCommand.pmcConfigOption() = PmcClientConfigOption(cliEnv())
 
-class PmcClientConfigOption(cliEnv: RellCliEnv): ChromiaConfigOption(cliEnv) {
-    val client by lazy { NopPostchainClient(PostchainClientImpl(config.get())) }
+class PmcClientConfigOption(cliEnv: RellCliEnv) : ChromiaConfigOption(cliEnv) {
+    val client by lazy { NopPostchainClient.withCachedBrid(config) }
 }
 
 fun CliktCommand.nameOption(helpMessage: String) = option("-n", "--name", help = helpMessage)
