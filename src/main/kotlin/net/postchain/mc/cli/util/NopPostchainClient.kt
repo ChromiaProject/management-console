@@ -22,8 +22,6 @@ class NopPostchainClient(val client: PostchainClient) : PostchainClient by clien
 
     companion object {
         fun withCachedBrid(config: ChromiaConfig): PostchainClient {
-            println("brid: " + config.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid"))
-
             val brid = config.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
                     ?.let { BlockchainRid.buildFromHex(it) }
                     ?: findAndCacheBrid(config)

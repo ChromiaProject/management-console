@@ -4,20 +4,18 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.chromia.build.tools.TestModelImpl
 import com.chromia.build.tools.TestProcess
-import com.chromia.cli.tools.config.ChromiaConfigLoader
 import net.postchain.api.rest.controller.Model
 import net.postchain.api.rest.controller.RestApi
 import net.postchain.chain0.common.queries.GetSummaryResult
 import net.postchain.common.BlockchainRid
-import net.postchain.gtv.Gtv
+import net.postchain.common.PropertiesFileLoader
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtx.GtxQuery
-import net.postchain.rell.api.base.MainRellCliEnv
-import net.postchain.rell.api.base.NullRellCliEnv
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
+import kotlin.io.path.absolutePathString
 
 class ConfiguresBridIT {
     val testBrid = BlockchainRid.buildFromHex("ABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABAB")
@@ -45,8 +43,8 @@ class ConfiguresBridIT {
                     .awaitCompletion(true)
                     .setWorkingDir(dir.toFile())
                     .start {
-                        val config = ChromiaConfigLoader(NullRellCliEnv).loadClientConfigFile(dir.resolve(".chromia/config").toFile())
-                        assertThat(config.get().blockchainRid).isEqualTo(testBrid)
+                        val config = PropertiesFileLoader.load(dir.resolve(".chromia/config").absolutePathString())
+                        assertThat(config.getString("brid")).isEqualTo(testBrid.toHex())
                     }
         }
     }
