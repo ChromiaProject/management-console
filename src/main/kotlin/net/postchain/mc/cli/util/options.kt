@@ -37,7 +37,7 @@ fun CliktCommand.pubkeysOption(helpMsg: String = "Comma delimited list of public
 fun CliktCommand.pmcConfigOption() = PmcClientConfigOption(cliEnv())
 
 class PmcClientConfigOption(cliEnv: RellCliEnv) : ChromiaConfigOption(cliEnv) {
-    val client by lazy { NopPostchainClient.withCachedBrid(config) }
+    val client by lazy { NopPostchainClient.withCaching(config) }
 }
 
 fun CliktCommand.nameOption(helpMessage: String) = option("-n", "--name", help = helpMessage)
