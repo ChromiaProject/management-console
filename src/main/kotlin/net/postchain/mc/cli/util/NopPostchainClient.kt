@@ -33,7 +33,7 @@ class NopPostchainClient(val client: PostchainClient) : PostchainClient by clien
                     httpHandler = defaultHttpHandler(PostchainClientConfig(BlockchainRid.ZERO_RID, endpointPool = EndpointPool.singleUrl(""))),
                     url = requireNotNull(config.getEnvOrStringProperty("POSTCHAIN_CLIENT_API_URL", "api.url")) { "Missing 'api.url'" })
                     .findBlockchainRid(0)
-            ChromiaConfigWriter(ChromiaConfigWriter.Level.LOCAL).setBrid(brid)
+            ChromiaConfigWriter.local.setBrid(brid)
             return brid
         }
     }
