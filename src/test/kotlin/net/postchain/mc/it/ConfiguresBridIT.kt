@@ -2,7 +2,7 @@ package net.postchain.mc.it
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.chromia.build.tools.TestModelImpl
+import com.chromia.build.tools.TestModel
 import com.chromia.build.tools.TestProcess
 import net.postchain.api.rest.controller.Model
 import net.postchain.api.rest.controller.RestApi
@@ -20,8 +20,8 @@ import kotlin.io.path.absolutePathString
 class ConfiguresBridIT {
     val testBrid = BlockchainRid.buildFromHex("ABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABAB")
 
-    class TestModel(val model: Model) : Model by model {
-        constructor(blockchainRid: BlockchainRid) : this(TestModelImpl(blockchainRid))
+    class SummaryModel(val model: Model) : Model by model {
+        constructor(blockchainRid: BlockchainRid) : this(TestModel(blockchainRid))
 
         override fun query(query: GtxQuery) = when (query.name) {
             "get_summary" -> GtvObjectMapper.toGtvDictionary(GetSummaryResult(12, 1, 2, 5, 10, 230))
@@ -32,7 +32,7 @@ class ConfiguresBridIT {
     @Test
     fun `missing brid gets auto-configured`(@TempDir dir: Path) {
         RestApi(7740, "").use {
-            it.attachModel(testBrid, TestModel(testBrid))
+            it.attachModel(testBrid, SummaryModel(testBrid))
             with(File(dir.toFile(), ".chromia/config")) {
                 parentFile.mkdirs()
                 writeText("""
