@@ -134,6 +134,11 @@
 
 
         <dependency>
+            <groupId>net.postchain</groupId>
+            <artifactId>postchain-base</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.chromia.cli</groupId>
             <artifactId>chromia-build-tools</artifactId>
             <version>${chr.version}</version>
