@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.util
 
-import com.chromia.cli.tools.blockchain.BridFinder
+import com.chromia.cli.tools.blockchain.BridFetcher
 import com.chromia.cli.tools.config.ChromiaConfig
 import com.chromia.cli.tools.config.ChromiaConfigWriter
 import net.postchain.client.config.PostchainClientConfig
@@ -29,10 +29,10 @@ class NopPostchainClient(val client: PostchainClient) : PostchainClient by clien
         }
 
         private fun findAndCacheBrid(config: ChromiaConfig): BlockchainRid {
-            val brid = BridFinder(
+            val brid = BridFetcher(
                     httpHandler = defaultHttpHandler(PostchainClientConfig(BlockchainRid.ZERO_RID, endpointPool = EndpointPool.singleUrl(""))),
                     url = requireNotNull(config.getEnvOrStringProperty("POSTCHAIN_CLIENT_API_URL", "api.url")) { "Missing 'api.url'" })
-                    .findBlockchainRid(0)
+                    .fetchBlockchainRid(0)
             ChromiaConfigWriter.local.setBrid(brid)
             return brid
         }
