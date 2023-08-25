@@ -19,7 +19,7 @@ import net.postchain.client.core.PostchainClient
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.EndpointPool
 import net.postchain.common.BlockchainRid
-import net.postchain.mc.cli.base.printResultPolitely
+import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.hostOption
@@ -124,9 +124,9 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
                         name, blockchainRID, configData0, container, description
                 )
                 .postAwaitConfirmation()
-                .printResultPolitely(
+                .printResult(
                         "Foreign blockchain import proposed",
-                        "Failed to propose a foreign blockchain"
+                        "Failed to propose a foreign blockchain", true
                 )
         return true
     }
@@ -141,9 +141,9 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
                         "Propose importing of foreign blockchain configuration"
                 )
                 .postAwaitConfirmation()
-                .printResultPolitely(
+                .printResult(
                         "Foreign configuration proposed at height $height",
-                        "Failed to propose a foreign configuration at height $height"
+                        "Failed to propose a foreign configuration at height $height", true
                 )
     }
 

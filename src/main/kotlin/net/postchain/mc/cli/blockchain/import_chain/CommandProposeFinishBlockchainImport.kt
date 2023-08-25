@@ -8,7 +8,7 @@ import com.github.ajalt.clikt.parameters.options.convert
 import net.postchain.chain0.proposal_blockchain_import.proposeFinishImportBlockchainOperation
 import net.postchain.common.BlockchainRid
 import net.postchain.gtv.GtvDecoder
-import net.postchain.mc.cli.base.printResultPolitely
+import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.configurationsFileOption
@@ -47,9 +47,9 @@ class CommandProposeFinishBlockchainImport : CliktCommand(
         echo("Import of blockchain ${blockchainRID.toHex()} will be finished")
         val txBuilder = client.transactionBuilder()
         txBuilder.proposeFinishImportBlockchainOperation(client.pubkey, blockchainRID, description)
-        txBuilder.postAwaitConfirmation().printResultPolitely(
+        txBuilder.postAwaitConfirmation().printResult(
                 "Import of blockchain ${blockchainRID.toHex()} finished",
-                "Cannot finish blockchain import"
+                "Cannot finish blockchain import", true
         )
     }
 }

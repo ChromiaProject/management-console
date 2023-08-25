@@ -2,7 +2,6 @@ package net.postchain.mc.cli.blockchain.import_chain
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -13,6 +12,7 @@ import net.postchain.client.transaction.TransactionBuilder
 import net.postchain.common.BlockchainRid
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.gtv.GtvDecoder
+import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.configurationsFileOption
 import net.postchain.mc.cli.util.nameOption
@@ -79,12 +79,10 @@ class CommandProposeImportBlockchain : CliktCommand(
             }
             for (tx in txs) {
                 val result = client.awaitConfirmation(tx, client.config.statusPollCount, client.config.statusPollInterval)
-                when (result.status) {
-                    TransactionStatus.CONFIRMED -> echo("Transaction ${tx.rid} confirmed")
-                    TransactionStatus.REJECTED -> throw CliktError("Cannot import blockchain config(s): ${result.rejectReason}")
-                    TransactionStatus.WAITING -> throw PrintMessage("Transaction not complete")
-                    else -> throw CliktError("Cannot find status for this transaction")
-                }
+                result.printResult(
+                        "Transaction ${tx.rid} confirmed",
+                        "Cannot import blockchain config(s): ${result.rejectReason}", true
+                )
             }
             echo("Blockchain $name with $numConfigs blockchain configuration(s) imported")
         }
@@ -95,12 +93,10 @@ class CommandProposeImportBlockchain : CliktCommand(
         txBuilder.proposeImportBlockchainOperation(
                 client.pubkey, initialConfigData, blockchainRid, name, container, description)
         val result = txBuilder.postAwaitConfirmation()
-        when (result.status) {
-            TransactionStatus.CONFIRMED -> echo("Blockchain import started")
-            TransactionStatus.REJECTED -> throw CliktError("Cannot import blockchain config(s): ${result.rejectReason}")
-            TransactionStatus.WAITING -> throw PrintMessage("Transaction not complete")
-            else -> throw CliktError("Cannot find status for this transaction")
-        }
+        result.printResult(
+                "Blockchain import started",
+                "Cannot import blockchain config(s): ${result.rejectReason}", true
+        )
     }
 
     private fun tryAddConfiguration(txBuilder: TransactionBuilder, blockchainRid: BlockchainRid, height: Long, configData: ByteArray) =
