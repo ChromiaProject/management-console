@@ -46,7 +46,7 @@ class CommandProposeContainerResourceLimits : CliktCommand(
     // Remove when api version 2 is not needed
     private val _cpu by option("-c", "--cpu", help = "CPU limit (percent of cpus, 10 == 0.1 cpu(s), 150 == 1.5 cpu(s))").long().deprecated()
     private val _ram by option("-r", "--ram", help = "RAM limit (MiB)").long().deprecated()
-    private val _storage by option("-s", "--storage", help = "Storage limit (MiB)").long().deprecated()
+    private val _storage by option("-st", "--storage", help = "Storage limit (MiB)").long().deprecated()
     private val _ioRead by option("-ir", "--io-read", help = "Disk I/O read limit (MiB/s)").long().deprecated()
     private val _ioWrite by option("-iw", "--io-write", help = "Disk I/O write limit (MiB/s)").long().deprecated()
 

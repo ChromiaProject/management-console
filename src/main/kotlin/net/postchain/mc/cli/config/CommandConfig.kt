@@ -39,7 +39,7 @@ class CommandConfig : CliktCommand(
 
     private val list by option(help = "list all").flag()
 
-    private val set by option("-s", "--set", help = "set values [key=value]", metavar = "KEY=VALUE").associate()
+    private val set by option("--set", help = "set values [key=value]", metavar = "KEY=VALUE").associate()
 
     override fun run() {
         if (list) {

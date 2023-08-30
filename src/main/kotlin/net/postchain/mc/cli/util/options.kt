@@ -1,6 +1,8 @@
 package net.postchain.mc.cli.util
 
 import com.chromia.cli.tools.config.ChromiaConfigOption
+import com.chromia.cli.tools.config.ChromiaModelConfigOption
+import com.chromia.cli.tools.config.OptionalChromiaModelConfigOption
 import com.chromia.cli.tools.env.cliEnv
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
@@ -36,8 +38,19 @@ fun CliktCommand.pubkeysOption(helpMsg: String = "Comma delimited list of public
 
 fun CliktCommand.pmcConfigOption() = PmcClientConfigOption(cliEnv())
 
-class PmcClientConfigOption(cliEnv: RellCliEnv) : ChromiaConfigOption(cliEnv) {
-    val client by lazy { NopPostchainClient.withCachedBrid(config) }
+class PmcClientConfigOption(cliEnv: RellCliEnv) : OptionalChromiaModelConfigOption(cliEnv) {
+    val network by option("--network", help = "Target network to make requests to (if chromia.yml is configured)")
+    val client by lazy {
+        if (network != null) {
+            requireNotNull(model) { "chromia.yml not found"}
+            val networkModel = model!!.deployments[network]
+                    ?: throw IllegalArgumentException("Network $network not found in configuration")
+            config.setProperty("brid", networkModel.blockchainRid.toHex())
+            config.setProperty("api.url", networkModel.urls.joinToString(","))
+        }
+        NopPostchainClient.withCachedBrid(config)
+    }
+
 }
 
 fun CliktCommand.nameOption(helpMessage: String) = option("-n", "--name", help = helpMessage)
