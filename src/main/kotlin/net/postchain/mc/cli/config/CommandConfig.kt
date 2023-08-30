@@ -53,7 +53,7 @@ class CommandConfig : CliktCommand(
         }
         if (get != null) {
             if (get == "privkey") throw CliktError("Cannot print private key to stdout")
-            return echo(configLoader.loadClientConfigFile().getString(get))
+            return echo(configLoader.loadClientConfigFile(configFile).getString(get))
         }
         if (set.isNotEmpty()) {
             configWriter.setProperty(set)
