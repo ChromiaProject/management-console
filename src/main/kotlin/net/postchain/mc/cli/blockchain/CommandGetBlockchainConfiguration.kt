@@ -6,7 +6,6 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
-import net.postchain.chain0.common.queries.getBlockchainLastHeight
 import net.postchain.chain0.nm_api.nmGetBlockchainConfiguration
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.gtvml.GtvMLEncoder
@@ -30,14 +29,8 @@ open class CommandGetBlockchainConfiguration(
     private val save by option(help = "where to save configuration XML").file(canBeFile = true, canBeDir = false)
 
     override fun run() {
-        val (actualHeight, message) = if (height == -1L) {
-            val current = config.client.getBlockchainLastHeight(blockchainRID)
-            current to "Blockchain configuration at current height $current"
-        } else {
-            height to "Blockchain configuration at height $height"
-        }
-
-        val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, actualHeight)
+        val message = "Blockchain configuration at height $height"
+        val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, height)
         if (bcConfig == null) {
             echo("$message is absent")
         } else {
