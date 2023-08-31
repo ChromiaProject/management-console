@@ -24,7 +24,7 @@ open class CommandGetBlockchainConfiguration(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val height by heightOption().default(-1L)
+    private val height by heightOption().required()
 
     private val save by option(help = "where to save configuration XML").file(canBeFile = true, canBeDir = false)
 
