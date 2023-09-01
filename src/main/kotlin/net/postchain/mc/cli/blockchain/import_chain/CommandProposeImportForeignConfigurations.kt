@@ -63,8 +63,8 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
     ).long().default(0L)
 
     private val upToHeight by option("--up-to-height",
-            help = "Only import configurations up to and including this height"
-    ).long().default(-1L).validate {
+            help = "Import configurations up to and including this height"
+    ).long().required().validate {
         require(it > 0) { "--up-to-height arg must be greater than 0" }
     }
 
@@ -73,7 +73,7 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
     private val description by proposalDescriptionOption(default = "Propose importing of foreign blockchain")
 
     override fun run() {
-        client.requireApiVersion(10)
+        client.requireApiVersion(12)
         val foreignClient = buildForeignClient()
         val imported = mutableListOf<Long>()
 
@@ -101,12 +101,12 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
     }
 
     private fun proposeImportBlockchain(foreignClient: PostchainClient): Boolean {
-        // ensure blockchain is PAUSED if already added
+        // ensure blockchain is IMPORTING if already added
         client.getBlockchains(true).firstOrNull {
             BlockchainRid(it.rid) == blockchainRID
         }?.also {
-            if (it.state != BlockchainState.PAUSED) {
-                throw CliktError("Configurations import is allowed only for blockchain in ${BlockchainState.PAUSED} state")
+            if (it.state != BlockchainState.IMPORTING) {
+                throw CliktError("Configurations import is allowed only for blockchain in ${BlockchainState.IMPORTING} state")
             } else {
                 echo("Foreign blockchain import already proposed")
                 return false

@@ -5,8 +5,6 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.mordant.table.SectionBuilder
-import com.github.ajalt.mordant.table.Table
-import com.github.ajalt.mordant.table.TableBuilder
 import com.github.ajalt.mordant.table.table
 import net.postchain.chain0.common.queries.getProviderData
 import net.postchain.chain0.proposal.GetProposalResult
@@ -22,7 +20,6 @@ import net.postchain.chain0.proposal_blockchain.getConfigurationProposalAt
 import net.postchain.chain0.proposal_blockchain_import.getBlockchainImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getConfigurationImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getFinishBlockchainImportProposal
-import net.postchain.chain0.proposal_blockchain_import.getFinishForeignBlockchainImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getForeignBlockchainBlocksImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getForeignBlockchainImportProposal
 import net.postchain.chain0.proposal_cluster.getClusterLimitsProposal
@@ -318,11 +315,6 @@ class CommandGetProposal : CliktCommand(
 
             ProposalType.foreign_blockchain_blocks_import -> {
                 val proposal = client.getForeignBlockchainBlocksImportProposal(proposalId) ?: return ""
-                return "$proposal"
-            }
-
-            ProposalType.finish_foreign_blockchain_import -> {
-                val proposal = client.getFinishForeignBlockchainImportProposal(proposalId) ?: return ""
                 return "$proposal"
             }
         }
