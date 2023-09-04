@@ -64,7 +64,7 @@ class CommandGetAllBlockchainConfigurations : CliktCommand(
         if (heights.isEmpty()) {
             echo("No configurations ${if (save != null) "downloaded" else "found"}")
         } else {
-            echo("Configurations at heights ${if (save != null) "downloaded" else "found"}: ${heights.joinToString(", ")}")
+            echo("Configurations at heights ${if (save != null) "downloaded" else "found"}:\n${heights.joinToString("\n")}")
         }
     }
 }
