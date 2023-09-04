@@ -3,7 +3,6 @@ package net.postchain.mc.cli.blockchain
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import net.postchain.mc.cli.blockchain.import_chain.CommandProposeFinishBlockchainImport
-import net.postchain.mc.cli.blockchain.import_chain.CommandProposeFinishForeignImport
 import net.postchain.mc.cli.blockchain.import_chain.CommandProposeImportBlockchain
 import net.postchain.mc.cli.blockchain.import_chain.CommandProposeImportForeignBlocks
 import net.postchain.mc.cli.blockchain.import_chain.CommandProposeImportForeignConfigurations
@@ -21,7 +20,6 @@ fun blockchainCommands() = BlockchainCommand().subcommands(
         // foreign import
         CommandProposeImportForeignConfigurations(),
         CommandProposeImportForeignBlocks(),
-        CommandProposeFinishForeignImport(),
 
         CommandProposeConfiguration(),
         CommandProposePauseBlockchain(),
