@@ -34,7 +34,7 @@ class CommandListProposals : CliktCommand(
     private val all by option(help = "Include all proposals, including ones you can not vote on").flag()
     private val pending by option(help = "Only include proposals that are still pending").flag()
 
-    @Deprecated("Replaced with 'sinceDate' in version 7 of API")
+    // @Deprecated("Replaced with 'sinceDate' in version 7 of API")
     private val since by option(help = "DEPRECATED: List proposals since proposal id").long().default(0L)
 
     override fun run() {

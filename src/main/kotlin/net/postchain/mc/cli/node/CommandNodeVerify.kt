@@ -50,7 +50,7 @@ class CommandNodeVerify : CliktCommand(
 
         val bcStatuses = blockchains.associateWith { blockchainRid ->
             val bcHeight = nodeVerifier.verifyBlockchain(blockchainRid, node.apiUrl)
-            val anchoredHeight = client.getBlockchainCluster(blockchainRid)?.let { bcCluster ->
+            val anchoredHeight = client.getBlockchainCluster(blockchainRid).let { bcCluster ->
                 clusterAnchorChains[bcCluster]
             }?.let { anchoringBrid ->
                 PostchainClientImpl(client.config.copy(

@@ -12,6 +12,7 @@ class BlockchainCommand : CliktCommand("Interactions with blockchains") {
     override fun run() = Unit
 }
 
+@Suppress("DEPRECATION")
 fun blockchainCommands() = BlockchainCommand().subcommands(
         CommandProposeBlockchain(),
         // import
