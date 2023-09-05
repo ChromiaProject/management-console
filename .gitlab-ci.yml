@@ -1,5 +1,11 @@
 image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.1.3
 
+include:
+  - project: "chromaway/core-infra/gitlab-automation"
+    ref: 1.1.4
+    file: 
+      - templates/report-code-coverage.yml
+
 .git_template: &git_setup |
   git remote set-url --push origin "https://oauth2:${BUILD_USER_GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
   git config user.name "build-user core-dev"
@@ -23,6 +29,11 @@ image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.1.
         - "**/target/failsafe-reports/TEST-*.xml"
         - "**/target/rell-reports/rell-tests.xml"
     expire_in: 1 week
+  artifacts:
+    when: always
+    paths:
+      - $JACOCO_REPORT_DIR/*
+    expire_in: 1 week
 
 .release:
   stage: release
@@ -36,6 +47,7 @@ image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.1.
 
 stages:
   - build
+  - code-coverage
   - deploy
   - release
 
@@ -53,7 +65,9 @@ deploy:
       deploy
 
 build:
-  extends: .setup
+  extends:
+    - .setup
+    - .visualise-test-coverage
   stage: build
   interruptible: true
   except:
@@ -62,8 +76,16 @@ build:
   script:
     - mvn
       $MAVEN_CLI_OPTS
-      --activate-profiles docker
+      --activate-profiles docker,coverage
       verify
+
+test-coverage-report:
+  stage: code-coverage
+  except:
+    refs:
+      - tags
+  dependencies:
+    - build
 
 release-minor:
   extends: .release
@@ -94,6 +116,7 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   DOCKER_DRIVER: overlay2
   DOCKER_CLI_EXPERIMENTAL: enabled
+  JACOCO_REPORT_DIR: target/site/jacoco
 
 # Cache downloaded dependencies and plugins between builds.
 # To keep cache across branches add 'key: "$CI_JOB_NAME"'
