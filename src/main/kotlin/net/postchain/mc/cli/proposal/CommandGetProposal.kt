@@ -294,7 +294,7 @@ class CommandGetProposal : CliktCommand(
 
             ProposalType.blockchain_import -> {
                 val bip = client.getBlockchainImportProposal(proposalId) ?: return ""
-                val conf = GtvDecoder.decodeGtv(bip.configData.data)
+                GtvDecoder.decodeGtv(bip.configData.data)
                 return "Blockchain RID:\n${bip.blockchainRid}\n\nName: ${bip.name}\nContainer: ${bip.container}\nConfig hash: ${getDataHash(bip.configData)}"
             }
 
