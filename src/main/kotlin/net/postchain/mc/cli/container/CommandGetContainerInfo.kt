@@ -7,12 +7,12 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.queries.getContainerBlockchain
 import net.postchain.chain0.common.queries.getContainerData
-import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.nm_api.nmGetContainerLimits
 import net.postchain.chain0.version.apiVersion
-import net.postchain.mc.cli.util.pmcConfigOption
-import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.entityNameValidator
+import net.postchain.mc.cli.util.nameOption
+import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV3.getContainerBlockchainV3
 
 class CommandGetContainerInfo : CliktCommand(
@@ -47,8 +47,15 @@ class CommandGetContainerInfo : CliktCommand(
             header { row("Resource type", "Value") }
             body {
                 val limits = client.nmGetContainerLimits(name)
-                ContainerResourceLimitType.values().forEach {
-                    row(it.name, limits[it.name]?.toString() ?: "-1")
+                limits.forEach {
+                    row(it.key, when (it.key) {
+                        ApiCompatV2.ContainerResourceLimitType.cpu.name -> "${it.value} %"
+                        ApiCompatV2.ContainerResourceLimitType.ram.name -> "${it.value} MiB"
+                        ApiCompatV2.ContainerResourceLimitType.storage.name -> "${it.value} MiB"
+                        ApiCompatV2.ContainerResourceLimitType.io_read.name -> "${it.value} MiB/s"
+                        ApiCompatV2.ContainerResourceLimitType.io_write.name -> "${it.value} MiB/s"
+                        else -> it.value.toString()
+                    })
                 }
             }
         })
