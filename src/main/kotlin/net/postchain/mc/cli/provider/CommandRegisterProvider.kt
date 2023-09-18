@@ -31,6 +31,7 @@ import net.postchain.mc.cli.util.pubkeyOption
 
 class BatchOptions : OptionGroup() {
 
+    val batch by option(help = "Allows to add a batch of providers with --provider (see examples)").flag()
     val provider by option(
             help = "Multiple objects to register as providers in --batch mode (comma delimited list of objects, see examples)",
             valueSourceKey = "provider"
