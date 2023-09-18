@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 import kotlin.io.path.absolutePathString
 
 class ConfiguresBridIT {
@@ -31,7 +34,7 @@ class ConfiguresBridIT {
 
     @Test
     fun `missing brid gets auto-configured`(@TempDir dir: Path) {
-        RestApi(7740, "").use {
+        RestApi(7740, "", clock = Clock.fixed(Instant.EPOCH, ZoneOffset.UTC)).use {
             it.attachModel(testBrid, SummaryModel(testBrid))
             with(File(dir.toFile(), ".chromia/config")) {
                 parentFile.mkdirs()
