@@ -4,10 +4,12 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.split
+import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.enum
 import net.postchain.chain0.common.operations.addNodeToClusterOperation
 import net.postchain.chain0.common.operations.updateNodeCapabilityOperation
 import net.postchain.chain0.common.operations.updateNodeOperation
+import net.postchain.chain0.common.operations.updateNodeWithTerritoryAndUnitsOperation
 import net.postchain.chain0.common.operations.updateNodeWithUnitsOperation
 import net.postchain.chain0.model.NodeCapabilityType
 import net.postchain.chain0.version.apiVersion
@@ -34,6 +36,10 @@ class CommandUpdateNode : CliktCommand(
 
     private val apiUrl by option("-a", "--api-url", help = "api url")
 
+    private val territory by option("-t", "--territory", help = "ISO 3166-1 alpha-2 code").validate {
+        require(it.isNotBlank())
+    }
+
     private val clusterUnits by clusterUnitsOption()
 
     private val clusterName by option(
@@ -46,16 +52,26 @@ class CommandUpdateNode : CliktCommand(
     private val removeCapability by option(help = "Node capability").enum<NodeCapabilityType>()
 
     override fun run() {
-        if (host == null && port == null && apiUrl == null && clusterUnits == null && clusterName == null && addCapability == null && removeCapability == null) {
+        if (host == null && port == null && apiUrl == null && clusterUnits == null && clusterName == null && addCapability == null && removeCapability == null && territory == null) {
             echo("No properties to update. At least one node's property should be specified")
             return
         }
 
         val apiVersion = client.apiVersion()
+        if (territory != null && apiVersion < 15) {
+            echo("Territory is not supported in API version $apiVersion and will be ignored")
+        }
+
         val provider = client.config.pubkey().data
         client.transactionBuilder()
                 .apply {
                     when {
+                        apiVersion >= 15 -> {
+                            if (host != null || port != null || apiUrl != null || clusterUnits != null || territory != null) {
+                                updateNodeWithTerritoryAndUnitsOperation(provider, key.data, host, port?.toLong(), apiUrl, territory, clusterUnits)
+                            }
+                        }
+
                         apiVersion >= 3 -> {
                             if (host != null || port != null || apiUrl != null || clusterUnits != null) {
                                 updateNodeWithUnitsOperation(provider, key.data, host, port?.toLong(), apiUrl, clusterUnits)
