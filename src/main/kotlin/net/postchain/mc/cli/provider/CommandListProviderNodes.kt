@@ -30,7 +30,7 @@ class CommandListProviderNodes : CliktCommand(
         } else {
             echo("Nodes for provider $key")
             echo(defaultTable {
-                header { row("Pubkey", "Host", "Port", "Api port", "Active", "Last updated") }
+                header { row("Pubkey", "Host", "Port", "REST API", "Territory", "Active", "Last updated") }
                 body {
                     nodes.forEach {
                         row(
@@ -38,6 +38,7 @@ class CommandListProviderNodes : CliktCommand(
                                 it.host,
                                 it.port.toString(),
                                 it.apiUrl,
+                                it.territory,
                                 it.active.toString(),
                                 Date.from(Instant.ofEpochMilli(it.lastUpdated)).toString()
                         )
