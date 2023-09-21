@@ -26,6 +26,7 @@ class CommandGetNodeInfo : CliktCommand(
                 row("Host:", node.host)
                 row("Port:", "${node.port}")
                 row("REST API:", node.apiUrl)
+                node.territory?.let { row("Territory:", it) }
                 row("Provided by:", node.provider.toHex())
                 node.clusterUnits?.let { row("Cluster Units:", it.toString()) }
                 val clusters = client.listClustersOfNode(PubKey(node.pubkey))

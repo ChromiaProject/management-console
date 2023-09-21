@@ -6,7 +6,9 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.operations.replaceNodeOperation
+import net.postchain.chain0.common.operations.replaceNodeWithUnitsAndTerritoryOperation
 import net.postchain.chain0.common.operations.replaceNodeWithUnitsOperation
 import net.postchain.chain0.version.apiVersion
 import net.postchain.crypto.PubKey
@@ -40,13 +42,23 @@ class CommandReplaceNode : CliktCommand(
 
     private val apiUrl by option("-a", "--api-url", help = "api url")
 
+    private val territory by option("-t", "--territory", help = "ISO 3166-1 alpha-2 code").validate {
+        require(it.isNotBlank())
+    }
+
     private val clusterUnits by clusterUnitsOption().default(1)
 
     override fun run() {
         val apiVersion = client.apiVersion()
+
+        if (territory != null && apiVersion < 15) {
+            echo("Territory is not supported in API version $apiVersion and will be ignored")
+        }
+
         client.transactionBuilder()
                 .apply {
                     when {
+                        apiVersion >= 15 -> replaceNodeWithUnitsAndTerritoryOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, territory, clusterUnits)
                         apiVersion >= 3 -> replaceNodeWithUnitsOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, clusterUnits)
                         else -> replaceNodeOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl)
                     }
