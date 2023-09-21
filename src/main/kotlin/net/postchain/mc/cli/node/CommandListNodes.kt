@@ -3,7 +3,7 @@ package net.postchain.mc.cli.node
 import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import net.postchain.chain0.common.queries.getNodesWithProvider
+import net.postchain.chain0.common.queries.getAllNodes
 import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandListNodes : CliktCommand(
@@ -14,15 +14,15 @@ class CommandListNodes : CliktCommand(
     private val client get() = config.client
 
     override fun run() {
-        val nodes = client.getNodesWithProvider()
+        val nodes = client.getAllNodes(includeInactive = true)
         if (nodes.isEmpty()) {
             echo("No nodes")
         } else {
             echo(defaultTable {
-                header { row("Pubkey", "Host", "Port", "Active", "Provided by") }
+                header { row("Pubkey", "Host", "Port", "REST API", "Territory", "Active", "Provided by") }
                 body {
                     nodes.forEach {
-                        row(it.pubkey.toHex(), it.host, it.port.toString(), it.nodeActive.toString(), it.provider.toHex())
+                        row(it.info.pubkey.toHex(), it.info.host, it.info.port.toString(), it.info.apiUrl, it.info.territory, it.active.toString(), it.provider.pubkey.toHex())
                     }
                 }
             })
