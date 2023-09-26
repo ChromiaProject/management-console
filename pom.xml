@@ -16,7 +16,7 @@
         <revision>dev</revision>
         <postchain.version>3.13.4</postchain.version>
         <postchain.client.version>3.11.5</postchain.client.version>
-        <directory.chain.version>1.13.0</directory.chain.version>
+        <directory.chain.version>1.14.0</directory.chain.version>
         <chr.version>0.11.1</chr.version>
         <rell.version>0.13.2</rell.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
@@ -224,7 +224,7 @@
                         </goals>
                         <configuration>
                             <packageName>net.postchain.chain0</packageName>
-                            <mainModule>management_chain_directory1</mainModule>
+                            <mainModule>management_chain_mainnet</mainModule>
                         </configuration>
                     </execution>
                     <execution>
