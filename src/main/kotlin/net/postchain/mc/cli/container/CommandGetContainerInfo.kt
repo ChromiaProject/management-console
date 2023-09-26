@@ -40,6 +40,7 @@ class CommandGetContainerInfo : CliktCommand(
                                 .joinToString(" / ")
                 )
                 row("System:", info.system.toString())
+                info.state?.let { row("State:", it.toString()) }
             }
         })
 
