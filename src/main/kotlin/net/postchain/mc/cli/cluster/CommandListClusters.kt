@@ -3,7 +3,9 @@ package net.postchain.mc.cli.cluster
 import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.mordant.table.ColumnWidth
 import net.postchain.chain0.common.queries.getClusters
+import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandListClusters : CliktCommand(
@@ -19,6 +21,9 @@ class CommandListClusters : CliktCommand(
             echo("No clusters")
         } else {
             echo(defaultTable {
+                column(0) {
+                    width = ColumnWidth.Fixed(NAME_LENGTH_MAX + 1)
+                }
                 header { row("Name", "Governor", "Operational") }
                 body {
                     clusters.forEach {

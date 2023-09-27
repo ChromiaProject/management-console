@@ -3,11 +3,13 @@ package net.postchain.mc.cli.container
 import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.mordant.table.ColumnWidth
 import net.postchain.chain0.common.queries.GetBlockchainInfoListResult
 import net.postchain.chain0.common.queries.getBlockchainInfoList
 import net.postchain.chain0.common.queries.getContainers
 import net.postchain.chain0.model.BlockchainState
 import net.postchain.chain0.version.apiVersion
+import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.compatibility.ApiCompatV3.getBlockchainInfoListV3
 
@@ -35,6 +37,9 @@ class CommandListContainers : CliktCommand(
                 else -> client.getBlockchainInfoList(false).groupBy { it.container }
             }
             echo(defaultTable {
+                column(0) {
+                    width = ColumnWidth.Fixed(NAME_LENGTH_MAX + 1)
+                }
                 header { row("Name", "Cluster", "Deployer voter set", "Blockchains") }
                 body {
                     containers.forEach {
