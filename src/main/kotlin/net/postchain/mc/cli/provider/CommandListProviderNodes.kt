@@ -3,14 +3,12 @@ package net.postchain.mc.cli.provider
 import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import com.github.ajalt.clikt.parameters.options.convert
-import com.github.ajalt.clikt.parameters.options.defaultLazy
-import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.mordant.table.ColumnWidth
 import net.postchain.chain0.common.queries.getNodesByProvider
-import net.postchain.crypto.PubKey
+import net.postchain.mc.cli.base.PUBKEY_LENGTH
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.pmcConfigOption
-
+import net.postchain.mc.cli.util.pubkeyOption
 import java.time.Instant
 import java.util.Date
 
@@ -21,15 +19,19 @@ class CommandListProviderNodes : CliktCommand(
     private val config by pmcConfigOption()
     private val client get() = config.client
 
-    private val key by option("-pk", "--pubkey").convert { PubKey(it) }.defaultLazy { client.config.pubkey() }
+    private val pubkey by pubkeyOption()
 
     override fun run() {
-        val nodes = client.getNodesByProvider(key)
+        val providerPubkey = pubkey ?: client.config.pubkey()
+        val nodes = client.getNodesByProvider(providerPubkey)
         if (nodes.isEmpty()) {
-            echo("No nodes for provider $key")
+            echo("No nodes for provider $providerPubkey")
         } else {
-            echo("Nodes for provider $key")
+            echo("Nodes for provider $providerPubkey")
             echo(defaultTable {
+                column(0) {
+                    width = ColumnWidth.Fixed(PUBKEY_LENGTH + 1)
+                }
                 header { row("Pubkey", "Host", "Port", "REST API", "Territory", "Active", "Last updated") }
                 body {
                     nodes.forEach {
