@@ -4,12 +4,10 @@ import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
-import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.queries.getContainerBlockchain
 import net.postchain.chain0.common.queries.getContainerData
 import net.postchain.chain0.nm_api.nmGetContainerLimits
 import net.postchain.chain0.version.apiVersion
-import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.compatibility.ApiCompatV2
@@ -23,7 +21,7 @@ class CommandGetContainerInfo : CliktCommand(
     private val config by pmcConfigOption()
     private val client get() = config.client
 
-    private val name by nameOption("Container Name").required().validate(entityNameValidator())
+    private val name by nameOption("Container Name").required()
 
     override fun run() {
         val info = client.getContainerData(name)
