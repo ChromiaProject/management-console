@@ -1,7 +1,7 @@
 package net.postchain.mc.cli.base
 
 const val NAME_LENGTH = 10
-const val NAME_LENGTH_MAX = 50
+const val NAME_LENGTH_MAX = 64
 
 object CommandBase {
 
