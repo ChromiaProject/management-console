@@ -6,6 +6,8 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.mordant.table.ColumnWidth
 import net.postchain.chain0.common.queries.getClusters
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
+import net.postchain.mc.cli.interactiveOption
+import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandListClusters : CliktCommand(
@@ -14,6 +16,9 @@ class CommandListClusters : CliktCommand(
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client
+    private val interactive by interactiveOption()
+
+    private val headers = listOf("Name", "Governor", "Operational")
 
     override fun run() {
         val clusters = client.getClusters()
@@ -22,15 +27,21 @@ class CommandListClusters : CliktCommand(
         } else {
             echo(defaultTable {
                 column(0) {
-                    width = ColumnWidth.Fixed(NAME_LENGTH_MAX + 1)
+                    width = ColumnWidth.Fixed(if (interactive) 3 else NAME_LENGTH_MAX + 1)
                 }
-                header { row("Name", "Governor", "Operational") }
+                header { rowFrom(if (interactive) listOf("#") + headers else headers) }
                 body {
-                    clusters.forEach {
-                        row(it.name, it.governor, it.operational.toString())
+                    clusters.forEachIndexed { index, it ->
+                        val columns = listOf(it.name, it.governor, it.operational.toString())
+                        rowFrom(if (interactive) listOf(index.toString()) + columns else columns)
                     }
                 }
             })
+            if (interactive) {
+                promptForIndex(clusters)?.let {
+                    showClusterInfo(client, clusters[it].name)
+                }
+            }
         }
     }
 }

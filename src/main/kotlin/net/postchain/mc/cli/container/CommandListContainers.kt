@@ -10,6 +10,8 @@ import net.postchain.chain0.common.queries.getContainers
 import net.postchain.chain0.model.BlockchainState
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
+import net.postchain.mc.cli.interactiveOption
+import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.compatibility.ApiCompatV3.getBlockchainInfoListV3
 
@@ -19,6 +21,9 @@ class CommandListContainers : CliktCommand(
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client
+    private val interactive by interactiveOption()
+
+    private val headers = listOf("Name", "Cluster", "Deployer voter set", "Blockchains")
 
     override fun run() {
         val containers = client.getContainers()
@@ -38,15 +43,21 @@ class CommandListContainers : CliktCommand(
             }
             echo(defaultTable {
                 column(0) {
-                    width = ColumnWidth.Fixed(NAME_LENGTH_MAX + 1)
+                    width = ColumnWidth.Fixed(if (interactive) 3 else NAME_LENGTH_MAX + 1)
                 }
-                header { row("Name", "Cluster", "Deployer voter set", "Blockchains") }
+                header { rowFrom(if (interactive) listOf("#") + headers else headers) }
                 body {
-                    containers.forEach {
-                        row(it.name, it.cluster, it.deployer, bcs[it.name]?.joinToString(", ") { bc -> bc.name } ?: "")
+                    containers.forEachIndexed { index, it ->
+                        val columns = listOf(it.name, it.cluster, it.deployer, bcs[it.name]?.joinToString(", ") { bc -> bc.name } ?: "")
+                        rowFrom(if (interactive) listOf(index.toString()) + columns else columns)
                     }
                 }
             })
+            if (interactive) {
+                promptForIndex(containers)?.let {
+                    showContainerInfo(client, containers[it].name)
+                }
+            }
         }
     }
 }
