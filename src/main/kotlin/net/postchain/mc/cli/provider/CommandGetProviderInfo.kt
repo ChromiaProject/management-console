@@ -3,7 +3,6 @@ package net.postchain.mc.cli.provider
 import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import com.github.ajalt.clikt.parameters.options.defaultLazy
 import net.postchain.chain0.common.queries.getNodesByProvider
 import net.postchain.chain0.common.queries.getProviderClusters
 import net.postchain.chain0.common.queries.getProviderData
@@ -19,13 +18,14 @@ class CommandGetProviderInfo : CliktCommand(
     private val config by pmcConfigOption()
     val client get() = config.client
 
-    private val pubkey by pubkeyOption().defaultLazy { client.config.pubkey() }
+    private val pubkey by pubkeyOption()
 
     override fun run() {
-        val providerData = client.getProviderData(pubkey)
-        val actionPoints = client.getProviderPoints(pubkey)
-        val providerClusters = client.getProviderClusters(pubkey)
-        val nodesByProvider = client.getNodesByProvider(pubkey)
+        val providerPubkey = pubkey ?: client.config.pubkey()
+        val providerData = client.getProviderData(providerPubkey)
+        val actionPoints = client.getProviderPoints(providerPubkey)
+        val providerClusters = client.getProviderClusters(providerPubkey)
+        val nodesByProvider = client.getNodesByProvider(providerPubkey)
         echo(defaultTable {
             body {
                 row("Provider:", providerData.name)
