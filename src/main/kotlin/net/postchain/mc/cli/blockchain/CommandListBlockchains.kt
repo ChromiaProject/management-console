@@ -3,8 +3,10 @@ package net.postchain.mc.cli.blockchain
 import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.mordant.table.ColumnWidth
 import net.postchain.chain0.common.queries.getBlockchainInfoList
 import net.postchain.chain0.version.apiVersion
+import net.postchain.mc.cli.base.RID_LENGTH
 import net.postchain.mc.cli.includeInactiveOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.compatibility.ApiCompatV3.getBlockchainInfoListV3
@@ -28,6 +30,9 @@ class CommandListBlockchains : CliktCommand(
                 } else {
                     echo("Blockchains:")
                     echo(defaultTable {
+                        column(1) {
+                            width = ColumnWidth.Fixed(RID_LENGTH + 1)
+                        }
                         header { row("Name", "Rid", "State", "Container", "Cluster") }
                         body {
                             blockchains.forEach {
