@@ -4,7 +4,7 @@ import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.mordant.table.ColumnWidth
-import net.postchain.chain0.common.queries.GetBlockchainInfoListResult
+import net.postchain.chain0.common.queries.BlockchainInfo
 import net.postchain.chain0.common.queries.getBlockchainInfoList
 import net.postchain.chain0.common.queries.getContainers
 import net.postchain.chain0.model.BlockchainState
@@ -33,8 +33,8 @@ class CommandListContainers : CliktCommand(
             val bcs = when {
                 client.apiVersion() <= 3 -> {
                     client.getBlockchainInfoListV3(false).map {
-                        GetBlockchainInfoListResult(
-                                it.rid, it.name, BlockchainState.RUNNING, it.container, it.cluster
+                        BlockchainInfo(
+                                it.rid, it.name, BlockchainState.RUNNING, it.container, it.cluster, null
                         )
                     }.groupBy { it.container }
                 }
