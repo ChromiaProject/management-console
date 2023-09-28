@@ -5,7 +5,10 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.mordant.table.ColumnWidth
 import net.postchain.chain0.common.queries.getAllProviders
+import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.PUBKEY_LENGTH
+import net.postchain.mc.cli.interactiveOption
+import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandListProviders : CliktCommand(
@@ -13,7 +16,10 @@ class CommandListProviders : CliktCommand(
         help = "List all providers"
 ) {
     private val config by pmcConfigOption()
-    val client get() = config.client
+    private val client get() = config.client
+    private val interactive by interactiveOption()
+
+    private val headers = listOf("Name", "Url", "Pubkey", "Is System", "Tier", "Active")
 
     override fun run() {
         val providers = client.getAllProviders()
@@ -22,16 +28,28 @@ class CommandListProviders : CliktCommand(
         } else {
             echo("Providers:")
             echo(defaultTable {
-                column(2) {
-                    width = ColumnWidth.Fixed(PUBKEY_LENGTH + 1)
+                if (interactive) {
+                    column(0) {
+                        width = ColumnWidth.Fixed(3)
+                    }
+                } else {
+                    column(2) {
+                        width = ColumnWidth.Fixed(PUBKEY_LENGTH + 1)
+                    }
                 }
-                header { row("Name", "Url", "Pubkey", "Is System", "Tier", "Active") }
+                header { rowFrom(if (interactive) listOf("#") + headers else headers) }
                 body {
-                    providers.forEach {
-                        row(it.name, it.url, it.pubkey.toHex(), it.system.toString(), it.tier.toString(), it.active.toString())
+                    providers.forEachIndexed { index, it ->
+                        val columns = listOf(it.name, it.url, it.pubkey.toHex(), it.system.toString(), it.tier.toString(), it.active.toString())
+                        rowFrom(if (interactive) listOf(index.toString()) + columns else columns)
                     }
                 }
             })
+            if (interactive) {
+                promptForIndex(providers)?.let {
+                    showProviderInfo(client, PubKey(providers[it].pubkey))
+                }
+            }
         }
     }
 }

@@ -16,11 +16,12 @@ import net.postchain.chain0.version.apiVersion
 import net.postchain.common.types.RowId
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.dateToTimestampOption
+import net.postchain.mc.cli.interactiveOption
+import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.compatibility.ApiCompatV6.getProposalsSinceV6
 import net.postchain.mc.compatibility.ApiCompatV6.getProviderVotesV6
 import net.postchain.mc.compatibility.ApiCompatV6.getRelevantProposalsV6
-
 
 class CommandListProposals : CliktCommand(
         name = "list",
@@ -33,9 +34,12 @@ class CommandListProposals : CliktCommand(
     private val to by dateToTimestampOption("List proposals to date (YYYY-MM-DD)", Long.MAX_VALUE, "9999-12-31", 1)
     private val all by option(help = "Include all proposals, including ones you can not vote on").flag()
     private val pending by option(help = "Only include proposals that are still pending").flag()
+    private val interactive by interactiveOption()
 
     // @Deprecated("Replaced with 'sinceDate' in version 7 of API")
     private val since by option(help = "DEPRECATED: List proposals since proposal id").long().default(0L)
+
+    private val headers = listOf("Type", "Id", "State", "Your vote")
 
     override fun run() {
         val apiVersion = client.apiVersion()
@@ -51,15 +55,21 @@ class CommandListProposals : CliktCommand(
                 val votes = client.getProviderVotes(from, to, client.pubkey)
 
                 echo(defaultTable {
-                    header { row("Type", "Id", "State", "Your vote") }
+                    header { rowFrom(if (interactive) listOf("#") + headers else headers) }
                     body {
-                        proposals.forEach { info ->
+                        proposals.forEachIndexed { index, info ->
                             val vote = votes.find { it.proposal == info.rowId }
                             val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
-                            row(info.proposalType.toString(), info.rowId.id.toString(), info.state.toString(), voteStatus)
+                            val columns = listOf(info.proposalType.toString(), info.rowId.id.toString(), info.state.toString(), voteStatus)
+                            rowFrom(if (interactive) listOf(index.toString()) + columns else columns)
                         }
                     }
                 })
+                if (interactive) {
+                    promptForIndex(proposals)?.let {
+                        showProposalInfo(client, proposals[it].rowId)
+                    }
+                }
             }
 
             else -> {
