@@ -4,6 +4,8 @@ import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getVoterSets
+import net.postchain.mc.cli.interactiveOption
+import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandListVoterSets : CliktCommand(
@@ -12,6 +14,9 @@ class CommandListVoterSets : CliktCommand(
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client
+    private val interactive by interactiveOption()
+
+    private val headers = listOf("Name", "Governor", "Majority level")
 
     override fun run() {
         val voterSets = client.getVoterSets()
@@ -20,13 +25,19 @@ class CommandListVoterSets : CliktCommand(
         } else {
             echo("Voter sets:")
             echo(defaultTable {
-                header { row("Name", "Governor", "Majority level") }
+                header { rowFrom(if (interactive) listOf("#") + headers else headers) }
                 body {
-                    voterSets.forEach {
-                        row(it.name, it.gorvernor, formatThreshold(it.threshold))
+                    voterSets.forEachIndexed { index, it ->
+                        val columns = listOf(it.name, it.gorvernor, formatThreshold(it.threshold))
+                        rowFrom(if (interactive) listOf(index.toString()) + columns else columns)
                     }
                 }
             })
+            if (interactive) {
+                promptForIndex(voterSets)?.let {
+                    showVoterSetInfo(client, voterSets[it].name)
+                }
+            }
         }
     }
 }
