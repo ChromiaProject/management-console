@@ -74,6 +74,13 @@ test-coverage-report:
   dependencies:
     - build
 
+dependency-check:
+  extends: .maven-dependency-check
+  stage: dependency-check
+  only:
+    variables:
+      - $RUN_DEPENDENCY_CHECK == "true"
+
 release-minor:
   extends: .release
   script:
