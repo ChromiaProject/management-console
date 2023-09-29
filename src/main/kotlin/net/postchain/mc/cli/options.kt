@@ -9,6 +9,7 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
+import com.github.ajalt.mordant.terminal.ConversionResult
 import net.postchain.common.BlockchainRid
 import net.postchain.crypto.PubKey
 import java.time.Instant
@@ -17,13 +18,13 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 fun CliktCommand.includeInactiveOption() = option(
-        "-i", "--includeinactive",
+        "-ii", "--includeinactive",
         help = "Include disabled/removed clusters (not implemented yet)"
 ).flag()
 
 fun CliktCommand.blockchainRidOption() =
         option("-brid", "--blockchain-rid", help = "Blockchain RID", envvar = "POSTCHAIN_BRID")
-                .convert { BlockchainRid.buildFromHex(it) }.required()
+                .convert { BlockchainRid.buildFromHex(it) }
 
 fun CliktCommand.heightOption() = option("-h", "--height", envvar = "POSTCHAIN_HEIGHT").long()
 
@@ -53,3 +54,14 @@ fun CliktCommand.dateToTimestampOption(helpMessage: String, default: Long = 0, d
             }
             Instant.from(date).toEpochMilli()
         }.default(default, defaultString)
+
+fun CliktCommand.interactiveOption() =
+        option("-i", "--interactive", help = "Prompt for item to show details for").flag()
+
+
+fun CliktCommand.promptForIndex(items: List<*>) =
+        currentContext.terminal.prompt("Show details for #") { s ->
+            s.toIntOrNull()
+                    ?.let { if (it in items.indices) ConversionResult.Valid(it) else ConversionResult.Invalid("No such item: $it") }
+                    ?: ConversionResult.Invalid("$s is not a valid integer")
+        }

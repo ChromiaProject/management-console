@@ -1,18 +1,17 @@
 package net.postchain.mc.cli.container
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
-import com.github.ajalt.clikt.parameters.options.validate
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
 import net.postchain.chain0.common.queries.getContainerBlockchain
 import net.postchain.chain0.common.queries.getContainerData
-import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.nm_api.nmGetContainerLimits
 import net.postchain.chain0.version.apiVersion
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.client.core.PostchainClient
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.entityNameValidator
+import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV3.getContainerBlockchainV3
 
 class CommandGetContainerInfo : CliktCommand(
@@ -20,14 +19,21 @@ class CommandGetContainerInfo : CliktCommand(
         help = "Get information about a container"
 ) {
 
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
-    private val name by nameOption("Container Name").required().validate(entityNameValidator())
+    private val name by nameOption("Container Name").required()
 
     override fun run() {
-        val info = client.getContainerData(name)
+        showContainerInfo(client, name)
+    }
+}
 
-        table {
+fun CliktCommand.showContainerInfo(client: PostchainClient, name: String) {
+    val info = client.getContainerData(name)
+
+    echo(defaultTable {
+        body {
             row("Name:", info.name)
             row("Cluster:", info.cluster)
             row("Deployer:", info.deployer)
@@ -38,60 +44,62 @@ class CommandGetContainerInfo : CliktCommand(
                             .joinToString(" / ")
             )
             row("System:", info.system.toString())
-            hints {
-                defaultAlignment = Table.Hints.Alignment.LEFT
-            }
-        }.render().also { echo(it) }
+            info.state?.let { row("State:", it.toString()) }
+        }
+    })
 
-        table {
-            header("Resource type", "Value")
+    echo(defaultTable {
+        header { row("Resource type", "Value") }
+        body {
             val limits = client.nmGetContainerLimits(name)
-            ContainerResourceLimitType.values().forEach {
-                row(it.name, limits[it.name]?.toString() ?: "-1")
+            limits.forEach {
+                row(it.key, when (it.key) {
+                    ApiCompatV2.ContainerResourceLimitType.cpu.name -> "${it.value} %"
+                    ApiCompatV2.ContainerResourceLimitType.ram.name -> "${it.value} MiB"
+                    ApiCompatV2.ContainerResourceLimitType.storage.name -> "${it.value} MiB"
+                    ApiCompatV2.ContainerResourceLimitType.io_read.name -> "${it.value} MiB/s"
+                    ApiCompatV2.ContainerResourceLimitType.io_write.name -> "${it.value} MiB/s"
+                    else -> it.value.toString()
+                })
             }
-            defaultHints()
-        }.render().also { echo(it) }
+        }
+    })
 
-        val apiVersion = client.apiVersion()
-        when {
-            apiVersion >= 4 -> {
-                val blockchains = client.getContainerBlockchain(name)
-                if (blockchains.isEmpty()) {
-                    echo("No blockchains")
-                } else {
-                    echo("Blockchains:")
-                    table {
-                        header("Name", "Rid", "System", "State")
+    val apiVersion = client.apiVersion()
+    when {
+        apiVersion >= 4 -> {
+            val blockchains = client.getContainerBlockchain(name)
+            if (blockchains.isEmpty()) {
+                echo("No blockchains")
+            } else {
+                echo("Blockchains:")
+                echo(defaultTable {
+                    header { row("Name", "Rid", "System", "State") }
+                    body {
                         blockchains.forEach {
                             row(it.name, it.rid.toHex(), it.system.toString(), it.state.toString())
                         }
-                        defaultHints()
-                    }.render().also { echo(it) }
-                }
+                    }
+                })
             }
+        }
 
-            else -> {
-                val blockchains = client.getContainerBlockchainV3(name)
-                if (blockchains.isEmpty()) {
-                    echo("No blockchains")
-                } else {
-                    echo("Blockchains:")
-                    table {
-                        header("Name", "Rid", "System", "Active")
+        else -> {
+            val blockchains = client.getContainerBlockchainV3(name)
+            if (blockchains.isEmpty()) {
+                echo("No blockchains")
+            } else {
+                echo("Blockchains:")
+                echo(defaultTable {
+                    header { row("Name", "Rid", "System", "Active") }
+                    body {
                         blockchains.forEach {
                             row(it.name, it.rid.toHex(), it.system.toString(), it.active.toString())
                         }
-                        defaultHints()
-                    }.render().also { echo(it) }
-                }
+                    }
+                })
             }
         }
     }
-
-    private fun Table.defaultHints() {
-        hints {
-            borderStyle = Table.BorderStyle.SINGLE_LINE
-            defaultAlignment = Table.Hints.Alignment.LEFT
-        }
-    }
 }
+

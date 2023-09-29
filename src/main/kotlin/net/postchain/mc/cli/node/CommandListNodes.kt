@@ -1,32 +1,55 @@
 package net.postchain.mc.cli.node
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
-import net.postchain.chain0.common.queries.getNodesWithProvider
-import net.postchain.mc.cli.util.clientOption
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.mordant.table.ColumnWidth
+import net.postchain.chain0.common.queries.getAllNodes
+import net.postchain.crypto.PubKey
+import net.postchain.mc.cli.base.PUBKEY_LENGTH
+import net.postchain.mc.cli.interactiveOption
+import net.postchain.mc.cli.promptForIndex
+import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandListNodes : CliktCommand(
         name = "list",
         help = "List all nodes"
 ) {
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
+    private val interactive by interactiveOption()
+
+    private val headers = listOf("Pubkey", "Host", "Port", "REST API", "Territory", "Active", "Provided by")
 
     override fun run() {
-        val nodes = client.getNodesWithProvider()
+        val nodes = client.getAllNodes(includeInactive = true)
         if (nodes.isEmpty()) {
             echo("No nodes")
         } else {
-            table {
-                header("Pubkey", "Host", "Port", "Active", "Provided by")
-                nodes.forEach {
-                    row(it.pubkey.toHex(), it.host, it.port.toString(), it.nodeActive.toString(), it.provider.toHex())
+            echo(defaultTable {
+                column(0) {
+                    width = ColumnWidth.Fixed(if (interactive) 3 else PUBKEY_LENGTH + 1)
                 }
-                hints {
-                    defaultAlignment = Table.Hints.Alignment.LEFT
-                    borderStyle = Table.BorderStyle.SINGLE_LINE
+                header { rowFrom(if (interactive) listOf("#") + headers else headers) }
+                body {
+                    nodes.forEachIndexed { index, it ->
+                        val columns = listOf(
+                                it.info.pubkey.toHex(),
+                                it.info.host,
+                                it.info.port.toString(),
+                                it.info.apiUrl,
+                                it.info.territory,
+                                it.active.toString(),
+                                it.provider.pubkey.toHex())
+                        rowFrom(if (interactive) listOf(index.toString()) + columns else columns)
+                    }
                 }
-            }.render().also { echo(it) }
+            })
+            if (interactive) {
+                promptForIndex(nodes)?.let {
+                    showNodeInfo(client, PubKey(nodes[it].info.pubkey))
+                }
+            }
         }
     }
 }

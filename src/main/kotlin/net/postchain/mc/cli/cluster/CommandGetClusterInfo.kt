@@ -1,95 +1,101 @@
 package net.postchain.mc.cli.cluster
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
-import com.github.ajalt.clikt.parameters.options.validate
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
 import net.postchain.chain0.common.queries.getClusterContainers
 import net.postchain.chain0.common.queries.getClusterData
 import net.postchain.chain0.common.queries.getClusterNodes
 import net.postchain.chain0.common.queries.getClusterProviders
 import net.postchain.chain0.common.queries.getClusterReplicaNodes
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.client.core.PostchainClient
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.entityNameValidator
+import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandGetClusterInfo : CliktCommand(
         name = "info",
         help = "Get information about a cluster"
 ) {
 
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
-    private val name by nameOption("Cluster Name").required().validate(entityNameValidator())
+    private val name by nameOption("Cluster Name").required()
 
     override fun run() {
-        val info = client.getClusterData(name)
-        table {
+        showClusterInfo(client, name)
+    }
+}
+
+fun CliktCommand.showClusterInfo(client: PostchainClient, name: String) {
+    val info = client.getClusterData(name)
+    echo(defaultTable {
+        body {
+
             row("Name:", info.name)
             row("Governor:", info.governor)
             row("Is Operational:", info.isOperational.toString())
             info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
             row()
-        }.render().also { echo(it) }
+        }
+    })
 
-        val clusterProviders = client.getClusterProviders(name)
-        if (clusterProviders.isNotEmpty()) {
-            table {
-                header("Provider", "Alias")
+    val clusterProviders = client.getClusterProviders(name)
+    if (clusterProviders.isNotEmpty()) {
+        echo(defaultTable {
+            header { row("Provider", "Alias") }
+            body {
                 clusterProviders.forEach { provider ->
                     row(provider.pubkey.toString(), provider.name)
                 }
-                defaultHints()
-            }.render().also { echo(it) }
-        } else {
-            echo("No providers")
-        }
+            }
+        })
+    } else {
+        echo("No providers")
+    }
 
-        val clusterNodes = client.getClusterNodes(name)
-        if (clusterNodes.isNotEmpty()) {
-            table {
-                header("Node", "Host", "API url")
+    val clusterNodes = client.getClusterNodes(name)
+    if (clusterNodes.isNotEmpty()) {
+        echo(defaultTable {
+            header { row("Node", "Host", "API url") }
+            body {
                 clusterNodes.forEach { node ->
                     row(node.pubkey.toString(), "${node.host}:${node.port}", node.apiUrl)
                 }
-                defaultHints()
-            }.render().also { echo(it) }
-        } else {
-            echo("No nodes")
-        }
+            }
+        })
+    } else {
+        echo("No nodes")
+    }
 
-        val clusterReplicas = client.getClusterReplicaNodes(name)
-        if (clusterReplicas.isNotEmpty()) {
-            table {
-                header("Replica node", "Address")
+    val clusterReplicas = client.getClusterReplicaNodes(name)
+    if (clusterReplicas.isNotEmpty()) {
+        echo(defaultTable {
+            header { row("Replica node", "Address") }
+            body {
                 clusterReplicas.forEach { node ->
                     row(node.pubkey.toString(), "${node.host}:${node.port} / ${node.apiUrl}")
                 }
-                defaultHints()
-            }.render().also { echo(it) }
-        } else {
-            echo("No replica nodes")
-        }
 
-        val containers = client.getClusterContainers(name)
-        if (containers.isNotEmpty()) {
-            table {
-                header("Container", "Deployer")
+            }
+        })
+    } else {
+        echo("No replica nodes")
+    }
+
+    val containers = client.getClusterContainers(name)
+    if (containers.isNotEmpty()) {
+        echo(defaultTable {
+            header { row("Container", "Deployer") }
+            body {
                 containers.forEach {
                     row(it.name, it.deployer)
                 }
-                defaultHints()
-            }.render().also { echo(it) }
-        } else {
-            echo("No containers")
-        }
-    }
-
-    private fun Table.defaultHints() {
-        hints {
-            borderStyle = Table.BorderStyle.SINGLE_LINE
-            defaultAlignment = Table.Hints.Alignment.LEFT
-        }
+            }
+        })
+    } else {
+        echo("No containers")
     }
 }
+

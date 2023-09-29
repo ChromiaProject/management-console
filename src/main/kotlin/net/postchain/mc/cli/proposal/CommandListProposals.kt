@@ -1,14 +1,12 @@
 package net.postchain.mc.cli.proposal
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.context
-import com.github.ajalt.clikt.output.CliktHelpFormatter
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.long
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
 import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.ProposalType
 import net.postchain.chain0.proposal.getProposalsRange
@@ -18,7 +16,9 @@ import net.postchain.chain0.version.apiVersion
 import net.postchain.common.types.RowId
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.dateToTimestampOption
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.interactiveOption
+import net.postchain.mc.cli.promptForIndex
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.compatibility.ApiCompatV6.getProposalsSinceV6
 import net.postchain.mc.compatibility.ApiCompatV6.getProviderVotesV6
 import net.postchain.mc.compatibility.ApiCompatV6.getRelevantProposalsV6
@@ -27,18 +27,19 @@ class CommandListProposals : CliktCommand(
         name = "list",
         help = "List all proposals that you can vote on"
 ) {
-    init {
-        context { helpFormatter = CliktHelpFormatter(showDefaultValues = true) }
-    }
 
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
     private val from by dateToTimestampOption("List proposals from date (YYYY-MM-DD)")
     private val to by dateToTimestampOption("List proposals to date (YYYY-MM-DD)", Long.MAX_VALUE, "9999-12-31", 1)
     private val all by option(help = "Include all proposals, including ones you can not vote on").flag()
     private val pending by option(help = "Only include proposals that are still pending").flag()
+    private val interactive by interactiveOption()
 
-    @Deprecated("Replaced with 'sinceDate' in version 7 of API")
+    // @Deprecated("Replaced with 'sinceDate' in version 7 of API")
     private val since by option(help = "DEPRECATED: List proposals since proposal id").long().default(0L)
+
+    private val headers = listOf("Type", "Id", "State", "Your vote")
 
     override fun run() {
         val apiVersion = client.apiVersion()
@@ -53,15 +54,22 @@ class CommandListProposals : CliktCommand(
 
                 val votes = client.getProviderVotes(from, to, client.pubkey)
 
-                table {
-                    header("Type", "Id", "State", "Your vote")
-                    proposals.forEach { info ->
-                        val vote = votes.find { it.proposal == info.rowId }
-                        val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
-                        row(info.proposalType.toString(), info.rowId.id.toString(), info.state.toString(), voteStatus)
+                echo(defaultTable {
+                    header { rowFrom(if (interactive) listOf("#") + headers else headers) }
+                    body {
+                        proposals.forEachIndexed { index, info ->
+                            val vote = votes.find { it.proposal == info.rowId }
+                            val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
+                            val columns = listOf(info.proposalType.toString(), info.rowId.id.toString(), info.state.toString(), voteStatus)
+                            rowFrom(if (interactive) listOf(index.toString()) + columns else columns)
+                        }
                     }
-                    hints { borderStyle = Table.BorderStyle.SINGLE_LINE }
-                }.render().also { echo(it) }
+                })
+                if (interactive) {
+                    promptForIndex(proposals)?.let {
+                        showProposalInfo(client, proposals[it].rowId)
+                    }
+                }
             }
 
             else -> {
@@ -74,15 +82,16 @@ class CommandListProposals : CliktCommand(
 
                 val votes = client.getProviderVotesV6(client.pubkey)
 
-                table {
-                    header("Type", "Id", "Your vote")
-                    proposals.forEach { (rowid, proposalType) ->
-                        val vote = votes.find { it.proposal == rowid }
-                        val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
-                        row(proposalType.toString(), rowid.id.toString(), voteStatus)
+                echo(defaultTable {
+                    header { row("Type", "Id", "Your vote") }
+                    body {
+                        proposals.forEach { (rowid, proposalType) ->
+                            val vote = votes.find { it.proposal == rowid }
+                            val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
+                            row(proposalType.toString(), rowid.id.toString(), voteStatus)
+                        }
                     }
-                    hints { borderStyle = Table.BorderStyle.SINGLE_LINE }
-                }.render().also { echo(it) }
+                })
             }
         }
     }

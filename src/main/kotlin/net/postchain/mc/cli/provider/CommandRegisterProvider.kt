@@ -6,6 +6,7 @@ import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.groups.cooccurring
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.flag
@@ -23,9 +24,10 @@ import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.PropertiesConfigurationValueSource
 import net.postchain.mc.cli.util.ProviderType
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.pubkeyOption
+
 
 class BatchOptions : OptionGroup() {
 
@@ -43,26 +45,29 @@ class BatchOptions : OptionGroup() {
 
 class CommandRegisterProvider : CliktCommand(
         name = "register",
-        help = """Register new provider with given pubkey. There are three tiers of providers:
-        ```
-        - Community Node Provider: Basic provider, can deploy dapps and add nodes that replicates blockchains (replica) (default)
-        - Node Provider:           Can add block builder nodes
-        - System Provider:         System level permissions and can add node to the system cluster
-        ```
-        
-        Examples:
-        ```
-        (1): pmc provider register -cnp --enable --pubkey aa...
-        ```
-        ```
-        (2): pmc provider register --batch -cnp --enable --provider '{pubkey=x"aa...",name="foo",url="http://foo/api"}' --provider '{pubkey=x"bb...",name="bar"}'
-        ```
-        ```
-        (3): pmc provider register --batch -cnp --enable, where providers will be load from `providers.properties` file:
-                provider={pubkey=x"aa...",name="foo",url="http://foo/api"};{pubkey=x"bb...",name="bar",url="http://bar/api"}
-                provider={pubkey=x"cc...",url="http://foobar/api"}
-        ```
-    """
+        help = """
+            Register new provider with given pubkey
+            
+            There are three tiers of providers:
+            ```
+            - Community Node Provider: Basic provider, can deploy dapps and add nodes that replicates blockchains (replica) (default)
+            - Node Provider:           Can add block builder nodes
+            - System Provider:         System level permissions and can add node to the system cluster
+            ```
+            
+            Examples:
+            ```
+            (1): pmc provider register -cnp --enable --pubkey aa...
+            ```
+            ```
+            (2): pmc provider register --batch -cnp --enable --provider '{pubkey=x"aa...",name="foo",url="http://foo/api"}' --provider '{pubkey=x"bb...",name="bar"}'
+            ```
+            ```
+            (3): pmc provider register --batch -cnp --enable, where providers will be load from `providers.properties` file:
+                    provider={pubkey=x"aa...",name="foo",url="http://foo/api"};{pubkey=x"bb...",name="bar",url="http://bar/api"}
+                    provider={pubkey=x"cc...",url="http://foobar/api"}
+            ```
+    """.trimIndent()
 ) {
     init {
         context {
@@ -70,7 +75,8 @@ class CommandRegisterProvider : CliktCommand(
         }
     }
 
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val pubkey by pubkeyOption("Public key to register as provider")
 

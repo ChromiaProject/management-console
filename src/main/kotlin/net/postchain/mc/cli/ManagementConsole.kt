@@ -1,8 +1,7 @@
 package net.postchain.mc.cli
 
-import com.github.ajalt.clikt.completion.completionOption
+import com.chromia.cli.tools.launcher.CliLauncher
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.NoOpCliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.options.versionOption
 import net.postchain.mc.cli.anchoring.clusterAnchoringCommands
@@ -17,10 +16,9 @@ import net.postchain.mc.cli.provider.providerCommands
 import net.postchain.mc.cli.votingupdates.voterSetCommands
 import net.postchain.mc.network.networkCommands
 
-open class ManagementConsole : NoOpCliktCommand(name = "pmc") {
+open class ManagementConsole : CliLauncher(name = "pmc") {
 
     init {
-        completionOption()
         versionOption(this::class.java.`package`.implementationVersion ?: "(unknown)")
         subcommands(
                 CommandKeygen(),
@@ -40,7 +38,7 @@ open class ManagementConsole : NoOpCliktCommand(name = "pmc") {
     protected open fun extraProviderCommands(command: CliktCommand) {}
 
     override fun aliases(): Map<String, List<String>> {
-        return mapOf(
+        return super.aliases() + mapOf(
                 "init" to listOf("network", "initialize"),
                 "initialize" to listOf("network", "initialize"),
                 "blockchains" to listOf("blockchain", "list"),

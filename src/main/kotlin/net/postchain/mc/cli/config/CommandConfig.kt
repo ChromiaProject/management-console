@@ -1,5 +1,8 @@
 package net.postchain.mc.cli.config
 
+import com.chromia.cli.tools.config.ChromiaConfigLoader
+import com.chromia.cli.tools.config.ChromiaConfigWriter
+import com.chromia.cli.tools.env.cliEnv
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.default
@@ -9,29 +12,26 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
-import net.postchain.mc.cli.config.PmcConfigProvider.collectConfiguration
-import net.postchain.mc.cli.util.POSTCHAIN_CLIENT_CONFIG
-import org.apache.commons.configuration2.PropertiesConfiguration
-import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder
-import org.apache.commons.configuration2.builder.fluent.Parameters
+import net.postchain.mc.cli.util.CHROMIA_CONFIG
 import java.awt.Desktop
-import java.io.FileWriter
 
 
 fun CliktCommand.configFileOption() = mutuallyExclusiveOptions(
-        option("--global", help = "use global configuration file").flag().convert { PmcConfigProvider.globalConfigurationFile() },
-        option("--local", help = "use project configuration file").flag().convert { PmcConfigProvider.localConfigurationFile() },
-        option("--file", envvar = POSTCHAIN_CLIENT_CONFIG, help = "use given configuration file (env: $POSTCHAIN_CLIENT_CONFIG)")
-                .file(mustExist = true, canBeDir = false),
+        option("--global", help = "use global configuration file").flag().convert { ChromiaConfigWriter.global },
+        option("--local", help = "use project configuration file").flag().convert { ChromiaConfigWriter.local },
+        option("--file", envvar = CHROMIA_CONFIG, help = "use given configuration file (env: $CHROMIA_CONFIG)")
+                .file(mustExist = true, canBeDir = false).convert { ChromiaConfigWriter.custom(it) },
         name = "Config file location",
-).default(PmcConfigProvider.localConfigurationFile())
+).default(ChromiaConfigWriter.local)
 
 class CommandConfig : CliktCommand(
         name = "config",
         help = "Configure the management console"
 ) {
 
-    private val configFile by configFileOption()
+    private val configWriter by configFileOption()
+    private val configLoader = ChromiaConfigLoader(cliEnv())
+    private val configFile get() = configWriter.configFile
 
     private val get by option(help = "get value: name [value pattern]", metavar = "KEY")
 
@@ -39,7 +39,7 @@ class CommandConfig : CliktCommand(
 
     private val list by option(help = "list all").flag()
 
-    private val set by option("-s", "--set", help = "set values [key=value]", metavar = "KEY=VALUE").associate()
+    private val set by option("--set", help = "set values [key=value]", metavar = "KEY=VALUE").associate()
 
     override fun run() {
         if (list) {
@@ -53,25 +53,10 @@ class CommandConfig : CliktCommand(
         }
         if (get != null) {
             if (get == "privkey") throw CliktError("Cannot print private key to stdout")
-            return echo(collectConfiguration(configFile).getString(get))
+            return echo(configLoader.loadClientConfigFile(configFile).getString(get))
         }
         if (set.isNotEmpty()) {
-            val configuration = if (configFile.exists()) {
-                Parameters().properties()
-                        .setFile(configFile)
-                        .let {
-                            FileBasedConfigurationBuilder(PropertiesConfiguration::class.java)
-                                    .configure(it)
-                                    .configuration
-                        }
-            } else {
-                configFile.parentFile?.mkdirs()
-                PropertiesConfiguration()
-            }
-            set.forEach { (t, u) ->
-                configuration.setProperty(t, u)
-            }
-            configuration.write(FileWriter(configFile))
+            configWriter.setProperty(set)
         }
     }
 }

@@ -22,7 +22,7 @@ Configuration of `pmc` can be done one three levels:
 ```shell
 ~/.pmc/config # global configuration file
 .pmc/config   # local configuration file
-env POSTCHAIN_CLIENT_CONFIG # overriding file
+env CHROMIA_CONFIG # overriding file
 ```
 
 Configuration can be done using for example `pmc config --global/--local --set api.url=<url>`
