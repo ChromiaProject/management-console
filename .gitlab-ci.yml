@@ -7,16 +7,6 @@ include:
       - templates/dependency-scanning.yml
       - templates/report-code-coverage.yml
 
-
-
-image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.1.3
-
-include:
-  - project: "chromaway/core-infra/gitlab-automation"
-    ref: 1.1.4
-    file: 
-      - templates/report-code-coverage.yml
-
 .setup:
   # Necessary to be able to launch PostgreSQL in Docker manually. PostgreSQL is
   # launched in Docker manually (and not as a service, here) because then we can
@@ -75,11 +65,6 @@ build:
       $MAVEN_CLI_OPTS
       --activate-profiles ci,docker,coverage
       verify
-
-dependency-check:
-  extends: .maven-dependency-check
-  stage: dependency-check
-  interruptible: true
 
 test-coverage-report:
   stage: code-coverage
