@@ -2,9 +2,10 @@ image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.1.
 
 include:
   - project: "chromaway/core-infra/gitlab-automation"
-    ref: 1.1.4
+    ref: 1.1.6
     file: 
       - templates/report-code-coverage.yml
+      - templates/maven-dependency-scanning.yml
 
 .git_template: &git_setup |
   git remote set-url --push origin "https://oauth2:${BUILD_USER_GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
@@ -49,6 +50,7 @@ stages:
   - build
   - code-coverage
   - deploy
+  - dependency-check
   - release
 
 deploy:
@@ -78,6 +80,13 @@ build:
       $MAVEN_CLI_OPTS
       --activate-profiles ci,docker,coverage
       verify
+
+dependency-check:
+  extends: .maven-dependency-check
+  stage: dependency-check
+  interruptible: true
+  rules:
+    - if: $RUN_DEPENDENCY_CHECK == "true"
 
 test-coverage-report:
   stage: code-coverage
