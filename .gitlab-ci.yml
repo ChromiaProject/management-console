@@ -6,6 +6,7 @@ include:
     file: 
       - templates/report-code-coverage.yml
       - templates/maven-dependency-scanning.yml
+      - templates/container-dependency-scanning.yml
 
 .git_template: &git_setup |
   git remote set-url --push origin "https://oauth2:${BUILD_USER_GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
@@ -87,6 +88,17 @@ dependency-check:
   interruptible: true
   rules:
     - if: $RUN_DEPENDENCY_CHECK == "true"
+
+container-scanning:
+  variables:
+    REGISTRY: registry.gitlab.com/chromaway/core-tools/management-console
+  parallel:
+    matrix:
+      - IMAGE: [ pmc ]
+        VERSION: [ 3.15.1 ]
+  only:
+    variables:
+      - $RUN_DEPENDENCY_CHECK == "true"
 
 test-coverage-report:
   stage: code-coverage
