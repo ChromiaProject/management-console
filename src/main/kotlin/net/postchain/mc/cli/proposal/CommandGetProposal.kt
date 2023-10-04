@@ -22,6 +22,8 @@ import net.postchain.chain0.proposal_blockchain_import.getConfigurationImportPro
 import net.postchain.chain0.proposal_blockchain_import.getFinishBlockchainImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getForeignBlockchainBlocksImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getForeignBlockchainImportProposal
+import net.postchain.chain0.proposal_blockchain_move.getBlockchainMoveFinishProposal
+import net.postchain.chain0.proposal_blockchain_move.getBlockchainMoveProposal
 import net.postchain.chain0.proposal_cluster.getClusterLimitsProposal
 import net.postchain.chain0.proposal_cluster.getClusterProviderProposal
 import net.postchain.chain0.proposal_cluster.getClusterRemoveProposal
@@ -328,6 +330,22 @@ private fun CliktCommand.formatProposal(client: PostchainClient, proposalId: Row
 
         ProposalType.foreign_blockchain_blocks_import -> {
             val proposal = client.getForeignBlockchainBlocksImportProposal(proposalId) ?: return ""
+            return "$proposal"
+        }
+
+        ProposalType.blockchain_move -> {
+            val proposal = client.getBlockchainMoveProposal(proposalId) ?: return ""
+            return "$proposal"
+        }
+
+        ProposalType.blockchain_move_cancel -> {
+//            val proposal = client.getBlockchainMoveCancelProposal(proposalId) ?: return ""
+//            return "$proposal"
+            return "Not yet implemented"
+        }
+
+        ProposalType.blockchain_move_finish -> {
+            val proposal = client.getBlockchainMoveFinishProposal(proposalId) ?: return ""
             return "$proposal"
         }
     }
