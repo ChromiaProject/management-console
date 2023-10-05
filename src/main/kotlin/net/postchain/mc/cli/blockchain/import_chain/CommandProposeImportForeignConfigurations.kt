@@ -73,7 +73,7 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
     private val description by proposalDescriptionOption(default = "Propose importing of foreign blockchain")
 
     override fun run() {
-        client.requireApiVersion(12)
+        client.requireApiVersion(19)
         val foreignClient = buildForeignClient()
         val imported = mutableListOf<Long>()
 

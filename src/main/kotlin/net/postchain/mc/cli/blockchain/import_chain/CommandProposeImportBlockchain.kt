@@ -44,7 +44,7 @@ class CommandProposeImportBlockchain : CliktCommand(
     private val description by proposalDescriptionOption(default = "Propose importing of blockchain")
 
     override fun run() {
-        client.requireApiVersion(5)
+        client.requireApiVersion(19)
         echo("Blockchain $name will be imported")
         BufferedInputStream(FileInputStream(configurationsFile.toFile())).use {
             val blockchainRid = BlockchainRid(GtvDecoder.decodeGtv(it).asByteArray())

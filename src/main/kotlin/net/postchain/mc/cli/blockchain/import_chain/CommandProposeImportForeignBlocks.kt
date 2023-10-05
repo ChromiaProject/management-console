@@ -37,7 +37,7 @@ class CommandProposeImportForeignBlocks : CliktCommand(
     private val description by proposalDescriptionOption(default = "Propose import of foreign blockchain blocks")
 
     override fun run() {
-        client.requireApiVersion(12)
+        client.requireApiVersion(19)
         echo("Import of blocks of foreign blockchain ${blockchainRID.toHex()} will be proposed")
         val txBuilder = client.transactionBuilder()
         txBuilder.proposeForeignBlockchainBlocksImportOperation(client.pubkey, blockchainRID, upToHeight, description)
