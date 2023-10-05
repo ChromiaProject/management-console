@@ -5,6 +5,10 @@ import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.validate
+import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal_blockchain_import.proposeFinishImportBlockchainOperation
 import net.postchain.common.BlockchainRid
 import net.postchain.gtv.GtvDecoder
@@ -40,13 +44,18 @@ class CommandProposeFinishBlockchainImport : CliktCommand(
             blockchainRidOption()
     ).required()
 
+    private val finishAtHeight by option("--finish-at-height", help = "Finish blockchain import at height (required for API version 18 and later)")
+            .long().required().validate {
+                require(it > 0) { "--finish-at-height arg must be greater than 0" }
+            }
+
     private val description by proposalDescriptionOption(default = "Propose finishing import of blockchain")
 
     override fun run() {
-        client.requireApiVersion(5)
+        client.requireApiVersion(19)
         echo("Import of blockchain ${blockchainRID.toHex()} will be finished")
         val txBuilder = client.transactionBuilder()
-        txBuilder.proposeFinishImportBlockchainOperation(client.pubkey, blockchainRID, description)
+        txBuilder.proposeFinishImportBlockchainOperation(client.pubkey, blockchainRID, finishAtHeight, description)
         txBuilder.postAwaitConfirmation().printResult(
                 "Import of blockchain ${blockchainRID.toHex()} finished",
                 "Cannot finish blockchain import", true
