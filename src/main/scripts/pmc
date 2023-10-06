@@ -18,4 +18,6 @@ done
 
 APP_HOME=$( cd "${APP_HOME:-./}.." && pwd -P ) || exit
 
-${RELL_JAVA:-java} -cp "$APP_HOME/lib/*" net.postchain.mc.Directory1Kt "$@"
+JAR=$(find "$APP_HOME/lib" -maxdepth 1 -regex '.*/management-console-.[^/]*.jar')
+
+${RELL_JAVA:-java} -cp "$JAR:$APP_HOME/lib/*" net.postchain.mc.Directory1Kt "$@"
