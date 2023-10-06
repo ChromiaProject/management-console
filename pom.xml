@@ -21,7 +21,7 @@
         <revision>dev</revision>
         <postchain.version>3.13.4</postchain.version>
         <postchain.client.version>3.11.5</postchain.client.version>
-        <directory.chain.version>1.15.0</directory.chain.version>
+        <directory.chain.version>1.19.0</directory.chain.version>
         <chr.version>0.11.1</chr.version>
         <rell.version>0.13.2</rell.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
@@ -85,7 +85,7 @@
         <dependency>
             <groupId>com.github.ajalt.clikt</groupId>
             <artifactId>clikt-jvm</artifactId>
-            <version>4.0.0</version>
+            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>com.chromia.cli</groupId>
@@ -114,7 +114,7 @@
         <dependency>
             <groupId>org.bitcoinj</groupId>
             <artifactId>bitcoinj-core</artifactId>
-            <version>0.16.1</version>
+            <version>0.16.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
@@ -345,7 +345,7 @@
                     <configuration>
                         <allowInsecureRegistries>false</allowInsecureRegistries>
                         <from>
-                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java17:1.0.2@sha256:756673c4f33a67b88dbc4ce0019137b13e9bd351cee804cfbbda3b9aa9a2cba2</image>
+                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java17:1.1.0@sha256:68a30dd46a366b2d511c7cd741e98c7fab4b5a576977bb0c5a8362df3da21558</image>
                         </from>
                         <container>
                             <appRoot>/opt/chromaway/postchain</appRoot>
@@ -370,6 +370,20 @@
                             </configuration>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <configuration>
+                        <prettyPrint>true</prettyPrint>
+                        <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+                        <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                        <yarnAuditAnalyzerEnabled>false</yarnAuditAnalyzerEnabled>
+                        <suppressionFiles>
+                            <suppressionFile>https://gitlab.com/chromaway/chromia-parent/-/raw/dev/common-dependencies-suppression.xml?ref_type=heads</suppressionFile>
+                            <suppressionFile>dependencies-suppression.xml</suppressionFile>
+                        </suppressionFiles>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
