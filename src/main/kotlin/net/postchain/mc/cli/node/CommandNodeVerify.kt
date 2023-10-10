@@ -13,8 +13,8 @@ import net.postchain.chain0.nm_api.nmComputeBlockchainInfoList
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.SingleEndpointPool
 import net.postchain.common.BlockchainRid
-import net.postchain.mc.cli.requiredPubkeyOption
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pubkeyOption
 import net.postchain.mc.network.NodeVerifier
 
 class CommandNodeVerify : CliktCommand(
@@ -24,7 +24,7 @@ class CommandNodeVerify : CliktCommand(
     private val config by pmcConfigOption()
     private val client get() = config.client
 
-    private val key by requiredPubkeyOption()
+    private val key by pubkeyOption()
 
     private fun Boolean?.isOk(): String = this?.let { if (this) "OK" else "Bad" } ?: "Bad"
     override fun run() {

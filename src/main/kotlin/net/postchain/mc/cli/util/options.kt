@@ -1,7 +1,5 @@
 package net.postchain.mc.cli.util
 
-import com.chromia.cli.tools.config.ChromiaConfigOption
-import com.chromia.cli.tools.config.ChromiaModelConfigOption
 import com.chromia.cli.tools.config.OptionalChromiaModelConfigOption
 import com.chromia.cli.tools.env.cliEnv
 import com.github.ajalt.clikt.core.CliktCommand
@@ -13,6 +11,7 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.split
 import com.github.ajalt.clikt.parameters.options.switch
 import com.github.ajalt.clikt.parameters.options.validate
@@ -30,11 +29,37 @@ import java.net.URL
 
 
 const val CHROMIA_CONFIG = "CHROMIA_CONFIG"
+const val ECDSA_COMPRESSED_KEY_SIZE = 33
+const val ECDSA_UNCOMPRESSED_KEY_SIZE = 65
+const val DILITHIUM2_KEY_SIZE = 1336
+
 fun CliktCommand.pubkeyOption(helpMsg: String = "Public key") = option("-pk", "--pubkey", help = helpMsg, envvar = "POSTCHAIN_PUBKEY")
         .convert { PubKey(it) }
+        .required()
+        .validate(pubkeyValidator())
+
+fun CliktCommand.optionalPubkeyOption(helpMsg: String = "Public key") = option("-pk", "--pubkey", help = helpMsg, envvar = "POSTCHAIN_PUBKEY")
+        .convert { PubKey(it) }
+        .validate(pubkeyValidator())
 
 fun CliktCommand.pubkeysOption(helpMsg: String = "Comma delimited list of public keys") = option("--pubkeys", help = helpMsg)
         .convert { PubKey(it) }.split(",")
+        .required()
+        .validate(pubkeysValidator())
+
+fun pubkeyValidator(): OptionTransformContext.(PubKey) -> Unit = {
+    validatePubkey(it)
+}
+fun pubkeysValidator(): OptionTransformContext.(List<PubKey>) -> Unit = {
+    it.forEach(::validatePubkey)
+}
+
+fun OptionTransformContext.validatePubkey(pubKey: PubKey) {
+    val keySize = pubKey.data.size
+    require(keySize == ECDSA_COMPRESSED_KEY_SIZE || keySize == ECDSA_UNCOMPRESSED_KEY_SIZE || keySize == DILITHIUM2_KEY_SIZE) {
+        "Size of public key $pubKey is not valid, must be $ECDSA_COMPRESSED_KEY_SIZE, $ECDSA_UNCOMPRESSED_KEY_SIZE or $DILITHIUM2_KEY_SIZE"
+    }
+}
 
 fun CliktCommand.pmcConfigOption() = PmcClientConfigOption(cliEnv())
 
@@ -73,18 +98,22 @@ fun entityNameValidator(): OptionTransformContext.(String) -> Unit = {
 }
 
 fun CliktCommand.urlOption(helpMessage: String) = option("--url", help = helpMessage)
-        .validate(validateUrl())
+        .validate(urlValidator())
 
-fun validateUrl(): OptionTransformContext.(String) -> Unit = {
+fun urlValidator(): OptionTransformContext.(String) -> Unit = {
+    validateUrl(it)
+}
+
+fun OptionTransformContext.validateUrl(url: String) {
     val valid = try {
-        URL(it).toURI()
+        URL(url).toURI()
         true
     } catch (e: MalformedURLException) {
         false
     } catch (e: URISyntaxException) {
         false
     }
-    require(valid) { "Invalid URL provided: $it" }
+    require(valid) { "Invalid URL provided: $url" }
 }
 
 

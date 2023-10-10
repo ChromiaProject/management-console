@@ -20,7 +20,7 @@ class CommandAddBlockchainReplica : CliktCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val nodePubKey by pubkeyOption().required()
+    private val nodePubKey by pubkeyOption()
 
     override fun run() {
         client.transactionBuilder()

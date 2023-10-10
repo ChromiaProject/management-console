@@ -7,8 +7,8 @@ import net.postchain.chain0.common.queries.getNodeData
 import net.postchain.chain0.common.queries.listClustersOfNode
 import net.postchain.client.core.PostchainClient
 import net.postchain.crypto.PubKey
-import net.postchain.mc.cli.requiredPubkeyOption
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pubkeyOption
 
 class CommandGetNodeInfo : CliktCommand(
         name = "info",
@@ -16,7 +16,7 @@ class CommandGetNodeInfo : CliktCommand(
 ) {
     private val config by pmcConfigOption()
 
-    private val key by requiredPubkeyOption()
+    private val key by pubkeyOption()
 
     override fun run() {
         val client = config.client

@@ -5,8 +5,8 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.operations.enableNodeOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.requiredPubkeyOption
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pubkeyOption
 
 
 class CommandEnableNode : CliktCommand(
@@ -16,7 +16,7 @@ class CommandEnableNode : CliktCommand(
     private val config by pmcConfigOption()
     private val client get() = config.client
 
-    private val key by requiredPubkeyOption()
+    private val key by pubkeyOption()
 
     override fun run() {
         client.transactionBuilder()

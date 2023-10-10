@@ -8,9 +8,9 @@ import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_cluster.proposeClusterProviderOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.requiredPubkeyOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.cli.util.pubkeyOption
 
 
 class CommandProposeClusterProvider : CliktCommand(
@@ -25,7 +25,7 @@ class CommandProposeClusterProvider : CliktCommand(
     private val config by pmcConfigOption()
     private val client get() = config.client
 
-    private val provider by requiredPubkeyOption()
+    private val provider by pubkeyOption()
 
     private val clusterName by option(
             "-c", "--cluster",
