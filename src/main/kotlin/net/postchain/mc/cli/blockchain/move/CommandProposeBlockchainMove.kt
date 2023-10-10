@@ -31,7 +31,7 @@ class CommandProposeBlockchainMove : CliktCommand(
     private val description by proposalDescriptionOption(default = "Propose moving of blockchain")
 
     override fun run() {
-        client.requireApiVersion(17)
+        client.requireApiVersion(21)
         echo("Blockchain $blockchainRID will start moving to the container $destinationContainer as soon as the proposal approved")
 
         client.transactionBuilder()

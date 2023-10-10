@@ -28,7 +28,7 @@ class CommandProposeCancelBlockchainMove : CliktCommand(
         throw PrintMessage("Not yet implemented")
 
         /*
-        client.requireApiVersion(15)
+        client.requireApiVersion(21)
         echo("Blockchain moving will be canceled as soon as the proposal is approved")
 
         client.transactionBuilder()
