@@ -1,6 +1,6 @@
 package net.postchain.mc.network
 
-import net.postchain.chain0.model.NodeInfo
+import net.postchain.chain0.common.queries.NodeInfo
 import net.postchain.client.config.PostchainClientConfig
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.EndpointPool
