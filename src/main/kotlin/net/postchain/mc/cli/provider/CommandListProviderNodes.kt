@@ -7,8 +7,8 @@ import com.github.ajalt.mordant.table.ColumnWidth
 import net.postchain.chain0.common.queries.getNodesByProvider
 import net.postchain.mc.cli.base.PUBKEY_LENGTH
 import net.postchain.mc.cli.base.pubkey
+import net.postchain.mc.cli.util.optionalPubkeyOption
 import net.postchain.mc.cli.util.pmcConfigOption
-import net.postchain.mc.cli.util.pubkeyOption
 import java.time.Instant
 import java.util.Date
 
@@ -19,7 +19,7 @@ class CommandListProviderNodes : CliktCommand(
     private val config by pmcConfigOption()
     private val client get() = config.client
 
-    private val pubkey by pubkeyOption()
+    private val pubkey by optionalPubkeyOption()
 
     override fun run() {
         val providerPubkey = pubkey ?: client.config.pubkey()

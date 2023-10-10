@@ -25,7 +25,6 @@ class CommandCreateVoterSet : CliktCommand(
     private val name by nameOption("Name of new voter set").required()
 
     private val pubkeys by pubkeysOption("Comma separated list of provider pubkeys for this voter set")
-            .required()
 
     private val threshold by option(
             "-t", "--threshold",

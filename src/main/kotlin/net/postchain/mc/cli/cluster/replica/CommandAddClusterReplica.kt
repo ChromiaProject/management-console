@@ -22,7 +22,7 @@ class CommandAddClusterReplica : CliktCommand(
 
     private val name by nameOption("Cluster Name").required().validate(entityNameValidator())
 
-    private val nodePubKey by pubkeyOption().required()
+    private val nodePubKey by pubkeyOption()
 
     override fun run() {
         client.transactionBuilder()
