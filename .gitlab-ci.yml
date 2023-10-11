@@ -95,7 +95,7 @@ container-scanning:
   parallel:
     matrix:
       - IMAGE: [ pmc ]
-        VERSION: [ 3.15.1 ]
+        VERSION: [ LATEST ]
   only:
     variables:
       - $RUN_DEPENDENCY_CHECK == "true"
