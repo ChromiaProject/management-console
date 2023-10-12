@@ -333,7 +333,7 @@ private fun CliktCommand.formatProposal(client: PostchainClient, proposalId: Row
             return "$proposal"
         }
 
-        ProposalType.blockchain_move -> {
+        ProposalType.blockchain_move_start -> {
             val proposal = client.getBlockchainMoveProposal(proposalId) ?: return ""
             return "$proposal"
         }
