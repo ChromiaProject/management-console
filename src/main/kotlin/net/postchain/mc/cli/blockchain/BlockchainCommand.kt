@@ -6,6 +6,9 @@ import net.postchain.mc.cli.blockchain.import_chain.CommandProposeFinishBlockcha
 import net.postchain.mc.cli.blockchain.import_chain.CommandProposeImportBlockchain
 import net.postchain.mc.cli.blockchain.import_chain.CommandProposeImportForeignBlocks
 import net.postchain.mc.cli.blockchain.import_chain.CommandProposeImportForeignConfigurations
+import net.postchain.mc.cli.blockchain.move.CommandProposeBlockchainMove
+import net.postchain.mc.cli.blockchain.move.CommandProposeCancelBlockchainMove
+import net.postchain.mc.cli.blockchain.move.CommandProposeFinishBlockchainMove
 import net.postchain.mc.cli.replica.blockchainReplicaCommands
 
 class BlockchainCommand : CliktCommand("Interactions with blockchains") {
@@ -34,5 +37,9 @@ fun blockchainCommands() = BlockchainCommand().subcommands(
         CommandGetBlockchainConfiguration(),
         CommandGetBlockchainConfigurationDeprecated(),
         CommandGetProposedBlockchainRid(),
-        blockchainReplicaCommands()
+        blockchainReplicaCommands(),
+
+        CommandProposeBlockchainMove(),
+//        CommandProposeCancelBlockchainMove(),
+        CommandProposeFinishBlockchainMove()
 )
