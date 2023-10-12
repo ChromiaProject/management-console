@@ -43,7 +43,7 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
     private val config by pmcConfigOption()
     private val client get() = config.client
 
-    private val key by pubkeyOption("Node pubkey").required()
+    private val key by pubkeyOption("Node pubkey")
 
     private val host by hostOption().required()
 

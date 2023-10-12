@@ -17,9 +17,9 @@ import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.hostOption
 import net.postchain.mc.cli.portOption
-import net.postchain.mc.cli.requiredPubkeyOption
 import net.postchain.mc.cli.util.clusterUnitsOption
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pubkeyOption
 
 class CommandUpdateNode : CliktCommand(
         name = "update",
@@ -28,7 +28,7 @@ class CommandUpdateNode : CliktCommand(
     private val config by pmcConfigOption()
     private val client get() = config.client
 
-    private val key by requiredPubkeyOption()
+    private val key by pubkeyOption()
 
     private val host by hostOption()
 

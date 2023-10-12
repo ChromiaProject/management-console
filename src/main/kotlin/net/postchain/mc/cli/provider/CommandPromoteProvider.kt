@@ -4,7 +4,6 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.operations.promoteNodeProviderOperation
 import net.postchain.chain0.proposal_provider.proposeProviderIsSystemOperation
 import net.postchain.mc.cli.base.printResult
@@ -19,7 +18,7 @@ class CommandPromoteProvider : CliktCommand(
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client
-    private val key by pubkeyOption("Public key of provider to promote").required()
+    private val key by pubkeyOption("Public key of provider to promote")
 
     private val system by option(help = "Proposes this provider as a system provider").flag()
 

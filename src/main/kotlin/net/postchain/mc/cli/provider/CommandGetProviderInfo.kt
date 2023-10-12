@@ -10,8 +10,8 @@ import net.postchain.chain0.common.queries.getProviderPoints
 import net.postchain.client.core.PostchainClient
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.pubkey
+import net.postchain.mc.cli.util.optionalPubkeyOption
 import net.postchain.mc.cli.util.pmcConfigOption
-import net.postchain.mc.cli.util.pubkeyOption
 
 class CommandGetProviderInfo : CliktCommand(
         name = "info",
@@ -20,7 +20,7 @@ class CommandGetProviderInfo : CliktCommand(
     private val config by pmcConfigOption()
     val client get() = config.client
 
-    private val pubkey by pubkeyOption()
+    private val pubkey by optionalPubkeyOption()
 
     override fun run() {
         val providerPubkey = pubkey ?: client.config.pubkey()
