@@ -2,19 +2,26 @@ package net.postchain.mc.cli.blockchain
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
+import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.common.queries.getBlockchains
 import net.postchain.chain0.nm_api.nmFindNextConfigurationHeight
 import net.postchain.chain0.nm_api.nmGetBlockchainConfiguration
 import net.postchain.gtv.GtvDecoder
+import net.postchain.gtv.GtvEncoder
+import net.postchain.gtv.GtvFactory.gtv
+import net.postchain.gtv.GtvNull
 import net.postchain.gtv.gtvml.GtvMLEncoder
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.pmcConfigOption
+import java.io.BufferedOutputStream
 import java.io.File
-
+import java.io.FileOutputStream
+import java.io.OutputStream
 
 class CommandGetAllBlockchainConfigurations : CliktCommand(
         name = "get-all-configurations",
@@ -24,9 +31,15 @@ class CommandGetAllBlockchainConfigurations : CliktCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val save by option(help = "Where to save configurations XML").file(canBeFile = false, canBeDir = true)
+    private val save by option(help = "Where to save configuration file(s)").file(canBeFile = false, canBeDir = true)
 
     private val overwrite by option("--overwrite", help = "Overwrite existing files").flag()
+
+    private val exportFormat by option("--export-format", help = "Will generate a binary GTV file that can be used for chain import instead of human readable XML files").flag()
+
+    private val fromHeight by option("--from-height", help = "Fetch from height").long().default(0)
+
+    private val toHeight by option("--to-height", help = "Fetch to height").long()
 
     override fun run() {
         if (config.client.getBlockchains(true).none { it.rid == blockchainRID.wData }) {
@@ -34,31 +47,59 @@ class CommandGetAllBlockchainConfigurations : CliktCommand(
             return
         }
 
-        val heights = mutableListOf(0L)
+        val heights = if (fromHeight == 0L) {
+            mutableListOf(0L)
+        } else {
+            var startHeight = 0L
+            while (startHeight != fromHeight) {
+                val nextHeight = config.client.nmFindNextConfigurationHeight(blockchainRID, startHeight)
+                if (nextHeight == null || nextHeight > fromHeight) break
+                startHeight = nextHeight
+            }
+            mutableListOf(startHeight)
+        }
 
+        var exportConfigFile: OutputStream? = null
         if (save != null) {
             save?.mkdirs()
             if (!overwrite && save?.list()?.isNotEmpty() == true) {
                 echo("Directory is not empty: $save", err = true)
                 return
             }
+            if (exportFormat) {
+                echo("Generating configuration export file with name: '$blockchainRID.configs'")
+                exportConfigFile = BufferedOutputStream(FileOutputStream(File(save?.path, "$blockchainRID.configs")))
+            }
         }
 
-        while (true) {
-            if (save != null) {
-                val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, heights.last())
-                if (bcConfig == null) {
-                    echo("Blockchain configuration at height ${heights.last()} is absent", err = true)
-                    heights.removeLast()
-                    return
+        val stopHeight = toHeight
+        try {
+            exportConfigFile?.write(GtvEncoder.encodeGtv(gtv(blockchainRID.data)))
+            while (true) {
+                if (save != null) {
+                    val height = heights.last()
+                    val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, height)
+                    if (bcConfig == null) {
+                        echo("Blockchain configuration at height $height is absent", err = true)
+                        heights.removeLast()
+                        return
+                    }
+
+                    if (exportConfigFile != null) {
+                        exportConfigFile.write(GtvEncoder.encodeGtv(gtv(gtv(height), gtv(bcConfig))))
+                    } else {
+                        val xmlGtv = GtvMLEncoder.encodeXMLGtv(GtvDecoder.decodeGtv(bcConfig))
+                        File(save?.path, "${heights.last()}.conf.xml").writeText(xmlGtv)
+                    }
                 }
 
-                val xmlGtv = GtvMLEncoder.encodeXMLGtv(GtvDecoder.decodeGtv(bcConfig))
-                File(save?.path, "${heights.last()}.conf.xml").writeText(xmlGtv)
+                val nextHeight = config.client.nmFindNextConfigurationHeight(blockchainRID, heights.last()) ?: break
+                if (stopHeight != null && nextHeight > stopHeight) break
+                heights.add(nextHeight)
             }
-
-            val nextHeight = config.client.nmFindNextConfigurationHeight(blockchainRID, heights.last()) ?: break
-            heights.add(nextHeight)
+            exportConfigFile?.write(GtvEncoder.encodeGtv(GtvNull))
+        } finally {
+            exportConfigFile?.close()
         }
 
         if (heights.isEmpty()) {
