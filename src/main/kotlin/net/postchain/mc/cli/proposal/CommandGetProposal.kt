@@ -51,6 +51,9 @@ import net.postchain.mc.cli.base.cryptoSystem
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.votingupdates.formatThreshold
+import net.postchain.mc.compatibility.ApiCompatV22.getClusterLimitsProposalV22
+import net.postchain.mc.compatibility.ApiCompatV22.getContainerLimitsProposalV22
+import net.postchain.mc.compatibility.ApiCompatV22.getContainerProposalV22
 import net.postchain.mc.compatibility.ApiCompatV6.getProposalV6
 import net.postchain.mc.gtv.diff.GtvDiffFinder
 import java.time.Instant
@@ -98,7 +101,7 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
             if (proposal.state == ProposalState.PENDING) {
                 echo("Proposal details")
                 echo("------------------------------")
-                echo(formatProposal(client, proposal.id, proposal.type))
+                echo(formatProposal(apiVersion, client, proposal.id, proposal.type))
             }
         }
 
@@ -123,7 +126,7 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
 
             echo("Proposal details")
             echo("------------------------------")
-            echo(formatProposal(client, proposal.id, proposal.type))
+            echo(formatProposal(apiVersion, client, proposal.id, proposal.type))
         }
     }
 }
@@ -146,7 +149,7 @@ private fun SectionBuilder.printVotingInfo(client: PostchainClient, proposal: Ge
 private fun formatProvider(providerPubKey: WrappedByteArray, providerName: String) =
         "${providerPubKey.toHex()}${if (providerName.isNotEmpty()) " - $providerName" else ""}"
 
-private fun CliktCommand.formatProposal(client: PostchainClient, proposalId: RowId, proposalType: ProposalType): Any {
+private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClient, proposalId: RowId, proposalType: ProposalType): Any {
     return when (proposalType) {
         ProposalType.bc -> {
             val bp = client.getBlockchainProposal(proposalId) ?: return ""
@@ -237,22 +240,53 @@ private fun CliktCommand.formatProposal(client: PostchainClient, proposalId: Row
         }
 
         ProposalType.container_limits -> {
-            val pcl = client.getContainerLimitsProposal(proposalId) ?: return ""
-            return defaultTable {
-                body {
-                    row("Container:", pcl.container)
-                    row("Container Units:", pcl.containerUnits.toString())
-                    row("Max blockchains:", pcl.maxBlockchains.toString())
+            when {
+                apiVersion >= 24 -> {
+                    val pcl = client.getContainerLimitsProposal(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Container:", pcl.container)
+                            row("Container Units:", pcl.containerUnits.toString())
+                            row("Max blockchains:", pcl.maxBlockchains.toString())
+                            row("Extra Storage:", pcl.extraStorage.toString())
+                        }
+                    }
+                }
+
+                else -> {
+                    val pcl = client.getContainerLimitsProposalV22(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Container:", pcl.container)
+                            row("Container Units:", pcl.containerUnits.toString())
+                            row("Max blockchains:", pcl.maxBlockchains.toString())
+                        }
+                    }
                 }
             }
         }
 
         ProposalType.cluster_limits -> {
-            val pcl = client.getClusterLimitsProposal(proposalId) ?: return ""
-            return defaultTable {
-                body {
-                    row("Cluster:", pcl.cluster)
-                    row("Cluster Units:", pcl.clusterUnits.toString())
+            when {
+                apiVersion >= 24 -> {
+                    val pcl = client.getClusterLimitsProposal(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Cluster:", pcl.cluster)
+                            row("Cluster Units:", pcl.clusterUnits.toString())
+                            row("Extra Storage:", pcl.extraStorage.toString())
+                        }
+                    }
+                }
+
+                else -> {
+                    val pcl = client.getClusterLimitsProposalV22(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Cluster:", pcl.cluster)
+                            row("Cluster Units:", pcl.clusterUnits.toString())
+                        }
+                    }
                 }
             }
         }
@@ -292,12 +326,28 @@ private fun CliktCommand.formatProposal(client: PostchainClient, proposalId: Row
         }
 
         ProposalType.container -> {
-            val pc = client.getContainerProposal(proposalId) ?: return ""
-            return defaultTable {
-                body {
-                    row("Container:", pc.container)
-                    row("Container Units:", pc.containerUnits.toString())
-                    row("Max blockchains:", pc.maxBlockchains.toString())
+            when {
+                apiVersion >= 24 -> {
+                    val pc = client.getContainerProposal(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Container:", pc.container)
+                            row("Container Units:", pc.containerUnits.toString())
+                            row("Max blockchains:", pc.maxBlockchains.toString())
+                            row("Extra Storage:", pc.extraStorage.toString())
+                        }
+                    }
+                }
+
+                else -> {
+                    val pc = client.getContainerProposalV22(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Container:", pc.container)
+                            row("Container Units:", pc.containerUnits.toString())
+                            row("Max blockchains:", pc.maxBlockchains.toString())
+                        }
+                    }
                 }
             }
         }

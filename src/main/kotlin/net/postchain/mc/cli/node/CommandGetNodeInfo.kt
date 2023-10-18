@@ -36,6 +36,7 @@ fun CliktCommand.showNodeInfo(client: PostchainClient, pubkey: PubKey) {
             node.territory?.let { row("Territory:", it) }
             row("Provided by:", node.provider.toHex())
             node.clusterUnits?.let { row("Cluster Units:", it.toString()) }
+            node.extraStorage?.let { row("Extra Storage:", it.toString()) }
             val clusters = client.listClustersOfNode(PubKey(node.pubkey))
             row("Used by clusters:", "$clusters")
         }

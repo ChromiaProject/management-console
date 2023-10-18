@@ -37,6 +37,7 @@ fun CliktCommand.showClusterInfo(client: PostchainClient, name: String) {
             row("Governor:", info.governor)
             row("Is Operational:", info.isOperational.toString())
             info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
+            info.extraStorage?.let { row("Extra Storage:", it.toString()) }
             row()
         }
     })

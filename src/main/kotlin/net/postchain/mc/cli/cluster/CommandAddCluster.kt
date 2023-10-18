@@ -6,14 +6,18 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.direct_cluster.createClusterFromOperation
+import net.postchain.chain0.direct_cluster.createClusterFromWithClusterQuotaDataDataOperation
 import net.postchain.chain0.direct_cluster.createClusterFromWithUnitsOperation
 import net.postchain.chain0.direct_cluster.createClusterOperation
+import net.postchain.chain0.direct_cluster.createClusterWithClusterQuotaDataOperation
 import net.postchain.chain0.direct_cluster.createClusterWithUnitsOperation
+import net.postchain.chain0.model.ClusterQuotaData
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.VoterSetOrPubkeysOption
 import net.postchain.mc.cli.util.clusterUnitsOption
+import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.nameOrGenerateOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeysOrVotersetOption
@@ -33,6 +37,8 @@ class CommandAddCluster : CliktCommand(
 
     private val clusterUnits by clusterUnitsOption().default(1)
 
+    private val extraStorage by extraStorageOption().default(0)
+
     private val governorName by option(
             "-g", "--governor",
             help = "Name of another voter set which can update this cluster."
@@ -43,6 +49,18 @@ class CommandAddCluster : CliktCommand(
         client.transactionBuilder()
                 .apply {
                     when {
+                        apiVersion >= 24 -> {
+                            when (providerOptions) {
+                                is VoterSetOrPubkeysOption.Pubkeys -> {
+                                    createClusterWithClusterQuotaDataOperation(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, ClusterQuotaData(clusterUnits, extraStorage))
+                                }
+
+                                is VoterSetOrPubkeysOption.VoterSet -> {
+                                    createClusterFromWithClusterQuotaDataDataOperation(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, ClusterQuotaData(clusterUnits, extraStorage))
+                                }
+                            }
+                        }
+
                         apiVersion >= 3 -> {
                             when (providerOptions) {
                                 is VoterSetOrPubkeysOption.Pubkeys -> {

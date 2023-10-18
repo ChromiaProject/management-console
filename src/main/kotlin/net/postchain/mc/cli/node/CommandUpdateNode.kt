@@ -9,15 +9,19 @@ import com.github.ajalt.clikt.parameters.types.enum
 import net.postchain.chain0.common.operations.addNodeToClusterOperation
 import net.postchain.chain0.common.operations.updateNodeCapabilityOperation
 import net.postchain.chain0.common.operations.updateNodeOperation
+import net.postchain.chain0.common.operations.updateNodeWithNodeDataOperation
 import net.postchain.chain0.common.operations.updateNodeWithTerritoryAndUnitsOperation
 import net.postchain.chain0.common.operations.updateNodeWithUnitsOperation
 import net.postchain.chain0.model.NodeCapabilityType
+import net.postchain.chain0.model.UpdateNodeData
 import net.postchain.chain0.version.apiVersion
+import net.postchain.common.types.WrappedByteArray
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.hostOption
 import net.postchain.mc.cli.portOption
 import net.postchain.mc.cli.util.clusterUnitsOption
+import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeyOption
 
@@ -42,6 +46,8 @@ class CommandUpdateNode : CliktCommand(
 
     private val clusterUnits by clusterUnitsOption()
 
+    private val extraStorage by extraStorageOption()
+
     private val clusterName by option(
             "-c",
             "--cluster",
@@ -52,7 +58,7 @@ class CommandUpdateNode : CliktCommand(
     private val removeCapability by option(help = "Node capability").enum<NodeCapabilityType>()
 
     override fun run() {
-        if (host == null && port == null && apiUrl == null && clusterUnits == null && clusterName == null && addCapability == null && removeCapability == null && territory == null) {
+        if (host == null && port == null && apiUrl == null && clusterUnits == null && clusterName == null && addCapability == null && removeCapability == null && territory == null && extraStorage == null) {
             echo("No properties to update. At least one node's property should be specified")
             return
         }
@@ -61,11 +67,20 @@ class CommandUpdateNode : CliktCommand(
         if (territory != null && apiVersion < 15) {
             echo("Territory is not supported in API version $apiVersion and will be ignored")
         }
+        if (extraStorage != null && apiVersion < 24) {
+            echo("Extra Storage is not supported in API version $apiVersion and will be ignored")
+        }
 
         val provider = client.config.pubkey().data
         client.transactionBuilder()
                 .apply {
                     when {
+                        apiVersion >= 24 -> {
+                            if (host != null || port != null || apiUrl != null || clusterUnits != null || territory != null || extraStorage != null) {
+                                updateNodeWithNodeDataOperation(provider, UpdateNodeData(WrappedByteArray(key.data), host, port?.toLong(), apiUrl, clusterUnits, territory, extraStorage))
+                            }
+                        }
+
                         apiVersion >= 15 -> {
                             if (host != null || port != null || apiUrl != null || clusterUnits != null || territory != null) {
                                 updateNodeWithTerritoryAndUnitsOperation(provider, key.data, host, port?.toLong(), apiUrl, territory, clusterUnits)

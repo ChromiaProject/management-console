@@ -134,6 +134,7 @@ fun CliktCommand.pubkeysOrVotersetOption() = mutuallyExclusiveOptions(
 fun CliktCommand.maxBlockchainsOption() = option("-mb", "--max-blockchains", help = "Max number of blockchains per container").long()
 fun CliktCommand.containerUnitsOption() = option("-cou", "--container-units", help = "Container Units (minimum 1)").long()
 fun CliktCommand.clusterUnitsOption() = option("-clu", "--cluster-units", help = "Cluster Units (minimum 1)").long()
+fun CliktCommand.extraStorageOption() = option("-es", "--extra-storage", help = "Extra Storage (MiB)").long()
 
 fun CliktCommand.providerTierOption() = option(help = "Provider tier").switch(
         "-cnp" to ProviderType.COMMUNITY_NODE_PROVIDER,
