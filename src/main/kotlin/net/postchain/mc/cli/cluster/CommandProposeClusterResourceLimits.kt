@@ -11,12 +11,14 @@ import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.clusterUnitsOption
+import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.maxBlockchainsOption
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV2.proposeClusterLimitsOperationV2
+import net.postchain.mc.compatibility.ApiCompatV22.proposeClusterLimitsOperationV22
 
 
 class CommandProposeClusterResourceLimits : CliktCommand(
@@ -36,6 +38,8 @@ class CommandProposeClusterResourceLimits : CliktCommand(
 
     private val clusterUnits by clusterUnitsOption()
 
+    private val extraStorage by extraStorageOption()
+
     private val description by proposalDescriptionOption()
 
     // Remove when api version 2 is not needed
@@ -52,7 +56,8 @@ class CommandProposeClusterResourceLimits : CliktCommand(
         client.transactionBuilder()
                 .apply {
                     when {
-                        apiVersion >= 3 -> proposeClusterLimitsOperation(client.config.pubkey().data, clusterName, clusterUnits, description)
+                        apiVersion >= 24 -> proposeClusterLimitsOperation(client.config.pubkey().data, clusterName, clusterUnits, extraStorage, description)
+                        apiVersion >= 3 -> proposeClusterLimitsOperationV22(client.config.pubkey().data, clusterName, clusterUnits, description)
                         else -> {
                             val limits = mutableMapOf<ApiCompatV2.ClusterResourceLimitType, Long>()
                                     .apply {
