@@ -7,7 +7,6 @@ import net.postchain.mc.cli.blockchain.import_chain.CommandProposeImportBlockcha
 import net.postchain.mc.cli.blockchain.import_chain.CommandProposeImportForeignBlocks
 import net.postchain.mc.cli.blockchain.import_chain.CommandProposeImportForeignConfigurations
 import net.postchain.mc.cli.blockchain.move.CommandProposeBlockchainMove
-import net.postchain.mc.cli.blockchain.move.CommandProposeCancelBlockchainMove
 import net.postchain.mc.cli.blockchain.move.CommandProposeFinishBlockchainMove
 import net.postchain.mc.cli.replica.blockchainReplicaCommands
 
@@ -41,5 +40,7 @@ fun blockchainCommands() = BlockchainCommand().subcommands(
 
         CommandProposeBlockchainMove(),
 //        CommandProposeCancelBlockchainMove(),
-        CommandProposeFinishBlockchainMove()
+        CommandProposeFinishBlockchainMove(),
+
+        CommandProposeArchiveBlockchain()
 )
