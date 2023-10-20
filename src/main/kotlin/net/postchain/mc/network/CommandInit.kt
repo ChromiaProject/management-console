@@ -63,7 +63,11 @@ class CommandInit : CliktCommand(
                 .postAwaitConfirmation()
                 .printResult(
                         "Network was initiated",
-                        "Failed to initiate network"
+                        "Failed to initiate network",
+                        printOnSuccess = true
                 )
+        if (ticketChainConfigData != null) {
+            initTicketChain(client, config.config)
+        }
     }
 }
