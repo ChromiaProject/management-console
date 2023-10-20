@@ -10,6 +10,7 @@ import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.network.requireApiVersion
 
 class CommandProposeArchiveBlockchain : CliktCommand(
         name = "archive",
@@ -23,6 +24,7 @@ class CommandProposeArchiveBlockchain : CliktCommand(
     private val description by proposalDescriptionOption()
 
     override fun run() {
+        client.requireApiVersion(25)
         client.transactionBuilder()
                 .proposeBlockchainActionOperation(
                         client.config.pubkey().data,
