@@ -91,9 +91,9 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
             echo(defaultTable {
                 body {
                     printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name)
-                    row("State:", proposal.state.toString())
+                    row("State", proposal.state.toString())
                     printVotingInfo(client, proposal, apiVersion)
-                    row("Description:", proposal.description)
+                    row("Description", proposal.description)
                 }
             })
 
@@ -112,7 +112,7 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
                 body {
                     printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name)
                     printVotingResults(client.getProposalVotingResults(proposal.id))
-                    row("Description:", proposal.description)
+                    row("Description", proposal.description)
                 }
             })
 
@@ -128,23 +128,23 @@ private fun SectionBuilder.printVotingInfo(client: PostchainClient, proposal: Ge
         printVotingResults(client.getProposalVotingResults(proposal.id))
     } else if (apiVersion >= 9) {
         val votingInfo = client.getProposalVoterInfo(proposal.id)
-        row("Providers that accepted:", votingInfo.filter { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
-        row("Providers that rejected:", votingInfo.filterNot { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
+        row("Providers that accepted", votingInfo.filter { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
+        row("Providers that rejected", votingInfo.filterNot { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
     }
 }
 
 private fun SectionBuilder.printVotingResults(votingResults: ProposalVotingResults) {
-    row("Positive votes:", votingResults.positiveVotes.toString())
-    row("Negative votes:", votingResults.negativeVotes.toString())
-    row("Max votes:", votingResults.maxVotes.toString())
-    row("Threshold:", formatThreshold(votingResults.threshold))
-    row("Status:", votingResults.votingResult.toString())
+    row("Positive votes", votingResults.positiveVotes.toString())
+    row("Negative votes", votingResults.negativeVotes.toString())
+    row("Max votes", votingResults.maxVotes.toString())
+    row("Threshold", formatThreshold(votingResults.threshold))
+    row("Status", votingResults.votingResult.toString())
 }
 
 private fun SectionBuilder.printProposalHeader(id: RowId, type: ProposalType, timestamp: Long, proposedByPubkey: WrappedByteArray, proposedByName: String) {
-    row("Proposal:", "${id.id} - ${type.name}")
-    row("Proposed by:", formatProvider(proposedByPubkey, proposedByName))
-    row("Time:", "${Date.from(Instant.ofEpochMilli(timestamp))}")
+    row("Proposal", "${id.id} - ${type.name}")
+    row("Proposed by", formatProvider(proposedByPubkey, proposedByName))
+    row("Time", "${Date.from(Instant.ofEpochMilli(timestamp))}")
 }
 
 private fun formatProvider(providerPubKey: WrappedByteArray, providerName: String) =
@@ -175,11 +175,11 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
             val vsu = client.getVoterSetUpdateProposal(proposalId.id) ?: return ""
             return defaultTable {
                 body {
-                    row("Voter set:", vsu.voterSet)
-                    row("Governor update:", vsu.governor ?: "")
-                    row("Majority threshold update:", vsu.threshold?.toString() ?: "")
-                    row("New member:", vsu.addMember.joinToString(", ") { it.toHex() })
-                    row("Remove member:", vsu.removeMember.joinToString(", ") { it.toHex() })
+                    row("Voter set", vsu.voterSet)
+                    row("Governor update", vsu.governor ?: "")
+                    row("Majority threshold update", vsu.threshold?.toString() ?: "")
+                    row("New member", vsu.addMember.joinToString(", ") { it.toHex() })
+                    row("Remove member", vsu.removeMember.joinToString(", ") { it.toHex() })
                 }
             }
         }
@@ -188,9 +188,9 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
             val cpc = client.getClusterProviderProposal(proposalId) ?: return ""
             return table {
                 body {
-                    row("Cluster:", cpc.cluster)
-                    row("Provider:", cpc.provider.toHex())
-                    row("Add/Remove:", if (cpc.add) "Add" else "remove")
+                    row("Cluster", cpc.cluster)
+                    row("Provider", cpc.provider.toHex())
+                    row("Add/Remove", if (cpc.add) "Add" else "remove")
                 }
             }
         }
@@ -199,8 +199,8 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
             val pis = client.getSystemProviderProposal(proposalId) ?: return ""
             return defaultTable {
                 body {
-                    row("Provider:", pis.provider.toHex())
-                    row("Add/Remove:", if (pis.add) "Add" else "remove")
+                    row("Provider", pis.provider.toHex())
+                    row("Add/Remove", if (pis.add) "Add" else "remove")
                 }
             }
         }
@@ -209,9 +209,9 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
             val ppq = client.getProviderQuotaProposal(proposalId) ?: return ""
             return defaultTable {
                 body {
-                    row("Provider tier:", ppq.tier.name)
-                    row("Quota type:", ppq.quotaType.name)
-                    row("Value:", ppq.value.toString())
+                    row("Provider tier", ppq.tier.name)
+                    row("Quota type", ppq.quotaType.name)
+                    row("Value", ppq.value.toString())
                 }
             }
         }
@@ -221,9 +221,9 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
 
             echo(defaultTable {
                 body {
-                    row("Provider tier:", ppb.tier.toString())
-                    row("System:", ppb.system.toString())
-                    row("Active:", ppb.active.toString())
+                    row("Provider tier", ppb.tier.toString())
+                    row("System", ppb.system.toString())
+                    row("Active", ppb.active.toString())
                 }
             })
 
@@ -246,10 +246,10 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
                     val pcl = client.getContainerLimitsProposal(proposalId) ?: return ""
                     return defaultTable {
                         body {
-                            row("Container:", pcl.container)
-                            row("Container Units:", pcl.containerUnits.toString())
-                            row("Max blockchains:", pcl.maxBlockchains.toString())
-                            row("Extra Storage:", pcl.extraStorage.toString())
+                            row("Container", pcl.container)
+                            row("Container Units", pcl.containerUnits.toString())
+                            row("Max blockchains", pcl.maxBlockchains.toString())
+                            row("Extra Storage", pcl.extraStorage.toString())
                         }
                     }
                 }
@@ -258,9 +258,9 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
                     val pcl = client.getContainerLimitsProposalV22(proposalId) ?: return ""
                     return defaultTable {
                         body {
-                            row("Container:", pcl.container)
-                            row("Container Units:", pcl.containerUnits.toString())
-                            row("Max blockchains:", pcl.maxBlockchains.toString())
+                            row("Container", pcl.container)
+                            row("Container Units", pcl.containerUnits.toString())
+                            row("Max blockchains", pcl.maxBlockchains.toString())
                         }
                     }
                 }
@@ -273,9 +273,9 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
                     val pcl = client.getClusterLimitsProposal(proposalId) ?: return ""
                     return defaultTable {
                         body {
-                            row("Cluster:", pcl.cluster)
-                            row("Cluster Units:", pcl.clusterUnits.toString())
-                            row("Extra Storage:", pcl.extraStorage.toString())
+                            row("Cluster", pcl.cluster)
+                            row("Cluster Units", pcl.clusterUnits.toString())
+                            row("Extra Storage", pcl.extraStorage.toString())
                         }
                     }
                 }
@@ -284,8 +284,8 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
                     val pcl = client.getClusterLimitsProposalV22(proposalId) ?: return ""
                     return defaultTable {
                         body {
-                            row("Cluster:", pcl.cluster)
-                            row("Cluster Units:", pcl.clusterUnits.toString())
+                            row("Cluster", pcl.cluster)
+                            row("Cluster Units", pcl.clusterUnits.toString())
                         }
                     }
                 }
@@ -301,9 +301,9 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
             val pps = client.getProviderStateProposal(proposalId) ?: return ""
             return defaultTable {
                 body {
-                    row("Provider:", pps.provider.toHex())
-                    row("Provider name:", pps.providerName)
-                    row("Enable/Disable:", if (pps.active) "Enable" else "Disable")
+                    row("Provider", pps.provider.toHex())
+                    row("Provider name", pps.providerName)
+                    row("Enable/Disable", if (pps.active) "Enable" else "Disable")
                 }
             }
         }
@@ -312,9 +312,9 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
             val pba = client.getBlockchainActionProposal(proposalId) ?: return ""
             return defaultTable {
                 body {
-                    row("Blockchain:", pba.blockchain.toHex())
-                    row("Blockchain name:", pba.blockchainName)
-                    row("Action:", pba.action.name)
+                    row("Blockchain RID", pba.blockchain.toHex())
+                    row("Blockchain name", pba.blockchainName)
+                    row("Action", pba.action.name)
                 }
             }
         }
@@ -332,10 +332,10 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
                     val pc = client.getContainerProposal(proposalId) ?: return ""
                     return defaultTable {
                         body {
-                            row("Container:", pc.container)
-                            row("Container Units:", pc.containerUnits.toString())
-                            row("Max blockchains:", pc.maxBlockchains.toString())
-                            row("Extra Storage:", pc.extraStorage.toString())
+                            row("Container", pc.container)
+                            row("Container Units", pc.containerUnits.toString())
+                            row("Max blockchains", pc.maxBlockchains.toString())
+                            row("Extra Storage", pc.extraStorage.toString())
                         }
                     }
                 }
@@ -344,9 +344,9 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
                     val pc = client.getContainerProposalV22(proposalId) ?: return ""
                     return defaultTable {
                         body {
-                            row("Container:", pc.container)
-                            row("Container Units:", pc.containerUnits.toString())
-                            row("Max blockchains:", pc.maxBlockchains.toString())
+                            row("Container", pc.container)
+                            row("Container Units", pc.containerUnits.toString())
+                            row("Max blockchains", pc.maxBlockchains.toString())
                         }
                     }
                 }
@@ -359,34 +359,74 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
         }
 
         ProposalType.blockchain_import -> {
-            val bip = client.getBlockchainImportProposal(proposalId) ?: return ""
-            GtvDecoder.decodeGtv(bip.configData.data)
-            return "Blockchain RID:\n${bip.blockchainRid}\n\nName: ${bip.name}\nContainer: ${bip.container}\nConfig hash: ${getDataHash(bip.configData)}"
+            val proposal = client.getBlockchainImportProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Blockchain Name", proposal.name)
+                    row("Container", proposal.container)
+                    row("Config hash", getDataHash(proposal.configData))
+                }
+            }
         }
 
         ProposalType.configuration_import -> {
-            val cip = client.getConfigurationImportProposal(proposalId) ?: return ""
-            return "Blockchain RID:\n${cip.blockchainRid}\nHeight: ${cip.height}\nConfig hash: ${getDataHash(cip.configData)}"
+            val proposal = client.getConfigurationImportProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Height", proposal.height)
+                    row("Config hash", getDataHash(proposal.configData))
+                }
+            }
         }
 
         ProposalType.finish_blockchain_import -> {
-            val fbi = client.getFinishBlockchainImportProposal(proposalId) ?: return ""
-            return "Blockchain RID: ${fbi.blockchainRid}"
+            val proposal = client.getFinishBlockchainImportProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Finish at height", proposal.finishAtHeight)
+                }
+            }
         }
 
         ProposalType.foreign_blockchain_import -> {
             val proposal = client.getForeignBlockchainImportProposal(proposalId) ?: return ""
-            return "$proposal"
+            return defaultTable {
+                body {
+                    row("Foreign node", proposal.foreignNode)
+                    row("Host", proposal.host)
+                    row("Port", proposal.port)
+                    row("Api url", proposal.apiUrl)
+                    row("Chain0 RID", proposal.chain0Rid)
+                    row("Blockchain name", proposal.blockchainName)
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Container", proposal.container)
+                }
+            }
         }
 
         ProposalType.foreign_blockchain_blocks_import -> {
             val proposal = client.getForeignBlockchainBlocksImportProposal(proposalId) ?: return ""
-            return "$proposal"
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Up to height", proposal.upToHeight)
+                }
+            }
         }
 
         ProposalType.blockchain_move_start -> {
             val proposal = client.getBlockchainMoveProposal(proposalId) ?: return ""
-            return "$proposal"
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Blockchain name", proposal.blockchainName)
+                    row("Cluster", proposal.cluster)
+                    row("Container", proposal.container)
+                }
+            }
         }
 
         ProposalType.blockchain_move_cancel -> {
@@ -397,7 +437,15 @@ private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClien
 
         ProposalType.blockchain_move_finish -> {
             val proposal = client.getBlockchainMoveFinishProposal(proposalId) ?: return ""
-            return "$proposal"
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Blockchain name", proposal.blockchainName)
+                    row("Cluster", proposal.cluster)
+                    row("Container", proposal.container)
+                    row("Finish at height", proposal.finishAtHeight)
+                }
+            }
         }
     }
 }
