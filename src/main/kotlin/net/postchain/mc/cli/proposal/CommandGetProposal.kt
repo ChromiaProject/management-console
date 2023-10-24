@@ -100,7 +100,7 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
             if (proposal.state == ProposalState.PENDING) {
                 echo("Proposal details")
                 echo("------------------------------")
-                echo(formatProposal(apiVersion, client, proposal.id, proposal.type))
+                echo(formatPendingProposal(apiVersion, client, proposal.id, proposal.type))
             }
         }
 
@@ -118,7 +118,7 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
 
             echo("Proposal details")
             echo("------------------------------")
-            echo(formatProposal(apiVersion, client, proposal.id, proposal.type))
+            echo(formatPendingProposal(apiVersion, client, proposal.id, proposal.type))
         }
     }
 }
@@ -150,7 +150,7 @@ private fun SectionBuilder.printProposalHeader(id: RowId, type: ProposalType, ti
 private fun formatProvider(providerPubKey: WrappedByteArray, providerName: String) =
         "${providerPubKey.toHex()}${if (providerName.isNotEmpty()) " - $providerName" else ""}"
 
-private fun CliktCommand.formatProposal(apiVersion: Long, client: PostchainClient, proposalId: RowId, proposalType: ProposalType): Any {
+private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: PostchainClient, proposalId: RowId, proposalType: ProposalType): Any {
     return when (proposalType) {
         ProposalType.bc -> {
             val bp = client.getBlockchainProposal(proposalId) ?: return ""
