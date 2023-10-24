@@ -11,6 +11,7 @@ import net.postchain.chain0.proposal.GetProposalResult
 import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.ProposalType
 import net.postchain.chain0.proposal.ProposalVotingResults
+import net.postchain.chain0.proposal.getBlockchainConfigurationUpdateAttemptStateByProposal
 import net.postchain.chain0.proposal.getProposal
 import net.postchain.chain0.proposal.getProposalVoterInfo
 import net.postchain.chain0.proposal.getProposalVotingResults
@@ -101,6 +102,8 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
                 echo("Proposal details")
                 echo("------------------------------")
                 echo(formatPendingProposal(apiVersion, client, proposal.id, proposal.type))
+            } else if (apiVersion >= 26 && proposal.state == ProposalState.APPROVED && proposal.type == ProposalType.configuration) {
+                printApprovedConfigurationStatus(client, proposal)
             }
         }
 
@@ -120,6 +123,22 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
             echo("------------------------------")
             echo(formatPendingProposal(apiVersion, client, proposal.id, proposal.type))
         }
+    }
+}
+
+private fun CliktCommand.printApprovedConfigurationStatus(client: PostchainClient, proposal: GetProposalResult) {
+    val updateState = client.getBlockchainConfigurationUpdateAttemptStateByProposal(proposal.id)
+    if (updateState != null) {
+        echo("")
+        echo("Configuration update status")
+        echo("------------------------------")
+        val heightInfo = if (updateState.appliedAtHeight > -1) updateState.appliedAtHeight.toString() else "Not applied yet"
+        echo(defaultTable {
+            header { row("Status", "Applied at height") }
+            body {
+                row(updateState.state.toString(), heightInfo)
+            }
+        })
     }
 }
 
