@@ -10,6 +10,7 @@ import net.postchain.chain0.common.queries.getProviderData
 import net.postchain.chain0.proposal.GetProposalResult
 import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.ProposalType
+import net.postchain.chain0.proposal.ProposalVotingResults
 import net.postchain.chain0.proposal.getProposal
 import net.postchain.chain0.proposal.getProposalVoterInfo
 import net.postchain.chain0.proposal.getProposalVotingResults
@@ -89,9 +90,7 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
 
             echo(defaultTable {
                 body {
-                    row("Proposal:", "${proposal.id.id} - ${proposal.type.name}")
-                    row("Proposed by:", "${proposedBy.pubkey.toHex()}${if (proposedBy.name.isNotEmpty()) " - " + proposedBy.name else ""}")
-                    row("Time:", "${Date.from(Instant.ofEpochMilli(proposal.timestamp))}")
+                    printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name)
                     row("State:", proposal.state.toString())
                     printVotingInfo(client, proposal, apiVersion)
                     row("Description:", proposal.description)
@@ -108,18 +107,11 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
         else -> {
             val proposal = client.getProposalV6(id) ?: return echo("Proposal $id not found")
             val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
-            val votingResults = client.getProposalVotingResults(proposal.id)
 
             echo(defaultTable {
                 body {
-                    row("Proposal:", "${proposal.id.id} - ${proposal.type.name}")
-                    row("Proposed by:", formatProvider(proposedBy.pubkey, proposedBy.name))
-                    row("Time:", "${Date.from(Instant.ofEpochMilli(proposal.timestamp))}")
-                    row("Positive votes:", votingResults.positiveVotes.toString())
-                    row("Negative votes:", votingResults.negativeVotes.toString())
-                    row("Max votes:", votingResults.maxVotes.toString())
-                    row("Threshold:", formatThreshold(votingResults.threshold))
-                    row("Status:", votingResults.votingResult.toString())
+                    printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name)
+                    printVotingResults(client.getProposalVotingResults(proposal.id))
                     row("Description:", proposal.description)
                 }
             })
@@ -133,17 +125,26 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
 
 private fun SectionBuilder.printVotingInfo(client: PostchainClient, proposal: GetProposalResult, apiVersion: Long) {
     if (proposal.state == ProposalState.PENDING) {
-        val votingResults = client.getProposalVotingResults(proposal.id)
-        row("Positive votes:", votingResults.positiveVotes.toString())
-        row("Negative votes:", votingResults.negativeVotes.toString())
-        row("Max votes:", votingResults.maxVotes.toString())
-        row("Threshold:", formatThreshold(votingResults.threshold))
-        row("Status:", votingResults.votingResult.toString())
+        printVotingResults(client.getProposalVotingResults(proposal.id))
     } else if (apiVersion >= 9) {
         val votingInfo = client.getProposalVoterInfo(proposal.id)
         row("Providers that accepted:", votingInfo.filter { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
         row("Providers that rejected:", votingInfo.filterNot { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
     }
+}
+
+private fun SectionBuilder.printVotingResults(votingResults: ProposalVotingResults) {
+    row("Positive votes:", votingResults.positiveVotes.toString())
+    row("Negative votes:", votingResults.negativeVotes.toString())
+    row("Max votes:", votingResults.maxVotes.toString())
+    row("Threshold:", formatThreshold(votingResults.threshold))
+    row("Status:", votingResults.votingResult.toString())
+}
+
+private fun SectionBuilder.printProposalHeader(id: RowId, type: ProposalType, timestamp: Long, proposedByPubkey: WrappedByteArray, proposedByName: String) {
+    row("Proposal:", "${id.id} - ${type.name}")
+    row("Proposed by:", formatProvider(proposedByPubkey, proposedByName))
+    row("Time:", "${Date.from(Instant.ofEpochMilli(timestamp))}")
 }
 
 private fun formatProvider(providerPubKey: WrappedByteArray, providerName: String) =
