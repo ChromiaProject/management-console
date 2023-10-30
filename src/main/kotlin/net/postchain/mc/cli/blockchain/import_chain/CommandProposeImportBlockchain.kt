@@ -45,12 +45,13 @@ class CommandProposeImportBlockchain : CliktCommand(
 
     override fun run() {
         client.requireApiVersion(19)
-        echo("Blockchain $name will be imported")
         BufferedInputStream(FileInputStream(configurationsFile.toFile())).use {
             val blockchainRid = BlockchainRid(GtvDecoder.decodeGtv(it).asByteArray())
             val initialConfig = GtvDecoder.decodeGtv(it)
             require(initialConfig.asArray()[0].asInteger() == 0L)
             val initialConfigData = initialConfig.asArray()[1].asByteArray()
+
+            echo("Blockchain $name with bc-rid $blockchainRid will be imported")
 
             proposeImportBlockchain(blockchainRid, initialConfigData)
 
@@ -84,7 +85,7 @@ class CommandProposeImportBlockchain : CliktCommand(
                         "Cannot import blockchain config(s): ${result.rejectReason}", true
                 )
             }
-            echo("Blockchain $name with $numConfigs blockchain configuration(s) imported")
+            echo("Blockchain $name with bc-rid $blockchainRid with $numConfigs blockchain configuration(s) imported")
         }
     }
 
