@@ -64,6 +64,7 @@ fun OptionTransformContext.validatePubkey(pubKey: PubKey) {
 fun CliktCommand.pmcConfigOption() = PmcClientConfigOption(cliEnv())
 
 class PmcClientConfigOption(cliEnv: RellCliEnv) : OptionalChromiaModelConfigOption(cliEnv) {
+    private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup").flag()
     val network by option("--network", help = "Target network to make requests to (if chromia.yml is configured)")
     val client by lazy {
         if (network != null) {
@@ -73,7 +74,7 @@ class PmcClientConfigOption(cliEnv: RellCliEnv) : OptionalChromiaModelConfigOpti
             config.setProperty("brid", networkModel.blockchainRid.toHex())
             config.setProperty("api.url", networkModel.urls.joinToString(","))
         }
-        NopPostchainClient.withCachedBrid(config)
+        NopPostchainClient.withCachedBrid(config, lookupBrid)
     }
 
 }
