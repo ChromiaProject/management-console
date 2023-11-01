@@ -15,8 +15,10 @@ import net.postchain.chain0.proposal.getBlockchainConfigurationUpdateAttemptStat
 import net.postchain.chain0.proposal.getProposal
 import net.postchain.chain0.proposal.getProposalVoterInfo
 import net.postchain.chain0.proposal.getProposalVotingResults
+import net.postchain.chain0.proposal_blockchain.BlockchainAction
 import net.postchain.chain0.proposal_blockchain.getBlockchainActionProposal
 import net.postchain.chain0.proposal_blockchain.getBlockchainProposal
+import net.postchain.chain0.proposal_blockchain.getBlockchainUnarchiveActionProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposalAt
 import net.postchain.chain0.proposal_blockchain_import.getBlockchainImportProposal
@@ -334,6 +336,15 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                     row("Blockchain RID", pba.blockchain.toHex())
                     row("Blockchain name", pba.blockchainName)
                     row("Action", pba.action.name)
+
+                    if (apiVersion >= 27 && pba.action == BlockchainAction.unarchive) {
+                        val unarchivingProposal = client.getBlockchainUnarchiveActionProposal(proposalId)
+                        if (unarchivingProposal != null) {
+                            row("Source container", unarchivingProposal.sourceContainer)
+                            row("Destination container", unarchivingProposal.destinationContainer)
+                            row("Up to height", unarchivingProposal.upToHeight)
+                        }
+                    }
                 }
             }
         }

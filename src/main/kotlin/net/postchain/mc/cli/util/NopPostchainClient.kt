@@ -21,8 +21,11 @@ class NopPostchainClient(val client: PostchainClient) : PostchainClient by clien
     override fun transactionBuilder(signers: List<KeyPair>) = client.transactionBuilder(signers).addNop()
 
     companion object {
-        fun withCachedBrid(config: ChromiaConfig): PostchainClient {
-            val brid = config.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
+        fun withCachedBrid(config: ChromiaConfig, lookupBrid: Boolean): PostchainClient {
+            val brid = (if (!lookupBrid)
+                config.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
+            else
+                null)
                     ?.let { BlockchainRid.buildFromHex(it) }
                     ?: findAndCacheBrid(config)
             return NopPostchainClient(PostchainClientImpl(config.get(blockchainRid = brid)))
