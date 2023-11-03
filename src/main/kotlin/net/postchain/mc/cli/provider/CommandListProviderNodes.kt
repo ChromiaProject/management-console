@@ -30,7 +30,7 @@ class CommandListProviderNodes : CliktCommand(
             echo("Nodes for provider $providerPubkey")
             echo(defaultTable {
                 column(0) {
-                    width = ColumnWidth.Fixed(PUBKEY_LENGTH + 1)
+                    width = ColumnWidth.Fixed(PUBKEY_LENGTH + 2)
                 }
                 header { row("Pubkey", "Host", "Port", "REST API", "Territory", "Active", "Last updated") }
                 body {

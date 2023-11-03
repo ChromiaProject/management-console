@@ -47,7 +47,7 @@ class CommandListBlockchains : CliktCommand(
                             }
                         } else {
                             column(1) {
-                                width = ColumnWidth.Fixed(RID_LENGTH + 1)
+                                width = ColumnWidth.Fixed(RID_LENGTH + 2)
                             }
                         }
                         header { rowFrom(if (interactive) listOf("#") + headers else headers) }
