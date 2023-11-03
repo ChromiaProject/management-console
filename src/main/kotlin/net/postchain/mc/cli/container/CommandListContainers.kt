@@ -43,7 +43,7 @@ class CommandListContainers : CliktCommand(
             }
             echo(defaultTable {
                 column(0) {
-                    width = ColumnWidth.Fixed(if (interactive) 3 else NAME_LENGTH_MAX + 1)
+                    width = ColumnWidth.Fixed(if (interactive) 3 else NAME_LENGTH_MAX + 2)
                 }
                 header { rowFrom(if (interactive) listOf("#") + headers else headers) }
                 body {

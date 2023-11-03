@@ -34,7 +34,7 @@ class CommandListProviders : CliktCommand(
                     }
                 } else {
                     column(2) {
-                        width = ColumnWidth.Fixed(PUBKEY_LENGTH + 1)
+                        width = ColumnWidth.Fixed(PUBKEY_LENGTH + 2)
                     }
                 }
                 header { rowFrom(if (interactive) listOf("#") + headers else headers) }
