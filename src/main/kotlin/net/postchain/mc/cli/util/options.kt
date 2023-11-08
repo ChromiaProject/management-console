@@ -1,5 +1,7 @@
 package net.postchain.mc.cli.util
 
+import com.chromia.cli.tools.config.OptionalChromiaModelConfigOption
+import com.chromia.cli.tools.env.cliEnv
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.groups.required
@@ -7,48 +9,75 @@ import com.github.ajalt.clikt.parameters.groups.single
 import com.github.ajalt.clikt.parameters.options.OptionTransformContext
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
-import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.split
 import com.github.ajalt.clikt.parameters.options.switch
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.model.ProviderQuotaType
-import net.postchain.client.config.PostchainClientConfig
-import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.common.hexStringToByteArray
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.CommandBase
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
-import net.postchain.mc.cli.config.PmcConfigProvider.fromSystemConfig
+import net.postchain.rell.api.base.RellCliEnv
 import java.net.MalformedURLException
 import java.net.URISyntaxException
 import java.net.URL
 
 
-const val POSTCHAIN_CLIENT_CONFIG = "POSTCHAIN_CLIENT_CONFIG"
+const val CHROMIA_CONFIG = "CHROMIA_CONFIG"
+const val ECDSA_COMPRESSED_KEY_SIZE = 33
+const val ECDSA_UNCOMPRESSED_KEY_SIZE = 65
+const val DILITHIUM2_KEY_SIZE = 1336
+
 fun CliktCommand.pubkeyOption(helpMsg: String = "Public key") = option("-pk", "--pubkey", help = helpMsg, envvar = "POSTCHAIN_PUBKEY")
         .convert { PubKey(it) }
+        .required()
+        .validate(pubkeyValidator())
+
+fun CliktCommand.optionalPubkeyOption(helpMsg: String = "Public key") = option("-pk", "--pubkey", help = helpMsg, envvar = "POSTCHAIN_PUBKEY")
+        .convert { PubKey(it) }
+        .validate(pubkeyValidator())
 
 fun CliktCommand.pubkeysOption(helpMsg: String = "Comma delimited list of public keys") = option("--pubkeys", help = helpMsg)
         .convert { PubKey(it) }.split(",")
+        .required()
+        .validate(pubkeysValidator())
 
-fun CliktCommand.configOption() = configOptionBase().defaultLazy { fromSystemConfig() }
-fun CliktCommand.clientOption() = clientOptionBase()
-        .defaultLazy { PostchainClientImpl(fromSystemConfig()) }
+fun pubkeyValidator(): OptionTransformContext.(PubKey) -> Unit = {
+    validatePubkey(it)
+}
+fun pubkeysValidator(): OptionTransformContext.(List<PubKey>) -> Unit = {
+    it.forEach(::validatePubkey)
+}
 
-fun CliktCommand.nopClientOption() = clientOptionBase()
-        .convert { NopPostchainClient(it) }
-        .defaultLazy { NopPostchainClient(PostchainClientImpl(fromSystemConfig())) }
+fun OptionTransformContext.validatePubkey(pubKey: PubKey) {
+    val keySize = pubKey.data.size
+    require(keySize == ECDSA_COMPRESSED_KEY_SIZE || keySize == ECDSA_UNCOMPRESSED_KEY_SIZE || keySize == DILITHIUM2_KEY_SIZE) {
+        "Size of public key $pubKey is not valid, must be $ECDSA_COMPRESSED_KEY_SIZE, $ECDSA_UNCOMPRESSED_KEY_SIZE or $DILITHIUM2_KEY_SIZE"
+    }
+}
 
-private fun CliktCommand.clientOptionBase() = configOptionBase()
-        .convert { PostchainClientImpl(it) }
+fun CliktCommand.pmcConfigOption() = PmcClientConfigOption(cliEnv())
 
-private fun CliktCommand.configOptionBase() =
-        option("-cfg", "--config", help = "Configuration file for PMC (overrides system configuration)", envvar = POSTCHAIN_CLIENT_CONFIG)
-                .convert { PostchainClientConfig.fromProperties(it) }
+class PmcClientConfigOption(cliEnv: RellCliEnv) : OptionalChromiaModelConfigOption(cliEnv) {
+    private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup").flag()
+    val network by option("--network", help = "Target network to make requests to (if chromia.yml is configured)")
+    val client by lazy {
+        if (network != null) {
+            requireNotNull(model) { "chromia.yml not found"}
+            val networkModel = model!!.deployments[network]
+                    ?: throw IllegalArgumentException("Network $network not found in configuration")
+            config.setProperty("brid", networkModel.blockchainRid.toHex())
+            config.setProperty("api.url", networkModel.urls.joinToString(","))
+        }
+        NopPostchainClient.withCachedBrid(config, lookupBrid)
+    }
+
+}
 
 fun CliktCommand.nameOption(helpMessage: String) = option("-n", "--name", help = helpMessage)
 
@@ -70,18 +99,22 @@ fun entityNameValidator(): OptionTransformContext.(String) -> Unit = {
 }
 
 fun CliktCommand.urlOption(helpMessage: String) = option("--url", help = helpMessage)
-        .validate(validateUrl())
+        .validate(urlValidator())
 
-fun validateUrl(): OptionTransformContext.(String) -> Unit = {
+fun urlValidator(): OptionTransformContext.(String) -> Unit = {
+    validateUrl(it)
+}
+
+fun OptionTransformContext.validateUrl(url: String) {
     val valid = try {
-        URL(it).toURI()
+        URL(url).toURI()
         true
     } catch (e: MalformedURLException) {
         false
     } catch (e: URISyntaxException) {
         false
     }
-    require(valid) { "Invalid URL provided: $it" }
+    require(valid) { "Invalid URL provided: $url" }
 }
 
 
@@ -102,6 +135,7 @@ fun CliktCommand.pubkeysOrVotersetOption() = mutuallyExclusiveOptions(
 fun CliktCommand.maxBlockchainsOption() = option("-mb", "--max-blockchains", help = "Max number of blockchains per container").long()
 fun CliktCommand.containerUnitsOption() = option("-cou", "--container-units", help = "Container Units (minimum 1)").long()
 fun CliktCommand.clusterUnitsOption() = option("-clu", "--cluster-units", help = "Cluster Units (minimum 1)").long()
+fun CliktCommand.extraStorageOption() = option("-es", "--extra-storage", help = "Extra Storage (MiB)").long()
 
 fun CliktCommand.providerTierOption() = option(help = "Provider tier").switch(
         "-cnp" to ProviderType.COMMUNITY_NODE_PROVIDER,

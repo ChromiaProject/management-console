@@ -1,24 +1,31 @@
 package net.postchain.mc.cli.proposal
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
+import com.github.ajalt.mordant.table.SectionBuilder
+import com.github.ajalt.mordant.table.table
 import net.postchain.chain0.common.queries.getProviderData
 import net.postchain.chain0.proposal.GetProposalResult
 import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.ProposalType
-import net.postchain.chain0.proposal.ProposalVoter
+import net.postchain.chain0.proposal.ProposalVotingResults
+import net.postchain.chain0.proposal.getBlockchainConfigurationUpdateAttemptStateByProposal
 import net.postchain.chain0.proposal.getProposal
 import net.postchain.chain0.proposal.getProposalVoterInfo
 import net.postchain.chain0.proposal.getProposalVotingResults
 import net.postchain.chain0.proposal_blockchain.getBlockchainActionProposal
-import net.postchain.chain0.proposal_blockchain.getBlockchainImportProposal
 import net.postchain.chain0.proposal_blockchain.getBlockchainProposal
-import net.postchain.chain0.proposal_blockchain.getConfigurationImportProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposalAt
-import net.postchain.chain0.proposal_blockchain.getFinishBlockchainImportProposal
+import net.postchain.chain0.proposal_blockchain_import.getBlockchainImportProposal
+import net.postchain.chain0.proposal_blockchain_import.getConfigurationImportProposal
+import net.postchain.chain0.proposal_blockchain_import.getFinishBlockchainImportProposal
+import net.postchain.chain0.proposal_blockchain_import.getForeignBlockchainBlocksImportProposal
+import net.postchain.chain0.proposal_blockchain_import.getForeignBlockchainImportProposal
+import net.postchain.chain0.proposal_blockchain_move.getBlockchainMoveFinishProposal
+import net.postchain.chain0.proposal_blockchain_move.getBlockchainMoveProposal
 import net.postchain.chain0.proposal_cluster.getClusterLimitsProposal
 import net.postchain.chain0.proposal_cluster.getClusterProviderProposal
 import net.postchain.chain0.proposal_cluster.getClusterRemoveProposal
@@ -39,267 +46,432 @@ import net.postchain.common.wrap
 import net.postchain.crypto.PubKey
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.GtvDictionary
+import net.postchain.gtv.GtvFactory
 import net.postchain.gtv.merkle.GtvMerkleHashCalculator
 import net.postchain.gtv.merkleHash
-import net.postchain.mc.cli.base.ClientUtil
 import net.postchain.mc.cli.base.cryptoSystem
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
-import net.postchain.mc.cli.util.configOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.votingupdates.formatThreshold
+import net.postchain.mc.compatibility.ApiCompatV22.getClusterLimitsProposalV22
+import net.postchain.mc.compatibility.ApiCompatV22.getContainerLimitsProposalV22
+import net.postchain.mc.compatibility.ApiCompatV22.getContainerProposalV22
 import net.postchain.mc.compatibility.ApiCompatV6.getProposalV6
 import net.postchain.mc.gtv.diff.GtvDiffFinder
 import java.time.Instant
-import java.util.*
+import java.util.Date
+
+private val AUTO_GENERATED_CONFIG_FIELDS = setOf(
+        "chain0_last_block_rid",
+        "chain0_block_height",
+        "chain0_tx_rid",
+        "chain0_op_index"
+)
 
 class CommandGetProposal : CliktCommand(
         name = "info",
         help = "Gets information of a given proposal"
 ) {
-    private val config by configOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val id by proposalIndexOption().convert { RowId(it) }
 
     override fun run() {
-        val client = ClientUtil.fromConfig(config)
-        val apiVersion = client.apiVersion()
-        when {
-            apiVersion >= 7 -> {
-                val proposal = client.getProposal(id) ?: return echo("Proposal $id not found")
-                val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
+        showProposalInfo(client, id)
+    }
+}
 
-                table {
-                    row("Proposal:", "${proposal.id.id} - ${proposal.type.name}")
-                    row("Proposed by:", "${proposedBy.pubkey.toHex()}${if (proposedBy.name.isNotEmpty()) " - " + proposedBy.name else ""}")
-                    row("Time:", "${Date.from(Instant.ofEpochMilli(proposal.timestamp))}")
-                    row("State:", proposal.state.toString())
+fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
+    val apiVersion = client.apiVersion()
+    when {
+        apiVersion >= 7 -> {
+            val proposal = client.getProposal(id) ?: return echo("Proposal $id not found")
+            val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
+
+            echo(defaultTable {
+                body {
+                    printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name)
+                    row("State", proposal.state.toString())
                     printVotingInfo(client, proposal, apiVersion)
-                    row("Description:", proposal.description)
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().also {
-                    echo(it.toString())
+                    row("Description", proposal.description)
                 }
+            })
 
-                if (proposal.state == ProposalState.PENDING) {
-                    echo("Proposal details")
-                    echo("------------------------------")
-                    echo(formatProposal(client, proposal.id, proposal.type))
-                }
-            }
-
-            else -> {
-                val proposal = client.getProposalV6(id) ?: return echo("Proposal $id not found")
-                val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
-                val votingResults = client.getProposalVotingResults(proposal.id)
-
-                table {
-                    row("Proposal:", "${proposal.id.id} - ${proposal.type.name}")
-                    row("Proposed by:", formatProvider(proposedBy.pubkey, proposedBy.name))
-                    row("Time:", "${Date.from(Instant.ofEpochMilli(proposal.timestamp))}")
-                    row("Positive votes:", votingResults.positiveVotes.toString())
-                    row("Negative votes:", votingResults.negativeVotes.toString())
-                    row("Max votes:", votingResults.maxVotes.toString())
-                    row("Threshold:", formatThreshold(votingResults.threshold))
-                    row("Status:", votingResults.votingResult.toString())
-                    row("Description:", proposal.description)
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().also {
-                    echo(it.toString())
-                }
-
+            if (proposal.state == ProposalState.PENDING) {
                 echo("Proposal details")
                 echo("------------------------------")
-                echo(formatProposal(client, proposal.id, proposal.type))
+                echo(formatPendingProposal(apiVersion, client, proposal.id, proposal.type))
+            } else if (apiVersion >= 26 && proposal.state == ProposalState.APPROVED && proposal.type == ProposalType.configuration) {
+                printApprovedConfigurationStatus(client, proposal)
             }
         }
-    }
 
-    private fun Table.printVotingInfo(client: PostchainClient, proposal: GetProposalResult, apiVersion: Long) {
-        if (proposal.state == ProposalState.PENDING) {
-            val votingResults = client.getProposalVotingResults(proposal.id)
-            row("Positive votes:", votingResults.positiveVotes.toString())
-            row("Negative votes:", votingResults.negativeVotes.toString())
-            row("Max votes:", votingResults.maxVotes.toString())
-            row("Threshold:", formatThreshold(votingResults.threshold))
-            row("Status:", votingResults.votingResult.toString())
-        } else if (apiVersion >= 9) {
-            val votingInfo = client.getProposalVoterInfo(proposal.id)
-            row("Providers that accepted:", votingInfo.filter { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
-            row("Providers that rejected:", votingInfo.filterNot { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
+        else -> {
+            val proposal = client.getProposalV6(id) ?: return echo("Proposal $id not found")
+            val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
+
+            echo(defaultTable {
+                body {
+                    printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name)
+                    printVotingResults(client.getProposalVotingResults(proposal.id))
+                    row("Description", proposal.description)
+                }
+            })
+
+            echo("Proposal details")
+            echo("------------------------------")
+            echo(formatPendingProposal(apiVersion, client, proposal.id, proposal.type))
         }
     }
+}
 
-    private fun formatProvider(providerPubKey: WrappedByteArray, providerName: String) =
-            "${providerPubKey.toHex()}${if (providerName.isNotEmpty()) " - $providerName" else ""}"
-
-    private fun formatProposal(client: PostchainClient, proposalId: RowId, proposalType: ProposalType): String {
-        return when (proposalType) {
-            ProposalType.bc -> {
-                val bp = client.getBlockchainProposal(proposalId) ?: return ""
-                "Container: ${bp.container}\nConfig hash: ${getDataHash(bp.data)}"
+private fun CliktCommand.printApprovedConfigurationStatus(client: PostchainClient, proposal: GetProposalResult) {
+    val updateState = client.getBlockchainConfigurationUpdateAttemptStateByProposal(proposal.id)
+    if (updateState != null) {
+        echo("")
+        echo("Configuration update status")
+        echo("------------------------------")
+        val heightInfo = if (updateState.appliedAtHeight > -1) updateState.appliedAtHeight.toString() else "Not applied yet"
+        echo(defaultTable {
+            header { row("Status", "Applied at height") }
+            body {
+                row(updateState.state.toString(), heightInfo)
             }
+        })
+    }
+}
 
-            ProposalType.configuration -> {
-                val p = client.getConfigurationProposal(proposalId) ?: return ""
-                val currentConf = GtvDecoder.decodeGtv(p.currentConf.data.data) as GtvDictionary
-                val newConf = GtvDecoder.decodeGtv(p.proposedConf.data.data) as GtvDictionary
-                "Proposed configuration:\n\n${GtvDiffFinder.diff(currentConf, newConf).diff}"
+private fun SectionBuilder.printVotingInfo(client: PostchainClient, proposal: GetProposalResult, apiVersion: Long) {
+    if (proposal.state == ProposalState.PENDING) {
+        printVotingResults(client.getProposalVotingResults(proposal.id))
+    } else if (apiVersion >= 9) {
+        val votingInfo = client.getProposalVoterInfo(proposal.id)
+        row("Providers that accepted", votingInfo.filter { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
+        row("Providers that rejected", votingInfo.filterNot { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
+    }
+}
+
+private fun SectionBuilder.printVotingResults(votingResults: ProposalVotingResults) {
+    row("Positive votes", votingResults.positiveVotes.toString())
+    row("Negative votes", votingResults.negativeVotes.toString())
+    row("Max votes", votingResults.maxVotes.toString())
+    row("Threshold", formatThreshold(votingResults.threshold))
+    row("Status", votingResults.votingResult.toString())
+}
+
+private fun SectionBuilder.printProposalHeader(id: RowId, type: ProposalType, timestamp: Long, proposedByPubkey: WrappedByteArray, proposedByName: String) {
+    row("Proposal", "${id.id} - ${type.name}")
+    row("Proposed by", formatProvider(proposedByPubkey, proposedByName))
+    row("Time", "${Date.from(Instant.ofEpochMilli(timestamp))}")
+}
+
+private fun formatProvider(providerPubKey: WrappedByteArray, providerName: String) =
+        "${providerPubKey.toHex()}${if (providerName.isNotEmpty()) " - $providerName" else ""}"
+
+private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: PostchainClient, proposalId: RowId, proposalType: ProposalType): Any {
+    return when (proposalType) {
+        ProposalType.bc -> {
+            val bp = client.getBlockchainProposal(proposalId) ?: return ""
+            "Container: ${bp.container}\nConfig hash: ${getDataHash(bp.data)}"
+        }
+
+        ProposalType.configuration -> {
+            val p = client.getConfigurationProposal(proposalId) ?: return ""
+            val currentConf = pruneAutoGeneratedConfigFields(GtvDecoder.decodeGtv(p.currentConf.data.data) as GtvDictionary)
+            val newConf = GtvDecoder.decodeGtv(p.proposedConf.data.data) as GtvDictionary
+            "Proposed configuration:\n\n${GtvDiffFinder.diff(currentConf, newConf).diff}"
+        }
+
+        ProposalType.configuration_at -> {
+            val p = client.getConfigurationProposalAt(proposalId) ?: return ""
+            val currentConf = pruneAutoGeneratedConfigFields(GtvDecoder.decodeGtv(p.currentConf.data.data) as GtvDictionary)
+            val newConf = GtvDecoder.decodeGtv(p.proposedConf.data.data) as GtvDictionary
+            "Enabled at height: ${p.proposedConf.height}\n\n${GtvDiffFinder.diff(currentConf, newConf).diff}"
+        }
+
+        ProposalType.voter_set_update -> {
+            val vsu = client.getVoterSetUpdateProposal(proposalId.id) ?: return ""
+            return defaultTable {
+                body {
+                    row("Voter set", vsu.voterSet)
+                    row("Governor update", vsu.governor ?: "")
+                    row("Majority threshold update", vsu.threshold?.toString() ?: "")
+                    row("New member", vsu.addMember.joinToString(", ") { it.toHex() })
+                    row("Remove member", vsu.removeMember.joinToString(", ") { it.toHex() })
+                }
             }
+        }
 
-            ProposalType.configuration_at -> {
-                val p = client.getConfigurationProposalAt(proposalId) ?: return ""
-                val currentConf = GtvDecoder.decodeGtv(p.currentConf.data.data) as GtvDictionary
-                val newConf = GtvDecoder.decodeGtv(p.proposedConf.data.data) as GtvDictionary
-                "Enabled at height: ${p.proposedConf.height}\n\n${GtvDiffFinder.diff(currentConf, newConf).diff}"
+        ProposalType.cluster_provider -> {
+            val cpc = client.getClusterProviderProposal(proposalId) ?: return ""
+            return table {
+                body {
+                    row("Cluster", cpc.cluster)
+                    row("Provider", cpc.provider.toHex())
+                    row("Add/Remove", if (cpc.add) "Add" else "remove")
+                }
             }
+        }
 
-            ProposalType.voter_set_update -> {
-                val vsu = client.getVoterSetUpdateProposal(proposalId.id) ?: return ""
-                val t = table {
-                    row("Voter set:", vsu.voterSet)
-                    row("Governor update:", vsu.governor ?: "")
-                    row("Majority threshold update:", vsu.threshold?.toString() ?: "")
-                    row("New member:", vsu.addMember.joinToString(", ") { it.toHex() })
-                    row("Remove member:", vsu.removeMember.joinToString(", ") { it.toHex() })
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render()
-                return t.toString()
+        ProposalType.provider_is_system -> {
+            val pis = client.getSystemProviderProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Provider", pis.provider.toHex())
+                    row("Add/Remove", if (pis.add) "Add" else "remove")
+                }
             }
+        }
 
-            ProposalType.cluster_provider -> {
-                val cpc = client.getClusterProviderProposal(proposalId) ?: return ""
-                return table {
-                    row("Cluster:", cpc.cluster)
-                    row("Provider:", cpc.provider.toHex())
-                    row("Add/Remove:", if (cpc.add) "Add" else "remove")
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+        ProposalType.provider_quota -> {
+            val ppq = client.getProviderQuotaProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Provider tier", ppq.tier.name)
+                    row("Quota type", ppq.quotaType.name)
+                    row("Value", ppq.value.toString())
+                }
             }
+        }
 
-            ProposalType.provider_is_system -> {
-                val pis = client.getSystemProviderProposal(proposalId) ?: return ""
-                return table {
-                    row("Provider:", pis.provider.toHex())
-                    row("Add/Remove:", if (pis.add) "Add" else "remove")
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
-            }
+        ProposalType.provider_batch -> {
+            val ppb = client.getProviderBatchProposal(proposalId) ?: return ""
 
-            ProposalType.provider_quota -> {
-                val ppq = client.getProviderQuotaProposal(proposalId) ?: return ""
-                return table {
-                    row("Provider tier:", ppq.tier.name)
-                    row("Quota type:", ppq.quotaType.name)
-                    row("Value:", ppq.value.toString())
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
-            }
+            echo(defaultTable {
+                body {
+                    row("Provider tier", ppb.tier.toString())
+                    row("System", ppb.system.toString())
+                    row("Active", ppb.active.toString())
+                }
+            })
 
-            ProposalType.provider_batch -> {
-                val ppb = client.getProviderBatchProposal(proposalId) ?: return ""
+            val providers = defaultTable {
+                header { row("Pubkey", "Name", "Url") }
+                body {
 
-                val info = table {
-                    row("Provider tier:", ppb.tier.toString())
-                    row("System:", ppb.system.toString())
-                    row("Active:", ppb.active.toString())
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
-
-                val providers = table {
-                    header("Pubkey", "Name", "Url")
                     ppb.providerInfos.forEach {
                         row(it.pubkey.toString(), it.name, it.url)
                     }
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
-
-                return info + providers
+                }
             }
 
-            ProposalType.container_limits -> {
-                val pcl = client.getContainerLimitsProposal(proposalId) ?: return ""
-                return table {
-                    row("Container:", pcl.container)
-                    row("Container Units:", pcl.containerUnits.toString())
-                    row("Max blockchains:", pcl.maxBlockchains.toString())
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
-            }
+            return providers
+        }
 
-            ProposalType.cluster_limits -> {
-                val pcl = client.getClusterLimitsProposal(proposalId) ?: return ""
-                return table {
-                    row("Cluster:", pcl.cluster)
-                    row("Cluster Units:", pcl.clusterUnits.toString())
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
-            }
+        ProposalType.container_limits -> {
+            when {
+                apiVersion >= 24 -> {
+                    val pcl = client.getContainerLimitsProposal(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Container", pcl.container)
+                            row("Container Units", pcl.containerUnits.toString())
+                            row("Max blockchains", pcl.maxBlockchains.toString())
+                            row("Extra Storage", pcl.extraStorage.toString())
+                        }
+                    }
+                }
 
-            ProposalType.cluster_remove -> {
-                val cluster = client.getClusterRemoveProposal(proposalId) ?: return ""
-                return "Cluster to remove: $cluster"
+                else -> {
+                    val pcl = client.getContainerLimitsProposalV22(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Container", pcl.container)
+                            row("Container Units", pcl.containerUnits.toString())
+                            row("Max blockchains", pcl.maxBlockchains.toString())
+                        }
+                    }
+                }
             }
+        }
 
-            ProposalType.provider_state -> {
-                val pps = client.getProviderStateProposal(proposalId) ?: return ""
-                return table {
-                    row("Provider:", pps.provider.toHex())
-                    row("Provider name:", pps.providerName)
-                    row("Enable/Disable:", if (pps.active) "Enable" else "Disable")
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+        ProposalType.cluster_limits -> {
+            when {
+                apiVersion >= 24 -> {
+                    val pcl = client.getClusterLimitsProposal(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Cluster", pcl.cluster)
+                            row("Cluster Units", pcl.clusterUnits.toString())
+                            row("Extra Storage", pcl.extraStorage.toString())
+                        }
+                    }
+                }
+
+                else -> {
+                    val pcl = client.getClusterLimitsProposalV22(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Cluster", pcl.cluster)
+                            row("Cluster Units", pcl.clusterUnits.toString())
+                        }
+                    }
+                }
             }
+        }
 
-            ProposalType.blockchain_action -> {
-                val pba = client.getBlockchainActionProposal(proposalId) ?: return ""
-                return table {
-                    row("Blockchain:", pba.blockchain.toHex())
-                    row("Blockchain name:", pba.blockchainName)
-                    row("Action:", pba.action.name)
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+        ProposalType.cluster_remove -> {
+            val cluster = client.getClusterRemoveProposal(proposalId) ?: return ""
+            return "Cluster to remove: $cluster"
+        }
+
+        ProposalType.provider_state -> {
+            val pps = client.getProviderStateProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Provider", pps.provider.toHex())
+                    row("Provider name", pps.providerName)
+                    row("Enable/Disable", if (pps.active) "Enable" else "Disable")
+                }
             }
+        }
 
-            ProposalType.cluster_anchoring_configuration -> {
-                val p = client.getClusterAnchoringConfigurationProposal(proposalId) ?: return ""
-                val currentConf = GtvDecoder.decodeGtv(p.currentConf.data) as GtvDictionary
-                val newConf = GtvDecoder.decodeGtv(p.proposedConf.data) as GtvDictionary
-                "Proposed anchoring configuration:\n\n${GtvDiffFinder.diff(currentConf, newConf).diff}"
+        ProposalType.blockchain_action -> {
+            val pba = client.getBlockchainActionProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Blockchain RID", pba.blockchain.toHex())
+                    row("Blockchain name", pba.blockchainName)
+                    row("Action", pba.action.name)
+                }
             }
+        }
 
-            ProposalType.container -> {
-                val pc = client.getContainerProposal(proposalId) ?: return ""
-                return table {
-                    row("Container:", pc.container)
-                    row("Container Units:", pc.containerUnits.toString())
-                    row("Max blockchains:", pc.maxBlockchains.toString())
-                    hints { defaultAlignment = Table.Hints.Alignment.LEFT }
-                }.render().toString()
+        ProposalType.cluster_anchoring_configuration -> {
+            val p = client.getClusterAnchoringConfigurationProposal(proposalId) ?: return ""
+            val currentConf = pruneAutoGeneratedConfigFields(GtvDecoder.decodeGtv(p.currentConf.data) as GtvDictionary)
+            val newConf = GtvDecoder.decodeGtv(p.proposedConf.data) as GtvDictionary
+            "Proposed anchoring configuration:\n\n${GtvDiffFinder.diff(currentConf, newConf).diff}"
+        }
+
+        ProposalType.container -> {
+            when {
+                apiVersion >= 24 -> {
+                    val pc = client.getContainerProposal(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Container", pc.container)
+                            row("Container Units", pc.containerUnits.toString())
+                            row("Max blockchains", pc.maxBlockchains.toString())
+                            row("Extra Storage", pc.extraStorage.toString())
+                        }
+                    }
+                }
+
+                else -> {
+                    val pc = client.getContainerProposalV22(proposalId) ?: return ""
+                    return defaultTable {
+                        body {
+                            row("Container", pc.container)
+                            row("Container Units", pc.containerUnits.toString())
+                            row("Max blockchains", pc.maxBlockchains.toString())
+                        }
+                    }
+                }
             }
+        }
 
-            ProposalType.container_remove -> {
-                val container = client.getContainerRemoveProposal(proposalId) ?: return ""
-                return "Container to remove: $container"
+        ProposalType.container_remove -> {
+            val container = client.getContainerRemoveProposal(proposalId) ?: return ""
+            return "Container to remove: $container"
+        }
+
+        ProposalType.blockchain_import -> {
+            val proposal = client.getBlockchainImportProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Blockchain Name", proposal.name)
+                    row("Container", proposal.container)
+                    row("Config hash", getDataHash(proposal.configData))
+                }
             }
+        }
 
-            ProposalType.blockchain_import -> {
-                val bip = client.getBlockchainImportProposal(proposalId) ?: return ""
-                val conf = GtvDecoder.decodeGtv(bip.configData.data)
-                return "Blockchain RID:\n${bip.blockchainRid}\n\nName: ${bip.name}\nContainer: ${bip.container}\nConfig hash: ${getDataHash(bip.configData)}"
+        ProposalType.configuration_import -> {
+            val proposal = client.getConfigurationImportProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Height", proposal.height)
+                    row("Config hash", getDataHash(proposal.configData))
+                }
             }
+        }
 
-            ProposalType.configuration_import -> {
-                val cip = client.getConfigurationImportProposal(proposalId) ?: return ""
-                return "Blockchain RID:\n${cip.blockchainRid}\nHeight: ${cip.height}\nConfig hash: ${getDataHash(cip.configData)}"
+        ProposalType.finish_blockchain_import -> {
+            val proposal = client.getFinishBlockchainImportProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Finish at height", proposal.finishAtHeight)
+                }
             }
+        }
 
-            ProposalType.finish_blockchain_import -> {
-                val fbi = client.getFinishBlockchainImportProposal(proposalId) ?: return ""
-                return "Blockchain RID: ${fbi.blockchainRid}"
+        ProposalType.foreign_blockchain_import -> {
+            val proposal = client.getForeignBlockchainImportProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Foreign node", proposal.foreignNode)
+                    row("Host", proposal.host)
+                    row("Port", proposal.port)
+                    row("Api url", proposal.apiUrl)
+                    row("Chain0 RID", proposal.chain0Rid)
+                    row("Blockchain name", proposal.blockchainName)
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Container", proposal.container)
+                }
+            }
+        }
+
+        ProposalType.foreign_blockchain_blocks_import -> {
+            val proposal = client.getForeignBlockchainBlocksImportProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Up to height", proposal.upToHeight)
+                }
+            }
+        }
+
+        ProposalType.blockchain_move_start -> {
+            val proposal = client.getBlockchainMoveProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Blockchain name", proposal.blockchainName)
+                    row("Cluster", proposal.cluster)
+                    row("Container", proposal.container)
+                }
+            }
+        }
+
+        ProposalType.blockchain_move_cancel -> {
+//            val proposal = client.getBlockchainMoveCancelProposal(proposalId) ?: return ""
+//            return "$proposal"
+            return "Not yet implemented"
+        }
+
+        ProposalType.blockchain_move_finish -> {
+            val proposal = client.getBlockchainMoveFinishProposal(proposalId) ?: return ""
+            return defaultTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Blockchain name", proposal.blockchainName)
+                    row("Cluster", proposal.cluster)
+                    row("Container", proposal.container)
+                    row("Finish at height", proposal.finishAtHeight)
+                }
             }
         }
     }
-
-    private fun getDataHash(configData: WrappedByteArray) = GtvDecoder.decodeGtv(configData.data)
-            .merkleHash(GtvMerkleHashCalculator(cryptoSystem))
-            .wrap()
 }
+
+private fun getDataHash(configData: WrappedByteArray) = GtvDecoder.decodeGtv(configData.data)
+        .merkleHash(GtvMerkleHashCalculator(cryptoSystem))
+        .wrap()
+
+private fun pruneAutoGeneratedConfigFields(config: GtvDictionary): GtvDictionary =
+        GtvFactory.gtv(config.asDict().filterKeys { !AUTO_GENERATED_CONFIG_FIELDS.contains(it) })

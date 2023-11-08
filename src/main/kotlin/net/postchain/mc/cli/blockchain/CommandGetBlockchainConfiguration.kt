@@ -1,39 +1,36 @@
 package net.postchain.mc.cli.blockchain
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
-import net.postchain.chain0.common.queries.getBlockchainLastHeight
 import net.postchain.chain0.nm_api.nmGetBlockchainConfiguration
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.gtvml.GtvMLEncoder
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.heightOption
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 
-class CommandGetBlockchainConfiguration : CliktCommand(
-        name = "get",
-        help = "Get blockchain configuration"
+open class CommandGetBlockchainConfiguration(
+        name: String = "get-configuration",
+        help: String = "Get blockchain configuration"
+) : CliktCommand(
+        name = name,
+        help = help
 ) {
-    private val client by clientOption()
+    private val config by pmcConfigOption()
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val height by heightOption().default(-1L)
+    private val height by heightOption().required()
 
     private val save by option(help = "where to save configuration XML").file(canBeFile = true, canBeDir = false)
 
     override fun run() {
-        val (actualHeight, message) = if (height == -1L) {
-            val current = client.getBlockchainLastHeight(blockchainRID)
-            current to "Blockchain configuration at current height $current"
-        } else {
-            height to "Blockchain configuration at height $height"
-        }
-
-        val bcConfig = client.nmGetBlockchainConfiguration(blockchainRID, actualHeight)
+        val message = "Blockchain configuration at height $height"
+        val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, height)
         if (bcConfig == null) {
             echo("$message is absent")
         } else {

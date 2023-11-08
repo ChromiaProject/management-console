@@ -1,16 +1,22 @@
 package net.postchain.mc.cli.votingupdates
 
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
-import de.m3y.kformat.Table
-import de.m3y.kformat.table
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getVoterSets
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.interactiveOption
+import net.postchain.mc.cli.promptForIndex
+import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandListVoterSets : CliktCommand(
         name = "list",
         help = "List all voter sets"
 ) {
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
+    private val interactive by interactiveOption()
+
+    private val headers = listOf("Name", "Governor", "Majority level")
 
     override fun run() {
         val voterSets = client.getVoterSets()
@@ -18,15 +24,20 @@ class CommandListVoterSets : CliktCommand(
             echo("No voter sets")
         } else {
             echo("Voter sets:")
-            table {
-                header("Name", "Governor", "Majority level")
-                voterSets.forEach {
-                    row(it.name, it.gorvernor, formatThreshold(it.threshold))
+            echo(defaultTable {
+                header { rowFrom(if (interactive) listOf("#") + headers else headers) }
+                body {
+                    voterSets.forEachIndexed { index, it ->
+                        val columns = listOf(it.name, it.gorvernor, formatThreshold(it.threshold))
+                        rowFrom(if (interactive) listOf(index.toString()) + columns else columns)
+                    }
                 }
-                hints {
-                    borderStyle = Table.BorderStyle.SINGLE_LINE
+            })
+            if (interactive) {
+                promptForIndex(voterSets)?.let {
+                    showVoterSetInfo(client, voterSets[it].name)
                 }
-            }.render().also { echo(it) }
+            }
         }
     }
 }

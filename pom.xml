@@ -2,8 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.chromia</groupId>
+        <artifactId>chromia-parent</artifactId>
+        <version>0.1.2</version>
+    </parent>
 
     <groupId>net.postchain.mc</groupId>
     <artifactId>management-console</artifactId>
@@ -14,9 +19,11 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.11.7.3391-pqc</postchain.version>
-        <postchain.client.version>3.11.1</postchain.client.version>
-        <directory.chain.version>1.9.0</directory.chain.version>
+        <postchain.version>3.13.13</postchain.version>
+        <postchain.client.version>3.11.6</postchain.client.version>
+        <directory.chain.version>1.26.0</directory.chain.version>
+        <chr.version>0.11.3</chr.version>
+        <rell.version>0.13.2</rell.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
 
         <main-class>net.postchain.mc.Directory1Kt</main-class>
@@ -25,7 +32,6 @@
         <kotlin.version>1.8.21</kotlin.version>
         <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
         <kotlin.code.style>obsolete</kotlin.code.style> <!-- Kotlin obsolete IntelliJ IDEA codestyle -->
-        <project.build.outputTimestamp>10</project.build.outputTimestamp>
 
         <!--suppress UnresolvedMavenProperty -->
         <gitlab.username>${CI_REGISTRY_USER}</gitlab.username>
@@ -79,7 +85,17 @@
         <dependency>
             <groupId>com.github.ajalt.clikt</groupId>
             <artifactId>clikt-jvm</artifactId>
-            <version>3.5.0</version>
+            <version>4.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.chromia.cli</groupId>
+            <artifactId>chromia-cli-tools</artifactId>
+            <version>${chr.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.postchain.rell</groupId>
+            <artifactId>rell-api-base</artifactId>
+            <version>${rell.version}</version>
         </dependency>
 
         <!-- logging -->
@@ -98,7 +114,7 @@
         <dependency>
             <groupId>org.bitcoinj</groupId>
             <artifactId>bitcoinj-core</artifactId>
-            <version>0.16.1</version>
+            <version>0.16.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
@@ -116,16 +132,23 @@
         </dependency>
 
         <dependency>
-            <groupId>de.m3y.kformat</groupId>
-            <artifactId>kformat</artifactId>
-            <version>0.9</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-configuration2</artifactId>
         </dependency>
 
+
+        <dependency>
+            <groupId>net.postchain</groupId>
+            <artifactId>postchain-base</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.chromia.cli</groupId>
+            <artifactId>chromia-build-tools</artifactId>
+            <version>${chr.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -165,7 +188,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>make-archive</id>
@@ -184,7 +206,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.0.0</version>
                 <configuration>
                     <mainClass>${main-class}</mainClass>
                 </configuration>
@@ -205,7 +226,7 @@
                         </goals>
                         <configuration>
                             <packageName>net.postchain.chain0</packageName>
-                            <mainModule>management_chain_directory1</mainModule>
+                            <mainModule>management_chain_mainnet</mainModule>
                         </configuration>
                     </execution>
                     <execution>
@@ -244,21 +265,8 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.0.0</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -286,7 +294,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.1.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <flattenMode>resolveCiFriendliesOnly</flattenMode>
@@ -308,6 +315,25 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <environmentVariables>
+                        <DIST_EXECUTABLE>${project.build.directory}/${project.artifactId}-${project.version}-dist/management-console/bin/pmc
+                        </DIST_EXECUTABLE>
+                        <PROJECT_VERSION>${project.version}</PROJECT_VERSION>
+                    </environmentVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
 
         <pluginManagement>
@@ -319,7 +345,7 @@
                     <configuration>
                         <allowInsecureRegistries>false</allowInsecureRegistries>
                         <from>
-                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java17:1.0.2@sha256:756673c4f33a67b88dbc4ce0019137b13e9bd351cee804cfbbda3b9aa9a2cba2</image>
+                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java17:1.1.2@sha256:c8cd42f7fba93b2682cb567660c92ddc90cd7641c0da72481a28764e9ff437d5</image>
                         </from>
                         <container>
                             <appRoot>/opt/chromaway/postchain</appRoot>
@@ -345,11 +371,41 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <configuration>
+                        <prettyPrint>true</prettyPrint>
+                        <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+                        <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                        <yarnAuditAnalyzerEnabled>false</yarnAuditAnalyzerEnabled>
+                        <suppressionFiles>
+                            <suppressionFile>https://gitlab.com/chromaway/chromia-parent/-/raw/dev/common-dependencies-suppression.xml?ref_type=heads</suppressionFile>
+                            <suppressionFile>dependencies-suppression.xml</suppressionFile>
+                        </suppressionFiles>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
 
     <profiles>
+        <profile>
+            <id>ci</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-plugin</artifactId>
+                        <configuration>
+                            <args>
+                                <arg>-Werror</arg>
+                            </args>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>artifact</id>
             <activation>
@@ -468,7 +524,11 @@
                                             </platforms>
                                         </from>
                                         <to>
-                                            <image>${gitlab.registry}/${image.name}:${project.version}</image>
+                                            <image>${gitlab.registry}/${image.name}</image>
+                                            <tags>
+                                                <tag>latest</tag>
+                                                <tag>${project.version}</tag>
+                                            </tags>
                                             <auth>
                                                 <username>${env.CI_REGISTRY_USER}</username>
                                                 <password>${env.CI_REGISTRY_PASSWORD}</password>
@@ -482,9 +542,54 @@
                 </pluginManagement>
             </build>
         </profile>
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.10</version>
+                        <executions>
+                            <execution>
+                                <id>default-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>default-prepare-agent-integration</id>
+                                <goals>
+                                    <goal>prepare-agent-integration</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>default-report</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>default-report-integration</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>report-integration</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <repositories>
+        <repository>
+            <id>chromia-parent</id>
+            <name>Chromia parent GitLab Registry</name>
+            <url>https://gitlab.com/api/v4/projects/50818999/packages/maven</url>
+        </repository>
         <repository>
             <id>postchain-client</id>
             <name>Postchain Client GitLab Registry</name>
@@ -498,6 +603,15 @@
         <repository>
             <id>Postchain Chromia</id>
             <url>https://gitlab.com/api/v4/projects/33481005/packages/maven</url>
+        </repository>
+        <repository>
+            <id>Chromia CLI</id>
+            <url>https://gitlab.com/api/v4/projects/39844192/packages/maven</url>
+        </repository>
+        <repository>
+            <id>Rell</id>
+            <name>Rell Runtime Registry</name>
+            <url>https://gitlab.com/api/v4/projects/32802097/packages/maven</url>
         </repository>
     </repositories>
 

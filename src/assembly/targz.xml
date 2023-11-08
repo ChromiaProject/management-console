@@ -7,7 +7,6 @@
     </formats>
 
     <baseDirectory>management-console</baseDirectory>
-
     <dependencySets>
         <dependencySet>
             <outputDirectory>./lib</outputDirectory>

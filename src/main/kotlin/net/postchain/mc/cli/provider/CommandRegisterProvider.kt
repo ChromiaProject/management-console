@@ -6,16 +6,20 @@ import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.groups.cooccurring
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.groups.required
+import com.github.ajalt.clikt.parameters.options.OptionTransformContext
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.operations.registerProviderOperation
 import net.postchain.chain0.model.ProviderInfo
 import net.postchain.chain0.proposal_provider.proposeProviderIsSystemOperation
 import net.postchain.chain0.proposal_provider.proposeProviderStateOperation
 import net.postchain.chain0.proposal_provider.proposeProvidersOperation
+import net.postchain.crypto.PubKey
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtv.parse.GtvParser
@@ -23,12 +27,16 @@ import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.PropertiesConfigurationValueSource
 import net.postchain.mc.cli.util.ProviderType
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.optionalPubkeyOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
-import net.postchain.mc.cli.util.pubkeyOption
+import net.postchain.mc.cli.util.validatePubkey
+import net.postchain.mc.cli.util.validateUrl
+
 
 class BatchOptions : OptionGroup() {
 
+    val batch by option(help = "Allows to add a batch of providers with --provider (see examples)").flag()
     val provider by option(
             help = "Multiple objects to register as providers in --batch mode (comma delimited list of objects, see examples)",
             valueSourceKey = "provider"
@@ -37,7 +45,14 @@ class BatchOptions : OptionGroup() {
         pi.putIfAbsent("name", gtv(""))
         pi.putIfAbsent("url", gtv(""))
         GtvObjectMapper.fromGtv(gtv(pi), ProviderInfo::class)
-    }.multiple(required = true)
+    }.multiple(required = true).validate(validateProviderBatch())
+
+    private fun validateProviderBatch(): OptionTransformContext.(List<ProviderInfo>) -> Unit = { providers ->
+        providers.forEach {
+            validatePubkey(PubKey(it.pubkey))
+            if (it.url.isNotBlank()) validateUrl(it.url)
+        }
+    }
 }
 
 class CommandRegisterProvider : CliktCommand(
@@ -72,9 +87,10 @@ class CommandRegisterProvider : CliktCommand(
         }
     }
 
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
-    private val pubkey by pubkeyOption("Public key to register as provider")
+    private val pubkey by optionalPubkeyOption("Public key to register as provider")
 
     private val batchOptions by BatchOptions().cooccurring()
 

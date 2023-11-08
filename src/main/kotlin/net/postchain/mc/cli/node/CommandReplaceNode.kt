@@ -1,20 +1,28 @@
 package net.postchain.mc.cli.node
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.operations.replaceNodeOperation
+import net.postchain.chain0.common.operations.replaceNodeWithNodeDataOperation
+import net.postchain.chain0.common.operations.replaceNodeWithUnitsAndTerritoryOperation
 import net.postchain.chain0.common.operations.replaceNodeWithUnitsOperation
+import net.postchain.chain0.model.ReplaceNodeData
 import net.postchain.chain0.version.apiVersion
+import net.postchain.common.types.WrappedByteArray
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.hostOption
 import net.postchain.mc.cli.portOption
 import net.postchain.mc.cli.util.clusterUnitsOption
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.extraStorageOption
+import net.postchain.mc.cli.util.pmcConfigOption
+
 
 class CommandReplaceNode : CliktCommand(
         name = "replace",
@@ -26,7 +34,8 @@ class CommandReplaceNode : CliktCommand(
         privkey=<key>,<old-node-key>,<new-node-key>
     """.trimIndent()
 ) {
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val old by option("--old-key", help = "Public key of the node to replace").convert { PubKey(it) }.required()
     private val new by option("--new-key", help = "Public key of the new node").convert { PubKey(it) }.required()
@@ -37,13 +46,26 @@ class CommandReplaceNode : CliktCommand(
 
     private val apiUrl by option("-a", "--api-url", help = "api url")
 
+    private val territory by option("-t", "--territory", help = "ISO 3166-1 alpha-2 code").validate {
+        require(it.isNotBlank())
+    }
+
     private val clusterUnits by clusterUnitsOption().default(1)
+
+    private val extraStorage by extraStorageOption().default(0)
 
     override fun run() {
         val apiVersion = client.apiVersion()
+
+        if (territory != null && apiVersion < 15) {
+            echo("Territory is not supported in API version $apiVersion and will be ignored")
+        }
+
         client.transactionBuilder()
                 .apply {
                     when {
+                        apiVersion >= 24 -> replaceNodeWithNodeDataOperation(client.config.pubkey().data, ReplaceNodeData(WrappedByteArray(old.data), WrappedByteArray(new.data), host, port?.toLong(), apiUrl, clusterUnits, territory, extraStorage))
+                        apiVersion >= 15 -> replaceNodeWithUnitsAndTerritoryOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, territory, clusterUnits)
                         apiVersion >= 3 -> replaceNodeWithUnitsOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, clusterUnits)
                         else -> replaceNodeOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl)
                     }

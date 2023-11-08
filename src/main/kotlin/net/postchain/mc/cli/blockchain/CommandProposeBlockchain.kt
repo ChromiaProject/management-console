@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.core.ProgramResult
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -17,8 +18,9 @@ import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainConfigOption
 import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
+
 
 class CommandProposeBlockchain : CliktCommand(
         name = "add",
@@ -28,7 +30,8 @@ class CommandProposeBlockchain : CliktCommand(
             Change will be applied after voting within the deployer voter set of the cluster that the container belongs to.
         """.trimIndent()
 ) {
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val blockchainConfigFile by blockchainConfigOption().required()
 
@@ -55,6 +58,7 @@ class CommandProposeBlockchain : CliktCommand(
                             throw ProgramResult(0)
                         } else
                             throw PrintMessage("Transaction not confirmed")
+
                         else -> throw CliktError("Cannot find status for this transaction")
                     }
                 }

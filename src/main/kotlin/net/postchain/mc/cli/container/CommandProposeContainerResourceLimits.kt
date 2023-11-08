@@ -1,25 +1,28 @@
 package net.postchain.mc.cli.container
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.deprecated
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.model.ContainerResourceLimitType
-import net.postchain.chain0.model.ContainerResourceLimitType.container_units
-import net.postchain.chain0.model.ContainerResourceLimitType.max_blockchains
 import net.postchain.chain0.proposal_container.proposal_container_limits.proposeContainerLimitsOperation
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.cluster.CommandProposeClusterResourceLimits.Companion.setIfNotNull
 import net.postchain.mc.cli.util.containerUnitsOption
+import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.maxBlockchainsOption
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.nopClientOption
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV2.proposeContainerLimitsOperationV2
+import net.postchain.mc.compatibility.ApiCompatV22
+import net.postchain.mc.compatibility.ApiCompatV22.proposeContainerLimitsOperationV22
+
 
 class CommandProposeContainerResourceLimits : CliktCommand(
         name = "limits",
@@ -30,7 +33,8 @@ class CommandProposeContainerResourceLimits : CliktCommand(
             Proposal can contain all types of limits or a subset of them.
         """.trimIndent()
 ) {
-    private val client by nopClientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val containerName by nameOption("Container name").required()
 
@@ -38,32 +42,56 @@ class CommandProposeContainerResourceLimits : CliktCommand(
 
     private val maxBlockchains by maxBlockchainsOption()
 
+    private val extraStorage by extraStorageOption()
+
     private val description by proposalDescriptionOption()
 
     // Remove when api version 2 is not needed
     private val _cpu by option("-c", "--cpu", help = "CPU limit (percent of cpus, 10 == 0.1 cpu(s), 150 == 1.5 cpu(s))").long().deprecated()
     private val _ram by option("-r", "--ram", help = "RAM limit (MiB)").long().deprecated()
-    private val _storage by option("-s", "--storage", help = "Storage limit (MiB)").long().deprecated()
+    private val _storage by option("-st", "--storage", help = "Storage limit (MiB)").long().deprecated()
     private val _ioRead by option("-ir", "--io-read", help = "Disk I/O read limit (MiB/s)").long().deprecated()
     private val _ioWrite by option("-iw", "--io-write", help = "Disk I/O write limit (MiB/s)").long().deprecated()
 
     override fun run() {
         val apiVersion = client.apiVersion()
         when {
-            apiVersion >= 3 -> {
-                if (containerUnits == null && maxBlockchains == null) {
+
+            apiVersion >= 24 -> {
+                if (containerUnits == null && maxBlockchains == null && extraStorage == null) {
                     echo("No resource limits are specified. At least one value should be specified.")
                     return
                 }
 
                 val limits = mutableMapOf<ContainerResourceLimitType, Long>()
                         .apply {
-                            setIfNotNull(container_units, containerUnits)
-                            setIfNotNull(max_blockchains, maxBlockchains)
+                            setIfNotNull(ContainerResourceLimitType.container_units, containerUnits)
+                            setIfNotNull(ContainerResourceLimitType.max_blockchains, maxBlockchains)
+                            setIfNotNull(ContainerResourceLimitType.extra_storage, extraStorage)
                         }
 
                 client.transactionBuilder()
                         .proposeContainerLimitsOperation(client.config.pubkey().data, containerName, limits, description)
+                        .postAwaitConfirmation()
+                        .printResult(
+                                "Container limits proposed",
+                                "Failed proposing new container limits")
+            }
+
+            apiVersion >= 3 -> {
+                if (containerUnits == null && maxBlockchains == null) {
+                    echo("No resource limits are specified. At least one value should be specified.")
+                    return
+                }
+
+                val limits = mutableMapOf<ApiCompatV22.ContainerResourceLimitType, Long>()
+                        .apply {
+                            setIfNotNull(ApiCompatV22.ContainerResourceLimitType.container_units, containerUnits)
+                            setIfNotNull(ApiCompatV22.ContainerResourceLimitType.max_blockchains, maxBlockchains)
+                        }
+
+                client.transactionBuilder()
+                        .proposeContainerLimitsOperationV22(client.config.pubkey().data, containerName, limits, description)
                         .postAwaitConfirmation()
                         .printResult(
                                 "Container limits proposed",

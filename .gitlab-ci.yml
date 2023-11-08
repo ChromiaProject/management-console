@@ -1,4 +1,12 @@
-image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.1.2
+image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.1.3
+
+include:
+  - project: "chromaway/core-infra/gitlab-automation"
+    ref: 1.1.6
+    file: 
+      - templates/report-code-coverage.yml
+      - templates/maven-dependency-scanning.yml
+      - templates/container-dependency-scanning.yml
 
 .git_template: &git_setup |
   git remote set-url --push origin "https://oauth2:${BUILD_USER_GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
@@ -23,6 +31,11 @@ image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.1.
         - "**/target/failsafe-reports/TEST-*.xml"
         - "**/target/rell-reports/rell-tests.xml"
     expire_in: 1 week
+  artifacts:
+    when: always
+    paths:
+      - $JACOCO_REPORT_DIR/*
+    expire_in: 1 week
 
 .release:
   stage: release
@@ -36,7 +49,9 @@ image: registry.gitlab.com/chromaway/core-tools/chromia-images/maven-docker:1.1.
 
 stages:
   - build
+  - code-coverage
   - deploy
+  - dependency-check
   - release
 
 deploy:
@@ -49,7 +64,7 @@ deploy:
       $MAVEN_CLI_OPTS
       -Drevision=$CI_COMMIT_TAG
       -Djib.to.tags=$CI_COMMIT_TAG
-      --activate-profiles docker,docker-push
+      --activate-profiles ci,docker,docker-push
       deploy
 
 deploy-pqc:
@@ -68,7 +83,9 @@ deploy-pqc:
       deploy -DskipTests
 
 build:
-  extends: .setup
+  extends:
+    - .setup
+    - .visualise-test-coverage
   stage: build
   interruptible: true
   except:
@@ -77,8 +94,34 @@ build:
   script:
     - mvn
       $MAVEN_CLI_OPTS
-      --activate-profiles docker
+      --activate-profiles ci,docker,coverage
       verify
+
+dependency-check:
+  extends: .maven-dependency-check
+  stage: dependency-check
+  interruptible: true
+  rules:
+    - if: $RUN_DEPENDENCY_CHECK == "true"
+
+container-scanning:
+  variables:
+    REGISTRY: registry.gitlab.com/chromaway/core-tools/management-console
+  parallel:
+    matrix:
+      - IMAGE: [ pmc ]
+        VERSION: [ latest ]
+  only:
+    variables:
+      - $RUN_DEPENDENCY_CHECK == "true"
+
+test-coverage-report:
+  stage: code-coverage
+  except:
+    refs:
+      - tags
+  dependencies:
+    - build
 
 release-minor:
   extends: .release
@@ -109,6 +152,7 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   DOCKER_DRIVER: overlay2
   DOCKER_CLI_EXPERIMENTAL: enabled
+  JACOCO_REPORT_DIR: target/site/jacoco
 
 # Cache downloaded dependencies and plugins between builds.
 # To keep cache across branches add 'key: "$CI_JOB_NAME"'

@@ -20,7 +20,7 @@ import net.postchain.mc.cli.keys.CryptoSystemType.ECDSA
 import org.bitcoinj.crypto.MnemonicCode
 import java.io.File
 import java.io.FileOutputStream
-import java.util.*
+import java.util.Properties
 
 enum class CryptoSystemType(val option: String) {
     ECDSA("--ecdsa"),

@@ -1,18 +1,22 @@
 package net.postchain.mc.cli.blockchain
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.theme
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.queries.getBlockchainReplicas
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.includeInactiveOption
 import net.postchain.mc.cli.util.NodeListFormatter.renderNodes
-import net.postchain.mc.cli.util.clientOption
+import net.postchain.mc.cli.util.pmcConfigOption
+
 
 class CommandListBlockchainReplicas : CliktCommand(
         name = "replicas",
         help = "List blockchain replicas"
 ) {
-    private val client by clientOption()
+    private val config by pmcConfigOption()
+    private val client get() = config.client
 
     private val blockchainRID by blockchainRidOption().required()
 
@@ -23,7 +27,7 @@ class CommandListBlockchainReplicas : CliktCommand(
         if (replicas.isEmpty()) {
             echo("No replicas")
         } else {
-            renderNodes(replicas, includeInactive).also { echo(it) }
+            echo(renderNodes(currentContext.theme, replicas, includeInactive))
         }
     }
 }

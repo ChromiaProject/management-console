@@ -5,19 +5,18 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
+import com.github.ajalt.mordant.terminal.ConversionResult
 import net.postchain.common.BlockchainRid
-import net.postchain.crypto.PubKey
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 fun CliktCommand.includeInactiveOption() = option(
-        "-i", "--includeinactive",
+        "-ii", "--includeinactive",
         help = "Include disabled/removed clusters (not implemented yet)"
 ).flag()
 
@@ -37,9 +36,6 @@ fun CliktCommand.blockchainConfigOption() = option(
         envvar = "POSTCHAIN_BLOCKCHAIN_CONFIG"
 ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
 
-fun CliktCommand.requiredPubkeyOption() = option("-pk", "--pubkey", help = "Public key")
-        .convert { PubKey(it) }.required()
-
 fun CliktCommand.hostOption() = option("-h", "--host", help = "Host", envvar = "POSTCHAIN_HOST")
 
 fun CliktCommand.portOption() = option("-p", "--port", help = "Port").int()
@@ -53,3 +49,14 @@ fun CliktCommand.dateToTimestampOption(helpMessage: String, default: Long = 0, d
             }
             Instant.from(date).toEpochMilli()
         }.default(default, defaultString)
+
+fun CliktCommand.interactiveOption() =
+        option("-i", "--interactive", help = "Prompt for item to show details for").flag()
+
+
+fun CliktCommand.promptForIndex(items: List<*>) =
+        currentContext.terminal.prompt("Show details for #") { s ->
+            s.toIntOrNull()
+                    ?.let { if (it in items.indices) ConversionResult.Valid(it) else ConversionResult.Invalid("No such item: $it") }
+                    ?: ConversionResult.Invalid("$s is not a valid integer")
+        }
