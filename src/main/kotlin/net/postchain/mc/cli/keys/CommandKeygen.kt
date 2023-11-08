@@ -9,11 +9,11 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.common.toHex
-import net.postchain.crypto.DilithiumCryptoSystem
 import net.postchain.crypto.KeyPair
 import net.postchain.crypto.PrivKey
 import net.postchain.crypto.PubKey
 import net.postchain.crypto.Secp256K1CryptoSystem
+import net.postchain.crypto.pqc.dilithium.DilithiumCryptoSystem
 import net.postchain.crypto.secp256k1_derivePubKey
 import net.postchain.mc.cli.keys.CryptoSystemType.DILITHIUM
 import net.postchain.mc.cli.keys.CryptoSystemType.ECDSA

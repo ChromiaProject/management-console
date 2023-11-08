@@ -19,11 +19,11 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.13.13</postchain.version>
+        <postchain.version>3.13.18</postchain.version>
         <postchain.client.version>3.11.6</postchain.client.version>
-        <directory.chain.version>1.26.0</directory.chain.version>
-        <chr.version>0.11.3</chr.version>
-        <rell.version>0.13.2</rell.version>
+        <directory.chain.version>1.26.2</directory.chain.version>
+        <chr.version>0.13.0</chr.version>
+        <rell.version>0.13.4</rell.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
 
         <main-class>net.postchain.mc.Directory1Kt</main-class>
@@ -75,6 +75,11 @@
         </dependency>
 
         <!-- Postchain -->
+        <dependency>
+            <groupId>net.postchain</groupId>
+            <artifactId>postchain-dilithium</artifactId>
+            <version>${postchain.version}</version>
+        </dependency>
         <dependency>
             <groupId>net.postchain.client</groupId>
             <artifactId>postchain-client</artifactId>
