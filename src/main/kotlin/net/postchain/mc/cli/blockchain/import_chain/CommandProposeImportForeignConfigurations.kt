@@ -19,11 +19,14 @@ import net.postchain.client.core.PostchainClient
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.EndpointPool
 import net.postchain.common.BlockchainRid
+import net.postchain.gtv.GtvDecoder
+import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.hostOption
 import net.postchain.mc.cli.portOption
+import net.postchain.mc.cli.util.BlockchainConfigurationCompressor
 import net.postchain.mc.cli.util.NopPostchainClient
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
@@ -73,12 +76,12 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
     private val description by proposalDescriptionOption(default = "Propose importing of foreign blockchain")
 
     override fun run() {
-        client.requireApiVersion(19)
+        val version = client.requireApiVersion(19)
         val foreignClient = buildForeignClient()
         val imported = mutableListOf<Long>()
 
         // propose foreign config import
-        if (proposeImportBlockchain(foreignClient)) {
+        if (proposeImportBlockchain(foreignClient, version)) {
             imported.add(0)
         }
 
@@ -92,7 +95,7 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
             val config = foreignClient.nmGetBlockchainConfiguration(blockchainRID, next0)
                     ?: throw CliktError("Can't get blockchain configuration at height $next0")
             echo("Foreign configuration at height $next0 downloaded")
-            proposeImportBlockchainConfigurations(next0, config)
+            proposeImportBlockchainConfigurations(next0, config, version)
             imported.add(next0)
             next = next0
         }
@@ -100,7 +103,7 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
         echo("${imported.size} foreign configuration(s) imported")
     }
 
-    private fun proposeImportBlockchain(foreignClient: PostchainClient): Boolean {
+    private fun proposeImportBlockchain(foreignClient: PostchainClient, version: Long): Boolean {
         // ensure blockchain is IMPORTING if already added
         client.getBlockchains(true).firstOrNull {
             BlockchainRid(it.rid) == blockchainRID
@@ -116,12 +119,13 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
         val configData0 = foreignClient.nmGetBlockchainConfiguration(blockchainRID, 0)
                 ?: throw CliktError("Can't download the foreign blockchain initial configuration")
         echo("Initial configuration of foreign blockchain downloaded")
+        val compressedConfig = BlockchainConfigurationCompressor.compress(client, GtvDecoder.decodeGtv(configData0), version)
 
         client.transactionBuilder()
                 .proposeForeignBlockchainImportOperation(client.pubkey,
                         key.data, host, port.toLong(), apiUrl,
                         chain0BlockchainRID.data,
-                        name, blockchainRID, configData0, container, description
+                        name, blockchainRID, GtvEncoder.encodeGtv(compressedConfig), container, description
                 )
                 .postAwaitConfirmation()
                 .printResult(
@@ -131,13 +135,14 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
         return true
     }
 
-    private fun proposeImportBlockchainConfigurations(height: Long, configData: ByteArray) {
+    private fun proposeImportBlockchainConfigurations(height: Long, configData: ByteArray, version: Long) {
+        val compressedConfig = BlockchainConfigurationCompressor.compress(client, GtvDecoder.decodeGtv(configData), version)
         client.transactionBuilder()
                 .proposeImportConfigurationOperation(
                         client.pubkey,
                         blockchainRID,
                         height,
-                        configData,
+                        GtvEncoder.encodeGtv(compressedConfig),
                         "Propose importing of foreign blockchain configuration"
                 )
                 .postAwaitConfirmation()
