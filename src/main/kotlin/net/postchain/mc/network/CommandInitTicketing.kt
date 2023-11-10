@@ -5,9 +5,11 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.ticketing.initTicketingOperation
+import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.BlockchainConfig
+import net.postchain.mc.cli.util.BlockchainConfigurationCompressor
 import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandInitTicketing : CliktCommand(
@@ -32,9 +34,10 @@ class CommandInitTicketing : CliktCommand(
         }
 
         ticketChainConfig?.let {
-            val ticketChainConfigData = BlockchainConfig.readFromFile(it).data
+            val ticketChainConfigData = BlockchainConfig.readFromFile(it)
+            val compressedTicketChainConfig = BlockchainConfigurationCompressor.compress(client, ticketChainConfigData.gtv, version)
             client.transactionBuilder()
-                    .initTicketingOperation(client.pubkey, ticketChainConfigData)
+                    .initTicketingOperation(client.pubkey, GtvEncoder.encodeGtv(compressedTicketChainConfig))
                     .postAwaitConfirmation()
                     .printResult(
                             "Ticket chain was created",

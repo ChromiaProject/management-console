@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.proposal_blockchain.proposeConfigurationAtOperation
 import net.postchain.chain0.proposal_blockchain.proposeConfigurationOperation
+import net.postchain.gtv.GtvEncoder
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.AlreadyExistMode
 import net.postchain.mc.cli.base.printResult
@@ -15,6 +16,7 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.forceOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
+import net.postchain.mc.cli.util.BlockchainConfigurationCompressor
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.Version
@@ -49,6 +51,7 @@ class CommandProposeConfiguration : CliktCommand(
     override fun run() {
         val version = Version(client)
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
+        val compressedConfigurationData = GtvEncoder.encodeGtv(BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, version.version))
 
         client.transactionBuilder()
                 .apply {
@@ -63,7 +66,7 @@ class CommandProposeConfiguration : CliktCommand(
                             }
 
                             else -> {
-                                proposeConfigurationOperation(client.config.pubkey().data, blockchainRID, bcConfig.data, description)
+                                proposeConfigurationOperation(client.config.pubkey().data, blockchainRID, compressedConfigurationData, description)
                             }
                         }
                     } else {
@@ -78,7 +81,7 @@ class CommandProposeConfiguration : CliktCommand(
                             }
 
                             else -> {
-                                proposeConfigurationAtOperation(client.config.pubkey().data, blockchainRID, bcConfig.data, height!!, force == AlreadyExistMode.FORCE, description)
+                                proposeConfigurationAtOperation(client.config.pubkey().data, blockchainRID, compressedConfigurationData, height!!, force == AlreadyExistMode.FORCE, description)
                             }
                         }
                     }
