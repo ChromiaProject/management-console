@@ -42,5 +42,6 @@ fun blockchainCommands() = BlockchainCommand().subcommands(
 //        CommandProposeCancelBlockchainMove(),
         CommandProposeFinishBlockchainMove(),
 
-        CommandProposeArchiveBlockchain()
+        CommandProposeArchiveBlockchain(),
+        CommandProposeUnarchiveBlockchain()
 )
