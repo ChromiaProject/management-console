@@ -28,7 +28,7 @@ class CommandListNodes : CliktCommand(
         } else {
             echo(defaultTable {
                 column(0) {
-                    width = ColumnWidth.Fixed(if (interactive) 3 else PUBKEY_LENGTH + 1)
+                    width = ColumnWidth.Fixed(if (interactive) 3 else PUBKEY_LENGTH + 2)
                 }
                 header { rowFrom(if (interactive) listOf("#") + headers else headers) }
                 body {

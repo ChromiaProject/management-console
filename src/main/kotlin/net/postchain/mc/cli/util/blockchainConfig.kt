@@ -13,7 +13,8 @@ import java.io.File
 
 class BlockchainConfig(
         val hash: WrappedByteArray,
-        val data: ByteArray
+        val data: ByteArray,
+        val gtv: Gtv
 ) {
 
     companion object {
@@ -35,7 +36,8 @@ class BlockchainConfig(
 
         private fun create(gtv: Gtv, data: ByteArray): BlockchainConfig = BlockchainConfig(
                 gtv.merkleHash(GtvMerkleHashCalculator(cryptoSystem)).wrap(),
-                data
+                data,
+                gtv
         )
     }
 }

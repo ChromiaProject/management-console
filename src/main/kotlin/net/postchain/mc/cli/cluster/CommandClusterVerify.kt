@@ -4,22 +4,18 @@ import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
-import net.postchain.anchoring.anchoring_chain_common.getLastAnchoredBlock
 import net.postchain.chain0.cm_api.CmClusterInfo
-import net.postchain.chain0.cm_api.cmGetClusterAnchoringChains
 import net.postchain.chain0.cm_api.cmGetClusterBlockchains
 import net.postchain.chain0.cm_api.cmGetClusterInfo
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
-import net.postchain.client.config.RequestStrategies
-import net.postchain.client.exception.ClientError
-import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.EndpointPool
-import net.postchain.client.request.SingleEndpointPool
+import net.postchain.client.request.RandomizedEndpointPool
 import net.postchain.common.BlockchainRid
+import net.postchain.common.wrap
 import net.postchain.crypto.PubKey
-import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.BlockHeightClient
 import net.postchain.mc.cli.util.nameOption
-import java.time.Duration
+import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandClusterVerify : CliktCommand(
         name = "verify",
@@ -42,73 +38,28 @@ class CommandClusterVerify : CliktCommand(
             }
         })
 
-        val anchoringClient = PostchainClientImpl(client.config.copy(
-                blockchainRid = BlockchainRid(clusterInfo.anchoringChain),
-                endpointPool = clusterEndpoints,
-                connectTimeout = Duration.ofMillis(300),
-                responseTimeout = Duration.ofMillis(300),
-                requestStrategy = RequestStrategies.TRY_NEXT_ON_ERROR.factory
-        ))
         echo("Cluster Chains")
-        analyzeBlockchains(client.cmGetClusterBlockchains(cluster), clusterInfo, anchoringClient)
-
-        if (cluster == "system") {
-            val systemAnchoringClient = PostchainClientImpl(
-                    client.config.copy(
-                            blockchainRid = BlockchainRid(client.cmGetSystemAnchoringChain()!!),
-                            endpointPool = clusterEndpoints,
-                            connectTimeout = Duration.ofMillis(300),
-                            responseTimeout = Duration.ofMillis(300),
-                            requestStrategy = RequestStrategies.TRY_NEXT_ON_ERROR.factory
-
-                    )
-            )
-            echo("Anchoring Chains")
-            analyzeBlockchains(client.cmGetClusterAnchoringChains(), clusterInfo, systemAnchoringClient)
-        }
-
+        analyzeBlockchains(client.cmGetClusterBlockchains(cluster), clusterInfo, clusterEndpoints)
     }
 
-    private fun analyzeBlockchains(chainsToAnalyze: Collection<ByteArray>, clusterInfo: CmClusterInfo, anchoringClient: PostchainClientImpl) {
+    private fun analyzeBlockchains(chainsToAnalyze: Collection<ByteArray>, clusterInfo: CmClusterInfo, clusterEndpoints: RandomizedEndpointPool) {
+        val blockHeightClient = BlockHeightClient(client)
         chainsToAnalyze.map { BlockchainRid(it) }.forEach { bc ->
             echo(defaultTable {
                 header { row("Blockchain", "Anchored height", *clusterInfo.peers.map { PubKey(it.pubkey).toShortHex() }.toTypedArray()) }
-
-                val peerClients = clusterInfo.peers.map {
-                    PostchainClientImpl(
-                            client.config.copy(
-                                    blockchainRid = bc,
-                                    endpointPool = SingleEndpointPool(it.apiUrl),
-                                    connectTimeout = Duration.ofMillis(300),
-                                    responseTimeout = Duration.ofMillis(300),
-                            )
-                    )
-                }
-
                 body {
+                    val anchoringChain = when (bc.wData) {
+                        client.cmGetSystemAnchoringChain()?.wrap() -> null
+                        clusterInfo.anchoringChain -> client.cmGetSystemAnchoringChain()?.wrap()
+                        else -> clusterInfo.anchoringChain
+                    }
                     row(
                             bc.toShortHex(),
-                            getLastAnchoredBlockHeight(anchoringClient, bc)?.toString() ?: "",
-                            *peerClients.map { getCurrentBlockHeight(it).toString() }.toTypedArray()
+                            blockHeightClient.getLastAnchoredBlockHeight(anchoringChain, clusterEndpoints, bc),
+                            *clusterInfo.peers.map { blockHeightClient.getCurrentBlockHeightOnPeer(it, bc) }.toTypedArray()
                     )
                 }
             })
         }
     }
-
-    private fun getCurrentBlockHeight(it: PostchainClientImpl) = try {
-        it.currentBlockHeight()
-    } catch (e: ClientError) {
-        -1
-    }
-
-    private fun getLastAnchoredBlockHeight(anchoringClient: PostchainClientImpl, bc: BlockchainRid): Long? {
-        return try {
-            anchoringClient.getLastAnchoredBlock(bc)?.blockHeight
-        } catch (e: ClientError) {
-            -1
-        }
-    }
-
-
 }

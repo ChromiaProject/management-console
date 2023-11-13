@@ -6,10 +6,14 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.common.init.initOperation
 import net.postchain.chain0.ticketing.initTicketingOperation
+import net.postchain.client.core.PostchainClient
+import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.BlockchainConfig
+import net.postchain.mc.cli.util.BlockchainConfigurationCompressor
 import net.postchain.mc.cli.util.pmcConfigOption
+import java.io.File
 
 class CommandInit : CliktCommand(
         name = "initialize",
@@ -43,11 +47,11 @@ class CommandInit : CliktCommand(
             return
         }
 
-        val systemAnchoringConfigData = systemAnchoringConfig?.let { BlockchainConfig.readFromFile(it).data }
-        val clusterAnchoringConfigData = clusterAnchoringConfig?.let { BlockchainConfig.readFromFile(it).data }
-
-        val ticketChainConfigData = ticketChainConfig?.let { BlockchainConfig.readFromFile(it).data }
         val version = Version(client).version
+        val systemAnchoringConfigData = systemAnchoringConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
+        val clusterAnchoringConfigData = clusterAnchoringConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
+
+        val ticketChainConfigData = ticketChainConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
         if (version < 16 && ticketChainConfigData != null) {
             echo("Ticketing requires directory chain version 16, found version $version")
             return
@@ -69,5 +73,11 @@ class CommandInit : CliktCommand(
         if (ticketChainConfigData != null) {
             initTicketChain(client, config.config)
         }
+    }
+
+    private fun readAndCompressConfigurationFromFile(client: PostchainClient, configFile: File, apiVersion: Long): ByteArray {
+        val configData = BlockchainConfig.readFromFile(configFile)
+        val compressedConfig = BlockchainConfigurationCompressor.compress(client, configData.gtv, apiVersion)
+        return GtvEncoder.encodeGtv(compressedConfig)
     }
 }

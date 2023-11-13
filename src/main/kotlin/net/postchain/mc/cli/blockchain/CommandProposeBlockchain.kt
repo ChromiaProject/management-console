@@ -14,9 +14,11 @@ import net.postchain.chain0.version.apiVersion
 import net.postchain.common.hexStringToByteArray
 import net.postchain.common.toHex
 import net.postchain.common.tx.TransactionStatus
+import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainConfigOption
 import net.postchain.mc.cli.util.BlockchainConfig
+import net.postchain.mc.cli.util.BlockchainConfigurationCompressor
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
@@ -46,8 +48,9 @@ class CommandProposeBlockchain : CliktCommand(
     override fun run() {
         val apiVersion = client.apiVersion()
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
+        val compressedConfig = BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, apiVersion)
         val txResult = client.transactionBuilder()
-                .proposeBlockchainOperation(client.pubkey, bcConfig.data, name, container, description)
+                .proposeBlockchainOperation(client.pubkey, GtvEncoder.encodeGtv(compressedConfig), name, container, description)
                 .postAwaitConfirmation()
                 .apply {
                     when (status) {
