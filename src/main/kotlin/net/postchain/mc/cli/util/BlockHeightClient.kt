@@ -12,13 +12,15 @@ import net.postchain.common.BlockchainRid
 import net.postchain.common.types.WrappedByteArray
 import java.time.Duration
 
-class BlockHeightClient(
-        private val parentClient: PostchainClient,
-        private val connectTimeout: Duration = Duration.ofMillis(1000),
-        private val responseTimeout: Duration = Duration.ofMillis(1000)
-) {
+class BlockHeightClient(private val parentClient: PostchainClient) {
 
-    fun getLastAnchoredBlockHeight(anchoringChain: WrappedByteArray?, clusterEndpoints: EndpointPool, blockchainRid: BlockchainRid): Long =
+    fun getLastAnchoredBlockHeight(
+            anchoringChain: WrappedByteArray?,
+            clusterEndpoints: EndpointPool,
+            blockchainRid: BlockchainRid,
+            connectTimeout: Duration = Duration.ofMillis(1000),
+            responseTimeout: Duration = Duration.ofMillis(1000)
+    ): Long =
             try {
                 if (anchoringChain == null) {
                     -1
@@ -35,7 +37,12 @@ class BlockHeightClient(
                 -1
             }
 
-    fun getCurrentBlockHeightOnPeer(peer: CmPeerInfo, blockchainRid: BlockchainRid) = try {
+    fun getCurrentBlockHeightOnPeer(
+            peer: CmPeerInfo,
+            blockchainRid: BlockchainRid,
+            connectTimeout: Duration = Duration.ofMillis(1000),
+            responseTimeout: Duration = Duration.ofMillis(1000)
+    ) = try {
         PostchainClientImpl(parentClient.config.copy(
                 blockchainRid = blockchainRid,
                 endpointPool = SingleEndpointPool(peer.apiUrl),
