@@ -24,7 +24,7 @@ class CommandProposeArchiveBlockchain : CliktCommand(
     private val description by proposalDescriptionOption()
 
     override fun run() {
-        client.requireApiVersion(25)
+        client.requireApiVersion(28)
         client.transactionBuilder()
                 .proposeBlockchainActionOperation(
                         client.config.pubkey().data,

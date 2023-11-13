@@ -35,7 +35,7 @@ class CommandProposeUnarchiveBlockchain : CliktCommand(
     private val description by proposalDescriptionOption()
 
     override fun run() {
-        client.requireApiVersion(25)
+        client.requireApiVersion(28)
         client.transactionBuilder()
                 .proposeBlockchainUnarchiveActionOperation(
                         client.config.pubkey().data,

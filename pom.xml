@@ -19,9 +19,9 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.13.13</postchain.version>
+        <postchain.version>3.14.2</postchain.version>
         <postchain.client.version>3.11.6</postchain.client.version>
-        <directory.chain.version>1.27.0</directory.chain.version>
+        <directory.chain.version>1.28.0</directory.chain.version>
         <chr.version>0.11.3</chr.version>
         <rell.version>0.13.2</rell.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>

@@ -337,7 +337,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                     row("Blockchain name", pba.blockchainName)
                     row("Action", pba.action.name)
 
-                    if (apiVersion >= 27 && pba.action == BlockchainAction.unarchive) {
+                    if (apiVersion >= 28 && pba.action == BlockchainAction.unarchive) {
                         val unarchivingProposal = client.getBlockchainUnarchiveActionProposal(proposalId)
                         if (unarchivingProposal != null) {
                             row("Source container", unarchivingProposal.sourceContainer)
