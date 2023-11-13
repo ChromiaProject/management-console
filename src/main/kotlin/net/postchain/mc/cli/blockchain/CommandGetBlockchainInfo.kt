@@ -5,11 +5,17 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
+import net.postchain.chain0.cm_api.cmGetClusterInfo
+import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.queries.getBlockchainInfo
 import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
+import net.postchain.client.request.EndpointPool
 import net.postchain.common.BlockchainRid
+import net.postchain.common.wrap
+import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.blockchainRidOption
+import net.postchain.mc.cli.util.BlockHeightClient
 import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandGetBlockchainInfo : CliktCommand(
@@ -33,18 +39,39 @@ class CommandGetBlockchainInfo : CliktCommand(
 
 fun CliktCommand.showBlockchainInfo(client: PostchainClient, blockchainRid: BlockchainRid) {
     val blockchainInfo = client.getBlockchainInfo(blockchainRid.data)
-    if (blockchainInfo != null) {
+            ?: throw CliktError("Blockchain with rid $blockchainRid not found")
+
+    echo(defaultTable {
+        body {
+            row("Name", blockchainInfo.name)
+            row("RID", blockchainInfo.rid)
+            row("State", blockchainInfo.state)
+            row("Container", blockchainInfo.container)
+            row("Cluster", blockchainInfo.cluster)
+            row("Is system chain", blockchainInfo.system)
+        }
+    })
+
+    if (blockchainInfo.cluster != null) {
+        val clusterInfo = client.cmGetClusterInfo(blockchainInfo.cluster)
+        val clusterEndpoints = clusterInfo.peers.map { it.apiUrl }.let { EndpointPool.default(it) }
+        val anchoringChain = when (blockchainInfo.rid) {
+            client.cmGetSystemAnchoringChain()?.wrap() -> null
+            clusterInfo.anchoringChain -> client.cmGetSystemAnchoringChain()?.wrap()
+            else -> clusterInfo.anchoringChain
+        }
+        val blockHeightClient = BlockHeightClient(client)
+        val anchoredHeight = blockHeightClient.getLastAnchoredBlockHeight(anchoringChain, clusterEndpoints, blockchainRid)
+
+        echo("Heights on nodes:")
         echo(defaultTable {
             body {
-                row("Name:", blockchainInfo.name)
-                row("Rid:", blockchainInfo.rid)
-                row("State:", blockchainInfo.state)
-                row("Container:", blockchainInfo.container)
-                row("Cluster:", blockchainInfo.cluster)
-                row("Is system chain:", blockchainInfo.system)
+                row("Anchored height", anchoredHeight)
+                clusterInfo.peers.forEach { peer ->
+                    row(PubKey(peer.pubkey).toShortHex(), blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid))
+                }
             }
         })
-    } else {
-        throw CliktError("Blockchain with rid $blockchainRid not found")
     }
 }
+
