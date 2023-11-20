@@ -7,9 +7,9 @@ import net.postchain.common.tx.TransactionStatus
 
 fun TransactionResult.printResult(onSuccess: String, onFail: String, printOnSuccess: Boolean = false) {
     return when (status) {
-        TransactionStatus.CONFIRMED -> if (printOnSuccess) println(onSuccess) else throw PrintMessage(onSuccess)
+        TransactionStatus.CONFIRMED -> if (printOnSuccess) println(onSuccess) else throw PrintMessage(onSuccess, statusCode = 0)
         TransactionStatus.REJECTED -> throw CliktError("$onFail: $rejectReason")
-        TransactionStatus.WAITING -> throw PrintMessage("Transaction $txRid was sent to transaction queue")
+        TransactionStatus.WAITING -> throw PrintMessage("Transaction $txRid was sent to transaction queue", statusCode = 0)
         else -> throw CliktError("Cannot find status for this transaction")
     }
 }
