@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.deprecated
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -14,8 +15,6 @@ import net.postchain.chain0.common.operations.registerNodeOperation
 import net.postchain.chain0.common.operations.registerNodeWithNodeDataOperation
 import net.postchain.chain0.common.operations.registerNodeWithTerritoryAndUnitsOperation
 import net.postchain.chain0.common.operations.registerNodeWithUnitsOperation
-import net.postchain.chain0.common.operations.updateNodeCapabilityOperation
-import net.postchain.chain0.model.NodeCapabilityType
 import net.postchain.chain0.model.RegisterNodeData
 import net.postchain.chain0.version.apiVersion
 import net.postchain.common.types.WrappedByteArray
@@ -27,8 +26,9 @@ import net.postchain.mc.cli.util.clusterUnitsOption
 import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeyOption
+import net.postchain.mc.compatibility.ApiCompatV28.NodeCapabilityTypeV28
+import net.postchain.mc.compatibility.ApiCompatV28.updateNodeCapabilityOperationV28
 import net.postchain.mc.network.NodeVerifier
-
 
 class CommandRegisterNode : CliktCommand(
         name = "register",
@@ -59,7 +59,8 @@ class CommandRegisterNode : CliktCommand(
             help = "comma delimited list of clusters this node belongs to"
     ).split(",").default(emptyList())
 
-    private val capability by option(help = "Node capability").enum<NodeCapabilityType>().multiple()
+    private val capability by option(help = "Node capability").enum<NodeCapabilityTypeV28>().multiple().deprecated()
+
     override fun run() {
         val verifier = NodeVerifier(client.config, null)
         if (!verifier.verifyApi(apiUrl).responds) throw CliktError("Api url is not accessible for host")
@@ -68,6 +69,9 @@ class CommandRegisterNode : CliktCommand(
 
         if (territory != null && apiVersion < 15) {
             echo("Territory is not supported in API version $apiVersion and will be ignored")
+        }
+        if (capability.isNotEmpty() && apiVersion > 28) {
+            echo("Node capability is not supported in API version $apiVersion and will be ignored")
         }
 
         client.transactionBuilder()
@@ -90,7 +94,7 @@ class CommandRegisterNode : CliktCommand(
                     }
                 }
                 .apply {
-                    if (capability.isNotEmpty()) capability.forEach { updateNodeCapabilityOperation(client.pubkey, key.data, it, true) }
+                    if (apiVersion <= 28 && capability.isNotEmpty()) capability.forEach { updateNodeCapabilityOperationV28(client.pubkey, key.data, it, true) }
                 }
                 .postAwaitConfirmation()
                 .printResult(

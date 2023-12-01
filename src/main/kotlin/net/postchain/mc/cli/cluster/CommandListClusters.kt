@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.mordant.table.ColumnWidth
 import net.postchain.chain0.common.queries.getClusters
+import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
@@ -21,6 +22,7 @@ class CommandListClusters : CliktCommand(
     private val headers = listOf("Name", "Governor", "Operational")
 
     override fun run() {
+        val apiVersion = client.apiVersion()
         val clusters = client.getClusters()
         if (clusters.isEmpty()) {
             echo("No clusters")
@@ -39,7 +41,7 @@ class CommandListClusters : CliktCommand(
             })
             if (interactive) {
                 promptForIndex(clusters)?.let {
-                    showClusterInfo(client, clusters[it].name)
+                    showClusterInfo(apiVersion, client, clusters[it].name)
                 }
             }
         }

@@ -9,9 +9,11 @@ import net.postchain.chain0.common.queries.getClusterData
 import net.postchain.chain0.common.queries.getClusterNodes
 import net.postchain.chain0.common.queries.getClusterProviders
 import net.postchain.chain0.common.queries.getClusterReplicaNodes
+import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.compatibility.ApiCompatV28.getClusterDataV28
 
 class CommandGetClusterInfo : CliktCommand(
         name = "info",
@@ -24,23 +26,45 @@ class CommandGetClusterInfo : CliktCommand(
     private val name by nameOption("Cluster Name").required()
 
     override fun run() {
-        showClusterInfo(client, name)
+        val apiVersion = client.apiVersion()
+        showClusterInfo(apiVersion, client, name)
     }
 }
 
-fun CliktCommand.showClusterInfo(client: PostchainClient, name: String) {
-    val info = client.getClusterData(name)
-    echo(defaultTable {
-        body {
+fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainClient, name: String) {
 
-            row("Name:", info.name)
-            row("Governor:", info.governor)
-            row("Is Operational:", info.isOperational.toString())
-            info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
-            info.extraStorage?.let { row("Extra Storage:", it.toString()) }
-            row()
+    when {
+        apiVersion >= 29 -> {
+            val info = client.getClusterData(name)
+            echo(defaultTable {
+                body {
+                    row("Name:", info.name)
+                    row("Governor:", info.governor)
+                    row("Is Operational:", info.isOperational.toString())
+                    info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
+                    info.extraStorage?.let { row("Extra Storage:", it.toString()) }
+                    info.containerUnitsAvailable?.let { row("Container Units available:", it.toString()) }
+                    info.extraStorageAvailable?.let { row("Extra Storage available:", it.toString()) }
+                    info.clusterClass?.let { row("Cluster class:", it) }
+                    row()
+                }
+            })
         }
-    })
+
+        else -> {
+            val info = client.getClusterDataV28(name)
+            echo(defaultTable {
+                body {
+                    row("Name:", info.name)
+                    row("Governor:", info.governor)
+                    row("Is Operational:", info.isOperational.toString())
+                    info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
+                    info.extraStorage?.let { row("Extra Storage:", it.toString()) }
+                    row()
+                }
+            })
+        }
+    }
 
     val clusterProviders = client.getClusterProviders(name)
     if (clusterProviders.isNotEmpty()) {
