@@ -6,11 +6,12 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.long
-import net.postchain.chain0.direct_cluster.requestClusterOperation
+import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.nameOrGenerateOption
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.compatibility.ApiCompatV28.requestClusterOperationV28
 
 
 class CommandRequestCluster : CliktCommand(
@@ -28,13 +29,18 @@ class CommandRequestCluster : CliktCommand(
     private val requireFull by option(help = "Fail if cluster is not full").flag("--do-not-require-full", default = true)
 
     override fun run() {
-        client.transactionBuilder()
-                .requestClusterOperation(client.pubkey, name, size, requireFull)
-                .postAwaitConfirmation()
-                .printResult(
-                        "Cluster $name was created",
-                        "Could not create cluster"
-                )
+        val apiVersion = client.apiVersion()
+        if (apiVersion >= 29) {
+            echo("This operation is not supported after version 29 (version = $apiVersion)")
+        } else {
+            client.transactionBuilder()
+                    .requestClusterOperationV28(client.pubkey, name, size, requireFull)
+                    .postAwaitConfirmation()
+                    .printResult(
+                            "Cluster $name was created",
+                            "Could not create cluster"
+                    )
+        }
     }
 }
 
