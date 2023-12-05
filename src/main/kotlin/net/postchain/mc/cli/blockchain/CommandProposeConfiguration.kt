@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
+import com.chromia.cli.tools.config.BlockchainConfigurationCompressor
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
@@ -16,7 +17,6 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.forceOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
-import net.postchain.mc.cli.util.BlockchainConfigurationCompressor
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.Version
