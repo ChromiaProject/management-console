@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
+import com.chromia.cli.tools.config.BlockchainConfigurationCompressor
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.PrintMessage
@@ -18,7 +19,6 @@ import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainConfigOption
 import net.postchain.mc.cli.util.BlockchainConfig
-import net.postchain.mc.cli.util.BlockchainConfigurationCompressor
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption

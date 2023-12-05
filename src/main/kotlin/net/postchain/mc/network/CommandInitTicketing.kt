@@ -1,5 +1,6 @@
 package net.postchain.mc.network
 
+import com.chromia.cli.tools.config.BlockchainConfigurationCompressor
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
@@ -9,7 +10,6 @@ import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.BlockchainConfig
-import net.postchain.mc.cli.util.BlockchainConfigurationCompressor
 import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandInitTicketing : CliktCommand(
