@@ -10,6 +10,7 @@ import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.EndpointPool
 import net.postchain.client.transaction.TransactionBuilder
 import net.postchain.common.BlockchainRid
+import net.postchain.common.config.getEnvOrBooleanProperty
 import net.postchain.common.config.getEnvOrStringProperty
 import net.postchain.crypto.KeyPair
 
@@ -28,7 +29,8 @@ class NopPostchainClient(val client: PostchainClient) : PostchainClient by clien
                 null)
                     ?.let { BlockchainRid.buildFromHex(it) }
                     ?: findAndCacheBrid(config)
-            return NopPostchainClient(PostchainClientImpl(config.get(blockchainRid = brid)))
+            val useRequestCompression = config.getEnvOrBooleanProperty("POSTCHAIN_CLIENT_COMPRESS_REQUEST_BODIES", "compress.requests", true)
+            return NopPostchainClient(PostchainClientImpl(config.get(blockchainRid = brid).copy(compressRequestBodies = useRequestCompression)))
         }
 
         private fun findAndCacheBrid(config: ChromiaConfig): BlockchainRid {
