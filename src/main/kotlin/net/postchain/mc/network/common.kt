@@ -2,25 +2,25 @@ package net.postchain.mc.network
 
 import com.chromia.cli.tools.config.ChromiaConfig
 import com.github.ajalt.clikt.core.CliktError
-import net.postchain.chain0.ticketing.getTicketChainRid
+import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
 import net.postchain.client.core.PostchainClient
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.common.BlockchainRid
 import net.postchain.mc.cli.base.printResult
 
-fun initTicketChain(client: PostchainClient, config: ChromiaConfig) {
-    val ticketChainRid = client.getTicketChainRid()
-    if (ticketChainRid != null) {
-        val ticketChainClient = PostchainClientImpl(config.get(blockchainRid = BlockchainRid(ticketChainRid)))
-        ticketChainClient.transactionBuilder()
+fun initEconomyChain(client: PostchainClient, config: ChromiaConfig) {
+    val economyChainRid = client.getEconomyChainRid()
+    if (economyChainRid != null) {
+        val economyChainClient = PostchainClientImpl(config.get(blockchainRid = BlockchainRid(economyChainRid)))
+        economyChainClient.transactionBuilder()
                 .addOperation("init")
                 .postAwaitConfirmation()
                 .printResult(
-                        "Ticket chain was initiated",
-                        "Failed to initiate ticket chain",
+                        "Economy chain was initiated",
+                        "Failed to initiate economy chain",
                         printOnSuccess = false
                 )
     } else {
-        throw CliktError("""Ticket chain not yet available, please run "pmc network initialize-ticketing" after a while""")
+        throw CliktError("""Economy chain not yet available, please run "pmc network initialize-economy-chain" after a while""")
     }
 }

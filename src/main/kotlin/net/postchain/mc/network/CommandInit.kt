@@ -6,7 +6,7 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.common.init.initOperation
-import net.postchain.chain0.ticketing.initTicketingOperation
+import net.postchain.chain0.economy_chain_in_directory_chain.initEconomyChainOperation
 import net.postchain.client.core.PostchainClient
 import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.base.printResult
@@ -35,10 +35,10 @@ class CommandInit : CliktCommand(
             help = "Configuration file for cluster anchoring chain (GtvML (*.xml) or Gtv (*.gtv))"
     ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
 
-    private val ticketChainConfig by option(
-            "-tcc",
-            "--ticket-chain-config",
-            help = "Configuration file for ticket chain (GtvML (*.xml) or Gtv (*.gtv))"
+    private val economyChainConfig by option(
+            "-ecc",
+            "--economy-chain-config",
+            help = "Configuration file for economy chain (GtvML (*.xml) or Gtv (*.gtv))"
     ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
 
     override fun run() {
@@ -51,17 +51,17 @@ class CommandInit : CliktCommand(
         val systemAnchoringConfigData = systemAnchoringConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
         val clusterAnchoringConfigData = clusterAnchoringConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
 
-        val ticketChainConfigData = ticketChainConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
-        if (version < 16 && ticketChainConfigData != null) {
-            echo("Ticketing requires directory chain version 16, found version $version")
+        val economyChainConfigData = economyChainConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
+        if (version < 30 && economyChainConfigData != null) {
+            echo("Economy chain requires directory chain version 30, found version $version")
             return
         }
 
         client.transactionBuilder()
                 .initOperation(systemAnchoringConfigData, clusterAnchoringConfigData)
                 .apply {
-                    if (ticketChainConfigData != null) {
-                        initTicketingOperation(client.pubkey, ticketChainConfigData)
+                    if (economyChainConfigData != null) {
+                        initEconomyChainOperation(client.pubkey, economyChainConfigData)
                     }
                 }
                 .postAwaitConfirmation()
@@ -70,8 +70,8 @@ class CommandInit : CliktCommand(
                         "Failed to initiate network",
                         printOnSuccess = true
                 )
-        if (ticketChainConfigData != null) {
-            initTicketChain(client, config.config)
+        if (economyChainConfigData != null) {
+            initEconomyChain(client, config.config)
         }
     }
 
