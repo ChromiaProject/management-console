@@ -8,6 +8,9 @@ import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.cm_api.cmGetClusterInfo
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.queries.getBlockchainInfo
+import net.postchain.chain0.common.queries.getImportingForeignBlockchainInfo
+import net.postchain.chain0.common.queries.getMovingBlockchainInfo
+import net.postchain.chain0.common.queries.getUnarchivingBlockchainInfo
 import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
 import net.postchain.client.request.EndpointPool
@@ -41,6 +44,7 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, blockchainRid: Bloc
     val blockchainInfo = client.getBlockchainInfo(blockchainRid.data)
             ?: throw CliktError("Blockchain with rid $blockchainRid not found")
 
+    echo("Basic info:")
     echo(defaultTable {
         body {
             row("Name", blockchainInfo.name)
@@ -52,6 +56,7 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, blockchainRid: Bloc
         }
     })
 
+    // Anchored height + heights on nodes
     if (blockchainInfo.cluster != null) {
         val clusterInfo = client.cmGetClusterInfo(blockchainInfo.cluster)
         val clusterEndpoints = clusterInfo.peers.map { it.apiUrl }.let { EndpointPool.default(it) }
@@ -73,5 +78,47 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, blockchainRid: Bloc
             }
         })
     }
-}
 
+    // Migrating Blockchain Info
+    if (blockchainInfo.isForeignImporting == true) {
+        client.getImportingForeignBlockchainInfo(blockchainRid)?.let { info ->
+            echo("Importing foreign blockchain info:")
+            echo(defaultTable {
+                body {
+                    row("Node pubkey", info.pubkey)
+                    row("Node host", info.host)
+                    row("Node port", info.port)
+                    row("Node api-url", info.apiUrl)
+                    row("Foreign management chain RID", info.chain0Rid)
+                    row("Up to height", info.upToHeight)
+                }
+            })
+        }
+    }
+
+    if (blockchainInfo.isMoving == true) {
+        client.getMovingBlockchainInfo(blockchainRid)?.let { info ->
+            echo("Moving blockchain info:")
+            echo(defaultTable {
+                body {
+                    row("Source container", info.sourceContainer)
+                    row("Destination container", info.destinationContainer)
+                    row("Finish at height", info.finishAtHeight)
+                }
+            })
+        }
+    }
+
+    if (blockchainInfo.isUnarchiving == true) {
+        client.getUnarchivingBlockchainInfo(blockchainRid)?.let { info ->
+            echo("Unarchiving blockchain info:")
+            echo(defaultTable {
+                body {
+                    row("Source container", info.sourceContainer)
+                    row("Destination container", info.destinationContainer)
+                    row("Finish at height", info.finishAtHeight)
+                }
+            })
+        }
+    }
+}
