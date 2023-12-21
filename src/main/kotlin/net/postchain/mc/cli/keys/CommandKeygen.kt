@@ -32,7 +32,7 @@ class CommandKeygen : CliktCommand(name = "keygen", help = "Generates public/pri
 
     private val nodeFormat by option("-n", "--node", help = "Save the generated keypair in format to be included in node properties file").flag()
 
-    private val deprecated by option("-dr", "--deprecated-recovery", help = "Used to recover keys from Mnemonic generated before version 0.13.2, will be removed in the future")
+    private val deprecated by option("-dr", "--deprecated-recovery", help = "Used to recover keys from Mnemonic generated before postchain version 0.13.2, will be removed in the future")
             .flag()
 
 
