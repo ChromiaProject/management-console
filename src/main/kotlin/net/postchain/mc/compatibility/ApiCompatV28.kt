@@ -23,7 +23,7 @@ object ApiCompatV28 {
             @Name("is_operational") val isOperational: Boolean,
             @Name("cluster_units") @Nullable val clusterUnits: Long?,
             @Name("extra_storage") @Nullable val extraStorage: Long?,
-            @Name("number_of_nodes") val numberOfNodes: Long
+            @Name("number_of_nodes") @Nullable val numberOfNodes: Long?
     )
 
     // @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "common.queries:get_cluster_data")
