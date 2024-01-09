@@ -4,8 +4,8 @@ import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.table.SectionBuilder
-import com.github.ajalt.mordant.table.table
 import net.postchain.chain0.common.queries.getProviderData
 import net.postchain.chain0.proposal.GetProposalResult
 import net.postchain.chain0.proposal.ProposalState
@@ -102,7 +102,6 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
 
             if (proposal.state == ProposalState.PENDING) {
                 echo("Proposal details")
-                echo("------------------------------")
                 echo(formatPendingProposal(apiVersion, client, proposal.id, proposal.type))
             } else if (apiVersion >= 26 && proposal.state == ProposalState.APPROVED && proposal.type == ProposalType.configuration) {
                 printApprovedConfigurationStatus(client, proposal)
@@ -122,7 +121,6 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
             })
 
             echo("Proposal details")
-            echo("------------------------------")
             echo(formatPendingProposal(apiVersion, client, proposal.id, proposal.type))
         }
     }
@@ -131,11 +129,9 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
 private fun CliktCommand.printApprovedConfigurationStatus(client: PostchainClient, proposal: GetProposalResult) {
     val updateState = client.getBlockchainConfigurationUpdateAttemptStateByProposal(proposal.id)
     if (updateState != null) {
-        echo("")
-        echo("Configuration update status")
-        echo("------------------------------")
         val heightInfo = if (updateState.appliedAtHeight > -1) updateState.appliedAtHeight.toString() else "Not applied yet"
         echo(defaultTable {
+            captionTop("Configuration update status", TextAlign.LEFT)
             header { row("Status", "Applied at height") }
             body {
                 row(updateState.state.toString(), heightInfo)
@@ -207,7 +203,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.cluster_provider -> {
             val cpc = client.getClusterProviderProposal(proposalId) ?: return ""
-            return table {
+            return defaultTable {
                 body {
                     row("Cluster", cpc.cluster)
                     row("Provider", cpc.provider.toHex())

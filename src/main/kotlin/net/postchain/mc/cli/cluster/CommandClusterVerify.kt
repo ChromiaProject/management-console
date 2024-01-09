@@ -4,6 +4,7 @@ import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.mordant.rendering.TextAlign
 import net.postchain.chain0.cm_api.CmClusterInfo
 import net.postchain.chain0.cm_api.cmGetClusterBlockchains
 import net.postchain.chain0.cm_api.cmGetClusterInfo
@@ -30,15 +31,14 @@ class CommandClusterVerify : CliktCommand(
         val clusterInfo = client.cmGetClusterInfo(cluster)
         val clusterEndpoints = clusterInfo.peers.map { it.apiUrl }.let { EndpointPool.default(it) }
 
-        echo("Verifying cluster $cluster")
         echo(defaultTable {
+            captionTop("Verifying cluster $cluster", TextAlign.LEFT)
             header { row("Pubkey", "Url") }
             body {
                 clusterInfo.peers.forEach { row(PubKey(it.pubkey).toShortHex(), it.apiUrl) }
             }
         })
 
-        echo("Cluster Chains")
         analyzeBlockchains(client.cmGetClusterBlockchains(cluster), clusterInfo, clusterEndpoints)
     }
 
@@ -46,6 +46,7 @@ class CommandClusterVerify : CliktCommand(
         val blockHeightClient = BlockHeightClient(client)
         chainsToAnalyze.map { BlockchainRid(it) }.forEach { bc ->
             echo(defaultTable {
+                captionTop("Cluster Chains", TextAlign.LEFT)
                 header { row("Blockchain", "Anchored height", *clusterInfo.peers.map { PubKey(it.pubkey).toShortHex() }.toTypedArray()) }
                 body {
                     val anchoringChain = when (bc.wData) {

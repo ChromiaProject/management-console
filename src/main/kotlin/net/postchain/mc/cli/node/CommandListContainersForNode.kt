@@ -1,10 +1,10 @@
 package net.postchain.mc.cli.node
 
-import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getNodeContainers
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.util.pubkeyOption
 
 class CommandListContainersForNode : CliktCommand(
@@ -17,17 +17,10 @@ class CommandListContainersForNode : CliktCommand(
 
     override fun run() {
         val containers = client.getNodeContainers(key)
-        if (containers.isEmpty()) {
-            echo("No containers")
-        } else {
-            echo(defaultTable {
-                header { row("Name", "Cluster", "Deployer") }
-                body {
-                    containers.forEach {
-                        row(it.name, it.cluster, it.deployer)
-                    }
-                }
-            })
-        }
+        echo(pmcTable(
+                "containers",
+                listOf("Name", "Cluster", "Deployer"),
+                containers.map { listOf(it.name, it.cluster, it.deployer) }
+        ))
     }
 }

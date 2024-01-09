@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.proposal
 
-import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
@@ -19,6 +18,7 @@ import net.postchain.mc.cli.dateToTimestampOption
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.compatibility.ApiCompatV6.getProposalsSinceV6
 import net.postchain.mc.compatibility.ApiCompatV6.getProviderVotesV6
 import net.postchain.mc.compatibility.ApiCompatV6.getRelevantProposalsV6
@@ -50,22 +50,21 @@ class CommandListProposals : CliktCommand(
                 } else {
                     client.getRelevantProposals(from, to, pending, client.pubkey).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
                 }
-                if (proposals.isEmpty()) return echo("No proposals found")
 
                 val votes = client.getProviderVotes(from, to, client.pubkey)
 
-                echo(defaultTable {
-                    header { rowFrom(if (interactive) listOf("#") + headers else headers) }
-                    body {
-                        proposals.forEachIndexed { index, info ->
+                echo(pmcTable(
+                        "proposals",
+                        headers,
+                        proposals.map { info ->
                             val vote = votes.find { it.proposal == info.rowId }
                             val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
-                            val columns = listOf(info.proposalType.toString(), info.rowId.id.toString(), info.state.toString(), voteStatus)
-                            rowFrom(if (interactive) listOf(index.toString()) + columns else columns)
-                        }
-                    }
-                })
-                if (interactive) {
+                            listOf(info.proposalType.toString(), info.rowId.id.toString(), info.state.toString(), voteStatus)
+                        },
+                        null,
+                        interactive
+                ))
+                if (interactive && proposals.isNotEmpty()) {
                     promptForIndex(proposals)?.let {
                         showProposalInfo(client, proposals[it].rowId)
                     }
@@ -78,20 +77,18 @@ class CommandListProposals : CliktCommand(
                 } else {
                     client.getRelevantProposalsV6(client.pubkey, RowId(since)).map { it.rowid to it.proposalType }
                 }
-                if (proposals.isEmpty()) return echo("No proposals found")
 
                 val votes = client.getProviderVotesV6(client.pubkey)
 
-                echo(defaultTable {
-                    header { row("Type", "Id", "Your vote") }
-                    body {
-                        proposals.forEach { (rowid, proposalType) ->
+                echo(pmcTable(
+                        "proposals",
+                        listOf("Type", "Id", "Your vote"),
+                        proposals.map { (rowid, proposalType) ->
                             val vote = votes.find { it.proposal == rowid }
                             val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
-                            row(proposalType.toString(), rowid.id.toString(), voteStatus)
+                            listOf(proposalType.toString(), rowid.id.toString(), voteStatus)
                         }
-                    }
-                })
+                ))
             }
         }
     }
