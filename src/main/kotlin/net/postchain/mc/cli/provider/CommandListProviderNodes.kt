@@ -32,7 +32,7 @@ class CommandListProviderNodes : CliktCommand(
                             it.host,
                             it.port.toString(),
                             it.apiUrl,
-                            it.territory,
+                            it.territory ?: "",
                             it.active.toString(),
                             Date.from(Instant.ofEpochMilli(it.lastUpdated)).toString()
                     )
