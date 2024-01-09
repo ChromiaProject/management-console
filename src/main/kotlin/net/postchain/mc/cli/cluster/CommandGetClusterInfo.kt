@@ -123,4 +123,3 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainClient, name
         echo("No containers")
     }
 }
-

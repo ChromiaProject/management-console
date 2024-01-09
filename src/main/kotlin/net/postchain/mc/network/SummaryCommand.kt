@@ -3,7 +3,6 @@ package net.postchain.mc.network
 import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.table.Borders
 import net.postchain.chain0.common.queries.getSummary
 import net.postchain.mc.cli.util.pmcConfigOption

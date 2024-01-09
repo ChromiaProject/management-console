@@ -1,15 +1,14 @@
 package net.postchain.mc.cli.cluster
 
-import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import com.github.ajalt.mordant.table.ColumnWidth
 import net.postchain.chain0.common.queries.getClusters
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pmcTable
 
 class CommandListClusters : CliktCommand(
         name = "list",
@@ -24,25 +23,16 @@ class CommandListClusters : CliktCommand(
     override fun run() {
         val apiVersion = client.apiVersion()
         val clusters = client.getClusters()
-        if (clusters.isEmpty()) {
-            echo("No clusters")
-        } else {
-            echo(defaultTable {
-                column(0) {
-                    width = ColumnWidth.Fixed(if (interactive) 3 else NAME_LENGTH_MAX + 2)
-                }
-                header { rowFrom(if (interactive) listOf("#") + headers else headers) }
-                body {
-                    clusters.forEachIndexed { index, it ->
-                        val columns = listOf(it.name, it.governor, it.operational.toString())
-                        rowFrom(if (interactive) listOf(index.toString()) + columns else columns)
-                    }
-                }
-            })
-            if (interactive) {
-                promptForIndex(clusters)?.let {
-                    showClusterInfo(apiVersion, client, clusters[it].name)
-                }
+        echo(pmcTable(
+                "clusters",
+                headers,
+                clusters.map { listOf(it.name, it.governor, it.operational.toString()) },
+                0 to NAME_LENGTH_MAX,
+                interactive
+        ))
+        if (interactive && clusters.isNotEmpty()) {
+            promptForIndex(clusters)?.let {
+                showClusterInfo(apiVersion, client, clusters[it].name)
             }
         }
     }

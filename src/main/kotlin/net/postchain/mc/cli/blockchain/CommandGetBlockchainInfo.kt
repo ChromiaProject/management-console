@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.mordant.rendering.TextAlign
 import net.postchain.chain0.cm_api.cmGetClusterInfo
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.queries.getBlockchainInfo
@@ -44,8 +45,8 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, blockchainRid: Bloc
     val blockchainInfo = client.getBlockchainInfo(blockchainRid.data)
             ?: throw CliktError("Blockchain with rid $blockchainRid not found")
 
-    echo("Basic info:")
     echo(defaultTable {
+        captionTop("Basic info:", TextAlign.LEFT)
         body {
             row("Name", blockchainInfo.name)
             row("RID", blockchainInfo.rid)
@@ -68,8 +69,8 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, blockchainRid: Bloc
         val blockHeightClient = BlockHeightClient(client)
         val anchoredHeight = blockHeightClient.getLastAnchoredBlockHeight(anchoringChain, clusterEndpoints, blockchainRid)
 
-        echo("Heights on nodes:")
         echo(defaultTable {
+            captionTop("Heights on nodes:", TextAlign.LEFT)
             body {
                 row("Anchored height", anchoredHeight)
                 clusterInfo.peers.forEach { peer ->
@@ -82,8 +83,8 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, blockchainRid: Bloc
     // Migrating Blockchain Info
     if (blockchainInfo.isForeignImporting == true) {
         client.getImportingForeignBlockchainInfo(blockchainRid)?.let { info ->
-            echo("Importing foreign blockchain info:")
             echo(defaultTable {
+                captionTop("Importing foreign blockchain info:", TextAlign.LEFT)
                 body {
                     row("Node pubkey", info.pubkey)
                     row("Node host", info.host)
@@ -98,8 +99,8 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, blockchainRid: Bloc
 
     if (blockchainInfo.isMoving == true) {
         client.getMovingBlockchainInfo(blockchainRid)?.let { info ->
-            echo("Moving blockchain info:")
             echo(defaultTable {
+                captionTop("Moving blockchain info:", TextAlign.LEFT)
                 body {
                     row("Source container", info.sourceContainer)
                     row("Destination container", info.destinationContainer)
@@ -111,8 +112,8 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, blockchainRid: Bloc
 
     if (blockchainInfo.isUnarchiving == true) {
         client.getUnarchivingBlockchainInfo(blockchainRid)?.let { info ->
-            echo("Unarchiving blockchain info:")
             echo(defaultTable {
+                captionTop("Unarchiving blockchain info:", TextAlign.LEFT)
                 body {
                     row("Source container", info.sourceContainer)
                     row("Destination container", info.destinationContainer)
