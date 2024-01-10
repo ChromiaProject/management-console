@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.node
 
-import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.anchoring.anchoring_chain_common.getLastAnchoredBlock
@@ -14,6 +13,7 @@ import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.SingleEndpointPool
 import net.postchain.common.BlockchainRid
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.util.pubkeyOption
 import net.postchain.mc.network.NodeVerifier
 
@@ -35,7 +35,7 @@ class CommandNodeVerify : CliktCommand(
         val clusterAnchorChainsHeights = clusterAnchorChains.map { it.key to nodeVerifier.verifyBlockchain(it.value, node.apiUrl).second }
         val nodeStatus = nodeVerifier.verifyApi(node.apiUrl)
 
-        echo(defaultTable {
+        echo(pmcTable {
             body {
                 row("Node", "${node.pubkey}")
                 row("Url", node.apiUrl)
@@ -62,23 +62,18 @@ class CommandNodeVerify : CliktCommand(
             Triple(anchoredHeight, bcHeight.first, bcHeight.second)
         }
 
-        if (blockchains.isEmpty()) {
-            echo("No running chains")
-        } else {
-            echo(defaultTable {
-                header { row("Blockchain", "Responds", "Height", "Anchored Height", "Synchronized") }
-                body {
-                    bcStatuses.forEach { (brid, status) ->
-                        row(
-                                brid.toHex(),
-                                "${status.second}",
-                                "${status.third}",
-                                "${status.first}",
-                                status.third?.let { if (it < status.first ?: 0) "NO" else "Yes" } ?: "NO"
-                        )
-                    }
+        echo(pmcTable(
+                "blockchains",
+                listOf("Blockchain", "Responds", "Height", "Anchored Height", "Synchronized"),
+                bcStatuses.map { (brid, status) ->
+                    listOf(
+                            brid.toHex(),
+                            "${status.second}",
+                            "${status.third}",
+                            "${status.first}",
+                            status.third?.let { if (it < (status.first ?: 0)) "NO" else "Yes" } ?: "NO"
+                    )
                 }
-            })
-        }
+        ))
     }
 }

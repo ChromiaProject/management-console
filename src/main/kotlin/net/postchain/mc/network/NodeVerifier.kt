@@ -22,7 +22,7 @@ class NodeVerifier(private val configTemplate: PostchainClientConfig, private va
             socket.close()
             true
         } catch (e: IOException) {
-            println(e)
+            System.err.println(e)
             false
         }
     }
@@ -34,8 +34,8 @@ class NodeVerifier(private val configTemplate: PostchainClientConfig, private va
         val systemAnchorStatus = verifyBlockchain(sacBrid, url)
 
         when {
-            managementChainStatus.third != null -> println("Node verification failed ($url): " + managementChainStatus.third?.message)
-            systemAnchorStatus.third != null -> println("Node verification failed ($url): " + systemAnchorStatus.third?.message)
+            managementChainStatus.third != null -> System.err.println("Node verification failed ($url): " + managementChainStatus.third?.message)
+            systemAnchorStatus.third != null -> System.err.println("Node verification failed ($url): " + systemAnchorStatus.third?.message)
         }
 
         return NodeApiStatus(managementChainStatus.first && systemAnchorStatus.first, managementChainStatus.second, systemAnchorStatus.second)

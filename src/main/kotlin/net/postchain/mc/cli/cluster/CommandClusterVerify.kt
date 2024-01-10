@@ -1,10 +1,9 @@
 package net.postchain.mc.cli.cluster
 
-import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
-import com.github.ajalt.mordant.rendering.TextAlign
 import net.postchain.chain0.cm_api.CmClusterInfo
 import net.postchain.chain0.cm_api.cmGetClusterBlockchains
 import net.postchain.chain0.cm_api.cmGetClusterInfo
@@ -17,6 +16,7 @@ import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.util.BlockHeightClient
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pmcTable
 
 class CommandClusterVerify : CliktCommand(
         name = "verify",
@@ -31,36 +31,34 @@ class CommandClusterVerify : CliktCommand(
         val clusterInfo = client.cmGetClusterInfo(cluster)
         val clusterEndpoints = clusterInfo.peers.map { it.apiUrl }.let { EndpointPool.default(it) }
 
-        echo(defaultTable {
-            captionTop("Verifying cluster $cluster", TextAlign.LEFT)
-            header { row("Pubkey", "Url") }
-            body {
-                clusterInfo.peers.forEach { row(PubKey(it.pubkey).toShortHex(), it.apiUrl) }
-            }
-        })
+        if (terminal.info.outputInteractive) echo("Verifying cluster $cluster")
+
+        echo(pmcTable(
+                "nodes",
+                listOf("Pubkey", "Url"),
+                clusterInfo.peers.map { listOf(PubKey(it.pubkey).toShortHex(), it.apiUrl) }
+        ))
 
         analyzeBlockchains(client.cmGetClusterBlockchains(cluster), clusterInfo, clusterEndpoints)
     }
 
     private fun analyzeBlockchains(chainsToAnalyze: Collection<ByteArray>, clusterInfo: CmClusterInfo, clusterEndpoints: RandomizedEndpointPool) {
         val blockHeightClient = BlockHeightClient(client)
-        chainsToAnalyze.map { BlockchainRid(it) }.forEach { bc ->
-            echo(defaultTable {
-                captionTop("Cluster Chains", TextAlign.LEFT)
-                header { row("Blockchain", "Anchored height", *clusterInfo.peers.map { PubKey(it.pubkey).toShortHex() }.toTypedArray()) }
-                body {
+        echo(pmcTable(
+                "cluster chains",
+                listOf("Blockchain RID", "Anchored height", *clusterInfo.peers.map { PubKey(it.pubkey).toShortHex() }.toTypedArray()),
+                chainsToAnalyze.map { BlockchainRid(it) }.map { bc ->
                     val anchoringChain = when (bc.wData) {
                         client.cmGetSystemAnchoringChain()?.wrap() -> null
                         clusterInfo.anchoringChain -> client.cmGetSystemAnchoringChain()?.wrap()
                         else -> clusterInfo.anchoringChain
                     }
-                    row(
-                            bc.toShortHex(),
-                            blockHeightClient.getLastAnchoredBlockHeight(anchoringChain, clusterEndpoints, bc),
-                            *clusterInfo.peers.map { blockHeightClient.getCurrentBlockHeightOnPeer(it, bc) }.toTypedArray()
+                    listOf(
+                            bc.toHex(),
+                            blockHeightClient.getLastAnchoredBlockHeight(anchoringChain, clusterEndpoints, bc).toString(),
+                            *clusterInfo.peers.map { blockHeightClient.getCurrentBlockHeightOnPeer(it, bc).toString() }.toTypedArray()
                     )
                 }
-            })
-        }
+        ))
     }
 }

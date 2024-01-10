@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.node
 
-import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getNodeData
@@ -8,6 +7,7 @@ import net.postchain.chain0.common.queries.listClustersOfNode
 import net.postchain.client.core.PostchainClient
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.util.pubkeyOption
 
 class CommandGetNodeInfo : CliktCommand(
@@ -26,7 +26,7 @@ class CommandGetNodeInfo : CliktCommand(
 
 fun CliktCommand.showNodeInfo(client: PostchainClient, pubkey: PubKey) {
     val node = client.getNodeData(pubkey)
-    echo(defaultTable {
+    echo(pmcTable {
         body {
             row("Pubkey:", "${node.pubkey}")
             row("Active:", "${node.active}")

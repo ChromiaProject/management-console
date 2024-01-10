@@ -5,8 +5,15 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.table.ColumnWidth
-import com.google.gson.GsonBuilder
+import com.github.ajalt.mordant.table.TableBuilder
 import java.util.Locale
+
+fun CliktCommand.pmcTable(init: TableBuilder.() -> Unit): Any =
+        if (terminal.info.outputInteractive)
+            defaultTable(init)
+        else {
+            jsonTable(init)
+        }
 
 fun CliktCommand.pmcTable(name: String, headers: List<String>, rows: List<List<String>>, idColumn: Pair<Int, Int>? = null, interactive: Boolean = false): Any =
         if (terminal.info.outputInteractive)
@@ -36,13 +43,4 @@ private fun CliktCommand.prettyTable(name: String, headers: List<String>, rows: 
             rowFrom(if (interactive) listOf(index.toString()) + columns else columns)
         }
     }
-}
-
-private fun jsonTable(headers: List<String>, rows: List<List<String>>): String {
-    val table: List<Map<String, String>> = rows.map { row ->
-        row.withIndex().associate { cell ->
-            headers[cell.index].replace(' ', '_') to cell.value
-        }
-    }
-    return GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(table)
 }
