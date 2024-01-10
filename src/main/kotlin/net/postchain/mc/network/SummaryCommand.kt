@@ -1,12 +1,11 @@
 package net.postchain.mc.network
 
-import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import com.github.ajalt.mordant.table.Borders
+import com.github.ajalt.mordant.rendering.TextAlign
 import net.postchain.chain0.common.queries.getSummary
 import net.postchain.mc.cli.util.pmcConfigOption
-
+import net.postchain.mc.cli.util.pmcTable
 
 class SummaryCommand : CliktCommand(
         help = "Show summary of the network"
@@ -17,13 +16,8 @@ class SummaryCommand : CliktCommand(
 
     override fun run() {
         val summary = client.getSummary()
-        echo(defaultTable {
-            header {
-                row {
-                    this.cellBorders = Borders.NONE
-                    cell("Network Summary")
-                }
-            }
+        echo(pmcTable {
+            captionTop("Network Summary", TextAlign.LEFT)
             body {
                 row("Voter sets", summary.voterSets)
                 row("Providers", summary.providers)

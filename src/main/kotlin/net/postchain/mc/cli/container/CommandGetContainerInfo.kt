@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.container
 
-import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
@@ -11,6 +10,7 @@ import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV3.getContainerBlockchainV3
 
@@ -32,7 +32,7 @@ class CommandGetContainerInfo : CliktCommand(
 fun CliktCommand.showContainerInfo(client: PostchainClient, name: String) {
     val info = client.getContainerData(name)
 
-    echo(defaultTable {
+    echo(pmcTable {
         body {
             row("Name:", info.name)
             row("Cluster:", info.cluster)
@@ -48,12 +48,12 @@ fun CliktCommand.showContainerInfo(client: PostchainClient, name: String) {
         }
     })
 
-    echo(defaultTable {
-        header { row("Resource type", "Value") }
-        body {
-            val limits = client.nmGetContainerLimits(name)
-            limits.forEach {
-                row(it.key, when (it.key) {
+    val limits = client.nmGetContainerLimits(name)
+    echo(pmcTable(
+            "resources limits",
+            listOf("Resource type", "Value"),
+            limits.map {
+                listOf(it.key, when (it.key) {
                     ApiCompatV2.ContainerResourceLimitType.cpu.name -> "${it.value} %"
                     ApiCompatV2.ContainerResourceLimitType.ram.name -> "${it.value} MiB"
                     ApiCompatV2.ContainerResourceLimitType.storage.name -> "${it.value} MiB"
@@ -62,44 +62,30 @@ fun CliktCommand.showContainerInfo(client: PostchainClient, name: String) {
                     else -> it.value.toString()
                 })
             }
-        }
-    })
+    ))
 
     val apiVersion = client.apiVersion()
     when {
         apiVersion >= 4 -> {
             val blockchains = client.getContainerBlockchain(name)
-            if (blockchains.isEmpty()) {
-                echo("No blockchains")
-            } else {
-                echo("Blockchains:")
-                echo(defaultTable {
-                    header { row("Name", "Rid", "System", "State") }
-                    body {
-                        blockchains.forEach {
-                            row(it.name, it.rid.toHex(), it.system.toString(), it.state.toString())
-                        }
+            echo(pmcTable(
+                    "blockchains",
+                    listOf("Name", "Rid", "System", "State"),
+                    blockchains.map {
+                        listOf(it.name, it.rid.toHex(), it.system.toString(), it.state.toString())
                     }
-                })
-            }
+            ))
         }
 
         else -> {
             val blockchains = client.getContainerBlockchainV3(name)
-            if (blockchains.isEmpty()) {
-                echo("No blockchains")
-            } else {
-                echo("Blockchains:")
-                echo(defaultTable {
-                    header { row("Name", "Rid", "System", "Active") }
-                    body {
-                        blockchains.forEach {
-                            row(it.name, it.rid.toHex(), it.system.toString(), it.active.toString())
-                        }
+            echo(pmcTable(
+                    "blockchains",
+                    listOf("Name", "Rid", "System", "Active"),
+                    blockchains.map {
+                        listOf(it.name, it.rid.toHex(), it.system.toString(), it.active.toString())
                     }
-                })
-            }
+            ))
         }
     }
 }
-

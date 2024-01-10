@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.provider
 
-import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getNodesByProvider
@@ -12,6 +11,7 @@ import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.optionalPubkeyOption
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.pmcTable
 
 class CommandGetProviderInfo : CliktCommand(
         name = "info",
@@ -33,7 +33,7 @@ fun CliktCommand.showProviderInfo(client: PostchainClient, pubkey: PubKey) {
     val actionPoints = client.getProviderPoints(pubkey)
     val providerClusters = client.getProviderClusters(pubkey)
     val nodesByProvider = client.getNodesByProvider(pubkey)
-    echo(defaultTable {
+    echo(pmcTable {
         body {
             row("Provider:", providerData.name)
             row("Url:", providerData.url)
