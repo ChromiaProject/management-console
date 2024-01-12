@@ -72,12 +72,12 @@ class CommandRegisterProvider : CliktCommand(
             (1): pmc provider register -cnp --enable --pubkey aa...
             ```
             ```
-            (2): pmc provider register --batch -cnp --enable --provider '{pubkey=x"aa...",name="foo",url="http://foo/api"}' --provider '{pubkey=x"bb...",name="bar"}'
+            (2): pmc provider register --batch -cnp --enable --provider '["pubkey": x"aa...", "name": "foo", "url": "http://foo/api"]' --provider '["pubkey": x"bb...", "name": "bar"]'
             ```
             ```
             (3): pmc provider register --batch -cnp --enable, where providers will be load from `providers.properties` file:
-                    provider={pubkey=x"aa...",name="foo",url="http://foo/api"};{pubkey=x"bb...",name="bar",url="http://bar/api"}
-                    provider={pubkey=x"cc...",url="http://foobar/api"}
+                    provider=["pubkey": x"aa...", "name": "foo", "url": "http://foo/api"];["pubkey": x"bb...", "name": "bar", "url": "http://bar/api"]
+                    provider=["pubkey": x"cc...", "url": "http://foobar/api"]
             ```
     """.trimIndent()
 ) {
