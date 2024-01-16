@@ -59,6 +59,8 @@ import net.postchain.mc.cli.votingupdates.formatThreshold
 import net.postchain.mc.compatibility.ApiCompatV22.getClusterLimitsProposalV22
 import net.postchain.mc.compatibility.ApiCompatV22.getContainerLimitsProposalV22
 import net.postchain.mc.compatibility.ApiCompatV22.getContainerProposalV22
+import net.postchain.mc.compatibility.ApiCompatV33.getFinishBlockchainImportProposalV33
+import net.postchain.mc.compatibility.ApiCompatV33.getForeignBlockchainBlocksImportProposalV33
 import net.postchain.mc.compatibility.ApiCompatV6.getProposalV6
 import net.postchain.mc.gtv.diff.GtvDiffFinder
 import java.time.Instant
@@ -332,12 +334,12 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                     row("Blockchain name", pba.blockchainName)
                     row("Action", pba.action.name)
 
-                    if (apiVersion >= 28 && pba.action == BlockchainAction.unarchive) {
+                    if (apiVersion >= 33 && pba.action == BlockchainAction.unarchive) {
                         val unarchivingProposal = client.getBlockchainUnarchiveActionProposal(proposalId)
                         if (unarchivingProposal != null) {
                             row("Source container", unarchivingProposal.sourceContainer)
                             row("Destination container", unarchivingProposal.destinationContainer)
-                            row("Up to height", unarchivingProposal.upToHeight)
+                            row("Final height", unarchivingProposal.finalHeight)
                         }
                     }
                 }
@@ -384,73 +386,129 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
         }
 
         ProposalType.blockchain_import -> {
-            val proposal = client.getBlockchainImportProposal(proposalId) ?: return ""
-            return pmcTable {
-                body {
-                    row("Blockchain RID", proposal.blockchainRid)
-                    row("Blockchain Name", proposal.name)
-                    row("Container", proposal.container)
-                    row("Config hash", getDataHash(proposal.configData))
+            when {
+                apiVersion >= 19 -> {
+                    val proposal = client.getBlockchainImportProposal(proposalId) ?: return ""
+                    return pmcTable {
+                        body {
+                            row("Blockchain RID", proposal.blockchainRid)
+                            row("Blockchain Name", proposal.name)
+                            row("Container", proposal.container)
+                            row("Config hash", getDataHash(proposal.configData))
+                        }
+                    }
                 }
+
+                else -> return ""
             }
         }
 
         ProposalType.configuration_import -> {
-            val proposal = client.getConfigurationImportProposal(proposalId) ?: return ""
-            return pmcTable {
-                body {
-                    row("Blockchain RID", proposal.blockchainRid)
-                    row("Height", proposal.height)
-                    row("Config hash", getDataHash(proposal.configData))
+            when {
+                apiVersion >= 19 -> {
+                    val proposal = client.getConfigurationImportProposal(proposalId) ?: return ""
+                    return pmcTable {
+                        body {
+                            row("Blockchain RID", proposal.blockchainRid)
+                            row("Height", proposal.height)
+                            row("Config hash", getDataHash(proposal.configData))
+                        }
+                    }
                 }
+
+                else -> return ""
             }
         }
 
         ProposalType.finish_blockchain_import -> {
-            val proposal = client.getFinishBlockchainImportProposal(proposalId) ?: return ""
-            return pmcTable {
-                body {
-                    row("Blockchain RID", proposal.blockchainRid)
-                    row("Finish at height", proposal.finishAtHeight)
+            when {
+                apiVersion >= 33 -> {
+                    val proposal = client.getFinishBlockchainImportProposal(proposalId) ?: return ""
+                    return pmcTable {
+                        body {
+                            row("Blockchain RID", proposal.blockchainRid)
+                            row("Final height", proposal.finalHeight)
+                        }
+                    }
                 }
+
+                apiVersion >= 19 -> {
+                    val proposal = client.getFinishBlockchainImportProposalV33(proposalId) ?: return ""
+                    return pmcTable {
+                        body {
+                            row("Blockchain RID", proposal.blockchainRid)
+                            row("Finish at height", proposal.finishAtHeight)
+                        }
+                    }
+                }
+
+                else -> return ""
             }
         }
 
         ProposalType.foreign_blockchain_import -> {
-            val proposal = client.getForeignBlockchainImportProposal(proposalId) ?: return ""
-            return pmcTable {
-                body {
-                    row("Foreign node", proposal.foreignNode)
-                    row("Host", proposal.host)
-                    row("Port", proposal.port)
-                    row("Api url", proposal.apiUrl)
-                    row("Chain0 RID", proposal.chain0Rid)
-                    row("Blockchain name", proposal.blockchainName)
-                    row("Blockchain RID", proposal.blockchainRid)
-                    row("Container", proposal.container)
+            when {
+                apiVersion >= 19 -> {
+                    val proposal = client.getForeignBlockchainImportProposal(proposalId) ?: return ""
+                    return pmcTable {
+                        body {
+                            row("Foreign node", proposal.foreignNode)
+                            row("Host", proposal.host)
+                            row("Port", proposal.port)
+                            row("Api url", proposal.apiUrl)
+                            row("Chain0 RID", proposal.chain0Rid)
+                            row("Blockchain name", proposal.blockchainName)
+                            row("Blockchain RID", proposal.blockchainRid)
+                            row("Container", proposal.container)
+                        }
+                    }
                 }
+
+                else -> return ""
             }
         }
 
         ProposalType.foreign_blockchain_blocks_import -> {
-            val proposal = client.getForeignBlockchainBlocksImportProposal(proposalId) ?: return ""
-            return pmcTable {
-                body {
-                    row("Blockchain RID", proposal.blockchainRid)
-                    row("Up to height", proposal.upToHeight)
+            when {
+                apiVersion >= 33 -> {
+                    val proposal = client.getForeignBlockchainBlocksImportProposal(proposalId) ?: return ""
+                    return pmcTable {
+                        body {
+                            row("Blockchain RID", proposal.blockchainRid)
+                            row("Final height", proposal.finalHeight)
+                        }
+                    }
                 }
+
+                apiVersion >= 19 -> {
+                    val proposal = client.getForeignBlockchainBlocksImportProposalV33(proposalId) ?: return ""
+                    return pmcTable {
+                        body {
+                            row("Blockchain RID", proposal.blockchainRid)
+                            row("Up to height", proposal.upToHeight)
+                        }
+                    }
+                }
+
+                else -> return ""
             }
         }
 
         ProposalType.blockchain_move_start -> {
-            val proposal = client.getBlockchainMoveProposal(proposalId) ?: return ""
-            return pmcTable {
-                body {
-                    row("Blockchain RID", proposal.blockchainRid)
-                    row("Blockchain name", proposal.blockchainName)
-                    row("Cluster", proposal.cluster)
-                    row("Container", proposal.container)
+            when {
+                apiVersion >= 33 -> {
+                    val proposal = client.getBlockchainMoveProposal(proposalId) ?: return ""
+                    return pmcTable {
+                        body {
+                            row("Blockchain RID", proposal.blockchainRid)
+                            row("Blockchain name", proposal.blockchainName)
+                            row("Cluster", proposal.cluster)
+                            row("Container", proposal.container)
+                        }
+                    }
                 }
+
+                else -> return ""
             }
         }
 
@@ -461,15 +519,21 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
         }
 
         ProposalType.blockchain_move_finish -> {
-            val proposal = client.getBlockchainMoveFinishProposal(proposalId) ?: return ""
-            return pmcTable {
-                body {
-                    row("Blockchain RID", proposal.blockchainRid)
-                    row("Blockchain name", proposal.blockchainName)
-                    row("Cluster", proposal.cluster)
-                    row("Container", proposal.container)
-                    row("Finish at height", proposal.finishAtHeight)
+            when {
+                apiVersion >= 33 -> {
+                    val proposal = client.getBlockchainMoveFinishProposal(proposalId) ?: return ""
+                    return pmcTable {
+                        body {
+                            row("Blockchain RID", proposal.blockchainRid)
+                            row("Blockchain name", proposal.blockchainName)
+                            row("Cluster", proposal.cluster)
+                            row("Container", proposal.container)
+                            row("Final height", proposal.finalHeight)
+                        }
+                    }
                 }
+
+                else -> return ""
             }
         }
     }

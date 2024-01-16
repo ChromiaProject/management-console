@@ -46,7 +46,7 @@ class CommandListBlockchains : CliktCommand(
                         interactive))
                 if (interactive && blockchains.isNotEmpty()) {
                     promptForIndex(blockchains)?.let {
-                        showBlockchainInfo(client, BlockchainRid(blockchains[it].rid))
+                        showBlockchainInfo(client, apiVersion, BlockchainRid(blockchains[it].rid))
                     }
                 }
             }

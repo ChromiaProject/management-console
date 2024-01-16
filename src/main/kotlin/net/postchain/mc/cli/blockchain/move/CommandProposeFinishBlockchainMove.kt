@@ -28,19 +28,19 @@ class CommandProposeFinishBlockchainMove : CliktCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val finishAtHeight by option("--finish-at-height", help = "Finish blockchain moving at height")
+    private val finalHeight by option("--final-height", help = "Finish blockchain moving at height")
             .long().required().validate {
-                require(it > 0) { "--finish-at-height arg must be greater than 0" }
+                require(it > 0) { "--final-height arg must be greater than 0" }
             }
 
     private val description by proposalDescriptionOption(default = "Propose finishing of the blockchain moving")
 
     override fun run() {
-        client.requireApiVersion(21)
+        client.requireApiVersion(33)
         echo("Blockchain moving will be finished as soon as the proposal is approved")
 
         client.transactionBuilder()
-                .proposeBlockchainMoveFinishOperation(client.pubkey, blockchainRID, finishAtHeight, description)
+                .proposeBlockchainMoveFinishOperation(client.pubkey, blockchainRID, finalHeight, description)
                 .postAwaitConfirmation()
                 .printResult(
                         "Finishing of the blockchain moving proposed",
