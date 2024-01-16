@@ -21,6 +21,7 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.BlockHeightClient
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
+import net.postchain.mc.compatibility.ApiCompatV33.getImportingForeignBlockchainInfoV33
 
 class CommandGetBlockchainInfo : CliktCommand(
         name = "info",
@@ -34,14 +35,14 @@ class CommandGetBlockchainInfo : CliktCommand(
         val client = config.client
         val apiVersion = client.apiVersion()
         if (apiVersion >= 17) {
-            showBlockchainInfo(client, blockchainRID)
+            showBlockchainInfo(client, apiVersion, blockchainRID)
         } else {
             throw CliktError("blockchain info requires directory chain version 17, found version $apiVersion")
         }
     }
 }
 
-fun CliktCommand.showBlockchainInfo(client: PostchainClient, blockchainRid: BlockchainRid) {
+fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion: Long, blockchainRid: BlockchainRid) {
     val blockchainInfo = client.getBlockchainInfo(blockchainRid.data)
             ?: throw CliktError("Blockchain with rid $blockchainRid not found")
 
@@ -82,42 +83,62 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, blockchainRid: Bloc
 
     // Migrating Blockchain Info
     if (blockchainInfo.isForeignImporting == true) {
-        client.getImportingForeignBlockchainInfo(blockchainRid)?.let { info ->
-            echo(pmcTable {
-                captionTop("Importing foreign blockchain info:", TextAlign.LEFT)
-                body {
-                    row("Node pubkey", info.pubkey)
-                    row("Node host", info.host)
-                    row("Node port", info.port)
-                    row("Node api-url", info.apiUrl)
-                    row("Foreign management chain RID", info.chain0Rid)
-                    row("Up to height", info.upToHeight)
+        when {
+            apiVersion >= 33 -> {
+                client.getImportingForeignBlockchainInfo(blockchainRid)?.let { info ->
+                    echo(pmcTable {
+                        captionTop("Importing foreign blockchain info:", TextAlign.LEFT)
+                        body {
+                            row("Node pubkey", info.pubkey)
+                            row("Node host", info.host)
+                            row("Node port", info.port)
+                            row("Node api-url", info.apiUrl)
+                            row("Foreign management chain RID", info.chain0Rid)
+                            row("Final height", info.finalHeight)
+                        }
+                    })
                 }
-            })
+            }
+
+            else -> {
+                client.getImportingForeignBlockchainInfoV33(blockchainRid)?.let { info ->
+                    echo(pmcTable {
+                        captionTop("Importing foreign blockchain info:", TextAlign.LEFT)
+                        body {
+                            row("Node pubkey", info.pubkey)
+                            row("Node host", info.host)
+                            row("Node port", info.port)
+                            row("Node api-url", info.apiUrl)
+                            row("Foreign management chain RID", info.chain0Rid)
+                            row("Up to height", info.upToHeight)
+                        }
+                    })
+                }
+            }
         }
     }
 
-    if (blockchainInfo.isMoving == true) {
+    if (blockchainInfo.isMoving == true && apiVersion >= 33) {
         client.getMovingBlockchainInfo(blockchainRid)?.let { info ->
             echo(pmcTable {
                 captionTop("Moving blockchain info:", TextAlign.LEFT)
                 body {
                     row("Source container", info.sourceContainer)
                     row("Destination container", info.destinationContainer)
-                    row("Finish at height", info.finishAtHeight)
+                    row("Final height", info.finalHeight)
                 }
             })
         }
     }
 
-    if (blockchainInfo.isUnarchiving == true) {
+    if (blockchainInfo.isUnarchiving == true && apiVersion >= 33) {
         client.getUnarchivingBlockchainInfo(blockchainRid)?.let { info ->
             echo(pmcTable {
                 captionTop("Unarchiving blockchain info:", TextAlign.LEFT)
                 body {
                     row("Source container", info.sourceContainer)
                     row("Destination container", info.destinationContainer)
-                    row("Finish at height", info.finishAtHeight)
+                    row("Final height", info.finalHeight)
                 }
             })
         }

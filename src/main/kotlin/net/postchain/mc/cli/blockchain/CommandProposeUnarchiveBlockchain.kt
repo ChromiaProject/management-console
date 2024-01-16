@@ -6,7 +6,6 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
-import net.postchain.chain0.proposal_blockchain.BlockchainAction
 import net.postchain.chain0.proposal_blockchain.proposeBlockchainUnarchiveActionOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
@@ -24,10 +23,10 @@ class CommandProposeUnarchiveBlockchain : CliktCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val upToHeight by option("--up-to-height",
+    private val finalHeight by option("--final-height",
             help = "Unarchive blockchain blocks up to and including this height"
     ).long().required().validate {
-        require(it > 0) { "--up-to-height arg must be greater than 0" }
+        require(it > 0) { "--final-height arg must be greater than 0" }
     }
 
     private val destinationContainer by option("-dc", "--destination-container", help = "Name of container to unarchive blockchain to").required()
@@ -35,13 +34,13 @@ class CommandProposeUnarchiveBlockchain : CliktCommand(
     private val description by proposalDescriptionOption()
 
     override fun run() {
-        client.requireApiVersion(28)
+        client.requireApiVersion(33)
         client.transactionBuilder()
                 .proposeBlockchainUnarchiveActionOperation(
                         client.config.pubkey().data,
                         blockchainRID,
                         destinationContainer,
-                        upToHeight,
+                        finalHeight,
                         description
                 )
                 .postAwaitConfirmation()

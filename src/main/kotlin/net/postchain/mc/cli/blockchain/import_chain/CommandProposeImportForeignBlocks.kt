@@ -2,6 +2,7 @@ package net.postchain.mc.cli.blockchain.import_chain
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.clikt.parameters.options.deprecated
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
@@ -28,11 +29,13 @@ class CommandProposeImportForeignBlocks : CliktCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val upToHeight by option("--up-to-height",
-            help = "Import blocks up to and including this height"
-    ).long().required().validate {
-        require(it > 0) { "--up-to-height arg must be greater than 0" }
-    }
+    private val upToHeight by option("--up-to-height", help = "Import blocks up to and including this height")
+            .deprecated("Use --final-height option")
+
+    private val finalHeight by option("--final-height", help = "Import blocks up to and including this height")
+            .long().required().validate {
+                require(it > 0) { "--final-height arg must be greater than 0" }
+            }
 
     private val description by proposalDescriptionOption(default = "Propose import of foreign blockchain blocks")
 
@@ -40,7 +43,7 @@ class CommandProposeImportForeignBlocks : CliktCommand(
         client.requireApiVersion(19)
         echo("Import of blocks of foreign blockchain ${blockchainRID.toHex()} will be proposed")
         val txBuilder = client.transactionBuilder()
-        txBuilder.proposeForeignBlockchainBlocksImportOperation(client.pubkey, blockchainRID, upToHeight, description)
+        txBuilder.proposeForeignBlockchainBlocksImportOperation(client.pubkey, blockchainRID, finalHeight, description)
         txBuilder.postAwaitConfirmation()
                 .printResult(
                         "Import of blocks of foreign blockchain ${blockchainRID.toHex()} proposed",
