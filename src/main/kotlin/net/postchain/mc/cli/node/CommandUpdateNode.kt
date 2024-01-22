@@ -52,7 +52,7 @@ class CommandUpdateNode : CliktCommand(
     private val clusterName by option(
             "-c",
             "--cluster",
-            help = "comma delimited list of clusters to add this node to"
+            help = "Comma delimited list of clusters to add this node to"
     ).split(",")
 
     private val addCapability by option(help = "Node capability").enum<NodeCapabilityTypeV28>().deprecated()

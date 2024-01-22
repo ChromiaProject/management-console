@@ -56,7 +56,7 @@ class CommandRegisterNode : CliktCommand(
     private val clusters by option(
             "-c",
             "--cluster",
-            help = "comma delimited list of clusters this node belongs to"
+            help = "Comma delimited list of clusters this node belongs to"
     ).split(",").default(emptyList())
 
     private val capability by option(help = "Node capability").enum<NodeCapabilityTypeV28>().multiple().deprecated()
