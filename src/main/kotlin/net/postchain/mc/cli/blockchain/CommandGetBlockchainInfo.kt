@@ -74,9 +74,10 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion: Long, b
             captionTop("Heights on nodes:", TextAlign.LEFT)
             body {
                 row("Anchored height", anchoredHeight)
-                clusterInfo.peers.forEach { peer ->
-                    row(PubKey(peer.pubkey).toShortHex(), blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid))
-                }
+                clusterInfo.peers.parallelStream()
+                        .map { peer -> Pair(peer.pubkey, blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid)) }
+                        .toList()
+                        .forEach{ peerHeight -> row(PubKey(peerHeight.first).toShortHex(), peerHeight.second) }
             }
         })
     }
