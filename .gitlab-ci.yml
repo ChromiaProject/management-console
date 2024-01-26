@@ -67,6 +67,17 @@ deploy:
       --activate-profiles ci,docker,docker-push
       deploy
 
+trigger-homebrew-release:
+  stage: release
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^[0-9]+\.[0-9]+\.[0-9]+$/
+  variables:
+    VERSION: $CI_COMMIT_TAG
+    FORMULA: pmc
+  trigger:
+    project: chromaway/core-tools/homebrew-chromia
+    strategy: depend
+
 build:
   extends:
     - .setup
