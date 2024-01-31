@@ -6,6 +6,7 @@ import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
 import net.postchain.client.core.PostchainClient
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.common.BlockchainRid
+import net.postchain.economy.economy_chain.initOperation
 import net.postchain.mc.cli.base.printResult
 
 fun initEconomyChain(client: PostchainClient, config: ChromiaConfig) {
@@ -13,7 +14,7 @@ fun initEconomyChain(client: PostchainClient, config: ChromiaConfig) {
     if (economyChainRid != null) {
         val economyChainClient = PostchainClientImpl(config.get(blockchainRid = BlockchainRid(economyChainRid)))
         economyChainClient.transactionBuilder()
-                .addOperation("init")
+                .initOperation()
                 .postAwaitConfirmation()
                 .printResult(
                         "Economy chain was initiated",
