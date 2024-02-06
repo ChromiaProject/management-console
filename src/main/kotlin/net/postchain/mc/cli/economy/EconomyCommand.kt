@@ -23,6 +23,7 @@ fun economyCommands() = EconomyCommand().subcommands(
         CommandListClusters(),
         CommandChangeClusterTag(),
         CommandClusterCreationStatus(),
-        CommandVersion()
+        CommandVersion(),
+        CommandGetEconomyMetrics()
 )
 
