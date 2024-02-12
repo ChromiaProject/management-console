@@ -19,6 +19,7 @@ import net.postchain.economy.economy_chain.ec_proposal.ProposalState
 import net.postchain.economy.economy_chain.ec_proposal.getProposal
 import net.postchain.economy.economy_chain.ec_proposal.getProposalVoterInfo
 import net.postchain.economy.economy_chain.ec_proposal.getProposalVotingResults
+import net.postchain.economy.economy_chain.getEcononyConstantsProposal
 import net.postchain.mc.cli.economy.ECBaseCommand
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
 import net.postchain.mc.cli.util.pmcTable
@@ -123,6 +124,20 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
                     row("Cluster name", clusterChangeTagProposal.cluster)
                     row("Current tag", clusterChangeTagProposal.currentTag)
                     row("New tag", clusterChangeTagProposal.newTag)
+                }
+            }
+        }
+
+        EcProposalType.economy_constants_update -> {
+            val economyConstantsProposal = economyChainClient.getEcononyConstantsProposal(proposalId)
+            return pmcTable {
+                body {
+                    if (economyConstantsProposal.minLeaseTimeWeeks != null) { row("Min lease time weeks", economyConstantsProposal.minLeaseTimeWeeks) }
+                    if (economyConstantsProposal.maxLeaseTimeWeeks != null) { row("Max lease time weeks", economyConstantsProposal.maxLeaseTimeWeeks) }
+                    if (economyConstantsProposal.stakingRewardFeeShare != null) { row("Staking reward fee share", economyConstantsProposal.stakingRewardFeeShare) }
+                    if (economyConstantsProposal.chromiaFoundationFeeShare != null) { row("Chromia foundation fee share", economyConstantsProposal.chromiaFoundationFeeShare) }
+                    if (economyConstantsProposal.resourcePoolMarginFeeShare != null) { row("Resource pool margin feee share", economyConstantsProposal.resourcePoolMarginFeeShare) }
+                    if (economyConstantsProposal.dappProviderRiskShare != null) { row("Dapp provider risk share", economyConstantsProposal.dappProviderRiskShare) }
                 }
             }
         }
