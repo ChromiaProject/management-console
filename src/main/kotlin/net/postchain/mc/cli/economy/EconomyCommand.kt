@@ -28,6 +28,7 @@ fun economyCommands() = EconomyCommand().subcommands(
         CommandVersion(),
         CommandGetEconomyMetrics(),
         CommandGetEconomyConstants(),
+        CommandUpdateSystemProviderEconomyConstants(),
         CommandUpdateEconomyConstants(),
         proposalCommands(),
 )
