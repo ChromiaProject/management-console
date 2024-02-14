@@ -5,11 +5,14 @@ import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.mordant.rendering.TextAlign
+import net.postchain.chain0.cm_api.CmPeerInfo
 import net.postchain.chain0.cm_api.cmGetClusterInfo
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.queries.getBlockchainInfo
+import net.postchain.chain0.common.queries.getBlockchainReplicas
 import net.postchain.chain0.common.queries.getImportingForeignBlockchainInfo
 import net.postchain.chain0.common.queries.getMovingBlockchainInfo
+import net.postchain.chain0.common.queries.getNodeData
 import net.postchain.chain0.common.queries.getUnarchivingBlockchainInfo
 import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
@@ -81,6 +84,19 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion: Long, b
             }
         })
     }
+    val blockchainReplicas = client.getBlockchainReplicas(blockchainRid)
+
+    if (blockchainReplicas.isNotEmpty()) {
+        val blockHeightClient = BlockHeightClient(client)
+        echo(pmcTable(
+                "Heights from replicas",
+                listOf("Node", "Height"),
+                blockchainReplicas
+                        .map { PubKey(it[0].asByteArray()) }
+                        .map { CmPeerInfo(it.wData, client.getNodeData(it).apiUrl)}
+                        .map { listOf(PubKey(it.pubkey).toShortHex(), blockHeightClient.getCurrentBlockHeightOnPeer(it, blockchainRid).toString()) }
+        ))
+    }
 
     // Migrating Blockchain Info
     if (blockchainInfo.isForeignImporting == true) {
@@ -144,4 +160,5 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion: Long, b
             })
         }
     }
+
 }
