@@ -10,6 +10,7 @@ class NetworkCommand : NoOpCliktCommand(
 fun networkCommands() = NetworkCommand().subcommands(
         CommandInit(),
         CommandInitEconomyChain(),
+        CommandInitEvmTransactionSubmitterChain(),
         SummaryCommand(),
         CommandVersion(),
         VerifyCommand(),
