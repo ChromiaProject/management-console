@@ -380,6 +380,10 @@
                             <mainClass>${main-class}</mainClass>
                             <creationTime>${git.commit.time}</creationTime>
                             <filesModificationTime>${git.commit.time}</filesModificationTime>
+                            <jvmFlags>
+                                <jvmFlag>-Duser.language=en</jvmFlag>
+                                <jvmFlag>-Duser.country=US</jvmFlag>
+                            </jvmFlags>
                         </container>
                         <containerizingMode>packaged</containerizingMode>
                     </configuration>
