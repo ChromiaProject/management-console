@@ -14,7 +14,8 @@ import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandInitEvmTransactionSubmitterChain : CliktCommand(
         name = "initialize-evm-transaction-submitter-chain",
-        help = "Create and initialize EVM transaction submitter chain"
+        help = "Create and initialize EVM transaction submitter chain",
+        printHelpOnEmptyArgs = true
 ) {
 
     private val config by pmcConfigOption()

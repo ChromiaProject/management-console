@@ -14,7 +14,8 @@ import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandInitPriceOracleChain : CliktCommand(
         name = "initialize-price-oracle-chain",
-        help = "Create and initialize Price oracle chain"
+        help = "Create and initialize Price oracle chain",
+        printHelpOnEmptyArgs = true
 ) {
 
     private val config by pmcConfigOption()

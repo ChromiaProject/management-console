@@ -14,7 +14,8 @@ import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandInitEvmEventReceiverChain : CliktCommand(
         name = "initialize-evm-event-receiver-chain",
-        help = "Create and initialize EVM event receiver chain"
+        help = "Create and initialize EVM event receiver chain",
+        printHelpOnEmptyArgs = true
 ) {
 
     private val config by pmcConfigOption()
