@@ -15,7 +15,8 @@ import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandInitEconomyChain : CliktCommand(
         name = "initialize-economy-chain",
-        help = "Create and initialize economy chain"
+        help = "Create and initialize economy chain",
+        printHelpOnEmptyArgs = true
 ) {
 
     private val config by pmcConfigOption()
