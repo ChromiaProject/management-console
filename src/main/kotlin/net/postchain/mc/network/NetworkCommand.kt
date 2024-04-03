@@ -11,6 +11,7 @@ fun networkCommands() = NetworkCommand().subcommands(
         CommandInit(),
         CommandInitEconomyChain(),
         CommandInitEvmTransactionSubmitterChain(),
+        CommandInitEvmEventReceiverChain(),
         CommandInitPriceOracleChain(),
         SummaryCommand(),
         CommandVersion(),
