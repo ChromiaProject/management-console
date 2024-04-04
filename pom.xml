@@ -19,11 +19,11 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.15.9</postchain.version>
+        <postchain.version>3.15.11</postchain.version>
         <postchain.client.version>3.12.1</postchain.client.version>
         <directory.chain.version>1.37.5</directory.chain.version>
-        <chr.version>0.17.0</chr.version>
-        <rell.version>0.13.6</rell.version>
+        <chr.version>0.17.1</chr.version>
+        <rell.version>0.13.10</rell.version>
         <rell.maven.plugin.version>0.11.9</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
@@ -31,7 +31,7 @@
         <main-class>net.postchain.mc.Directory1Kt</main-class>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <kotlin.version>1.8.21</kotlin.version>
+        <kotlin.version>1.9.23</kotlin.version>
         <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
         <kotlin.code.style>obsolete</kotlin.code.style> <!-- Kotlin obsolete IntelliJ IDEA codestyle -->
 
