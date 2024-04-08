@@ -25,6 +25,7 @@ fun blockchainCommands() = BlockchainCommand().subcommands(
         CommandProposeImportForeignBlocks(),
 
         CommandProposeConfiguration(),
+        CommandProposeForcedConfiguration(),
         CommandProposePauseBlockchain(),
         CommandProposeResumeBlockchain(),
         CommandProposeDeleteBlockchain(),
@@ -35,6 +36,7 @@ fun blockchainCommands() = BlockchainCommand().subcommands(
         CommandGetAllBlockchainConfigurations(),
         CommandGetBlockchainConfiguration(),
         CommandGetBlockchainConfigurationDeprecated(),
+        CommandGetForcedConfiguration(),
         CommandGetProposedBlockchainRid(),
         blockchainReplicaCommands(),
 
