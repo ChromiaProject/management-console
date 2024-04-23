@@ -15,9 +15,9 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
-fun CliktCommand.includeInactiveOption() = option(
+fun CliktCommand.includeInactiveOption(helpMessage: String) = option(
         "-ii", "--includeinactive",
-        help = "Include disabled/removed clusters (not implemented yet)"
+        help = helpMessage
 ).flag()
 
 fun CliktCommand.blockchainRidOption() =

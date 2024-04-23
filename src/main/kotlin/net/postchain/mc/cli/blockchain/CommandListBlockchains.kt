@@ -21,7 +21,7 @@ class CommandListBlockchains : CliktCommand(
     private val config by pmcConfigOption()
     private val interactive by interactiveOption()
 
-    private val includeInactive by includeInactiveOption()
+    private val includeInactive by includeInactiveOption("Include paused/removed blockchains")
 
     private val headers = listOf("Name", "Rid", "State", "Container", "Cluster")
 
