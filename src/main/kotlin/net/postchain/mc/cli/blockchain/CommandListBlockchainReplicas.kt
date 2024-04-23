@@ -19,7 +19,7 @@ class CommandListBlockchainReplicas : CliktCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val includeInactive by includeInactiveOption()
+    private val includeInactive by includeInactiveOption("Include inactive nodes")
 
     override fun run() {
         val replicas = client.getBlockchainReplicas(blockchainRID)

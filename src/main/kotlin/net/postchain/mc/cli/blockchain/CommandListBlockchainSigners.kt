@@ -19,7 +19,7 @@ class CommandListBlockchainSigners : CliktCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val includeInactive by includeInactiveOption()
+    private val includeInactive by includeInactiveOption("Include inactive nodes")
 
     override fun run() {
         val signers = client.getBlockchainSigners(blockchainRID)
