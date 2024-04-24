@@ -7,11 +7,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.common.toHex
 import net.postchain.crypto.KeyPair
-import net.postchain.crypto.PrivKey
-import net.postchain.crypto.PubKey
 import net.postchain.crypto.Secp256K1CryptoSystem
-import net.postchain.crypto.secp256k1_derivePubKey
-import org.bitcoinj.crypto.MnemonicCode
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Properties
@@ -32,15 +28,12 @@ class CommandKeygen : CliktCommand(name = "keygen", help = "Generates public/pri
 
     private val nodeFormat by option("-n", "--node", help = "Save the generated keypair in format to be included in node properties file").flag()
 
-    private val deprecated by option("-dr", "--deprecated-recovery", help = "Used to recover keys from Mnemonic generated before postchain version 0.13.2, will be removed in the future")
-            .flag()
-
 
     /**
      * Cryptographic key generator. Will generate a pair of public and private keys and print to stdout.
      */
     override fun run() {
-        val (keyPair, mnemonic) = generateSecp256k1KeyPairWithMnemonic(wordList, deprecated)
+        val (keyPair, mnemonic) = generateSecp256k1KeyPairWithMnemonic(wordList)
 
         file?.let {
             saveSecp256k1KeyPair(keyPair, it, nodeFormat)
@@ -55,28 +48,13 @@ class CommandKeygen : CliktCommand(name = "keygen", help = "Generates public/pri
     }
 }
 
-private fun generateSecp256k1KeyPairWithMnemonic(wordList: String, deprecated: Boolean = false): Pair<KeyPair, String> {
+private fun generateSecp256k1KeyPairWithMnemonic(wordList: String): Pair<KeyPair, String> {
     val cs = Secp256K1CryptoSystem()
 
-    if (deprecated) {
-        check(wordList.isNotEmpty()) { "Mnemonic is needed to use --deprecated-recovery" }
-    }
-
-    // Recover the mnemonic from old Secp256K1CryptoSystem were the mnemonic was not bip39 compatible
-    if (wordList.isNotEmpty() && deprecated) {
-        val words = wordList.split(" ")
-        val mnemonicInstance = MnemonicCode.INSTANCE
-        mnemonicInstance.check(words)
-        val privKey = mnemonicInstance.toEntropy(words)
-        val pubKey = secp256k1_derivePubKey(privKey)
-        val keyPair = KeyPair(PubKey(pubKey), PrivKey(privKey))
-        return keyPair to wordList
-
-    } else if (wordList.isNotEmpty() && !deprecated) {
+    if (wordList.isNotEmpty()) {
         // New Secp256K1CryptoSystem were the mnemonic is bip39 compatible
         return cs.recoverKeyPairFromMnemonic(wordList)
     }
-
     return cs.generateKeyPairWithMnemonic()
 }
 
