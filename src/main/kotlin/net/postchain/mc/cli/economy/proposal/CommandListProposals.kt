@@ -4,11 +4,12 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.types.RowId
-import net.postchain.economy.economy_chain.ec_proposal.EcProposalType
-import net.postchain.economy.economy_chain.ec_proposal.ProposalState
-import net.postchain.economy.economy_chain.ec_proposal.getProposalsRange
-import net.postchain.economy.economy_chain.ec_proposal.getProviderVotes
-import net.postchain.economy.economy_chain.ec_proposal.getRelevantProposals
+import net.postchain.crypto.PubKey
+import net.postchain.economy.common_proposal.CommonProposalState
+import net.postchain.economy.common_proposal.CommonProposalType
+import net.postchain.economy.common_proposal.getCommonProposalsRange
+import net.postchain.economy.common_proposal.getCommonPubkeyVotes
+import net.postchain.economy.common_proposal.getRelevantCommonProposals
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.dateToTimestampOption
 import net.postchain.mc.cli.economy.ECBaseCommand
@@ -31,12 +32,12 @@ class CommandListProposals : ECBaseCommand(
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
         val proposals = if (all) {
-            economyChainClient.getProposalsRange(from, to, pending).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
+            economyChainClient.getCommonProposalsRange(from, to, pending).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
         } else {
-            economyChainClient.getRelevantProposals(from, to, pending, client.pubkey).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
+            economyChainClient.getRelevantCommonProposals(from, to, pending, client.pubkey).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
         }
 
-        val votes = economyChainClient.getProviderVotes(from, to, client.pubkey)
+        val votes = economyChainClient.getCommonPubkeyVotes(from, to, PubKey(client.pubkey))
 
         echo(pmcTable(
                 "proposals",
@@ -56,6 +57,6 @@ class CommandListProposals : ECBaseCommand(
         }
     }
 
-    private data class ProposalInfo(val rowId: RowId, val proposalType: EcProposalType, val state: ProposalState)
+    private data class ProposalInfo(val rowId: RowId, val proposalType: CommonProposalType, val state: CommonProposalState)
 
 }
