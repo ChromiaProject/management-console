@@ -2,19 +2,24 @@ package net.postchain.mc.cli.economy.proposal
 
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.types.RowId
-import net.postchain.economy.economy_chain.ec_proposal.EcProposalType
-import net.postchain.economy.economy_chain.ec_proposal.ProposalState
-import net.postchain.economy.economy_chain.ec_proposal.getProposalsRange
-import net.postchain.economy.economy_chain.ec_proposal.getProviderVotes
-import net.postchain.economy.economy_chain.ec_proposal.getRelevantProposals
+import net.postchain.crypto.PubKey
+import net.postchain.economy.common_proposal.GetCommonPubkeyVotesResult
+import net.postchain.economy.common_proposal.getCommonProposalsRange
+import net.postchain.economy.common_proposal.getCommonPubkeyVotes
+import net.postchain.economy.common_proposal.getRelevantCommonProposals
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.dateToTimestampOption
 import net.postchain.mc.cli.economy.ECBaseCommand
+import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcTable
+import net.postchain.mc.compatibility.ApiCompatECV21.getProposalsRangeECV20
+import net.postchain.mc.compatibility.ApiCompatECV21.getProviderVotesECV20
+import net.postchain.mc.compatibility.ApiCompatECV21.getRelevantProposalsECV20
 
 class CommandListProposals : ECBaseCommand(
         name = "list",
@@ -30,13 +35,28 @@ class CommandListProposals : ECBaseCommand(
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
+        val version = economyChainClient.apiVersion()
         val proposals = if (all) {
-            economyChainClient.getProposalsRange(from, to, pending).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
+            when {
+                version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProposalsRangeECV20(from, to, pending)
+                        .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
+                else -> economyChainClient.getCommonProposalsRange(from, to, pending)
+                        .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
+            }
         } else {
-            economyChainClient.getRelevantProposals(from, to, pending, client.pubkey).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
+            when {
+                version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getRelevantProposalsECV20(from, to, pending, client.pubkey)
+                        .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
+                else -> economyChainClient.getRelevantCommonProposals(from, to, pending, client.pubkey)
+                        .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
+            }
         }
 
-        val votes = economyChainClient.getProviderVotes(from, to, client.pubkey)
+        val votes = when {
+            version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProviderVotesECV20(from, to, client.pubkey)
+                    .map { GetCommonPubkeyVotesResult(it.proposal, it.vote) }
+            else -> economyChainClient.getCommonPubkeyVotes(from, to, PubKey(client.pubkey))
+        }
 
         echo(pmcTable(
                 "proposals",
@@ -44,18 +64,18 @@ class CommandListProposals : ECBaseCommand(
                 proposals.map { info ->
                     val vote = votes.find { it.proposal == info.rowId }
                     val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
-                    listOf(info.proposalType.toString(), info.rowId.id.toString(), info.state.toString(), voteStatus)
+                    listOf(info.proposalType, info.rowId.id.toString(), info.state, voteStatus)
                 },
                 null,
                 interactive
         ))
         if (interactive && proposals.isNotEmpty()) {
             promptForIndex(proposals)?.let {
-                showECProposalInfo(client, economyChainClient, proposals[it].rowId)
+                showECProposalInfo(client, economyChainClient, proposals[it].rowId, version)
             }
         }
     }
 
-    private data class ProposalInfo(val rowId: RowId, val proposalType: EcProposalType, val state: ProposalState)
+    private data class ProposalInfo(val rowId: RowId, val proposalType: String, val state: String)
 
 }

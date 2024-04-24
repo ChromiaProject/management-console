@@ -3,13 +3,17 @@ package net.postchain.mc.cli.economy.proposal
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.types.RowId
-import net.postchain.economy.economy_chain.ec_proposal.makeVoteOperation
+import net.postchain.crypto.PubKey
+import net.postchain.economy.common_proposal.makeCommonVoteOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.economy.ECBaseCommand
+import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
+import net.postchain.mc.compatibility.ApiCompatECV21.makeVoteOperationECV20
 
 class CommandVote : ECBaseCommand(
         name = "vote",
@@ -24,12 +28,26 @@ class CommandVote : ECBaseCommand(
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
-        economyChainClient.transactionBuilder()
-                .makeVoteOperation(client.pubkey, RowId(id), vote)
-                .postAwaitConfirmation()
-                .printResult(
-                        "Vote added successfully",
-                        "Cannot add vote"
-                )
+        val version = economyChainClient.apiVersion()
+        when {
+            version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> {
+                economyChainClient.transactionBuilder()
+                        .makeVoteOperationECV20(client.pubkey, RowId(id), vote)
+                        .postAwaitConfirmation()
+                        .printResult(
+                                "Vote added successfully",
+                                "Cannot add vote"
+                        )
+            }
+            else -> {
+                economyChainClient.transactionBuilder()
+                        .makeCommonVoteOperation(PubKey(client.pubkey), RowId(id), vote)
+                        .postAwaitConfirmation()
+                        .printResult(
+                                "Vote added successfully",
+                                "Cannot add vote"
+                        )
+            }
+        }
     }
 }
