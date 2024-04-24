@@ -10,6 +10,7 @@ import net.postchain.mc.cli.util.NopPostchainClient
 import net.postchain.mc.network.Version
 
 const val ECONOMY_CHAIN_VERSION = 30
+const val ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION = 21L // EC <= v20 use ec proposals, v21 > use common_proposals
 
 fun getEconomyChainClient(directoryChainClient: PostchainClient, config: ChromiaConfig): PostchainClient {
 

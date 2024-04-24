@@ -11,19 +11,27 @@ import net.postchain.common.types.WrappedByteArray
 import net.postchain.crypto.PubKey
 import net.postchain.economy.common_proposal.CommonProposalState
 import net.postchain.economy.common_proposal.CommonProposalType
+import net.postchain.economy.common_proposal.CommonProposalVoter
 import net.postchain.economy.common_proposal.CommonProposalVotingResults
+import net.postchain.economy.common_proposal.CommonVotingResult
 import net.postchain.economy.common_proposal.GetCommonProposalResult
 import net.postchain.economy.common_proposal.getCommonProposal
 import net.postchain.economy.common_proposal.getCommonProposalVoterInfo
 import net.postchain.economy.common_proposal.getCommonProposalVotingResults
+import net.postchain.economy.economy_chain.apiVersion
 import net.postchain.economy.economy_chain.getClusterChangeTagProposal
 import net.postchain.economy.economy_chain.getClusterCreateProposal
-import net.postchain.economy.economy_chain.getTagProposal
 import net.postchain.economy.economy_chain.getEcononyConstantsProposal
+import net.postchain.economy.economy_chain.getTagProposal
 import net.postchain.mc.cli.economy.ECBaseCommand
+import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.votingupdates.formatThreshold
+import net.postchain.mc.compatibility.ApiCompatECV21.EcProposalTypeECV20
+import net.postchain.mc.compatibility.ApiCompatECV21.getProposalECV20
+import net.postchain.mc.compatibility.ApiCompatECV21.getProposalVoterInfoECV20
+import net.postchain.mc.compatibility.ApiCompatECV21.getProposalVotingResultsECV20
 import java.time.Instant
 import java.util.Date
 
@@ -39,16 +47,24 @@ class CommandGetProposal : ECBaseCommand(
     }
 }
 
-fun CliktCommand.showECProposalInfo(client: PostchainClient, economyChainClient: PostchainClient, id: RowId?) {
+fun CliktCommand.showECProposalInfo(client: PostchainClient, economyChainClient: PostchainClient, id: RowId?, version: Long = economyChainClient.apiVersion()) {
 
-    val proposal = economyChainClient.getCommonProposal(id) ?: return echo("Proposal $id not found")
+    val proposal = when {
+        version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProposalECV20(id).let {
+            if (it != null)
+                GetCommonProposalResult(it.id, it.timestamp, mapType(it.type), it.proposedBy, it.description, CommonProposalState.valueOf(it.state.name))
+            else
+                null
+        }
+        else -> economyChainClient.getCommonProposal(id)
+    } ?: return echo("Proposal $id not found")
     val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
 
     echo(pmcTable {
         body {
             printECProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name)
             row("State", proposal.state.toString())
-            printECVotingInfo(economyChainClient, proposal)
+            printECVotingInfo(economyChainClient, proposal, version)
             row("Description", proposal.description)
         }
     })
@@ -59,11 +75,33 @@ fun CliktCommand.showECProposalInfo(client: PostchainClient, economyChainClient:
     }
 }
 
-private fun SectionBuilder.printECVotingInfo(economyChainClient: PostchainClient, proposal: GetCommonProposalResult) {
+fun mapType(type: EcProposalTypeECV20): CommonProposalType {
+
+    return when (type) {
+        EcProposalTypeECV20.cluster_create -> CommonProposalType.ec_cluster_create
+        EcProposalTypeECV20.cluster_change_tag -> CommonProposalType.ec_cluster_change_tag
+        EcProposalTypeECV20.tag_create -> CommonProposalType.ec_tag_create
+        EcProposalTypeECV20.tag_update -> CommonProposalType.ec_tag_update
+        EcProposalTypeECV20.tag_remove -> CommonProposalType.ec_tag_remove
+        EcProposalTypeECV20.economy_constants_update -> CommonProposalType.ec_constants_update
+    }
+}
+
+private fun SectionBuilder.printECVotingInfo(economyChainClient: PostchainClient, proposal: GetCommonProposalResult, version: Long) {
     if (proposal.state == CommonProposalState.PENDING) {
-        printECVotingResults(economyChainClient.getCommonProposalVotingResults(proposal.id))
+        val votingResults = when {
+            version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProposalVotingResultsECV20(proposal.id).let {
+                CommonProposalVotingResults(it.positiveVotes, it.negativeVotes, it.maxVotes, it.threshold, CommonVotingResult.valueOf(it.votingResult.name))
+            }
+            else -> economyChainClient.getCommonProposalVotingResults(proposal.id)
+        }
+        printECVotingResults(votingResults)
     } else {
-        val votingInfo = economyChainClient.getCommonProposalVoterInfo(proposal.id)
+        val votingInfo = when {
+            version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProposalVoterInfoECV20(proposal.id)
+                    .map { CommonProposalVoter(it.provider, it.vote) }
+            else -> economyChainClient.getCommonProposalVoterInfo(proposal.id)
+        }
         row("Pubkeys that accepted", votingInfo.filter { it.vote }.joinToString { formatProvider(it.pubkey, "") })
         row("Pubkeys that rejected", votingInfo.filterNot { it.vote }.joinToString { formatProvider(it.pubkey, "") })
     }
