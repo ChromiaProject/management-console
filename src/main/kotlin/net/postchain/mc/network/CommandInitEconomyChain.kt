@@ -9,7 +9,7 @@ import net.postchain.chain0.economy_chain_in_directory_chain.initEconomyChainOpe
 import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_VERSION
+import net.postchain.mc.cli.economy.DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION
 import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.pmcConfigOption
 
@@ -29,8 +29,8 @@ class CommandInitEconomyChain : CliktCommand(
 
     override fun run() {
         val version = Version(client).version
-        if (version < ECONOMY_CHAIN_VERSION) {
-            echo("Economy chain requires directory chain version $ECONOMY_CHAIN_VERSION, found version $version")
+        if (version < DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION) {
+            echo("Economy chain requires directory chain version $DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION, found version $version")
             return
         }
 

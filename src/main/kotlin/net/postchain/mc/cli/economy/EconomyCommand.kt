@@ -2,6 +2,7 @@ package net.postchain.mc.cli.economy
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
+import net.postchain.mc.cli.economy.mint.mintCommands
 import net.postchain.mc.cli.economy.proposal.proposalCommands
 
 class EconomyCommand : CliktCommand("Economy chain commands") {
@@ -30,5 +31,6 @@ fun economyCommands() = EconomyCommand().subcommands(
         CommandGetEconomyConstants(),
         CommandUpdateSystemProviderEconomyConstants(),
         CommandUpdateEconomyConstants(),
+        mintCommands(),
         proposalCommands(),
 )
