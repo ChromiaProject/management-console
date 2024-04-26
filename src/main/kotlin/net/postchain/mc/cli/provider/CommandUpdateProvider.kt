@@ -3,9 +3,11 @@ package net.postchain.mc.cli.provider
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.management_chain_directory1.updateProviderOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
+import net.postchain.mc.cli.util.metadataTextValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.urlOption
@@ -18,7 +20,7 @@ class CommandUpdateProvider : CliktCommand(
     private val config by pmcConfigOption()
     private val client get() = config.client
 
-    private val name by nameOption("Provider name").required()
+    private val name by nameOption("Provider name").required().validate(metadataTextValidator())
 
     private val url by urlOption("Provider url")
 

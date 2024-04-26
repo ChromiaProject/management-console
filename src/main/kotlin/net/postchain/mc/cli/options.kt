@@ -1,15 +1,19 @@
 package net.postchain.mc.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.options.OptionTransformContext
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.mordant.terminal.ConversionResult
 import net.postchain.common.BlockchainRid
+import net.postchain.mc.cli.base.HOST_NAME_LENGTH_MAX
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -36,7 +40,16 @@ fun CliktCommand.blockchainConfigOption() = option(
         envvar = "POSTCHAIN_BLOCKCHAIN_CONFIG"
 ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
 
+fun CliktCommand.requiredHostOption() = option("-h", "--host", help = "Host", envvar = "POSTCHAIN_HOST")
+        .required()
+        .validate(hostValidator())
+
 fun CliktCommand.hostOption() = option("-h", "--host", help = "Host", envvar = "POSTCHAIN_HOST")
+        .validate(hostValidator())
+
+fun hostValidator(): OptionTransformContext.(String) -> Unit = {
+    require(it.length <= HOST_NAME_LENGTH_MAX) { "Host name is too long, maximum allowed length is $HOST_NAME_LENGTH_MAX" }
+}
 
 fun CliktCommand.portOption() = option("-p", "--port", help = "Port").int()
 

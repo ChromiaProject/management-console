@@ -9,6 +9,7 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.proposal_blockchain.findBlockchainRid
 import net.postchain.chain0.proposal_blockchain.proposeBlockchainOperation
 import net.postchain.chain0.version.apiVersion
@@ -19,6 +20,7 @@ import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainConfigOption
 import net.postchain.mc.cli.util.BlockchainConfig
+import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
@@ -39,7 +41,7 @@ class CommandProposeBlockchain : CliktCommand(
 
     private val container by option("-c", "--container", help = "Name of container to run in").required()
 
-    private val name by nameOption("Name of blockchain").required()
+    private val name by nameOption("Name of blockchain").required().validate(entityNameValidator())
 
     private val quiet by option("-q", "--quiet", help = "Print only blockchain RID if succeeds").flag()
 

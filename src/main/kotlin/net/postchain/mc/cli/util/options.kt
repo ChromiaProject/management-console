@@ -21,7 +21,9 @@ import net.postchain.chain0.model.ProviderQuotaType
 import net.postchain.common.hexStringToByteArray
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.CommandBase
+import net.postchain.mc.cli.base.METADATA_LENGTH_MAX
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
+import net.postchain.mc.cli.base.URL_LENGTH_MAX
 import net.postchain.rell.api.base.RellCliEnv
 import java.net.MalformedURLException
 import java.net.URISyntaxException
@@ -98,7 +100,11 @@ fun entityNameValidator(): OptionTransformContext.(String) -> Unit = {
     require(it.length <= NAME_LENGTH_MAX) { "Name is too long, maximum allowed length is $NAME_LENGTH_MAX" }
 }
 
-fun CliktCommand.urlOption(helpMessage: String) = option("--url", help = helpMessage)
+fun CliktCommand.requiredUrlOption(helpMessage: String, vararg names: String = arrayOf("--url")) = option(*names, help = helpMessage)
+        .required()
+        .validate(urlValidator())
+
+fun CliktCommand.urlOption(helpMessage: String, vararg names: String = arrayOf("--url")) = option(*names, help = helpMessage)
         .validate(urlValidator())
 
 fun urlValidator(): OptionTransformContext.(String) -> Unit = {
@@ -115,8 +121,16 @@ fun OptionTransformContext.validateUrl(url: String) {
         false
     }
     require(valid) { "Invalid URL provided: $url" }
+    require(url.length <= URL_LENGTH_MAX) { "URL is too long, maximum allowed length is $URL_LENGTH_MAX" }
 }
 
+fun metadataTextValidator(): OptionTransformContext.(String) -> Unit = {
+    validateMetadataText(it)
+}
+
+fun OptionTransformContext.validateMetadataText(text: String) {
+    require(text.length <= METADATA_LENGTH_MAX) { "value is too long, maximum allowed length is $METADATA_LENGTH_MAX" }
+}
 
 sealed class VoterSetOrPubkeysOption(val data: String) {
     class Pubkeys(data: String) : VoterSetOrPubkeysOption(data) {
@@ -151,6 +165,7 @@ fun CliktCommand.providerQuotaTypeOption() = option(help = "Provider quota type"
 
 fun CliktCommand.proposalDescriptionOption(helpMessage: String = "Proposal description", default: String = "") = option("--description", help = helpMessage)
         .default(default)
+        .validate(metadataTextValidator())
 
 fun CliktCommand.configurationsFileOption() = option("--configurations-file", help = "File to import blockchain configurations from")
         .path(mustExist = true, canBeDir = false, canBeFile = true, mustBeReadable = true)

@@ -10,6 +10,7 @@ import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal.voting.createVoterSetOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
+import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pubkeysOption
@@ -22,7 +23,7 @@ class CommandCreateVoterSet : CliktCommand(
     private val config by pmcConfigOption()
     private val client get() = config.client
 
-    private val name by nameOption("Name of new voter set").required()
+    private val name by nameOption("Name of new voter set").required().validate(entityNameValidator())
 
     private val pubkeys by pubkeysOption("Comma separated list of provider pubkeys for this voter set")
 
