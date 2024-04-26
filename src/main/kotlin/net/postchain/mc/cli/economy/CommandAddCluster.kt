@@ -3,10 +3,12 @@ package net.postchain.mc.cli.economy
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.createClusterOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.clusterUnitsOption
+import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.nameOption
 
@@ -14,7 +16,7 @@ class CommandAddCluster : ECBaseCommand(
         name = "add-cluster",
         help = "Add a new cluster"
 ) {
-    private val name by nameOption("Name of the new cluster").required()
+    private val name by nameOption("Name of the new cluster").required().validate(entityNameValidator())
 
     private val voterSet by option("-vs", "--voter-set", help = "Cluster voter set").required()
 

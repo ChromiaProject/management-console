@@ -30,6 +30,7 @@ import net.postchain.mc.cli.util.ProviderType
 import net.postchain.mc.cli.util.optionalPubkeyOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.cli.util.validateMetadataText
 import net.postchain.mc.cli.util.validatePubkey
 import net.postchain.mc.cli.util.validateUrl
 
@@ -50,6 +51,7 @@ class BatchOptions : OptionGroup() {
     private fun validateProviderBatch(): OptionTransformContext.(List<ProviderInfo>) -> Unit = { providers ->
         providers.forEach {
             validatePubkey(PubKey(it.pubkey))
+            validateMetadataText(it.name)
             if (it.url.isNotBlank()) validateUrl(it.url)
         }
     }

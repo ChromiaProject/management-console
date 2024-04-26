@@ -25,13 +25,15 @@ import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
-import net.postchain.mc.cli.hostOption
 import net.postchain.mc.cli.portOption
+import net.postchain.mc.cli.requiredHostOption
 import net.postchain.mc.cli.util.NopPostchainClient
+import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.pubkeyOption
+import net.postchain.mc.cli.util.requiredUrlOption
 import net.postchain.mc.network.requireApiVersion
 
 class CommandProposeImportForeignConfigurations : CliktCommand(
@@ -48,18 +50,18 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
 
     private val key by pubkeyOption("Node pubkey")
 
-    private val host by hostOption().required()
+    private val host by requiredHostOption()
 
     private val port by portOption().required()
 
-    private val apiUrl by option("-a", "--api-url", help = "api url").required()
+    private val apiUrl by requiredUrlOption("api url", "-a", "--api-url")
 
     private val chain0BlockchainRID by option("--chain0-blockchain-rid", help = "Chain0 blockchain RID")
             .convert { BlockchainRid.buildFromHex(it) }.required()
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val name by nameOption("Name of blockchain").required()
+    private val name by nameOption("Name of blockchain").required().validate(entityNameValidator())
 
     private val fromHeight by option("--from-height",
             help = "Only import configurations from and including this height (default is 0)"

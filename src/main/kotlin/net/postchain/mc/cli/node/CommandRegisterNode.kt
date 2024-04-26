@@ -20,12 +20,13 @@ import net.postchain.chain0.version.apiVersion
 import net.postchain.common.types.WrappedByteArray
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.hostOption
 import net.postchain.mc.cli.portOption
+import net.postchain.mc.cli.requiredHostOption
 import net.postchain.mc.cli.util.clusterUnitsOption
 import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeyOption
+import net.postchain.mc.cli.util.requiredUrlOption
 import net.postchain.mc.compatibility.ApiCompatV28.NodeCapabilityTypeV28
 import net.postchain.mc.compatibility.ApiCompatV28.updateNodeCapabilityOperationV28
 import net.postchain.mc.network.NodeVerifier
@@ -39,14 +40,14 @@ class CommandRegisterNode : CliktCommand(
 
     private val key by pubkeyOption("Node pubkey")
 
-    private val host by hostOption().required()
+    private val host by requiredHostOption()
 
     private val port by portOption().required()
 
-    private val apiUrl by option("-a", "--api-url", help = "api url").required()
+    private val apiUrl by requiredUrlOption("api url", "-a", "--api-url")
 
     private val territory by option("-t", "--territory", help = "ISO 3166-1 alpha-2 code").validate {
-        require(it.isNotBlank())
+        require(it.length == 2)
     }
 
     private val clusterUnits by clusterUnitsOption().default(1)

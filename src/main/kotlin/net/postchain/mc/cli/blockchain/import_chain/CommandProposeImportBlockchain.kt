@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.proposal_blockchain_import.proposeImportBlockchainOperation
 import net.postchain.chain0.proposal_blockchain_import.proposeImportConfigurationOperation
 import net.postchain.client.core.TxRid
@@ -15,6 +16,7 @@ import net.postchain.gtv.GtvDecoder
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.configurationsFileOption
+import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
@@ -39,7 +41,7 @@ class CommandProposeImportBlockchain : CliktCommand(
 
     private val container by option("-c", "--container", help = "Name of container to run in").required()
 
-    private val name by nameOption("Name of blockchain").required()
+    private val name by nameOption("Name of blockchain").required().validate(entityNameValidator())
 
     private val description by proposalDescriptionOption(default = "Propose importing of blockchain")
 

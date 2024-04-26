@@ -23,6 +23,7 @@ import net.postchain.mc.cli.util.clusterUnitsOption
 import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeyOption
+import net.postchain.mc.cli.util.urlOption
 import net.postchain.mc.compatibility.ApiCompatV28.NodeCapabilityTypeV28
 import net.postchain.mc.compatibility.ApiCompatV28.updateNodeCapabilityOperationV28
 
@@ -39,10 +40,10 @@ class CommandUpdateNode : CliktCommand(
 
     private val port by portOption()
 
-    private val apiUrl by option("-a", "--api-url", help = "api url")
+    private val apiUrl by urlOption("api url", "-a", "--api-url")
 
     private val territory by option("-t", "--territory", help = "ISO 3166-1 alpha-2 code").validate {
-        require(it.isNotBlank())
+        require(it.length == 2)
     }
 
     private val clusterUnits by clusterUnitsOption()
