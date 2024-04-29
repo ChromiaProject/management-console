@@ -9,14 +9,15 @@ import net.postchain.common.BlockchainRid
 import net.postchain.mc.cli.util.NopPostchainClient
 import net.postchain.mc.network.Version
 
-const val ECONOMY_CHAIN_VERSION = 30
+const val DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION = 30 // The version of directory chain introducing economy chain
 const val ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION = 21L // EC <= v20 use ec proposals, v21 > use common_proposals
+const val ECONOMY_CHAIN_MINTING_VERSION = 22L // EC >= 22 has minting support
 
 fun getEconomyChainClient(directoryChainClient: PostchainClient, config: ChromiaConfig): PostchainClient {
 
     val version = Version(directoryChainClient).version
-    if (version < ECONOMY_CHAIN_VERSION) {
-        throw CliktError("Economy chain requires directory chain version $ECONOMY_CHAIN_VERSION, found version $version")
+    if (version < DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION) {
+        throw CliktError("Economy chain requires directory chain version $DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION, found version $version")
     }
 
     val economyChainBrid = directoryChainClient.getEconomyChainRid()

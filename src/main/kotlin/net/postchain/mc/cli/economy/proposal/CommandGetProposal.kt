@@ -21,7 +21,9 @@ import net.postchain.economy.common_proposal.getCommonProposalVotingResults
 import net.postchain.economy.economy_chain.apiVersion
 import net.postchain.economy.economy_chain.getClusterChangeTagProposal
 import net.postchain.economy.economy_chain.getClusterCreateProposal
+import net.postchain.economy.economy_chain.getEcVoterSetUpdateProposal
 import net.postchain.economy.economy_chain.getEcononyConstantsProposal
+import net.postchain.economy.economy_chain.getMintingProposal
 import net.postchain.economy.economy_chain.getTagProposal
 import net.postchain.mc.cli.economy.ECBaseCommand
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
@@ -176,6 +178,33 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
                     if (economyConstantsProposal.chromiaFoundationFeeShare != null) { row("Chromia foundation fee share", economyConstantsProposal.chromiaFoundationFeeShare) }
                     if (economyConstantsProposal.resourcePoolMarginFeeShare != null) { row("Resource pool margin feee share", economyConstantsProposal.resourcePoolMarginFeeShare) }
                     if (economyConstantsProposal.dappProviderRiskShare != null) { row("Dapp provider risk share", economyConstantsProposal.dappProviderRiskShare) }
+                }
+            }
+        }
+
+        CommonProposalType.ec_voter_set_update -> {
+            val proposalDetails = economyChainClient.getEcVoterSetUpdateProposal(proposalId)
+            return pmcTable {
+                body {
+                    if (proposalDetails?.threshold != null) {
+                        row("Threshold", proposalDetails.threshold)
+                    }
+                    if (proposalDetails?.addMember != null && proposalDetails.addMember.isNotEmpty()) {
+                        row("Add member(s)", proposalDetails.addMember.joinToString(", "))
+                    }
+                    if (proposalDetails?.removeMember != null && proposalDetails.removeMember.isNotEmpty()) {
+                        row("Remove member(s)", proposalDetails.removeMember.joinToString(", "))
+                    }
+                }
+            }
+        }
+
+        CommonProposalType.ec_mint -> {
+            val proposalDetails = economyChainClient.getMintingProposal(proposalId)
+            return pmcTable {
+                body {
+                    row("Amount", proposalDetails.amount)
+                    row("Account ID", proposalDetails.accountId)
                 }
             }
         }
