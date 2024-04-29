@@ -21,10 +21,10 @@
         <revision>dev</revision>
         <postchain.version>3.15.13</postchain.version>
         <postchain.client.version>3.12.2</postchain.client.version>
-        <directory.chain.version>1.44.5</directory.chain.version>
+        <directory.chain.version>1.45.0</directory.chain.version>
         <chr.version>0.17.1</chr.version>
         <rell.version>0.13.10</rell.version>
-        <rell.maven.plugin.version>0.11.9</rell.maven.plugin.version>
+        <rell.maven.plugin.version>0.11.12</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
 
@@ -222,7 +222,11 @@
                         </goals>
                         <configuration>
                             <packageName>net.postchain.chain0</packageName>
-                            <mainModule>management_chain_mainnet</mainModule>
+                            <mainModules>
+                                <mainModule>management_chain_mainnet</mainModule>
+                                <mainModule>direct_cluster</mainModule>
+                                <mainModule>direct_container</mainModule>
+                            </mainModules>
                         </configuration>
                     </execution>
                     <execution>
