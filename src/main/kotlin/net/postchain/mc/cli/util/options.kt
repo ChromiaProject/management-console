@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.util
 
+import com.chromia.build.tools.config.ChromiaConfigLoader
 import com.chromia.cli.tools.config.OptionalChromiaModelConfigOption
 import com.chromia.cli.tools.env.cliEnv
 import com.github.ajalt.clikt.core.CliktCommand
@@ -18,6 +19,8 @@ import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.model.ProviderQuotaType
+import net.postchain.common.config.getEnvOrBooleanProperty
+import net.postchain.common.config.getEnvOrStringProperty
 import net.postchain.common.hexStringToByteArray
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.CommandBase
@@ -69,14 +72,18 @@ class PmcClientConfigOption(cliEnv: RellCliEnv) : OptionalChromiaModelConfigOpti
     private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup").flag()
     val network by option("--network", help = "Target network to make requests to (if chromia.yml is configured)")
     val client by lazy {
+        val rawConfig = ChromiaConfigLoader(cliEnv).loadProperties(configFile)
         if (network != null) {
             requireNotNull(model) { "chromia.yml not found"}
             val networkModel = model!!.deployments[network]
                     ?: throw IllegalArgumentException("Network $network not found in configuration")
-            config.setProperty("brid", networkModel.blockchainRid.toHex())
-            config.setProperty("api.url", networkModel.urls.joinToString(","))
+            rawConfig.setProperty("brid", networkModel.blockchainRid.toHex())
+            config.setApiUrls(networkModel.urls.joinToString(","))
         }
-        NopPostchainClient.withCachedBrid(config, lookupBrid)
+        val configuredBrid = rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
+        val useRequestCompression = rawConfig
+                .getEnvOrBooleanProperty("POSTCHAIN_CLIENT_COMPRESS_REQUEST_BODIES", "compress.requests", true)
+        NopPostchainClient.withCachedBrid(config, configuredBrid, lookupBrid, useRequestCompression)
     }
 
 }

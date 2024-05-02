@@ -1,18 +1,18 @@
 package net.postchain.mc.network
 
-import com.chromia.cli.tools.config.ChromiaConfig
+import com.chromia.build.tools.config.ChromiaClientConfig
 import com.github.ajalt.clikt.core.CliktError
 import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
 import net.postchain.client.core.PostchainClient
-import net.postchain.client.impl.PostchainClientImpl
+import net.postchain.client.impl.PostchainClientProviderImpl
 import net.postchain.common.BlockchainRid
 import net.postchain.economy.economy_chain.initOperation
 import net.postchain.mc.cli.base.printResult
 
-fun initEconomyChain(client: PostchainClient, config: ChromiaConfig) {
+fun initEconomyChain(client: PostchainClient, config: ChromiaClientConfig) {
     val economyChainRid = client.getEconomyChainRid()
     if (economyChainRid != null) {
-        val economyChainClient = PostchainClientImpl(config.get(blockchainRid = BlockchainRid(economyChainRid)))
+        val economyChainClient = config.setBrid(BlockchainRid(economyChainRid)).client(PostchainClientProviderImpl())
         economyChainClient.transactionBuilder()
                 .initOperation()
                 .postAwaitConfirmation()

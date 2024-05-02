@@ -1,6 +1,6 @@
 package net.postchain.mc.network
 
-import com.chromia.cli.tools.config.BlockchainConfigurationCompressor
+import com.chromia.build.tools.config.BlockchainConfigurationCompressor
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
