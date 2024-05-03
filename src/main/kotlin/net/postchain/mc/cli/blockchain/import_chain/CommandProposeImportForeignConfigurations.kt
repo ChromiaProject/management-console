@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.blockchain.import_chain
 
-import com.chromia.cli.tools.config.BlockchainConfigurationCompressor
+import com.chromia.build.tools.config.BlockchainConfigurationCompressor
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate

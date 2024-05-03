@@ -1,7 +1,7 @@
 package net.postchain.mc.cli.config
 
-import com.chromia.cli.tools.config.ChromiaConfigLoader
-import com.chromia.cli.tools.config.ChromiaConfigWriter
+import com.chromia.build.tools.config.ChromiaConfigLoader
+import com.chromia.build.tools.config.ChromiaConfigWriter
 import com.chromia.cli.tools.env.cliEnv
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
@@ -53,7 +53,7 @@ class CommandConfig : CliktCommand(
         }
         if (get != null) {
             if (get == "privkey") throw CliktError("Cannot print private key to stdout")
-            return echo(configLoader.loadClientConfigFile(configFile).getString(get))
+            return echo(configLoader.loadProperties(configFile).getString(get))
         }
         if (set.isNotEmpty()) {
             configWriter.setProperty(set)

@@ -2,8 +2,8 @@ package net.postchain.mc.it
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.chromia.build.tools.TestModel
 import com.chromia.build.tools.TestProcess
+import com.chromia.build.tools.restapi.TestModel
 import net.postchain.api.rest.controller.Model
 import net.postchain.api.rest.controller.RestApi
 import net.postchain.chain0.common.queries.GetSummaryResult
