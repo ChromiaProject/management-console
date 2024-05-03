@@ -54,10 +54,9 @@ class CommandProposeImportBlockchain : CliktCommand(
             val initialConfigData = initialConfig.asArray()[1].asByteArray()
 
             echo("Blockchain $name with bc-rid $blockchainRid will be imported")
-
             proposeImportBlockchain(blockchainRid, initialConfigData)
 
-            var txBuilder = client.transactionBuilder()
+            var txBuilder = newTxBuilder()
             var numConfigs = 1
             val txs = buildList {
                 while (true) {
@@ -68,54 +67,67 @@ class CommandProposeImportBlockchain : CliktCommand(
                     val height = gtv.asArray()[0].asInteger()
                     require(height > 0)
                     val configData = gtv.asArray()[1].asByteArray()
-                    val wasAdded = tryAddConfiguration(txBuilder, blockchainRid, height, configData)
+                    val wasAdded = txBuilder.tryAddConfiguration(blockchainRid, height, configData)
                     if (!wasAdded) {
-                        add(postTransaction(txBuilder))
-                        txBuilder = client.transactionBuilder()
-                        if (!tryAddConfiguration(txBuilder, blockchainRid, height, configData)) {
+                        postTransaction(txBuilder)?.also(::add)
+                        txBuilder = newTxBuilder()
+                        if (!txBuilder.tryAddConfiguration(blockchainRid, height, configData)) {
                             throw CliktError("Configuration does not fit in new transaction")
                         }
                     }
                     numConfigs++
                 }
-                add(postTransaction(txBuilder))
+                postTransaction(txBuilder)?.also(::add)
             }
-            for (tx in txs) {
-                val result = client.awaitConfirmation(tx, client.config.statusPollCount, client.config.statusPollInterval)
-                result.printResult(
-                        "Transaction ${tx.rid} confirmed",
-                        "Cannot import blockchain config(s): ${result.rejectReason}", true
-                )
+
+            txs.forEach { tx ->
+                client.awaitConfirmation(tx, client.config.statusPollCount, client.config.statusPollInterval).also { result ->
+                    result.printResult(
+                            "Transaction ${tx.rid} confirmed",
+                            "Cannot import blockchain config(s): ${result.rejectReason}", true
+                    )
+                }
             }
             echo("Blockchain $name with bc-rid $blockchainRid with $numConfigs blockchain configuration(s) imported")
         }
     }
 
     private fun proposeImportBlockchain(blockchainRid: BlockchainRid, initialConfigData: ByteArray) {
-        val txBuilder = client.transactionBuilder()
-        txBuilder.proposeImportBlockchainOperation(
-                client.pubkey, initialConfigData, blockchainRid, name, container, description)
-        val result = txBuilder.postAwaitConfirmation()
-        result.printResult(
-                "Blockchain import started",
-                "Cannot import blockchain config(s): ${result.rejectReason}", true
-        )
+        client.transactionBuilder()
+                .proposeImportBlockchainOperation(client.pubkey, initialConfigData, blockchainRid, name, container, description)
+                .postAwaitConfirmation()
+                .also {
+                    it.printResult(
+                            "Blockchain import started",
+                            "Cannot import blockchain config(s): ${it.rejectReason}", true)
+                }
     }
 
-    private fun tryAddConfiguration(txBuilder: TransactionBuilder, blockchainRid: BlockchainRid, height: Long, configData: ByteArray) =
+    private fun TrackingTransactionBuilder.tryAddConfiguration(blockchainRid: BlockchainRid, height: Long, configData: ByteArray) =
             try {
                 txBuilder.proposeImportConfigurationOperation(client.pubkey, blockchainRid, height, configData, description)
+                opCounter++
                 true
             } catch (e: IllegalStateException) {
                 false
             }
 
-    private fun postTransaction(txBuilder: TransactionBuilder): TxRid {
-        val txResult = txBuilder.post()
-        if (txResult.status == TransactionStatus.REJECTED) {
-            throw CliktError("Cannot import blockchain config(s): ${txResult.rejectReason}")
-        }
-        echo("Transaction ${txResult.txRid} submitted")
-        return txResult.txRid
+    private fun postTransaction(trackingTxBuilder: TrackingTransactionBuilder): TxRid? {
+        if (trackingTxBuilder.opCounter == 0) return null
+
+        return trackingTxBuilder.txBuilder.post()
+                .also { result ->
+                    if (result.status == TransactionStatus.REJECTED) {
+                        throw CliktError("Cannot import blockchain config(s): ${result.rejectReason}")
+                    }
+                    echo("Transaction ${result.txRid} submitted")
+                }.txRid
     }
+
+    private class TrackingTransactionBuilder(
+            val txBuilder: TransactionBuilder,
+            var opCounter: Int = 0
+    )
+
+    private fun newTxBuilder() = TrackingTransactionBuilder(client.transactionBuilder())
 }
