@@ -30,6 +30,7 @@ fun economyCommands() = EconomyCommand().subcommands(
         CommandGetEconomyMetrics(),
         CommandGetEconomyConstants(),
         CommandUpdateSystemProviderEconomyConstants(),
+        CommandUpdateStakingEconomyConstants(),
         CommandUpdateEconomyConstants(),
         mintCommands(),
         proposalCommands(),
