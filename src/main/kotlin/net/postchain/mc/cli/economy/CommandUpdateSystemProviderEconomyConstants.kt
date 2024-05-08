@@ -22,8 +22,11 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
         }
 
         economyChainClient.transactionBuilder()
-                .updateSystemProviderEconomyConstantsOperation(totalCostSystemProviders?.toLong(), systemProviderFeeShare?.toBigDecimal(),
-                        systemProviderRiskShare?.toBigDecimal())
+                .updateSystemProviderEconomyConstantsOperation(
+                        totalCostSystemProviders?.toLong(),
+                        systemProviderFeeShare?.toBigDecimal(),
+                        systemProviderRiskShare?.toBigDecimal(),
+                )
                 .postAwaitConfirmation()
                 .printResult(
                         "Economy system provider constants updated.",

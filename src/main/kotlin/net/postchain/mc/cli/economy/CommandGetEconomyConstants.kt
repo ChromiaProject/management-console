@@ -23,7 +23,12 @@ class CommandGetEconomyConstants : ECBaseCommand(
                 row("Chromia foundation fee share", economyConstants.chromiaFoundationFeeShare)
                 row("Resource pool margin feee share", economyConstants.resourcePoolMarginFeeShare)
                 row("System provider risk share", economyConstants.systemProviderRiskShare)
-                row("Dapp provider risk share", economyConstants.dappProviderRiskShare)
+                row("Staking requirements enabled", economyConstants.stakingRequirementsEnabled)
+                row("Staking requirements stop payout days", economyConstants.stakingRequirementStopPayoutDays)
+                row("Staking requirements system provider own", economyConstants.stakingRequirementSystemProviderOwnStakeUsd)
+                row("Staking requirements system provider total", economyConstants.stakingRequirementSystemProviderTotalStakeUsd)
+                row("Staking requirements dapp provider own", economyConstants.stakingRequirementDappProviderOwnStakeUsd)
+                row("Staking requirements dapp provider total", economyConstants.stakingRequirementDappProviderTotalStakeUsd)
             }
         })
     }
