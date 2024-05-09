@@ -64,20 +64,20 @@ class CommandRegisterProvider : CliktCommand(
             
             There are three tiers of providers:
             ```
-            - Community Node Provider: Basic provider, can deploy dapps and add nodes that replicates blockchains (replica) (default)
+            - Dapp Provider:           Basic provider, can deploy dapps and add nodes that replicates blockchains (replica) (default)
             - Node Provider:           Can add block builder nodes
             - System Provider:         System level permissions and can add node to the system cluster
             ```
             
             Examples:
             ```
-            (1): pmc provider register -cnp --enable --pubkey aa...
+            (1): pmc provider register -dp --enable --pubkey aa...
             ```
             ```
-            (2): pmc provider register --batch -cnp --enable --provider '["pubkey": x"aa...", "name": "foo", "url": "http://foo/api"]' --provider '["pubkey": x"bb...", "name": "bar"]'
+            (2): pmc provider register --batch -dp --enable --provider '["pubkey": x"aa...", "name": "foo", "url": "http://foo/api"]' --provider '["pubkey": x"bb...", "name": "bar"]'
             ```
             ```
-            (3): pmc provider register --batch -cnp --enable, where providers will be load from `providers.properties` file:
+            (3): pmc provider register --batch -dp --enable, where providers will be load from `providers.properties` file:
                     provider=["pubkey": x"aa...", "name": "foo", "url": "http://foo/api"];["pubkey": x"bb...", "name": "bar", "url": "http://bar/api"]
                     provider=["pubkey": x"cc...", "url": "http://foobar/api"]
             ```
@@ -97,7 +97,7 @@ class CommandRegisterProvider : CliktCommand(
     private val batchOptions by BatchOptions().cooccurring()
 
     private val providerTier by mutuallyExclusiveOptions(
-            option("-cnp", help = "community node provider").flag().convert { ProviderType.COMMUNITY_NODE_PROVIDER },
+            option("-dp", help = "dapp provider").flag().convert { ProviderType.DAPP_PROVIDER },
             option("-np", help = "node provider").flag().convert { ProviderType.NODE_PROVIDER },
             option("-sp", help = "system provider").flag().convert { ProviderType.SYSTEM_PROVIDER },
             name = "Provider tier",

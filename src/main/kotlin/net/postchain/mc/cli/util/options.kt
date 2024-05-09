@@ -159,7 +159,7 @@ fun CliktCommand.clusterUnitsOption() = option("-clu", "--cluster-units", help =
 fun CliktCommand.extraStorageOption() = option("-es", "--extra-storage", help = "Extra Storage (MiB)").long()
 
 fun CliktCommand.providerTierOption() = option(help = "Provider tier").switch(
-        "-cnp" to ProviderType.COMMUNITY_NODE_PROVIDER,
+        "-dp" to ProviderType.DAPP_PROVIDER,
         "-np" to ProviderType.NODE_PROVIDER,
         "-sp" to ProviderType.SYSTEM_PROVIDER
 )
