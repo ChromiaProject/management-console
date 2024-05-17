@@ -12,6 +12,7 @@ import net.postchain.chain0.direct_container.createContainerFromWithUnitsOperati
 import net.postchain.chain0.direct_container.createContainerOperation
 import net.postchain.chain0.direct_container.createContainerWithResourceLimitsOperation
 import net.postchain.chain0.direct_container.createContainerWithUnitsOperation
+import net.postchain.chain0.features.hasDirectContainer
 import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.printResult
@@ -58,99 +59,107 @@ class CommandProposeContainer : CliktCommand(
 
     override fun run() {
         val apiVersion = client.apiVersion()
-        client.transactionBuilder()
-                .apply {
-                    when {
+        var hasDirectContainer = true
+        if (apiVersion >= 49)
+            hasDirectContainer = client.hasDirectContainer()
+        if (hasDirectContainer) {
+            client.transactionBuilder()
+                    .apply {
+                        when {
 
-                        apiVersion >= 24 -> {
-                            when (deployerOption) {
-                                is VoterSetOrPubkeysOption.Pubkeys -> {
-                                    createContainerWithResourceLimitsOperation(
-                                            client.pubkey,
-                                            name,
-                                            clusterName,
-                                            consensusThreshold,
-                                            (deployerOption as VoterSetOrPubkeysOption.Pubkeys).pubkeys,
-                                            mapOf(
-                                                    ContainerResourceLimitType.container_units to containerUnits,
-                                                    ContainerResourceLimitType.max_blockchains to maxBlockchains,
-                                                    ContainerResourceLimitType.extra_storage to extraStorage
-                                            )
-                                    )
-                                }
+                            apiVersion >= 24 -> {
+                                when (deployerOption) {
+                                    is VoterSetOrPubkeysOption.Pubkeys -> {
+                                        createContainerWithResourceLimitsOperation(
+                                                client.pubkey,
+                                                name,
+                                                clusterName,
+                                                consensusThreshold,
+                                                (deployerOption as VoterSetOrPubkeysOption.Pubkeys).pubkeys,
+                                                mapOf(
+                                                        ContainerResourceLimitType.container_units to containerUnits,
+                                                        ContainerResourceLimitType.max_blockchains to maxBlockchains,
+                                                        ContainerResourceLimitType.extra_storage to extraStorage
+                                                )
+                                        )
+                                    }
 
-                                is VoterSetOrPubkeysOption.VoterSet -> {
-                                    createContainerFromWithResourceLimitsOperation(
-                                            client.pubkey,
-                                            name,
-                                            clusterName,
-                                            consensusThreshold,
-                                            (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
-                                            mapOf(
-                                                    ContainerResourceLimitType.container_units to containerUnits,
-                                                    ContainerResourceLimitType.max_blockchains to maxBlockchains,
-                                                    ContainerResourceLimitType.extra_storage to extraStorage
-                                            )
-                                    )
-                                }
-                            }
-                        }
-
-                        apiVersion >= 3 -> {
-                            when (deployerOption) {
-                                is VoterSetOrPubkeysOption.Pubkeys -> {
-                                    createContainerWithUnitsOperation(
-                                            client.pubkey,
-                                            name,
-                                            clusterName,
-                                            consensusThreshold,
-                                            (deployerOption as VoterSetOrPubkeysOption.Pubkeys).pubkeys,
-                                            containerUnits
-                                    )
-                                }
-
-                                is VoterSetOrPubkeysOption.VoterSet -> {
-                                    createContainerFromWithUnitsOperation(
-                                            client.pubkey,
-                                            name,
-                                            clusterName,
-                                            consensusThreshold,
-                                            (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
-                                            containerUnits
-                                    )
+                                    is VoterSetOrPubkeysOption.VoterSet -> {
+                                        createContainerFromWithResourceLimitsOperation(
+                                                client.pubkey,
+                                                name,
+                                                clusterName,
+                                                consensusThreshold,
+                                                (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
+                                                mapOf(
+                                                        ContainerResourceLimitType.container_units to containerUnits,
+                                                        ContainerResourceLimitType.max_blockchains to maxBlockchains,
+                                                        ContainerResourceLimitType.extra_storage to extraStorage
+                                                )
+                                        )
+                                    }
                                 }
                             }
-                        }
 
-                        else -> {
-                            when (deployerOption) {
-                                is VoterSetOrPubkeysOption.Pubkeys -> {
-                                    createContainerOperation(
-                                            client.pubkey,
-                                            name,
-                                            clusterName,
-                                            consensusThreshold,
-                                            (deployerOption as VoterSetOrPubkeysOption.Pubkeys).pubkeys
-                                    )
+                            apiVersion >= 3 -> {
+                                when (deployerOption) {
+                                    is VoterSetOrPubkeysOption.Pubkeys -> {
+                                        createContainerWithUnitsOperation(
+                                                client.pubkey,
+                                                name,
+                                                clusterName,
+                                                consensusThreshold,
+                                                (deployerOption as VoterSetOrPubkeysOption.Pubkeys).pubkeys,
+                                                containerUnits
+                                        )
+                                    }
+
+                                    is VoterSetOrPubkeysOption.VoterSet -> {
+                                        createContainerFromWithUnitsOperation(
+                                                client.pubkey,
+                                                name,
+                                                clusterName,
+                                                consensusThreshold,
+                                                (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
+                                                containerUnits
+                                        )
+                                    }
                                 }
+                            }
 
-                                is VoterSetOrPubkeysOption.VoterSet -> {
-                                    createContainerFromOperation(
-                                            client.pubkey,
-                                            name,
-                                            clusterName,
-                                            consensusThreshold,
-                                            (deployerOption as VoterSetOrPubkeysOption.VoterSet).data
-                                    )
+                            else -> {
+                                when (deployerOption) {
+                                    is VoterSetOrPubkeysOption.Pubkeys -> {
+                                        createContainerOperation(
+                                                client.pubkey,
+                                                name,
+                                                clusterName,
+                                                consensusThreshold,
+                                                (deployerOption as VoterSetOrPubkeysOption.Pubkeys).pubkeys
+                                        )
+                                    }
+
+                                    is VoterSetOrPubkeysOption.VoterSet -> {
+                                        createContainerFromOperation(
+                                                client.pubkey,
+                                                name,
+                                                clusterName,
+                                                consensusThreshold,
+                                                (deployerOption as VoterSetOrPubkeysOption.VoterSet).data
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                .postAwaitConfirmation()
-                .printResult(
-                        "Container $name has been created",
-                        "Failed to create container"
-                )
+                    .postAwaitConfirmation()
+                    .printResult(
+                            "Container $name has been created",
+                            "Failed to create container"
+                    )
+        } else {
+            echo("Network is configured to work with EC. Use EC commands to create container instead.")
+        }
     }
+
 }
