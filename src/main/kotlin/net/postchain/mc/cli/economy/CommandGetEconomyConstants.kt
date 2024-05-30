@@ -25,10 +25,10 @@ class CommandGetEconomyConstants : ECBaseCommand(
                 row("System provider risk share", economyConstants.systemProviderRiskShare)
                 row("Staking requirements enabled", economyConstants.stakingRequirementsEnabled)
                 row("Staking requirements stop payout days", economyConstants.stakingRequirementStopPayoutDays)
-                row("Staking requirements system provider own", economyConstants.stakingRequirementSystemProviderOwnStakeUsd)
-                row("Staking requirements system provider total", economyConstants.stakingRequirementSystemProviderTotalStakeUsd)
-                row("Staking requirements dapp provider own", economyConstants.stakingRequirementDappProviderOwnStakeUsd)
-                row("Staking requirements dapp provider total", economyConstants.stakingRequirementDappProviderTotalStakeUsd)
+                row("Staking requirements system provider own", economyConstants.stakingRequirementSystemProviderOwnStakeChr)
+                row("Staking requirements system provider total", economyConstants.stakingRequirementSystemProviderTotalStakeChr)
+                row("Staking requirements dapp provider own", economyConstants.stakingRequirementDappProviderOwnStakeChr)
+                row("Staking requirements dapp provider total", economyConstants.stakingRequirementDappProviderTotalStakeChr)
             }
         })
     }
