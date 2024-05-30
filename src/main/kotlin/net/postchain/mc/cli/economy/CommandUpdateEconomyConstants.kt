@@ -1,10 +1,10 @@
 package net.postchain.mc.cli.economy
 
+import com.chromia.directory1.economy_chain.updateEconomyConstantsOperation
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.client.core.PostchainClient
-import net.postchain.economy.economy_chain.updateEconomyConstantsOperation
 import net.postchain.mc.cli.base.printResult
 
 class CommandUpdateEconomyConstants : ECBaseCommand(
