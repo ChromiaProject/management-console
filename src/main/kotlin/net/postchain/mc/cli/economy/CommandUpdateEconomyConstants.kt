@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.economy
 
-import com.chromia.directory1.economy_chain.updateEconomyConstantsOperation
+import net.postchain.economy.economy_chain.updateEconomyConstantsOperation
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.long
@@ -14,6 +14,7 @@ class CommandUpdateEconomyConstants : ECBaseCommand(
 
     private val minLeaseTimeWeeks by option("--min-lease-time", help = "Number of weeks as minimum for a lease").long()
     private val maxLeaseTimeWeeks by option("--max-lease-time", help = "Number of weeks as maximum for a lease").long()
+    private val stakingRewardRate by option("--staking-reward-rate", help = "Staking reward rate")
     private val stakingRewardFeeShare by option("--staking-reward-fee-share", help = "Staking reward fee share")
     private val chromiaFoundationFeeShare by option("--chromia-foundation-fee-share", help = "Chromia foundation fee share")
     private val resourcePoolMarginFeeShare by option("--resource-pool-margin-fee-share", help = "Resource pool margin fee share")
@@ -21,14 +22,20 @@ class CommandUpdateEconomyConstants : ECBaseCommand(
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
-        if (minLeaseTimeWeeks == null && maxLeaseTimeWeeks == null && stakingRewardFeeShare == null &&
-            chromiaFoundationFeeShare == null && resourcePoolMarginFeeShare == null && dappProviderRiskShare == null
-        ) {
+        if (listOfNotNull(
+                        minLeaseTimeWeeks,
+                        maxLeaseTimeWeeks,
+                        stakingRewardRate,
+                        stakingRewardFeeShare,
+                        chromiaFoundationFeeShare,
+                        resourcePoolMarginFeeShare,
+                        dappProviderRiskShare,
+        ).isEmpty()) {
             throw CliktError("No variable provided")
         }
 
         economyChainClient.transactionBuilder()
-            .updateEconomyConstantsOperation(minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardFeeShare?.toBigDecimal(),
+            .updateEconomyConstantsOperation(minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(), stakingRewardFeeShare?.toBigDecimal(),
                 chromiaFoundationFeeShare?.toBigDecimal(), resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal())
             .postAwaitConfirmation()
             .printResult(
