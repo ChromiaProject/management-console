@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.container
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
@@ -158,7 +159,7 @@ class CommandProposeContainer : CliktCommand(
                             "Failed to create container"
                     )
         } else {
-            echo("Network is configured to work with EC. Use EC commands to create container instead.")
+            throw CliktError("Network is configured to work with EC. Use EC commands to create container instead.")
         }
     }
 

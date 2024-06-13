@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.cluster
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
@@ -130,7 +131,7 @@ class CommandAddCluster : CliktCommand(
                             "Could not create cluster"
                     )
         } else {
-            echo("Network is configured to work with EC. Use EC commands to create clusters instead.")
+            throw CliktError("Network is configured to work with EC. Use EC commands to create clusters instead.")
         }
     }
 }

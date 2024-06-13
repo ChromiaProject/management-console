@@ -4,9 +4,11 @@ import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.boolean
 import com.github.ajalt.clikt.parameters.types.long
+import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
-import net.postchain.economy.economy_chain.updateStakingRequirementsEconomyConstantsOperation
+import net.postchain.economy.economy_chain.proposeStakingRequirementConstantsOperation
 import net.postchain.mc.cli.base.printResult
+import net.postchain.mc.compatibility.ApiCompatECV28.updateStakingRequirementsEconomyConstantsOperationECV28
 
 class CommandUpdateStakingEconomyConstants : ECBaseCommand(
         name = "update-staking-constants",
@@ -36,19 +38,36 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
             throw CliktError("No variable provided")
         }
 
-        economyChainClient.transactionBuilder()
-                .updateStakingRequirementsEconomyConstantsOperation(
-                        stakingRequirementsEnabled,
-                        stakingRequirementsStopPayoutDays,
-                        stakingRequirementsSystemProviderOwnStakeChr,
-                        stakingRequirementsSystemProviderTotalStakeChr,
-                        stakingRequirementsDappProviderOwnStakeChr,
-                        stakingRequirementsDappProviderTotalStakeChr,
-                )
-                .postAwaitConfirmation()
-                .printResult(
-                        "Economy staking constants updated.",
-                        "Failed to update staking economy constants"
-                )
+        val version = economyChainClient.apiVersion()
+        when {
+            version < ECONOMY_CHAIN_EC_CONSTANTS_AS_PROPOSALS_VERSION -> {
+                economyChainClient.transactionBuilder()
+                        .updateStakingRequirementsEconomyConstantsOperationECV28(
+                                stakingRequirementsEnabled,
+                                stakingRequirementsStopPayoutDays,
+                                stakingRequirementsSystemProviderOwnStakeChr,
+                                stakingRequirementsSystemProviderTotalStakeChr,
+                                stakingRequirementsDappProviderOwnStakeChr,
+                                stakingRequirementsDappProviderTotalStakeChr,
+                        )
+            }
+
+            else -> {
+                economyChainClient.transactionBuilder()
+                        .proposeStakingRequirementConstantsOperation(
+                                stakingRequirementsEnabled,
+                                stakingRequirementsStopPayoutDays,
+                                stakingRequirementsSystemProviderOwnStakeChr,
+                                stakingRequirementsSystemProviderTotalStakeChr,
+                                stakingRequirementsDappProviderOwnStakeChr,
+                                stakingRequirementsDappProviderTotalStakeChr,
+                        )
+            }
+        }
+        .postAwaitConfirmation()
+        .printResult(
+                "Proposal for updating staking economy constants is created and awaits approval.",
+                "Failed to create staking economy constants update proposal"
+        )
     }
 }
