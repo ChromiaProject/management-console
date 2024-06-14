@@ -24,7 +24,10 @@ import net.postchain.economy.economy_chain.getClusterCreateProposal
 import net.postchain.economy.economy_chain.getEcVoterSetUpdateProposal
 import net.postchain.economy.economy_chain.getEcononyConstantsProposal
 import net.postchain.economy.economy_chain.getMintingProposal
+import net.postchain.economy.economy_chain.getStakingRequirementConstantsProposal
+import net.postchain.economy.economy_chain.getSystemProviderEconomyConstantsProposal
 import net.postchain.economy.economy_chain.getTagProposal
+import net.postchain.mc.cli.base.rowIfNotNull
 import net.postchain.mc.cli.economy.ECBaseCommand
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
@@ -172,12 +175,12 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
             val economyConstantsProposal = economyChainClient.getEcononyConstantsProposal(proposalId)
             return pmcTable {
                 body {
-                    if (economyConstantsProposal.minLeaseTimeWeeks != null) { row("Min lease time weeks", economyConstantsProposal.minLeaseTimeWeeks) }
-                    if (economyConstantsProposal.maxLeaseTimeWeeks != null) { row("Max lease time weeks", economyConstantsProposal.maxLeaseTimeWeeks) }
-                    if (economyConstantsProposal.stakingRewardFeeShare != null) { row("Staking reward fee share", economyConstantsProposal.stakingRewardFeeShare) }
-                    if (economyConstantsProposal.chromiaFoundationFeeShare != null) { row("Chromia foundation fee share", economyConstantsProposal.chromiaFoundationFeeShare) }
-                    if (economyConstantsProposal.resourcePoolMarginFeeShare != null) { row("Resource pool margin feee share", economyConstantsProposal.resourcePoolMarginFeeShare) }
-                    if (economyConstantsProposal.dappProviderRiskShare != null) { row("Dapp provider risk share", economyConstantsProposal.dappProviderRiskShare) }
+                    rowIfNotNull("Min lease time weeks", economyConstantsProposal.minLeaseTimeWeeks)
+                    rowIfNotNull("Max lease time weeks", economyConstantsProposal.maxLeaseTimeWeeks)
+                    rowIfNotNull("Staking reward fee share", economyConstantsProposal.stakingRewardFeeShare)
+                    rowIfNotNull("Chromia foundation fee share", economyConstantsProposal.chromiaFoundationFeeShare)
+                    rowIfNotNull("Resource pool margin feee share", economyConstantsProposal.resourcePoolMarginFeeShare)
+                    rowIfNotNull("Dapp provider risk share", economyConstantsProposal.dappProviderRiskShare)
                 }
             }
         }
@@ -186,9 +189,7 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
             val proposalDetails = economyChainClient.getEcVoterSetUpdateProposal(proposalId)
             return pmcTable {
                 body {
-                    if (proposalDetails?.threshold != null) {
-                        row("Threshold", proposalDetails.threshold)
-                    }
+                    rowIfNotNull("Threshold", proposalDetails?.threshold)
                     if (proposalDetails?.addMember != null && proposalDetails.addMember.isNotEmpty()) {
                         row("Add member(s)", proposalDetails.addMember.joinToString(", "))
                     }
@@ -205,6 +206,31 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
                 body {
                     row("Amount", proposalDetails.amount)
                     row("Account ID", proposalDetails.accountId)
+                }
+            }
+        }
+
+        CommonProposalType.ec_system_provider_constants_update -> {
+            val proposalDetails = economyChainClient.getSystemProviderEconomyConstantsProposal(proposalId)
+            return pmcTable {
+                body {
+                    rowIfNotNull("Total cost system provider", proposalDetails.totalCostSystemProviders)
+                    rowIfNotNull("System provider fee share", proposalDetails.systemProviderFeeShare)
+                    rowIfNotNull("System provider risk share", proposalDetails.systemProviderRiskShare)
+                }
+            }
+        }
+
+        CommonProposalType.ec_staking_requirement_constants_update -> {
+            val proposalDetails = economyChainClient.getStakingRequirementConstantsProposal(proposalId)
+            return pmcTable {
+                body {
+                    rowIfNotNull("Staking requirements enabled", proposalDetails.enabled)
+                    rowIfNotNull("Stop payout days", proposalDetails.stopPayoutDays)
+                    rowIfNotNull("Requirement - system provider own staking in chr", proposalDetails.systemProviderOwnStakeChr)
+                    rowIfNotNull("Requirement - system provider total staking in chr", proposalDetails.systemProviderTotalStakeChr)
+                    rowIfNotNull("Requirement - dapp provider own staking in chr", proposalDetails.dappProviderOwnStakeChr)
+                    rowIfNotNull("Requirement - dapp provider total staking in chr", proposalDetails.dappProviderTotalStakeChr)
                 }
             }
         }
