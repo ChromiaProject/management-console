@@ -34,12 +34,12 @@ class ConfiguresBridIT {
 
     @Test
     fun `missing brid gets auto-configured`(@TempDir dir: Path) {
-        RestApi(7740, "", clock = Clock.fixed(Instant.EPOCH, ZoneOffset.UTC)).use {
+        RestApi(0, "", clock = Clock.fixed(Instant.EPOCH, ZoneOffset.UTC)).use {
             it.attachModel(testBrid, SummaryModel(testBrid))
             with(File(dir.toFile(), ".chromia/config")) {
                 parentFile.mkdirs()
                 writeText("""
-                api.url=http://localhost:7740
+                api.url=http://localhost:${it.server.port()}
             """.trimIndent())
             }
             TestProcess.Builder("network", "summary")

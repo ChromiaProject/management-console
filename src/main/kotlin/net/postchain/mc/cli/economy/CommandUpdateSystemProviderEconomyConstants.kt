@@ -13,7 +13,7 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
         help = "Update system provider economy chain constants"
 ) {
 
-    private val totalCostSystemProviders by option("--total-cost-system-providers", help = "Total cost system providers")
+    private val totalCostSystemProviders by option("--total-cost-system-providers", help = "Total cost system providers in USD")
     private val systemProviderFeeShare by option("--system-provider-fee-share", help = "System provider fee share")
     private val systemProviderRiskShare by option("--system-provider-risk-share", help = "System provider risk share")
 
@@ -33,11 +33,18 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
                                 systemProviderRiskShare?.toBigDecimal(),
                         )
             }
-
-            else -> {
+            version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .proposeSystemProviderEconomyConstantsOperation(
                                 totalCostSystemProviders?.toLong(),
+                                systemProviderFeeShare?.toBigDecimal(),
+                                systemProviderRiskShare?.toBigDecimal(),
+                        )
+            }
+            else -> {
+                economyChainClient.transactionBuilder()
+                        .proposeSystemProviderEconomyConstantsOperation(
+                                totalCostSystemProviders?.toLong()?.times(UNITS_PER_USD),
                                 systemProviderFeeShare?.toBigDecimal(),
                                 systemProviderRiskShare?.toBigDecimal(),
                         )
