@@ -13,7 +13,7 @@ class CommandListTags : ECBaseCommand(
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
         val rows = economyChainClient.getTags()
-                .map { listOf(it.name, it.scuPrice.toString(), it.extraStoragePrice.toString()) }
+                .map { listOf(it.name, formatUsd(it.scuPrice, ecVersion), formatUsd(it.extraStoragePrice, ecVersion)) }
         echo(pmcTable(
                 "tags",
                 headers,

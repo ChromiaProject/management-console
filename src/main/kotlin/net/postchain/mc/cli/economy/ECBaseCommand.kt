@@ -15,16 +15,15 @@ abstract class ECBaseCommand(
 
     protected val config by pmcConfigOption()
     private val client get() = config.client
+    protected lateinit var ecVersion: Version
 
     override fun run() {
 
         val economyChainClient = getEconomyChainClient(client, config.config)
+        ecVersion = Version(economyChainClient)
 
-        if (requiresECVersion != null) {
-            val ecVersion = Version(economyChainClient)
-            if (ecVersion.version < requiresECVersion) {
-                throw PrintMessage("Command not supported by economy chain version. Requires version $requiresECVersion but is ${ecVersion.version}")
-            }
+        if (requiresECVersion != null && ecVersion.version < requiresECVersion) {
+            throw PrintMessage("Command not supported by economy chain version. Requires version $requiresECVersion but is ${ecVersion.version}")
         }
 
         runEC(client, economyChainClient)

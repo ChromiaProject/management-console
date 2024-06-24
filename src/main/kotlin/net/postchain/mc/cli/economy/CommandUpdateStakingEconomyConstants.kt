@@ -51,8 +51,7 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                                 stakingRequirementsDappProviderTotalStakeChr,
                         )
             }
-
-            else -> {
+            version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .proposeStakingRequirementConstantsOperation(
                                 stakingRequirementsEnabled,
@@ -61,6 +60,17 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                                 stakingRequirementsSystemProviderTotalStakeChr,
                                 stakingRequirementsDappProviderOwnStakeChr,
                                 stakingRequirementsDappProviderTotalStakeChr,
+                        )
+            }
+            else -> {
+                economyChainClient.transactionBuilder()
+                        .proposeStakingRequirementConstantsOperation(
+                                stakingRequirementsEnabled,
+                                stakingRequirementsStopPayoutDays,
+                                stakingRequirementsSystemProviderOwnStakeChr?.times(UNITS_PER_CHR),
+                                stakingRequirementsSystemProviderTotalStakeChr?.times(UNITS_PER_CHR),
+                                stakingRequirementsDappProviderOwnStakeChr?.times(UNITS_PER_CHR),
+                                stakingRequirementsDappProviderTotalStakeChr?.times(UNITS_PER_CHR),
                         )
             }
         }
