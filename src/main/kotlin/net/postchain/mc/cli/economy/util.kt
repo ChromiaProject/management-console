@@ -32,16 +32,22 @@ fun getEconomyChainClient(directoryChainClient: PostchainClient, config: Chromia
     return NopPostchainClient(config.setBrid(BlockchainRid(economyChainBrid)).client(PostchainClientProviderImpl()))
 }
 
-fun formatUsd(chr: Long, ecVersion: Version): String = formatCurrency(chr, UNITS_PER_USD, ecVersion)
+fun formatUsd(chr: Long?, ecVersion: Long): String = formatCurrency(chr, UNITS_PER_USD, ecVersion)
 
-fun formatChr(chr: Long, ecVersion: Version): String = formatCurrency(chr, UNITS_PER_CHR, ecVersion)
+fun formatChr(chr: Long?, ecVersion: Long): String = formatCurrency(chr, UNITS_PER_CHR, ecVersion)
 
-fun formatCurrency(value: Long, units: Int, ecVersion: Version): String {
+fun formatCurrency(value: Long?, units: Int, ecVersion: Long): String {
 
-    if (ecVersion.version >= ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION) {
+    if (value == null) {
+        return ""
+    }
+
+    if (doEcSupportMinorUnits(ecVersion)) {
         return value.toBigDecimal().divide(units.toBigDecimal()).toString()
     }
 
     return value.toString()
 }
 
+fun doEcSupportMinorUnits(ecVersion: Long) =
+        ecVersion >= ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION

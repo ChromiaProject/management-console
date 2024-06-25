@@ -2,7 +2,6 @@ package net.postchain.mc.cli.economy.proposal
 
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.types.RowId
 import net.postchain.crypto.PubKey
@@ -35,17 +34,16 @@ class CommandListProposals : ECBaseCommand(
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
-        val version = economyChainClient.apiVersion()
         val proposals = if (all) {
             when {
-                version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProposalsRangeECV20(from, to, pending)
+                ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProposalsRangeECV20(from, to, pending)
                         .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
                 else -> economyChainClient.getCommonProposalsRange(from, to, pending)
                         .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
             }
         } else {
             when {
-                version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getRelevantProposalsECV20(from, to, pending, client.pubkey)
+                ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getRelevantProposalsECV20(from, to, pending, client.pubkey)
                         .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
                 else -> economyChainClient.getRelevantCommonProposals(from, to, pending, client.pubkey)
                         .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
@@ -53,7 +51,7 @@ class CommandListProposals : ECBaseCommand(
         }
 
         val votes = when {
-            version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProviderVotesECV20(from, to, client.pubkey)
+            ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProviderVotesECV20(from, to, client.pubkey)
                     .map { GetCommonPubkeyVotesResult(it.proposal, it.vote) }
             else -> economyChainClient.getCommonPubkeyVotes(from, to, PubKey(client.pubkey))
         }
@@ -71,7 +69,7 @@ class CommandListProposals : ECBaseCommand(
         ))
         if (interactive && proposals.isNotEmpty()) {
             promptForIndex(proposals)?.let {
-                showECProposalInfo(client, economyChainClient, proposals[it].rowId, version)
+                showECProposalInfo(client, economyChainClient, proposals[it].rowId, ecVersion.version)
             }
         }
     }

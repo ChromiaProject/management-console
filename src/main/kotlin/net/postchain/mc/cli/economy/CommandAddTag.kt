@@ -5,7 +5,6 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
-import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.createTagOperation
 import net.postchain.mc.cli.base.printResult
@@ -29,10 +28,9 @@ class CommandAddTag : ECBaseCommand(
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
-        val version = economyChainClient.apiVersion()
         when {
 
-            version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
+            ecVersion.version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
 
                 if (scuPrice.stripTrailingZeros().scale() != 0 || extraStoragePrice.stripTrailingZeros().scale() != 0) {
                     throw CliktError("This version of Economy chain only support price in dollar (no minor/decimal units)")

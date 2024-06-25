@@ -7,3 +7,9 @@ fun RowHolderBuilder.rowIfNotNull(vararg cells: Any?) {
         row(*cells)
     }
 }
+
+fun RowHolderBuilder.rowIfNotNull(nullable: Any?, cellsFunction: () -> List<Any>) {
+    if (nullable != null) {
+        row(*cellsFunction().toTypedArray())
+    }
+}

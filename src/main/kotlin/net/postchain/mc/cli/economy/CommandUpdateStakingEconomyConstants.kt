@@ -4,7 +4,6 @@ import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.boolean
 import com.github.ajalt.clikt.parameters.types.long
-import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.proposeStakingRequirementConstantsOperation
 import net.postchain.mc.cli.base.printResult
@@ -38,9 +37,8 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
             throw CliktError("No variable provided")
         }
 
-        val version = economyChainClient.apiVersion()
         when {
-            version < ECONOMY_CHAIN_EC_CONSTANTS_AS_PROPOSALS_VERSION -> {
+            ecVersion.version < ECONOMY_CHAIN_EC_CONSTANTS_AS_PROPOSALS_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .updateStakingRequirementsEconomyConstantsOperationECV28(
                                 stakingRequirementsEnabled,
@@ -51,7 +49,7 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                                 stakingRequirementsDappProviderTotalStakeChr,
                         )
             }
-            version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
+            ecVersion.version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .proposeStakingRequirementConstantsOperation(
                                 stakingRequirementsEnabled,
