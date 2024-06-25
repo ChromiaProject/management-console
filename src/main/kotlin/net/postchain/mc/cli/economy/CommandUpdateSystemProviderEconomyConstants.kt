@@ -2,7 +2,6 @@ package net.postchain.mc.cli.economy
 
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
-import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.proposeSystemProviderEconomyConstantsOperation
 import net.postchain.mc.cli.base.printResult
@@ -23,9 +22,8 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
             throw CliktError("No variable provided")
         }
 
-        val version = economyChainClient.apiVersion()
         when {
-            version < ECONOMY_CHAIN_EC_CONSTANTS_AS_PROPOSALS_VERSION -> {
+            ecVersion.version < ECONOMY_CHAIN_EC_CONSTANTS_AS_PROPOSALS_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .updateSystemProviderEconomyConstantsOperationECV28(
                                 totalCostSystemProviders?.toLong(),
@@ -33,7 +31,7 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
                                 systemProviderRiskShare?.toBigDecimal(),
                         )
             }
-            version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
+            ecVersion.version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .proposeSystemProviderEconomyConstantsOperation(
                                 totalCostSystemProviders?.toLong(),

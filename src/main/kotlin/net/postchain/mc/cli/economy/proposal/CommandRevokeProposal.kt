@@ -1,7 +1,6 @@
 package net.postchain.mc.cli.economy.proposal
 
 import com.github.ajalt.clikt.parameters.options.required
-import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.types.RowId
 import net.postchain.crypto.PubKey
@@ -21,9 +20,8 @@ class CommandRevokeProposal : ECBaseCommand(
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
-        val version = economyChainClient.apiVersion()
         when {
-            version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> {
+            ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .revokeProposalOperationECV20(client.pubkey, RowId(idx))
                         .postAwaitConfirmation()

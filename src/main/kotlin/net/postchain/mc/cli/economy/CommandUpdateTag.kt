@@ -1,13 +1,14 @@
 package net.postchain.mc.cli.economy
 
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
-import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.updateTagOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.nameOption
+import java.math.BigDecimal
 
 class CommandUpdateTag : ECBaseCommand(
         name = "update-tag",
@@ -15,10 +16,11 @@ class CommandUpdateTag : ECBaseCommand(
 ) {
     private val name by nameOption("Name of the tag").required()
 
-    private val scuPrice by option("-scup", "--scu-price", help = "Updated SCU price for the tag").long()
+    private val scuPrice by option("-scup", "--scu-price", help = "Updated SCU price in USD for the tag")
+            .convert { BigDecimal(it) }
 
-    private val extraStoragePrice by option("-esp", "--extra-storage-price", help = "Updated extra storage price for the tag")
-            .long()
+    private val extraStoragePrice by option("-esp", "--extra-storage-price", help = "Updated extra storage price in USD for the tag")
+            .convert { BigDecimal(it) }
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
@@ -26,8 +28,21 @@ class CommandUpdateTag : ECBaseCommand(
             throw CliktError("Must specify either updated SCU price or extra storage price")
         }
 
-        economyChainClient.transactionBuilder()
-                .updateTagOperation(name, scuPrice, extraStoragePrice)
+        when {
+            ecVersion.version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
+
+                if ((scuPrice != null && scuPrice!!.stripTrailingZeros().scale() != 0) || (extraStoragePrice != null && extraStoragePrice!!.stripTrailingZeros().scale() != 0)) {
+                    throw CliktError("This version of Economy chain only support price in dollar (no minor/decimal units)")
+                }
+
+                economyChainClient.transactionBuilder()
+                        .updateTagOperation(name, scuPrice?.toLong(), extraStoragePrice?.toLong())
+            }
+            else -> {
+                economyChainClient.transactionBuilder()
+                        .updateTagOperation(name, scuPrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong(), extraStoragePrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong())
+            }
+        }
                 .postAwaitConfirmation()
                 .printResult(
                         "Proposal for updating tag $name is created",
