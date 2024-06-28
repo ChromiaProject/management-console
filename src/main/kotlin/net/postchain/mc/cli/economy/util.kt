@@ -15,6 +15,7 @@ const val ECONOMY_CHAIN_MINTING_VERSION = 22L // EC >= 22 has minting support
 const val ECONOMY_CHAIN_STAKING_REQUIREMENTS_VERSION = 24L // EC >= 24 has staking requirements
 const val ECONOMY_CHAIN_EC_CONSTANTS_AS_PROPOSALS_VERSION = 29L // EC >= 29 has changed EC constants to be proposals instead of admin controlled
 const val ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION = 33L // EC >= 29 has changed EC constants to be proposals instead of admin controlled
+const val ECONOMY_CHAIN_PRICE_ORACLE_RATE_PROPOSAL_VERSION = 34L // EC >= 34 has price oracle rate proposal
 
 const val UNITS_PER_CHR = 1_000_000
 const val UNITS_PER_USD = 1_000_000
