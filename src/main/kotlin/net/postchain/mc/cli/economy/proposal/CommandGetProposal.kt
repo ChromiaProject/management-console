@@ -23,6 +23,7 @@ import net.postchain.economy.economy_chain.getClusterCreateProposal
 import net.postchain.economy.economy_chain.getEcVoterSetUpdateProposal
 import net.postchain.economy.economy_chain.getEcononyConstantsProposal
 import net.postchain.economy.economy_chain.getMintingProposal
+import net.postchain.economy.economy_chain.getPriceOracleRateProposal
 import net.postchain.economy.economy_chain.getStakingRequirementConstantsProposal
 import net.postchain.economy.economy_chain.getSystemProviderEconomyConstantsProposal
 import net.postchain.economy.economy_chain.getTagProposal
@@ -240,6 +241,20 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
                     rowIfNotNull(proposalDetails.systemProviderTotalStakeChr) { listOf("Requirement - system provider total staking in CHR", formatChr(proposalDetails.systemProviderTotalStakeChr, ecVersion)) }
                     rowIfNotNull(proposalDetails.dappProviderOwnStakeChr) { listOf("Requirement - dapp provider own staking in CHR", formatChr(proposalDetails.dappProviderOwnStakeChr, ecVersion)) }
                     rowIfNotNull(proposalDetails.dappProviderTotalStakeChr) { listOf("Requirement - dapp provider total staking in CHR", formatChr(proposalDetails.dappProviderTotalStakeChr, ecVersion)) }
+                }
+            }
+        }
+
+        CommonProposalType.ec_price_oracle_rate -> {
+            val proposalDetails = economyChainClient.getPriceOracleRateProposal(proposalId)
+            return pmcTable {
+                body {
+                    for (proposalDetail in proposalDetails) {
+                        row("%s price:".format(proposalDetail.symbol), proposalDetail.price)
+                        if (proposalDetail.name != null) {
+                            row("%s name:".format(proposalDetail.symbol), proposalDetail.name)
+                        }
+                    }
                 }
             }
         }

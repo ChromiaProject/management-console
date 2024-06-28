@@ -11,7 +11,8 @@ abstract class ECBaseCommand(
         name: String,
         help: String,
         private val requiresECVersion: Long? = null,
-) : CliktCommand(name = name, help = help) {
+        printHelpOnEmptyArgs: Boolean = false
+) : CliktCommand(name = name, help = help, printHelpOnEmptyArgs = printHelpOnEmptyArgs) {
 
     protected val config by pmcConfigOption()
     private val client get() = config.client
