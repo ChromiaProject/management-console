@@ -149,8 +149,8 @@ private fun SectionBuilder.printVotingInfo(client: PostchainClient, proposal: Ge
         printVotingResults(client.getProposalVotingResults(proposal.id))
     } else if (apiVersion >= 9) {
         val votingInfo = client.getProposalVoterInfo(proposal.id)
-        row("Providers that accepted", votingInfo.filter { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
-        row("Providers that rejected", votingInfo.filterNot { it.vote }.joinToString { formatProvider(it.provider, it.providerName) })
+        row("Providers that accepted", votingInfo.filter { it.vote }.joinToString("\n") { formatProvider(it.provider, it.providerName) })
+        row("Providers that rejected", votingInfo.filterNot { it.vote }.joinToString("\n") { formatProvider(it.provider, it.providerName) })
     }
 }
 
