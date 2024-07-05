@@ -16,10 +16,10 @@ class CommandUpdateTag : ECBaseCommand(
 ) {
     private val name by nameOption("Name of the tag").required()
 
-    private val scuPrice by option("-scup", "--scu-price", help = "Updated SCU price in USD for the tag")
+    private val scuPrice by option("-scup", "--scu-price", help = "Updated SCU price in USD per day")
             .convert { BigDecimal(it) }
 
-    private val extraStoragePrice by option("-esp", "--extra-storage-price", help = "Updated extra storage price in USD for the tag")
+    private val extraStoragePrice by option("-esp", "--extra-storage-price", help = "Updated extra storage price in USD per day")
             .convert { BigDecimal(it) }
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
