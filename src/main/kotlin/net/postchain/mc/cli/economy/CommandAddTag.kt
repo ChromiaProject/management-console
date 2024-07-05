@@ -18,11 +18,11 @@ class CommandAddTag : ECBaseCommand(
 ) {
     private val name by nameOption("Name of the new tag").required().validate(entityNameValidator())
 
-    private val scuPrice by option("-scup", "--scu-price", help = "SCU price in USD for the new tag.")
+    private val scuPrice by option("-scup", "--scu-price", help = "SCU price in USD per day.")
             .convert { BigDecimal(it) }
             .required()
 
-    private val extraStoragePrice by option("-esp", "--extra-storage-price", help = "Extra storage price in USD for the new tag.")
+    private val extraStoragePrice by option("-esp", "--extra-storage-price", help = "Extra storage price in USD per day.")
             .convert { BigDecimal(it) }
             .required()
 
