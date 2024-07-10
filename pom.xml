@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.chromia</groupId>
         <artifactId>chromia-parent</artifactId>
-        <version>0.1.4</version>
+        <version>0.1.5</version>
     </parent>
 
     <groupId>net.postchain.mc</groupId>
@@ -357,7 +357,7 @@
                     <configuration>
                         <allowInsecureRegistries>false</allowInsecureRegistries>
                         <from>
-                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java21:1.0.2@sha256:ccf9a5acd8af7a34236d63f30524d17ac3a32ee8543642818469bb1ec1a9661a</image>
+                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java21:1.0.3@sha256:0304eeb671a96618b77259bf72104502869810633aa893e00c26421f19501a32</image>
                         </from>
                         <container>
                             <entrypoint>
