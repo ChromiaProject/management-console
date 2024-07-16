@@ -16,6 +16,7 @@ import net.postchain.chain0.common.queries.getNodeData
 import net.postchain.chain0.common.queries.getUnarchivingBlockchainInfo
 import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
+import net.postchain.client.request.Endpoint
 import net.postchain.client.request.EndpointPool
 import net.postchain.common.BlockchainRid
 import net.postchain.common.wrap
@@ -64,7 +65,7 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion: Long, b
     // Anchored height + heights on nodes
     if (blockchainInfo.cluster != null) {
         val clusterInfo = client.cmGetClusterInfo(blockchainInfo.cluster)
-        val clusterEndpoints = clusterInfo.peers.map { it.apiUrl }.let { EndpointPool.default(it) }
+        val clusterEndpoints = clusterInfo.peers.map { Endpoint.sanitizeUrl(it.apiUrl) }.let { EndpointPool.default(it) }
         val anchoringChain = when (blockchainInfo.rid) {
             client.cmGetSystemAnchoringChain()?.wrap() -> null
             clusterInfo.anchoringChain -> client.cmGetSystemAnchoringChain()?.wrap()

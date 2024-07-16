@@ -19,6 +19,7 @@ import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.model.ProviderQuotaType
+import net.postchain.client.request.Endpoint
 import net.postchain.common.config.getEnvOrBooleanProperty
 import net.postchain.common.config.getEnvOrStringProperty
 import net.postchain.common.hexStringToByteArray
@@ -78,7 +79,7 @@ class PmcClientConfigOption(cliEnv: RellCliEnv) : OptionalChromiaModelConfigOpti
             val networkModel = model!!.deployments[network]
                     ?: throw IllegalArgumentException("Network $network not found in configuration")
             rawConfig.setProperty("brid", networkModel.blockchainRid.toHex())
-            config.setApiUrls(networkModel.urls.joinToString(","))
+            config.setApiUrls(networkModel.urls.joinToString(",") { Endpoint.sanitizeUrl(it) })
         }
         val configuredBrid = rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
         val useRequestCompression = rawConfig
