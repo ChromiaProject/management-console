@@ -63,7 +63,7 @@ class CommandNodeVerify : CliktCommand(
         }
 
         echo(pmcTable(
-                "blockchains",
+                "Non-system blockchains",
                 listOf("Blockchain", "Responds", "Height", "Anchored Height", "Synchronized"),
                 bcStatuses.map { (brid, status) ->
                     listOf(
