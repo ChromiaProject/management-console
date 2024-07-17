@@ -8,6 +8,7 @@ import net.postchain.chain0.cm_api.CmClusterInfo
 import net.postchain.chain0.cm_api.cmGetClusterBlockchains
 import net.postchain.chain0.cm_api.cmGetClusterInfo
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
+import net.postchain.client.request.Endpoint
 import net.postchain.client.request.EndpointPool
 import net.postchain.client.request.RandomizedEndpointPool
 import net.postchain.common.BlockchainRid
@@ -29,7 +30,7 @@ class CommandClusterVerify : CliktCommand(
 
     override fun run() {
         val clusterInfo = client.cmGetClusterInfo(cluster)
-        val clusterEndpoints = clusterInfo.peers.map { it.apiUrl }.let { EndpointPool.default(it) }
+        val clusterEndpoints = clusterInfo.peers.map { Endpoint.sanitizeUrl(it.apiUrl) }.let { EndpointPool.default(it) }
 
         if (terminal.info.outputInteractive) echo("Verifying cluster $cluster")
 

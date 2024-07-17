@@ -24,12 +24,12 @@ open class CommandGetBlockchainConfiguration(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val height by heightOption().required()
+    private val height by heightOption().default(Long.MAX_VALUE)
 
     private val save by option(help = "where to save configuration XML").file(canBeFile = true, canBeDir = false)
 
     override fun run() {
-        val message = "Blockchain configuration at height $height"
+        val message = if (height == Long.MAX_VALUE) "Last blockchain configuration" else "Blockchain configuration at height $height"
         val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, height)
         if (bcConfig == null) {
             echo("$message is absent")
