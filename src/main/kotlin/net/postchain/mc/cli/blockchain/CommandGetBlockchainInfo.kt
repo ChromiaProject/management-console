@@ -10,6 +10,7 @@ import net.postchain.chain0.cm_api.cmGetClusterInfo
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.queries.getBlockchainInfo
 import net.postchain.chain0.common.queries.getBlockchainReplicas
+import net.postchain.chain0.common.queries.getContainerData
 import net.postchain.chain0.common.queries.getImportingForeignBlockchainInfo
 import net.postchain.chain0.common.queries.getMovingBlockchainInfo
 import net.postchain.chain0.common.queries.getNodeData
@@ -46,10 +47,11 @@ class CommandGetBlockchainInfo : CliktCommand(
     }
 }
 
-fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion: Long, blockchainRid: BlockchainRid) {
+internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion: Long, blockchainRid: BlockchainRid) {
     val blockchainInfo = client.getBlockchainInfo(blockchainRid.data)
             ?: throw CliktError("Blockchain with rid $blockchainRid not found")
 
+    // Basic info
     echo(pmcTable {
         captionTop("Basic info:", TextAlign.LEFT)
         body {
@@ -62,44 +64,29 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion: Long, b
         }
     })
 
-    // Anchored height + heights on nodes
-    if (blockchainInfo.cluster != null) {
-        val clusterInfo = client.cmGetClusterInfo(blockchainInfo.cluster)
-        val clusterEndpoints = clusterInfo.peers.map { Endpoint.sanitizeUrl(it.apiUrl) }.let { EndpointPool.default(it) }
-        val anchoringChain = when (blockchainInfo.rid) {
-            client.cmGetSystemAnchoringChain()?.wrap() -> null
-            clusterInfo.anchoringChain -> client.cmGetSystemAnchoringChain()?.wrap()
-            else -> clusterInfo.anchoringChain
+    // Moving info
+    val isMoving = blockchainInfo.isMoving == true && apiVersion >= 33
+    if (isMoving) {
+        val movingInfo = client.getMovingBlockchainInfo(blockchainRid)
+        movingInfo?.let { info ->
+            echo(pmcTable {
+                captionTop("Moving blockchain info:", TextAlign.LEFT)
+                body {
+                    row("Source container", info.sourceContainer)
+                    row("Destination container", info.destinationContainer)
+                    row("Final height", info.finalHeight)
+                }
+            })
+
+            val srcCluster = client.getContainerData(movingInfo.sourceContainer).cluster
+            showHeightsOnClusterNodes(client, srcCluster, blockchainRid, "Heights on source nodes:")
+
+            val dstCluster = client.getContainerData(movingInfo.destinationContainer).cluster
+            showHeightsOnClusterNodes(client, dstCluster, blockchainRid, "Heights on destination nodes:")
         }
-        val blockHeightClient = BlockHeightClient(client)
-        val anchoredHeight = blockHeightClient.getLastAnchoredBlockHeight(anchoringChain, clusterEndpoints, blockchainRid)
-
-        echo(pmcTable {
-            captionTop("Heights on nodes:", TextAlign.LEFT)
-            body {
-                row("Anchored height", anchoredHeight)
-                clusterInfo.peers.parallelStream()
-                        .map { peer -> Pair(peer.pubkey, blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid)) }
-                        .toList()
-                        .forEach{ peerHeight -> row(PubKey(peerHeight.first).toShortHex(), peerHeight.second) }
-            }
-        })
-    }
-    val blockchainReplicas = client.getBlockchainReplicas(blockchainRid)
-
-    if (blockchainReplicas.isNotEmpty()) {
-        val blockHeightClient = BlockHeightClient(client)
-        echo(pmcTable(
-                "Heights from replicas",
-                listOf("Node", "Height"),
-                blockchainReplicas
-                        .map { PubKey(it[0].asByteArray()) }
-                        .map { CmPeerInfo(it.wData, client.getNodeData(it).apiUrl)}
-                        .map { listOf(PubKey(it.pubkey).toShortHex(), blockHeightClient.getCurrentBlockHeightOnPeer(it, blockchainRid).toString()) }
-        ))
     }
 
-    // Migrating Blockchain Info
+    // Migrating info
     if (blockchainInfo.isForeignImporting == true) {
         when {
             apiVersion >= 33 -> {
@@ -136,19 +123,7 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion: Long, b
         }
     }
 
-    if (blockchainInfo.isMoving == true && apiVersion >= 33) {
-        client.getMovingBlockchainInfo(blockchainRid)?.let { info ->
-            echo(pmcTable {
-                captionTop("Moving blockchain info:", TextAlign.LEFT)
-                body {
-                    row("Source container", info.sourceContainer)
-                    row("Destination container", info.destinationContainer)
-                    row("Final height", info.finalHeight)
-                }
-            })
-        }
-    }
-
+    // Unarchiving info
     if (blockchainInfo.isUnarchiving == true && apiVersion >= 33) {
         client.getUnarchivingBlockchainInfo(blockchainRid)?.let { info ->
             echo(pmcTable {
@@ -162,4 +137,46 @@ fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion: Long, b
         }
     }
 
+    // Heights on nodes including anchored height
+    if (blockchainInfo.cluster != null && !isMoving) {
+        showHeightsOnClusterNodes(client, blockchainInfo.cluster, blockchainRid, "Heights on nodes:")
+    }
+
+    // Heights on replicas
+    val blockchainReplicas = client.getBlockchainReplicas(blockchainRid)
+    if (blockchainReplicas.isNotEmpty()) {
+        val blockHeightClient = BlockHeightClient(client)
+        echo(pmcTable(
+                "Heights from replicas",
+                listOf("Node", "Height"),
+                blockchainReplicas
+                        .map { PubKey(it[0].asByteArray()) }
+                        .map { CmPeerInfo(it.wData, client.getNodeData(it).apiUrl) }
+                        .map { listOf(PubKey(it.pubkey).toShortHex(), blockHeightClient.getCurrentBlockHeightOnPeer(it, blockchainRid).toString()) }
+        ))
+    }
+
+}
+
+internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainClient, cluster: String, blockchainRid: BlockchainRid, caption: String) {
+    val clusterInfo = client.cmGetClusterInfo(cluster)
+    val clusterEndpoints = clusterInfo.peers.map { Endpoint.sanitizeUrl(it.apiUrl) }.let { EndpointPool.default(it) }
+    val anchoringChain = when (blockchainRid.wData) {
+        client.cmGetSystemAnchoringChain()?.wrap() -> null
+        clusterInfo.anchoringChain -> client.cmGetSystemAnchoringChain()?.wrap()
+        else -> clusterInfo.anchoringChain
+    }
+    val blockHeightClient = BlockHeightClient(client)
+    val anchoredHeight = blockHeightClient.getLastAnchoredBlockHeight(anchoringChain, clusterEndpoints, blockchainRid)
+
+    echo(pmcTable {
+        captionTop(caption, TextAlign.LEFT)
+        body {
+            row("Anchored height", anchoredHeight)
+            clusterInfo.peers.parallelStream()
+                    .map { peer -> Pair(peer.pubkey, blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid)) }
+                    .toList()
+                    .forEach { peerHeight -> row(PubKey(peerHeight.first).toShortHex(), peerHeight.second) }
+        }
+    })
 }
