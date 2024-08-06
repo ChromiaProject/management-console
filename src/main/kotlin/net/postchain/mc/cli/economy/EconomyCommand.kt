@@ -32,6 +32,7 @@ fun economyCommands() = EconomyCommand().subcommands(
         CommandUpdateSystemProviderEconomyConstants(),
         CommandUpdateStakingEconomyConstants(),
         CommandUpdateEconomyConstants(),
+        CommandUpdateMainAuthDescriptorToEvmAddressAndLinkToEOAAccount(),
         CommandUpdatePriceOracleRates(),
         mintCommands(),
         proposalCommands(),
