@@ -20,7 +20,7 @@ class CommandProposeResumeBlockchain : CliktCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption { "Start blockchain $blockchainRID" }
 
     override fun run() {
         client.transactionBuilder()

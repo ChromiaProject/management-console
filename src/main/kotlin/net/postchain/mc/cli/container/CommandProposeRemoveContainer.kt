@@ -26,7 +26,7 @@ class CommandProposeRemoveContainer : CliktCommand(
 
     private val name by nameOption("Container name to remove").required()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption { "Remove container $name" }
 
     private val direct by option("-d", "--direct", help = "Remove directly without proposal")
             .flag("-p", "--proposal", default = false)

@@ -61,7 +61,14 @@ class CommandProposeContainer : CliktCommand(
 
     private val extraStorage by extraStorageOption().default(0)
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption {
+        "Add container $name to the cluster $clusterName - consensus-threshold: $consensusThreshold, " +
+                deployerOption.let {
+                    if (deployerOption is VoterSetOrPubkeysOption.Pubkeys) "pubkeys: ${(deployerOption as VoterSetOrPubkeysOption.Pubkeys).data}, "
+                    else "voter-set: ${(deployerOption as VoterSetOrPubkeysOption.VoterSet).data}, "
+                } +
+                "container-units: $containerUnits, max-blockchains: $maxBlockchains, extra-storage: $extraStorage"
+    }
 
     private val direct by option("-d", "--direct", help = "Create directly without proposal")
             .flag("-p", "--proposal", default = true)

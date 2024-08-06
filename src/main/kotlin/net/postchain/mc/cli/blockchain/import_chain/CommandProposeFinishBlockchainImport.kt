@@ -53,7 +53,7 @@ class CommandProposeFinishBlockchainImport : CliktCommand(
                 require(it > 0) { "--final-height arg must be greater than 0" }
             }
 
-    private val description by proposalDescriptionOption(default = "Propose finishing import of blockchain")
+    private val description by proposalDescriptionOption { "Finish blockchain import from file - blockchain-rid: $blockchainRID, final-height: $finalHeight" }
 
     override fun run() {
         client.requireApiVersion(19)

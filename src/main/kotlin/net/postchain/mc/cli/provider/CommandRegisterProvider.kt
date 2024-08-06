@@ -109,8 +109,14 @@ class CommandRegisterProvider : CliktCommand(
             name = "Provider state",
     ).required()
 
-
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption {
+        if (pubkey != null) {
+            "Register provider $pubkey - provider-tier: $providerTier, enable: $enable"
+        } else if (batchOptions != null) {
+            val providers = batchOptions?.provider?.joinToString(", ") { "[${it.pubkey} / ${it.name} / ${it.url}]" }.orEmpty()
+            "Register providers - provider-tier: $providerTier, enable: $enable, providers: $providers"
+        } else ""
+    }
 
     override fun run() {
         if (batchOptions != null) {

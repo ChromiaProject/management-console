@@ -23,7 +23,9 @@ class CommandProposeProviderQuota : CliktCommand(
     private val providerTier by providerTierOption().required()
     private val providerQuotaType by providerQuotaTypeOption().required()
     private val value by option("-v", "--value", help = "quota value").long().required()
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption {
+        "Update quota for provider ${client.config.pubkey()} - provider tier: $providerTier, quota type: $providerQuotaType, value: $value"
+    }
 
     override fun run() {
         client.transactionBuilder()

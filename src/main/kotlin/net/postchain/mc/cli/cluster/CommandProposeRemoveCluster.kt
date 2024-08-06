@@ -20,7 +20,7 @@ class CommandProposeRemoveCluster : CliktCommand(
 
     private val name by nameOption("Cluster name to remove").required()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption { "Remove cluster $name" }
 
     override fun run() {
         client.transactionBuilder()

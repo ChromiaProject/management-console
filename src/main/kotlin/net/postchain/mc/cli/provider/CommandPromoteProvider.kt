@@ -24,7 +24,7 @@ class CommandPromoteProvider : CliktCommand(
 
     private val system by option(help = "Proposes this provider as a system provider").flag()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption { "Promote provider $key - enable: $enable, system: $system" }
 
     override fun run() {
         client.transactionBuilder()

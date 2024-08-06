@@ -44,7 +44,9 @@ class CommandProposeContainerResourceLimits : CliktCommand(
 
     private val extraStorage by extraStorageOption()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption {
+        "Update container resource limits for $containerName - container-units: $containerUnits, max-blockchains: $maxBlockchains, extra-storage: $extraStorage (MiB)"
+    }
 
     // Remove when api version 2 is not needed
     private val _cpu by option("-c", "--cpu", help = "CPU limit (percent of cpus, 10 == 0.1 cpu(s), 150 == 1.5 cpu(s))").long().deprecated()

@@ -10,6 +10,7 @@ import com.github.ajalt.clikt.parameters.options.split
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal_voter_set.proposeUpdateVoterSetOperation
 import net.postchain.common.hexStringToByteArray
+import net.postchain.common.toHex
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.pmcConfigOption
@@ -43,7 +44,11 @@ class CommandProposeVoterSetUpdate : CliktCommand(
             .split(",")
             .default(listOf())
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption {
+        "Update voter set $voterSet - threshold: $threshold, governor: $governor, " +
+                "add members: ${newMember.map { it.toHex() }.toTypedArray().contentToString()}, " +
+                "remove members: ${removeMember.map { it.toHex() }.toTypedArray().contentToString()}"
+    }
 
     override fun run() {
         client.transactionBuilder()

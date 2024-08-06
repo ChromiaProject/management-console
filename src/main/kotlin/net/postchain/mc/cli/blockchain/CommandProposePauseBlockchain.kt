@@ -11,7 +11,6 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 
-
 class CommandProposePauseBlockchain : CliktCommand(
         name = "stop",
         help = "Propose stopping a blockchain from building blocks"
@@ -21,7 +20,7 @@ class CommandProposePauseBlockchain : CliktCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption { "Stop blockchain $blockchainRID" }
 
     override fun run() {
         client.transactionBuilder()

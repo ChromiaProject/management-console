@@ -31,7 +31,9 @@ class CommandProposeUnarchiveBlockchain : CliktCommand(
 
     private val destinationContainer by option("-dc", "--destination-container", help = "Name of container to unarchive blockchain to").required()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption {
+        "Unarchive blockchain $blockchainRID to the container $destinationContainer with final-height: $finalHeight"
+    }
 
     override fun run() {
         client.requireApiVersion(33)

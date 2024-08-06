@@ -20,7 +20,7 @@ class CommandProposeDeleteBlockchain : CliktCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption { "Remove blockchain $blockchainRID" }
 
     override fun run() {
         client.transactionBuilder()
