@@ -1,15 +1,19 @@
 package net.postchain.mc.network
 
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.PrintMessage
 import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainQuery
 import net.postchain.client.exception.ClientError
+import net.postchain.client.exception.NotFoundError
 
 class Version(private val client: PostchainQuery) {
 
     val version by lazy {
         try {
             client.apiVersion()
+        } catch (e: NotFoundError) {
+            throw CliktError(e.errorMessage)
         } catch (e: ClientError) {
             println("Unable to fetch API version, assuming version 1: ${e.message}")
             1
