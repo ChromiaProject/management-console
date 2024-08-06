@@ -18,7 +18,7 @@ class CommandProposeEnableProvider : CliktCommand(
 
     private val key by pubkeyOption()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption { "Enable provider $key" }
 
     override fun run() {
         client.transactionBuilder()

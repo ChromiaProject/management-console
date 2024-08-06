@@ -35,7 +35,10 @@ class CommandProposeClusterProvider : CliktCommand(
     private val add by option("-a", "--add", help = "Add or remove provider pubkey from cluster")
             .flag("-r", "--remove", default = true)
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption {
+        if (add) "Add cluster provider $provider to the cluster $clusterName"
+        else "Remove cluster provider $provider from the cluster $clusterName"
+    }
 
     override fun run() {
         client.transactionBuilder()

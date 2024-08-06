@@ -28,7 +28,7 @@ class CommandProposeBlockchainMove : CliktCommand(
 
     private val destinationContainer by option("-dc", "--destination-container", help = "Name of container to move blockchain to").required()
 
-    private val description by proposalDescriptionOption(default = "Propose moving of blockchain")
+    private val description by proposalDescriptionOption { "Move blockchain $blockchainRID to the container $destinationContainer" }
 
     override fun run() {
         client.requireApiVersion(33)

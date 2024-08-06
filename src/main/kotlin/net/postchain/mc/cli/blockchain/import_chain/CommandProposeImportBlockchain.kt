@@ -57,7 +57,11 @@ class CommandProposeImportBlockchain : CliktCommand(
 
     private val name by nameOption("Name of blockchain").required().validate(entityNameValidator())
 
-    private val description by proposalDescriptionOption(default = "Propose importing of blockchain")
+    private val description by proposalDescriptionOption {
+        "Import blockchain $name with blockchain-rid: $blockchainRid from a file to the container $container"
+    }
+
+    private lateinit var blockchainRid: BlockchainRid
 
     private var preloadedConfig: Gtv? = null
 
@@ -81,7 +85,7 @@ class CommandProposeImportBlockchain : CliktCommand(
     @Suppress("DuplicatedCode")
     private fun runImpl() {
         BufferedInputStream(FileInputStream(configurationsFile.toFile())).use {
-            val blockchainRid = BlockchainRid(GtvDecoder.decodeGtv(it).asByteArray())
+            blockchainRid = BlockchainRid(GtvDecoder.decodeGtv(it).asByteArray())
 
             // Load initial config
             val initialConfigData = GtvDecoder.decodeGtv(it).run {
@@ -185,7 +189,7 @@ class CommandProposeImportBlockchain : CliktCommand(
     @Suppress("DuplicatedCode")
     private fun runImplV53() {
         BufferedInputStream(FileInputStream(configurationsFile.toFile())).use {
-            val blockchainRid = BlockchainRid(GtvDecoder.decodeGtv(it).asByteArray())
+            blockchainRid = BlockchainRid(GtvDecoder.decodeGtv(it).asByteArray())
 
             // Load initial config
             val initialConfigData = GtvDecoder.decodeGtv(it).run {
@@ -268,7 +272,8 @@ class CommandProposeImportBlockchain : CliktCommand(
 
     private fun TrackingTransactionBuilder.tryAddConfiguration(blockchainRid: BlockchainRid, height: Long, configData: ByteArray) =
             try {
-                txBuilder.proposeImportConfigurationOperation(client.pubkey, blockchainRid, height, configData, description)
+                txBuilder.proposeImportConfigurationOperation(
+                        client.pubkey, blockchainRid, height, configData, "Import blockchain configuration from a file - blockchain-rid: $blockchainRid, height: $height")
                 opCounter++
                 true
             } catch (e: IllegalStateException) {

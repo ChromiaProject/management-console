@@ -37,7 +37,9 @@ class CommandProposeImportForeignBlocks : CliktCommand(
                 require(it > 0) { "--final-height arg must be greater than 0" }
             }
 
-    private val description by proposalDescriptionOption(default = "Propose import of foreign blockchain blocks")
+    private val description by proposalDescriptionOption {
+        "Import foreign blockchain blocks - blockchain-rid: $blockchainRID, final-height: $finalHeight"
+    }
 
     override fun run() {
         client.requireApiVersion(19)

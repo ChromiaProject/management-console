@@ -19,7 +19,7 @@ class CommandProposeDisableProvider : CliktCommand(
 
     private val key by pubkeyOption()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption { "Disable provider $key" }
 
     override fun run() {
         client.transactionBuilder()

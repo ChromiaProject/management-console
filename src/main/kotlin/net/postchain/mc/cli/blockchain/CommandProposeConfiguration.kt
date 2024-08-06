@@ -46,7 +46,10 @@ class CommandProposeConfiguration : CliktCommand(
 
     private val force by forceOption()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption {
+        if (height == null) "Update of blockchain configuration for $blockchainRID"
+        else "Update of blockchain configuration for $blockchainRID at height $height with force: $force"
+    }
 
     override fun run() {
         val version = Version(client)

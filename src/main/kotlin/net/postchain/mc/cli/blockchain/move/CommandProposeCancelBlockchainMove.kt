@@ -22,7 +22,7 @@ class CommandProposeCancelBlockchainMove : CliktCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val description by proposalDescriptionOption(default = "Propose canceling of the blockchain moving")
+    private val description by proposalDescriptionOption { "Cancel blockchain moving for $blockchainRID" }
 
     override fun run() {
         throw PrintMessage("Not yet implemented")

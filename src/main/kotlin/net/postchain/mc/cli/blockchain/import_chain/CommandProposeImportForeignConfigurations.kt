@@ -75,7 +75,11 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
 
     private val container by option("-c", "--container", help = "Name of container to run in").required()
 
-    private val description by proposalDescriptionOption(default = "Propose importing of foreign blockchain")
+    private val description by proposalDescriptionOption {
+        "Import foreign blockchain configurations - node pubkey: $key, host: $host, port: $port, api-url: $apiUrl, " +
+                "chain0-blockchain-rid: $chain0BlockchainRID, name: $name, blockchain-rid: $blockchainRID, " +
+                "from-height: $fromHeight, up-to-height: $upToHeight"
+    }
 
     override fun run() {
         val version = client.requireApiVersion(19)
@@ -145,7 +149,7 @@ class CommandProposeImportForeignConfigurations : CliktCommand(
                         blockchainRID,
                         height,
                         GtvEncoder.encodeGtv(compressedConfig),
-                        "Propose importing of foreign blockchain configuration"
+                        "Import foreign blockchain configuration - blockchain-rid: $blockchainRID, height: $height"
                 )
                 .postAwaitConfirmation()
                 .printResult(

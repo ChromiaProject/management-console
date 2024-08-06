@@ -45,7 +45,7 @@ class CommandProposeBlockchain : CliktCommand(
 
     private val quiet by option("-q", "--quiet", help = "Print only blockchain RID if succeeds").flag()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption { "Add blockchain $name to the container $container" }
 
     override fun run() {
         val apiVersion = client.apiVersion()

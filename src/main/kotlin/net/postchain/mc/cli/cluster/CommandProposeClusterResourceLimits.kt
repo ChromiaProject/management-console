@@ -40,7 +40,9 @@ class CommandProposeClusterResourceLimits : CliktCommand(
 
     private val extraStorage by extraStorageOption()
 
-    private val description by proposalDescriptionOption()
+    private val description by proposalDescriptionOption {
+        "Update cluster resource limits for $clusterName - cluster-units: $clusterUnits, extra-storage: $extraStorage (MiB)"
+    }
 
     // Remove when api version 2 is not needed
     private val _maxContainers by option("-mc", "--max-containers", help = "Max containers per cluster").long().deprecated()
