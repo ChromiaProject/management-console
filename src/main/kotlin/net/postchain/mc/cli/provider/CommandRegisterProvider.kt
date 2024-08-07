@@ -27,9 +27,9 @@ import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.PropertiesConfigurationValueSource
 import net.postchain.mc.cli.util.ProviderType
+import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.cli.util.optionalPubkeyOption
 import net.postchain.mc.cli.util.pmcConfigOption
-import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.validateMetadataText
 import net.postchain.mc.cli.util.validatePubkey
 import net.postchain.mc.cli.util.validateUrl
@@ -109,7 +109,9 @@ class CommandRegisterProvider : CliktCommand(
             name = "Provider state",
     ).required()
 
-    private val description by proposalDescriptionOption {
+    private val description by nullableProposalDescriptionOption()
+
+    private fun description() = description ?: run {
         if (pubkey != null) {
             "Register provider $pubkey - provider-tier: $providerTier, enable: $enable"
         } else if (batchOptions != null) {
@@ -123,7 +125,7 @@ class CommandRegisterProvider : CliktCommand(
             if (pubkey != null) throw CliktError("use --provider instead of --pubkey in a batch mode")
             client.transactionBuilder()
                     .proposeProvidersOperation(
-                            client.pubkey, batchOptions!!.provider, providerTier.toTier(), providerTier.isSystem(), enable, description
+                            client.pubkey, batchOptions!!.provider, providerTier.toTier(), providerTier.isSystem(), enable, description()
                     )
                     .postAwaitConfirmation()
                     .printResult(
@@ -135,8 +137,8 @@ class CommandRegisterProvider : CliktCommand(
             client.transactionBuilder()
                     .registerProviderOperation(client.pubkey, pubkey!!, providerTier.toTier())
                     .apply {
-                        if (providerTier.shouldEnable(enable)) proposeProviderStateOperation(client.pubkey, pubkey!!.data, enable, description)
-                        if (providerTier == ProviderType.SYSTEM_PROVIDER) proposeProviderIsSystemOperation(client.pubkey, pubkey!!.data, true, description)
+                        if (providerTier.shouldEnable(enable)) proposeProviderStateOperation(client.pubkey, pubkey!!.data, enable, description())
+                        if (providerTier == ProviderType.SYSTEM_PROVIDER) proposeProviderIsSystemOperation(client.pubkey, pubkey!!.data, true, description())
                     }
                     .postAwaitConfirmation()
                     .printResult(

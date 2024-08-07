@@ -8,8 +8,8 @@ import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal_provider.proposeProviderQuotaOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
+import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.cli.util.pmcConfigOption
-import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.providerQuotaTypeOption
 import net.postchain.mc.cli.util.providerTierOption
 
@@ -20,16 +20,22 @@ class CommandProposeProviderQuota : CliktCommand(
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client
+
     private val providerTier by providerTierOption().required()
+
     private val providerQuotaType by providerQuotaTypeOption().required()
+
     private val value by option("-v", "--value", help = "quota value").long().required()
-    private val description by proposalDescriptionOption {
+
+    private val description by nullableProposalDescriptionOption()
+
+    private fun description() = description ?: run {
         "Update quota for provider ${client.config.pubkey()} - provider tier: $providerTier, quota type: $providerQuotaType, value: $value"
     }
 
     override fun run() {
         client.transactionBuilder()
-                .proposeProviderQuotaOperation(client.config.pubkey().data, providerTier.toTier(), providerQuotaType, value, description)
+                .proposeProviderQuotaOperation(client.config.pubkey().data, providerTier.toTier(), providerQuotaType, value, description())
                 .postAwaitConfirmation()
                 .printResult(
                         "Provider quota value has been proposed",
