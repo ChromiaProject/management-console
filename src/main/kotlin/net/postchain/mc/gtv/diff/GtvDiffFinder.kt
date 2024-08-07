@@ -2,11 +2,13 @@ package net.postchain.mc.gtv.diff
 
 import com.github.difflib.DiffUtils
 import com.github.difflib.patch.DeltaType
+import net.postchain.common.toHex
 import net.postchain.common.wrap
 import net.postchain.gtv.Gtv
 import net.postchain.gtv.GtvArray
 import net.postchain.gtv.GtvDictionary
 import net.postchain.gtv.GtvType
+import net.postchain.gtv.pretty
 
 object GtvDiffFinder {
 
@@ -48,7 +50,7 @@ object GtvDiffFinder {
                 .map { it.key to StringDiffElement.diff("${it.key} was removed") }
 
         val addedElements = second.dict.filter { !first.dict.containsKey(it.key) }
-                .map { it.key to StringDiffElement.diff("${it.key} was added: ${it.value}") }
+                .map { it.key to StringDiffElement.diff("${it.key} was added: ${formatAdded(it.value)}") }
 
         val changedElements = first.dict.filter { second.dict.containsKey(it.key) }
                 .map { it.key to diff(it.value, second.dict[it.key]!!, it.key) }
@@ -56,6 +58,16 @@ object GtvDiffFinder {
 
         val result = (removedElements + addedElements + changedElements).toMap()
         return DictDiffResult(path, result)
+    }
+
+    private fun formatAdded(value: Gtv) = when (value.type) {
+        GtvType.NULL -> "null"
+        GtvType.BYTEARRAY -> value.asByteArray().toHex()
+        GtvType.INTEGER -> value.toString()
+        GtvType.BIGINTEGER -> value.toString()
+        GtvType.STRING -> "\n" + value.asString()
+        GtvType.ARRAY -> value.pretty()
+        GtvType.DICT -> value.pretty()
     }
 
     data class GtvDiffElement(override val equals: Boolean, override val diff: String) : DiffElement {
