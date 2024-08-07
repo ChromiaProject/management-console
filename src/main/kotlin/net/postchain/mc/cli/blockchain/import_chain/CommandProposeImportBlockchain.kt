@@ -31,6 +31,7 @@ import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.configurationsFileOption
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
+import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.util.proposalDescriptionOption
@@ -57,7 +58,9 @@ class CommandProposeImportBlockchain : CliktCommand(
 
     private val name by nameOption("Name of blockchain").required().validate(entityNameValidator())
 
-    private val description by proposalDescriptionOption {
+    private val description by nullableProposalDescriptionOption()
+
+    private fun description() = description ?: run {
         "Import blockchain $name with blockchain-rid: $blockchainRid from a file to the container $container"
     }
 
@@ -261,7 +264,7 @@ class CommandProposeImportBlockchain : CliktCommand(
 
     private fun proposeImportBlockchain(blockchainRid: BlockchainRid, initialConfigData: ByteArray): TransactionResult {
         return client.transactionBuilder()
-                .proposeImportBlockchainOperation(client.pubkey, initialConfigData, blockchainRid, name, container, description)
+                .proposeImportBlockchainOperation(client.pubkey, initialConfigData, blockchainRid, name, container, description())
                 .postAwaitConfirmation()
                 .also {
                     it.printResult(
