@@ -9,7 +9,6 @@ import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.groups.single
 import com.github.ajalt.clikt.parameters.options.OptionTransformContext
 import com.github.ajalt.clikt.parameters.options.convert
-import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -57,6 +56,7 @@ fun CliktCommand.pubkeysOption(helpMsg: String = "Comma delimited list of public
 fun pubkeyValidator(): OptionTransformContext.(PubKey) -> Unit = {
     validatePubkey(it)
 }
+
 fun pubkeysValidator(): OptionTransformContext.(List<PubKey>) -> Unit = {
     it.forEach(::validatePubkey)
 }
@@ -76,7 +76,7 @@ class PmcClientConfigOption(cliEnv: RellCliEnv) : OptionalChromiaModelConfigOpti
     val client by lazy {
         val rawConfig = ChromiaConfigLoader(cliEnv).loadProperties(configFile)
         if (network != null) {
-            requireNotNull(model) { "chromia.yml not found"}
+            requireNotNull(model) { "chromia.yml not found" }
             val networkModel = model!!.deployments[network]
                     ?: throw IllegalArgumentException("Network $network not found in configuration")
             rawConfig.setProperty("brid", networkModel.blockchainRid.toHex())
@@ -171,6 +171,9 @@ fun CliktCommand.providerQuotaTypeOption() = option(help = "Provider quota type"
         "-mc" to ProviderQuotaType.max_containers,
         "-mn" to ProviderQuotaType.max_nodes
 )
+
+fun CliktCommand.nullableProposalDescriptionOption(helpMessage: String = "Proposal description") = option("--description", help = helpMessage)
+        .validate(metadataTextValidator())
 
 fun CliktCommand.proposalDescriptionOption(helpMessage: String = "Proposal description", default: () -> String = { "" }) = option("--description", help = helpMessage)
         .defaultLazy(value = default)

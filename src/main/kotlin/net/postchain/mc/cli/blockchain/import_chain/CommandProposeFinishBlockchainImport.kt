@@ -17,10 +17,9 @@ import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.configurationsFileOption
+import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.cli.util.pmcConfigOption
-import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.requireApiVersion
-
 import java.io.BufferedInputStream
 import java.io.FileInputStream
 
@@ -53,13 +52,17 @@ class CommandProposeFinishBlockchainImport : CliktCommand(
                 require(it > 0) { "--final-height arg must be greater than 0" }
             }
 
-    private val description by proposalDescriptionOption { "Finish blockchain import from file - blockchain-rid: $blockchainRID, final-height: $finalHeight" }
+    private val description by nullableProposalDescriptionOption()
+
+    private fun description() = description ?: run {
+        "Finish blockchain import from file - blockchain-rid: $blockchainRID, final-height: $finalHeight"
+    }
 
     override fun run() {
         client.requireApiVersion(19)
         echo("Import of blockchain ${blockchainRID.toHex()} will be finished")
         val txBuilder = client.transactionBuilder()
-        txBuilder.proposeFinishImportBlockchainOperation(client.pubkey, blockchainRID, finalHeight, description)
+        txBuilder.proposeFinishImportBlockchainOperation(client.pubkey, blockchainRID, finalHeight, description())
         txBuilder.postAwaitConfirmation().printResult(
                 "Import of blockchain ${blockchainRID.toHex()} finished",
                 "Cannot finish blockchain import", true

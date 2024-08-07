@@ -25,8 +25,8 @@ import net.postchain.mc.cli.util.containerUnitsOption
 import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.maxBlockchainsOption
 import net.postchain.mc.cli.util.nameOrGenerateOption
+import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.cli.util.pmcConfigOption
-import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.pubkeysOrVotersetOption
 
 
@@ -61,7 +61,9 @@ class CommandProposeContainer : CliktCommand(
 
     private val extraStorage by extraStorageOption().default(0)
 
-    private val description by proposalDescriptionOption {
+    private val description by nullableProposalDescriptionOption()
+
+    private fun description() = description ?: run {
         "Add container $name to the cluster $clusterName - consensus-threshold: $consensusThreshold, " +
                 deployerOption.let {
                     if (deployerOption is VoterSetOrPubkeysOption.Pubkeys) "pubkeys: ${(deployerOption as VoterSetOrPubkeysOption.Pubkeys).data}, "
@@ -190,7 +192,7 @@ class CommandProposeContainer : CliktCommand(
                     clusterName,
                     name,
                     (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
-                    description
+                    description()
             )
                     .postAwaitConfirmation()
                     .printResult(
