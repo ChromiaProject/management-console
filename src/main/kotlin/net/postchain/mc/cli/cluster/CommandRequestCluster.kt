@@ -16,7 +16,7 @@ import net.postchain.mc.compatibility.ApiCompatV28.requestClusterOperationV28
 
 class CommandRequestCluster : CliktCommand(
         name = "request",
-        help = "Request system creating a new cluster"
+        help = "Request system creating a new cluster (is not supported after version 29)",
 ) {
 
     private val config by pmcConfigOption()
