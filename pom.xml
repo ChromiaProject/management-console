@@ -21,7 +21,7 @@
         <revision>dev</revision>
         <postchain.version>3.17.0</postchain.version>
         <postchain.client.version>3.16.0</postchain.client.version>
-        <directory.chain.version>1.54.0</directory.chain.version>
+        <directory.chain.version>1.56.0</directory.chain.version>
         <chr.version>0.20.6</chr.version>
         <rell.version>0.13.10</rell.version>
         <rell.maven.plugin.version>0.11.17</rell.maven.plugin.version>
@@ -233,6 +233,7 @@
                                 <mainModule>management_chain_mainnet</mainModule>
                                 <mainModule>direct_cluster</mainModule>
                                 <mainModule>direct_container</mainModule>
+                                <mainModule>proposal_subnode_image</mainModule>
                             </mainModules>
                         </configuration>
                     </execution>

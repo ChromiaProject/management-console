@@ -10,6 +10,7 @@ import net.postchain.mc.cli.cluster.clusterCommands
 import net.postchain.mc.cli.config.CommandConfig
 import net.postchain.mc.cli.container.containerCommands
 import net.postchain.mc.cli.economy.economyCommands
+import net.postchain.mc.cli.image.subnodeImageCommands
 import net.postchain.mc.cli.keys.CommandKeygen
 import net.postchain.mc.cli.node.nodeCommands
 import net.postchain.mc.cli.proposal.proposalCommands
@@ -33,7 +34,8 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
                 containerCommands(),
                 blockchainCommands(),
                 clusterAnchoringCommands(),
-                economyCommands()
+                economyCommands(),
+                subnodeImageCommands(),
         )
     }
 

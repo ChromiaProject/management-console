@@ -40,6 +40,11 @@ import net.postchain.chain0.proposal_provider.getProviderBatchProposal
 import net.postchain.chain0.proposal_provider.getProviderQuotaProposal
 import net.postchain.chain0.proposal_provider.getProviderStateProposal
 import net.postchain.chain0.proposal_provider.getSystemProviderProposal
+import net.postchain.chain0.proposal_subnode_image.getAddClusterSubnodeImageProposal
+import net.postchain.chain0.proposal_subnode_image.getRemoveClusterSubnodeImageProposal
+import net.postchain.chain0.proposal_subnode_image.getSubnodeImageProposal
+import net.postchain.chain0.proposal_subnode_image.getSubnodeImageStateProposal
+import net.postchain.chain0.proposal_subnode_image.getUpdateSubnodeImageProposal
 import net.postchain.chain0.proposal_voter_set.getVoterSetUpdateProposal
 import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
@@ -544,6 +549,59 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                 }
 
                 else -> return ""
+            }
+        }
+
+        ProposalType.subnode_image -> {
+            val pc = client.getSubnodeImageProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Name", pc.name)
+                    row("URL", pc.url)
+                    row("Digest", pc.digest)
+                    row("Type", pc.subnodeImageType)
+                }
+            }
+        }
+
+        ProposalType.subnode_image_state -> {
+            val pc = client.getSubnodeImageStateProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Name", pc.name)
+                    row("Active", pc.active)
+                }
+            }
+        }
+
+        ProposalType.update_subnode_image -> {
+            val pc = client.getUpdateSubnodeImageProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Name", pc.name)
+                    row("URL", pc.url)
+                    row("Digest", pc.digest)
+                }
+            }
+        }
+
+        ProposalType.add_cluster_subnode_image -> {
+            val pc = client.getAddClusterSubnodeImageProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Cluster", pc.cluster)
+                    row("Subnode image", pc.subnodeImage)
+                }
+            }
+        }
+
+        ProposalType.remove_cluster_subnode_image -> {
+            val pc = client.getRemoveClusterSubnodeImageProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Cluster", pc.cluster)
+                    row("Subnode image", pc.subnodeImage)
+                }
             }
         }
     }

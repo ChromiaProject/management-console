@@ -8,6 +8,7 @@ import net.postchain.chain0.common.queries.getClusterData
 import net.postchain.chain0.common.queries.getClusterNodes
 import net.postchain.chain0.common.queries.getClusterProviders
 import net.postchain.chain0.common.queries.getClusterReplicaNodes
+import net.postchain.chain0.common.queries.getClusterSubnodeImages
 import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
 import net.postchain.mc.cli.util.nameOption
@@ -77,6 +78,17 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainClient, name
                 }
             })
         }
+    }
+
+    if (apiVersion >= 56) {
+        val images = client.getClusterSubnodeImages(name)
+        echo(pmcTable(
+                "subnode images",
+                listOf("Name", "URL", "digest"),
+                images.map { image ->
+                    listOf(image.name, image.url, image.digest)
+                }
+        ))
     }
 
     val clusterProviders = client.getClusterProviders(name)
