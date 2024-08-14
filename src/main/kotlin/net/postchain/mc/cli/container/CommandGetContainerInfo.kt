@@ -44,6 +44,7 @@ fun CliktCommand.showContainerInfo(client: PostchainClient, name: String) {
                             .joinToString(" / ")
             )
             row("System:", info.system.toString())
+            info.subnodeImage?.let { row("Subnode image:", it) }
             info.state?.let { row("State:", it.toString()) }
         }
     })

@@ -17,6 +17,7 @@ import net.postchain.chain0.direct_container.createContainerWithUnitsOperation
 import net.postchain.chain0.features.hasDirectContainer
 import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.proposal_container.proposeContainerOperation
+import net.postchain.chain0.proposal_container.proposeContainerWithSubnodeImageOperation
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
@@ -61,6 +62,8 @@ class CommandProposeContainer : CliktCommand(
 
     private val extraStorage by extraStorageOption().default(0)
 
+    private val subnodeImageName by option("-sin", "--subnode-image-name", help = "Subnode image name")
+
     private val description by nullableProposalDescriptionOption()
 
     private fun description() = description ?: run {
@@ -76,8 +79,9 @@ class CommandProposeContainer : CliktCommand(
             .flag("-p", "--proposal", default = true)
 
     override fun run() {
+        val apiVersion = client.apiVersion()
+
         if (direct) {
-            val apiVersion = client.apiVersion()
             var hasDirectContainer = true
             if (apiVersion >= 49)
                 hasDirectContainer = client.hasDirectContainer()
@@ -187,18 +191,37 @@ class CommandProposeContainer : CliktCommand(
                 throw CliktError("Container proposals does not support specifying public keys as deployer. Specify a voter set instead.")
             }
             echo("Proposing container. Please note that any specified container limits are ignored. Create a separate proposal to change them from defaults.")
-            client.transactionBuilder().proposeContainerOperation(
-                    client.pubkey,
-                    clusterName,
-                    name,
-                    (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
-                    description()
-            )
-                    .postAwaitConfirmation()
-                    .printResult(
-                            "Container creation has been proposed",
-                            "Failed to propose container creation"
-                    )
+            if (subnodeImageName != null) {
+                if (apiVersion < 57) {
+                    throw CliktError("Setting subnode image for container is not supported by network")
+                }
+                client.transactionBuilder().proposeContainerWithSubnodeImageOperation(
+                        client.pubkey,
+                        clusterName,
+                        name,
+                        (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
+                        subnodeImageName!!,
+                        description()
+                )
+                        .postAwaitConfirmation()
+                        .printResult(
+                                "Container creation has been proposed",
+                                "Failed to propose container creation"
+                        )
+            } else {
+                client.transactionBuilder().proposeContainerOperation(
+                        client.pubkey,
+                        clusterName,
+                        name,
+                        (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
+                        description()
+                )
+                        .postAwaitConfirmation()
+                        .printResult(
+                                "Container creation has been proposed",
+                                "Failed to propose container creation"
+                        )
+            }
         }
     }
 
