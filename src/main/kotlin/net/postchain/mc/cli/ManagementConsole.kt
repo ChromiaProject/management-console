@@ -52,7 +52,8 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
                 "clusters" to listOf("cluster", "list"),
                 "providers" to listOf("provider", "list"),
                 "proposals" to listOf("proposal", "list"),
-                "nodes" to listOf("node", "list")
+                "nodes" to listOf("node", "list"),
+                "subnode-images" to listOf("subnode-image", "list"),
         )
     }
 }
