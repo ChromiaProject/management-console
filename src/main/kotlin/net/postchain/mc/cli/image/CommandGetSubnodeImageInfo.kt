@@ -21,7 +21,7 @@ class CommandGetSubnodeImageInfo : CliktCommand(
     private val name by nameOption("Subnode image name").required()
 
     override fun run() {
-        client.requireApiVersion(56)
+        client.requireApiVersion(57)
         showSubnodeImageInfo(client, name)
     }
 }
@@ -35,6 +35,7 @@ fun CliktCommand.showSubnodeImageInfo(client: PostchainClient, name: String) {
             row("Digest:", info.digest)
             row("Type:", info.subnodeImageType)
             row("Owner:", info.owner.toHex())
+            row("Description:", info.description)
             row("Active:", info.active)
         }
     })

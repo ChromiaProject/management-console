@@ -18,15 +18,15 @@ class CommandListSubnodeImages : CliktCommand(
     private val client get() = config.client
     private val interactive by interactiveOption()
 
-    private val headers = listOf("Name", "URL", "Digest", "Type", "Owner", "Active")
+    private val headers = listOf("Name", "URL", "Digest", "Type", "Owner", "Description", "Active")
 
     override fun run() {
-        client.requireApiVersion(56)
+        client.requireApiVersion(57)
         val images = client.getSubnodeImages()
         echo(pmcTable(
                 "images",
                 headers,
-                images.map { listOf(it.name, it.url, it.digest, it.subnodeImageType.name, it.owner.toHex(), it.active.toString()) },
+                images.map { listOf(it.name, it.url, it.digest, it.subnodeImageType.name, it.owner.toHex(), it.description, it.active.toString()) },
                 0 to NAME_LENGTH_MAX,
                 interactive
         ))
