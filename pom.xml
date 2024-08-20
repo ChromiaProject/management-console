@@ -22,8 +22,7 @@
         <postchain.version>3.17.0</postchain.version>
         <postchain.client.version>3.16.0</postchain.client.version>
         <directory.chain.version>1.57.0</directory.chain.version>
-        <chr.version>0.20.6</chr.version>
-        <rell.version>0.13.10</rell.version>
+        <chr.version>0.20.9</chr.version>
         <rell.maven.plugin.version>0.11.17</rell.maven.plugin.version>
         <web3j.version>4.12.0</web3j.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
@@ -94,11 +93,6 @@
             <groupId>com.chromia.cli</groupId>
             <artifactId>chromia-cli-tools</artifactId>
             <version>${chr.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.postchain.rell</groupId>
-            <artifactId>rell-api-base</artifactId>
-            <version>${rell.version}</version>
         </dependency>
 
         <!-- logging -->
