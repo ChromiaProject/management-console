@@ -2,7 +2,6 @@ package net.postchain.mc.cli.config
 
 import com.chromia.build.tools.config.ChromiaConfigLoader
 import com.chromia.build.tools.config.ChromiaConfigWriter
-import com.chromia.cli.tools.env.cliEnv
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.default
@@ -30,7 +29,7 @@ class CommandConfig : CliktCommand(
 ) {
 
     private val configWriter by configFileOption()
-    private val configLoader = ChromiaConfigLoader(cliEnv())
+    private val configLoader = ChromiaConfigLoader(::echo)
     private val configFile get() = configWriter.configFile
 
     private val get by option(help = "get value: name [value pattern]", metavar = "KEY")

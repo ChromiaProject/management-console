@@ -2,7 +2,6 @@ package net.postchain.mc.cli.util
 
 import com.chromia.build.tools.config.ChromiaConfigLoader
 import com.chromia.cli.tools.config.OptionalChromiaModelConfigOption
-import com.chromia.cli.tools.env.cliEnv
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.groups.required
@@ -28,7 +27,6 @@ import net.postchain.mc.cli.base.CommandBase
 import net.postchain.mc.cli.base.METADATA_LENGTH_MAX
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.base.URL_LENGTH_MAX
-import net.postchain.rell.api.base.RellCliEnv
 import java.net.MalformedURLException
 import java.net.URISyntaxException
 import java.net.URL
@@ -68,13 +66,13 @@ fun OptionTransformContext.validatePubkey(pubKey: PubKey) {
     }
 }
 
-fun CliktCommand.pmcConfigOption() = PmcClientConfigOption(cliEnv())
+fun CliktCommand.pmcConfigOption() = PmcClientConfigOption(::echo)
 
-class PmcClientConfigOption(cliEnv: RellCliEnv) : OptionalChromiaModelConfigOption(cliEnv) {
+class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConfigOption(logger) {
     private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup").flag()
     val network by option("--network", help = "Target network to make requests to (if chromia.yml is configured)")
     val client by lazy {
-        val rawConfig = ChromiaConfigLoader(cliEnv).loadProperties(configFile)
+        val rawConfig = ChromiaConfigLoader(logger).loadProperties(configFile)
         if (network != null) {
             requireNotNull(model) { "chromia.yml not found" }
             val networkModel = model!!.deployments[network]
