@@ -78,11 +78,8 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion
                 }
             })
 
-            val srcCluster = client.getContainerData(movingInfo.sourceContainer).cluster
-            showHeightsOnClusterNodes(client, srcCluster, blockchainRid, "Heights on source nodes:")
-
-            val dstCluster = client.getContainerData(movingInfo.destinationContainer).cluster
-            showHeightsOnClusterNodes(client, dstCluster, blockchainRid, "Heights on destination nodes:")
+            showHeightsOnClusterNodes(client, movingInfo.sourceContainer, blockchainRid, "Heights on source nodes:")
+            showHeightsOnClusterNodes(client, movingInfo.destinationContainer, blockchainRid, "Heights on destination nodes:")
         }
     }
 
@@ -138,8 +135,8 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion
     }
 
     // Heights on nodes including anchored height
-    if (blockchainInfo.cluster != null && !isMoving) {
-        showHeightsOnClusterNodes(client, blockchainInfo.cluster, blockchainRid, "Heights on nodes:")
+    if (blockchainInfo.container != null && !isMoving) {
+        showHeightsOnClusterNodes(client, blockchainInfo.container, blockchainRid, "Heights on nodes:")
     }
 
     // Heights on replicas
@@ -158,7 +155,8 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion
 
 }
 
-internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainClient, cluster: String, blockchainRid: BlockchainRid, caption: String) {
+internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainClient, container: String, blockchainRid: BlockchainRid, caption: String) {
+    val cluster = client.getContainerData(container).cluster
     val clusterInfo = client.cmGetClusterInfo(cluster)
     val clusterEndpoints = clusterInfo.peers.map { Endpoint.sanitizeUrl(it.apiUrl) }.let { EndpointPool.default(it) }
     val anchoringChain = when (blockchainRid.wData) {
@@ -174,7 +172,7 @@ internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainClient, clu
         body {
             row("Anchored height", anchoredHeight)
             clusterInfo.peers.parallelStream()
-                    .map { peer -> Pair(peer.pubkey, blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid)) }
+                    .map { peer -> Pair(peer.pubkey, blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid, container)) }
                     .toList()
                     .forEach { peerHeight -> row(PubKey(peerHeight.first).toShortHex(), peerHeight.second) }
         }
