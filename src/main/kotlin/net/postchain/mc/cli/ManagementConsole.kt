@@ -21,7 +21,10 @@ import net.postchain.mc.network.networkCommands
 open class ManagementConsole : CliLauncher(name = "pmc") {
 
     init {
-        versionOption(this::class.java.`package`.implementationVersion ?: "(unknown)")
+        versionOption("""
+            ${this::class.java.`package`.implementationVersion ?: "(unknown)"}
+            Java version ${System.getProperty("java.version")}            
+        """.trimIndent())
         subcommands(
                 CommandKeygen(),
                 CommandConfig(),
