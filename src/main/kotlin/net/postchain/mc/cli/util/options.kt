@@ -27,9 +27,8 @@ import net.postchain.mc.cli.base.CommandBase
 import net.postchain.mc.cli.base.METADATA_LENGTH_MAX
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.base.URL_LENGTH_MAX
-import java.net.MalformedURLException
+import java.net.URI
 import java.net.URISyntaxException
-import java.net.URL
 
 
 const val CHROMIA_CONFIG = "CHROMIA_CONFIG"
@@ -120,10 +119,8 @@ fun urlValidator(): OptionTransformContext.(String) -> Unit = {
 
 fun OptionTransformContext.validateUrl(url: String) {
     val valid = try {
-        URL(url).toURI()
+        URI(url)
         true
-    } catch (e: MalformedURLException) {
-        false
     } catch (e: URISyntaxException) {
         false
     }
