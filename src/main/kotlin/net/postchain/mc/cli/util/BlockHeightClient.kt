@@ -40,6 +40,7 @@ class BlockHeightClient(private val parentClient: PostchainClient) {
     fun getCurrentBlockHeightOnPeer(
             peer: CmPeerInfo,
             blockchainRid: BlockchainRid,
+            container: String? = null,
             connectTimeout: Duration = Duration.ofMillis(1000),
             responseTimeout: Duration = Duration.ofMillis(1000)
     ) = try {
@@ -48,7 +49,7 @@ class BlockHeightClient(private val parentClient: PostchainClient) {
                 endpointPool = SingleEndpointPool(peer.apiUrl),
                 connectTimeout = connectTimeout,
                 responseTimeout = responseTimeout,
-        )).currentBlockHeight()
+        )).currentBlockHeight(container)
     } catch (e: ClientError) {
         -1
     }
