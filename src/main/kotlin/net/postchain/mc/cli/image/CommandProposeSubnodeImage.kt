@@ -31,13 +31,17 @@ class CommandProposeSubnodeImage : CliktCommand(
     private val type by option(help = "Image type").enum<SubnodeImageType>().default(SubnodeImageType.COMMON)
     private val imageDescription by option("-desc", "--image-description", help = "Subnode image description").required()
             .validate(metadataTextValidator())
+    private val gtxModules by option("-gtx", "--gtx-modules", help = "GTX modules exposed by this subnode image (comma separated list of FQCNs)")
+            .default("").validate(metadataTextValidator())
+    private val syncExts by option("-sync", "--sync-exts", help = "Synchronization infrastructure extensions exposed by this subnode image (comma separated list of FQCNs)")
+            .default("").validate(metadataTextValidator())
 
     private val description by proposalDescriptionOption { "Register new subnode image $name with URL $url and digest $digest" }
 
     override fun run() {
-        client.requireApiVersion(57)
+        client.requireApiVersion(59)
         client.transactionBuilder()
-                .proposeSubnodeImageOperation(client.pubkey, name, url, digest, type, imageDescription, description)
+                .proposeSubnodeImageOperation(client.pubkey, name, url, digest, type, imageDescription, description, gtxModules, syncExts)
                 .postAwaitConfirmation()
                 .printResult(
                         "Subnode image $name proposed",

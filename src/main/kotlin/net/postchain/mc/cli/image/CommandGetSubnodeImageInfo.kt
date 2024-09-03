@@ -36,6 +36,8 @@ fun CliktCommand.showSubnodeImageInfo(client: PostchainClient, name: String) {
             row("Type:", info.subnodeImageType)
             row("Owner:", info.owner.toHex())
             row("Description:", info.description)
+            row("GTX modules:", info.gtxModules)
+            row("Sync extensions:", info.syncExts)
             row("Active:", info.active)
         }
     })
