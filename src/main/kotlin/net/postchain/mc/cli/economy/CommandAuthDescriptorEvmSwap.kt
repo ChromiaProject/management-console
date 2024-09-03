@@ -33,8 +33,8 @@ import org.web3j.crypto.Sign
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets
 
-class CommandUpdateMainAuthDescriptorToEvmAddressAndLinkToEOAAccount : ECBaseCommand(
-        name = "update-main-auth-descriptor-to-evm-address-and-link-to-eoa-account",
+class CommandAuthDescriptorEvmSwap : ECBaseCommand(
+        name = "auth-descriptor-evm-swap",
         help = "This command will swap the main auth descriptor signer of an ft4 provider account with the EVM address based on the " +
                 "provided metamask private key and set the auth flags to both T (Transfer) and A (Account). " +
                 "It will also link the account to an EOA (external owned account) using the EVM address"
