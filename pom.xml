@@ -462,6 +462,7 @@
                                     <checkoutDirectory>${project.build.directory}/directory-chain</checkoutDirectory>
                                     <scmVersion>${directory.chain.version}</scmVersion>
                                     <scmVersionType>tag</scmVersionType>
+                                    <skipCheckoutIfExists>true</skipCheckoutIfExists>
                                 </configuration>
                             </execution>
                         </executions>
