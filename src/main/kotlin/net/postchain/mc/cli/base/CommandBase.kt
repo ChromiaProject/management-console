@@ -17,7 +17,7 @@ object CommandBase {
             .joinToString("")
 
     fun isEntityNameValid(string: String): Boolean {
-        val regex = "^[a-zA-Z0-9_]*$"
+        val regex = "^[a-zA-Z0-9_-]*$"
         return string.matches(regex.toRegex())
     }
 }
