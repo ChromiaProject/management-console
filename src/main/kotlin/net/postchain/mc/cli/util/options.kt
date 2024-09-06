@@ -24,6 +24,7 @@ import net.postchain.common.config.getEnvOrStringProperty
 import net.postchain.common.hexStringToByteArray
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.CommandBase
+import net.postchain.mc.cli.base.DIGEST_LENGTH_MAX
 import net.postchain.mc.cli.base.METADATA_LENGTH_MAX
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.base.URL_LENGTH_MAX
@@ -135,6 +136,12 @@ fun metadataTextValidator(): OptionTransformContext.(String) -> Unit = {
 
 fun OptionTransformContext.validateMetadataText(text: String) {
     require(text.length <= METADATA_LENGTH_MAX) { "value is too long, maximum allowed length is $METADATA_LENGTH_MAX" }
+}
+
+fun digestValidator(): OptionTransformContext.(String) -> Unit = {
+    require(CommandBase.isDigestValid(it)) { "Digest name can only contain letters, numerals, and colon. Maximum allowed length is 100 characters." }
+    require(it.length <= DIGEST_LENGTH_MAX) { "Digest is too long, maximum allowed length is $DIGEST_LENGTH_MAX" }
+    require(it.isNotEmpty()) { "Digest cannot be empty" }
 }
 
 sealed class VoterSetOrPubkeysOption(val data: String) {

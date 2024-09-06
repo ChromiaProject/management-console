@@ -11,6 +11,8 @@ import net.postchain.chain0.model.SubnodeImageType
 import net.postchain.chain0.proposal_subnode_image.proposeSubnodeImageOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
+import net.postchain.mc.cli.util.digestValidator
+import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.metadataTextValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
@@ -25,9 +27,9 @@ class CommandProposeSubnodeImage : CliktCommand(
     private val config by pmcConfigOption()
     private val client get() = config.client
 
-    private val name by nameOption("Image name").required()
-    private val url by option(help = "Image URL").required()
-    private val digest by option(help = "Image digest").required()
+    private val name by nameOption("Image name").required().validate(entityNameValidator())
+    private val url by option(help = "Image URL").required().validate(metadataTextValidator())
+    private val digest by option(help = "Image digest").required().validate(digestValidator())
     private val type by option(help = "Image type").enum<SubnodeImageType>().default(SubnodeImageType.COMMON)
     private val imageDescription by option("-desc", "--image-description", help = "Subnode image description").required()
             .validate(metadataTextValidator())
