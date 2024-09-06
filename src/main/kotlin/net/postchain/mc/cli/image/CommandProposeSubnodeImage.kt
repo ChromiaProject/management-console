@@ -41,7 +41,7 @@ class CommandProposeSubnodeImage : CliktCommand(
     override fun run() {
         client.requireApiVersion(59)
         client.transactionBuilder()
-                .proposeSubnodeImageOperation(client.pubkey, name, url, digest, type, imageDescription, description, gtxModules, syncExts)
+                .proposeSubnodeImageOperation(client.pubkey, name, url, digest, type, imageDescription, gtxModules, syncExts, description)
                 .postAwaitConfirmation()
                 .printResult(
                         "Subnode image $name proposed",
