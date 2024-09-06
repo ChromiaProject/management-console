@@ -102,8 +102,9 @@ fun CliktCommand.nameOrGenerateOption(helpMessage: String) = mutuallyExclusiveOp
 ).single().required()
 
 fun entityNameValidator(): OptionTransformContext.(String) -> Unit = {
-    require(CommandBase.isEntityNameValid(it)) { "Name can only contain letters, numerals, and underscores. " }
+    require(CommandBase.isEntityNameValid(it)) { "Name can only contain letters, numerals, dashes and underscores. " }
     require(it.length <= NAME_LENGTH_MAX) { "Name is too long, maximum allowed length is $NAME_LENGTH_MAX" }
+    require(it.isNotEmpty()) { "Name cannot be empty" }
 }
 
 fun CliktCommand.requiredUrlOption(helpMessage: String, vararg names: String = arrayOf("--url")) = option(*names, help = helpMessage)
