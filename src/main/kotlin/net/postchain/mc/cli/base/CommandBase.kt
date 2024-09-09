@@ -13,7 +13,7 @@ object CommandBase {
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
-    private val entityNameRegex = "^[a-zA-Z0-9_-]*$".toRegex()
+    private val entityNameRegex = "^[a-zA-Z0-9_]*$".toRegex()
     private val digestRegex = "^[a-zA-Z0-9:]*$".toRegex()
 
     fun autoGenerateName(): String = (1..NAME_LENGTH)
