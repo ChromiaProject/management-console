@@ -18,6 +18,7 @@ import net.postchain.chain0.proposal.getProposalVotingResults
 import net.postchain.chain0.proposal_blockchain.BlockchainAction
 import net.postchain.chain0.proposal_blockchain.getBlockchainActionProposal
 import net.postchain.chain0.proposal_blockchain.getBlockchainProposal
+import net.postchain.chain0.proposal_blockchain.getBlockchainRenameProposal
 import net.postchain.chain0.proposal_blockchain.getBlockchainUnarchiveActionProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposal
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposalAt
@@ -357,6 +358,17 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                             row("Final height", unarchivingProposal.finalHeight)
                         }
                     }
+                }
+            }
+        }
+
+        ProposalType.blockchain_rename -> {
+            val details = client.getBlockchainRenameProposal(proposalId)
+            return pmcTable {
+                body {
+                    row("Blockchain RID", details.blockchainRid.toHex())
+                    row("Current name", details.currentName)
+                    row("New name", details.newName)
                 }
             }
         }

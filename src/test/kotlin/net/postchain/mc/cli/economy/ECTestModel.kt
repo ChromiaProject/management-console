@@ -15,6 +15,7 @@ import net.postchain.gtv.GtvArray
 import net.postchain.gtv.GtvFactory
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtx.GtxQuery
+import java.math.BigDecimal
 
 class ECTestModel(val model: Model, val ecVersion: Long) : Model by model {
 
@@ -46,6 +47,7 @@ class ECTestModel(val model: Model, val ecVersion: Long) : Model by model {
                     stakingRequirementSystemProviderTotalStakeChr = 2123456,
                     stakingRequirementDappProviderOwnStakeChr = 3123456,
                     stakingRequirementDappProviderTotalStakeChr = 4123456,
+                    bridgeLeaseAddMinBalanceUsd = BigDecimal("100"),
             ))
         }
         else -> throw IllegalArgumentException("Query not found: ${query.name}")
