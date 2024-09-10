@@ -29,6 +29,7 @@ fun blockchainCommands() = BlockchainCommand().subcommands(
         CommandProposePauseBlockchain(),
         CommandProposeResumeBlockchain(),
         CommandProposeDeleteBlockchain(),
+        CommandProposeRenameBlockchain(),
         CommandListBlockchainReplicas(),
         CommandListBlockchainSigners(),
         CommandListBlockchains(),
