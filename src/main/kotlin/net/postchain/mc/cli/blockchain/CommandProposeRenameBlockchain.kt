@@ -13,6 +13,7 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.util.proposalDescriptionOption
 
 class CommandProposeRenameBlockchain : CliktCommand(
         name = "rename",
@@ -24,6 +25,8 @@ class CommandProposeRenameBlockchain : CliktCommand(
     private val blockchainRID by blockchainRidOption().required()
 
     private val name by nameOption("Name of blockchain").required().validate(entityNameValidator())
+
+    private val description by proposalDescriptionOption { "Rename blockchain $blockchainRID to $name" }
 
     override fun run() {
 
@@ -38,7 +41,7 @@ class CommandProposeRenameBlockchain : CliktCommand(
                         client.config.pubkey().data,
                         blockchainRID,
                         name,
-                        "Rename blockchain $blockchainRID to $name"
+                        description
                 )
                 .postAwaitConfirmation()
                 .printResult(
