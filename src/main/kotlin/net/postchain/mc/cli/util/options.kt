@@ -8,6 +8,7 @@ import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.groups.single
 import com.github.ajalt.clikt.parameters.options.OptionTransformContext
 import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -113,6 +114,10 @@ fun CliktCommand.requiredUrlOption(helpMessage: String, vararg names: String = a
         .validate(urlValidator())
 
 fun CliktCommand.urlOption(helpMessage: String, vararg names: String = arrayOf("--url")) = option(*names, help = helpMessage)
+        .validate(urlValidator())
+
+fun CliktCommand.defaultUrlOption(default: String, helpMessage: String, vararg names: String = arrayOf("--url")) = option(*names, help = helpMessage)
+        .default(default)
         .validate(urlValidator())
 
 fun urlValidator(): OptionTransformContext.(String) -> Unit = {
