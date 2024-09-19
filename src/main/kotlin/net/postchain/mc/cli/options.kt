@@ -47,6 +47,10 @@ fun CliktCommand.requiredHostOption() = option("-h", "--host", help = "Host", en
 fun CliktCommand.hostOption() = option("-h", "--host", help = "Host", envvar = "POSTCHAIN_HOST")
         .validate(hostValidator())
 
+fun CliktCommand.defaultHostOption(default: String) = option("-h", "--host", help = "Host", envvar = "POSTCHAIN_HOST")
+        .default(default)
+        .validate(hostValidator())
+
 fun hostValidator(): OptionTransformContext.(String) -> Unit = {
     require(it.length <= HOST_NAME_LENGTH_MAX) { "Host name is too long, maximum allowed length is $HOST_NAME_LENGTH_MAX" }
 }
