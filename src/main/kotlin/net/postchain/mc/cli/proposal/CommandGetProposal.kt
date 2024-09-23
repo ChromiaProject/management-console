@@ -36,6 +36,7 @@ import net.postchain.chain0.proposal_cluster.getClusterRemoveProposal
 import net.postchain.chain0.proposal_cluster_anchoring.getClusterAnchoringConfigurationProposal
 import net.postchain.chain0.proposal_container.getContainerProposal
 import net.postchain.chain0.proposal_container.getContainerRemoveProposal
+import net.postchain.chain0.proposal_container.getContainerSubnodeImageProposal
 import net.postchain.chain0.proposal_container.proposal_container_limits.getContainerLimitsProposal
 import net.postchain.chain0.proposal_provider.getProviderBatchProposal
 import net.postchain.chain0.proposal_provider.getProviderQuotaProposal
@@ -382,6 +383,19 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.container -> {
             when {
+                apiVersion >= 57 -> {
+                    val pc = client.getContainerProposal(proposalId) ?: return ""
+                    return pmcTable {
+                        body {
+                            row("Container", pc.container)
+                            row("Container Units", pc.containerUnits.toString())
+                            row("Max blockchains", pc.maxBlockchains.toString())
+                            row("Extra Storage", pc.extraStorage.toString())
+                            row("Subnode image", pc.subnodeImageName)
+                        }
+                    }
+                }
+
                 apiVersion >= 24 -> {
                     val pc = client.getContainerProposal(proposalId) ?: return ""
                     return pmcTable {
@@ -403,6 +417,16 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                             row("Max blockchains", pc.maxBlockchains.toString())
                         }
                     }
+                }
+            }
+        }
+
+        ProposalType.container_subnode_image -> {
+            val pc = client.getContainerSubnodeImageProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Container", pc.container)
+                    row("Subnode image", pc.subnodeImage)
                 }
             }
         }
