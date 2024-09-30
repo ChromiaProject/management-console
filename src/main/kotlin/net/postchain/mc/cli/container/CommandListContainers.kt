@@ -31,7 +31,7 @@ class CommandListContainers : CliktCommand(
                 client.getBlockchainInfoListV3(false).map {
                     BlockchainInfo(
                             it.rid, it.name, BlockchainState.RUNNING, it.container, it.cluster, null,
-                            null, null, null
+                            null, null, null, null
                     )
                 }.groupBy { it.container }
             }
