@@ -7,7 +7,7 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.table.SectionBuilder
 import net.postchain.chain0.common.queries.getProviderData
-import net.postchain.chain0.proposal.GetProposalResult
+import net.postchain.chain0.proposal.ProposalData
 import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.ProposalType
 import net.postchain.chain0.proposal.ProposalVotingResults
@@ -106,6 +106,9 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
                 body {
                     printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name)
                     row("State", proposal.state.toString())
+                    proposal.applyAt?.let {
+                        row("Apply at", "${Date.from(Instant.ofEpochMilli(it))}")
+                    }
                     printVotingInfo(client, proposal, apiVersion)
                     row("Description", proposal.description)
                 }
@@ -137,7 +140,7 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
     }
 }
 
-private fun CliktCommand.printApprovedConfigurationStatus(client: PostchainClient, proposal: GetProposalResult) {
+private fun CliktCommand.printApprovedConfigurationStatus(client: PostchainClient, proposal: ProposalData) {
     val updateState = client.getBlockchainConfigurationUpdateAttemptStateByProposal(proposal.id)
     if (updateState != null) {
         val heightInfo = if (updateState.appliedAtHeight > -1) updateState.appliedAtHeight.toString() else "Not applied yet"
@@ -151,7 +154,7 @@ private fun CliktCommand.printApprovedConfigurationStatus(client: PostchainClien
     }
 }
 
-private fun SectionBuilder.printVotingInfo(client: PostchainClient, proposal: GetProposalResult, apiVersion: Long) {
+private fun SectionBuilder.printVotingInfo(client: PostchainClient, proposal: ProposalData, apiVersion: Long) {
     if (proposal.state == ProposalState.PENDING) {
         printVotingResults(client.getProposalVotingResults(proposal.id))
     }

@@ -61,6 +61,10 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion
             row("Container", blockchainInfo.container)
             row("Cluster", blockchainInfo.cluster)
             row("Is system chain", blockchainInfo.system)
+
+            if (apiVersion >= 63) {
+                row("Configuration delay", blockchainInfo.configDelay ?: "no")
+            }
         }
     })
 

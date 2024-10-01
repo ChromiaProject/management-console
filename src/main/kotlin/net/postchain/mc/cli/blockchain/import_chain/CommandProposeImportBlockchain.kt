@@ -11,7 +11,7 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.queries.getBlockchainInfo
 import net.postchain.chain0.model.BlockchainState
-import net.postchain.chain0.proposal.GetProposalResult
+import net.postchain.chain0.proposal.ProposalData
 import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.getProposal
 import net.postchain.chain0.proposal.getProposalIdsByTxRid
@@ -34,7 +34,6 @@ import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
-import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.requireApiVersion
 import java.io.BufferedInputStream
 import java.io.FileInputStream
@@ -153,7 +152,7 @@ class CommandProposeImportBlockchain : CliktCommand(
                 postTransaction(txBuilder)?.also(::add)
             }
 
-            val proposals = mutableListOf<GetProposalResult?>()
+            val proposals = mutableListOf<ProposalData?>()
             txs.forEach { tx ->
                 client.awaitConfirmation(tx, client.config.statusPollCount, client.config.statusPollInterval).also { result ->
                     result.printResult(
