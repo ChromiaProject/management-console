@@ -153,7 +153,13 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion
                 blockchainReplicas
                         .map { PubKey(it[0].asByteArray()) }
                         .map { CmPeerInfo(it.wData, client.getNodeData(it).apiUrl) }
-                        .map { listOf(PubKey(it.pubkey).toShortHex(), blockHeightClient.getCurrentBlockHeightOnPeer(it, blockchainRid).toString()) }
+                        .map {
+                            val heightOnReplica = blockHeightClient.getCurrentBlockHeightOnPeer(it, blockchainRid)
+                            listOf(
+                                    PubKey(it.pubkey).toShortHex(),
+                                    if (heightOnReplica < 0) "Unknown" else heightOnReplica.toString(),
+                            )
+                        }
         ))
     }
 

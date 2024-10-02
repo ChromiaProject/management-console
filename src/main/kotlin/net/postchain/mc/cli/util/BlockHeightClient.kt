@@ -44,12 +44,16 @@ class BlockHeightClient(private val parentClient: PostchainClient) {
             connectTimeout: Duration = Duration.ofMillis(1000),
             responseTimeout: Duration = Duration.ofMillis(1000)
     ) = try {
-        PostchainClientImpl(parentClient.config.copy(
-                blockchainRid = blockchainRid,
-                endpointPool = SingleEndpointPool(peer.apiUrl),
-                connectTimeout = connectTimeout,
-                responseTimeout = responseTimeout,
-        )).currentBlockHeight(container)
+        if (peer.apiUrl.isEmpty()) {
+            -1
+        } else {
+            PostchainClientImpl(parentClient.config.copy(
+                    blockchainRid = blockchainRid,
+                    endpointPool = SingleEndpointPool(peer.apiUrl),
+                    connectTimeout = connectTimeout,
+                    responseTimeout = responseTimeout,
+            )).currentBlockHeight(container)
+        }
     } catch (e: ClientError) {
         -1
     }
