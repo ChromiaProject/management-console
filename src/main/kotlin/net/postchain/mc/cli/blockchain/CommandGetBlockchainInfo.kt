@@ -82,8 +82,8 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion
                 }
             })
 
-            showHeightsOnClusterNodes(client, movingInfo.sourceContainer, blockchainRid, "Heights on source nodes:")
-            showHeightsOnClusterNodes(client, movingInfo.destinationContainer, blockchainRid, "Heights on destination nodes:")
+            showHeightsOnClusterNodes(client, movingInfo.sourceContainer, blockchainRid, "Heights on source nodes:", isMoving)
+            showHeightsOnClusterNodes(client, movingInfo.destinationContainer, blockchainRid, "Heights on destination nodes:", isMoving)
         }
     }
 
@@ -140,7 +140,7 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion
 
     // Heights on nodes including anchored height
     if (blockchainInfo.container != null && !isMoving) {
-        showHeightsOnClusterNodes(client, blockchainInfo.container, blockchainRid, "Heights on nodes:")
+        showHeightsOnClusterNodes(client, blockchainInfo.container, blockchainRid, "Heights on nodes:", isMoving)
     }
 
     // Heights on replicas
@@ -165,7 +165,7 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion
 
 }
 
-internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainClient, container: String, blockchainRid: BlockchainRid, caption: String) {
+internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainClient, container: String, blockchainRid: BlockchainRid, caption: String, isMoving: Boolean) {
     val cluster = client.getContainerData(container).cluster
     val clusterInfo = client.cmGetClusterInfo(cluster)
     val clusterEndpoints = clusterInfo.peers.map { Endpoint.sanitizeUrl(it.apiUrl) }.let { EndpointPool.default(it) }
@@ -182,7 +182,7 @@ internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainClient, con
         body {
             row("Anchored height", anchoredHeight)
             clusterInfo.peers.parallelStream()
-                    .map { peer -> Pair(peer.pubkey, blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid, container)) }
+                    .map { peer -> Pair(peer.pubkey, blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid, if (isMoving) container else null)) }
                     .toList()
                     .forEach { peerHeight -> row(PubKey(peerHeight.first).toShortHex(), peerHeight.second) }
         }
