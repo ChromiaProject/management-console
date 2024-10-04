@@ -32,15 +32,15 @@ open class CommandGetBlockchainConfiguration(
         val message = if (height == Long.MAX_VALUE) "Last blockchain configuration" else "Blockchain configuration at height $height"
         val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, height)
         if (bcConfig == null) {
-            echo("$message is absent")
+            echo("$message is absent", err = true)
         } else {
             val xmlGtv = GtvMLEncoder.encodeXMLGtv(GtvDecoder.decodeGtv(bcConfig))
             if (save != null) {
                 save!!.parentFile?.mkdirs()
                 save!!.writeText(xmlGtv)
-                echo("$message saved to ${save!!.name}")
+                echo("$message saved to ${save!!.name}", err = true)
             } else {
-                echo("$message:")
+                echo("$message:", err = true)
                 echo(xmlGtv)
             }
         }
