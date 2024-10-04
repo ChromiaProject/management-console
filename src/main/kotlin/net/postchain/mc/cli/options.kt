@@ -1,6 +1,7 @@
 package net.postchain.mc.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.options.OptionTransformContext
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
@@ -27,8 +28,12 @@ fun CliktCommand.includeInactiveOption(helpMessage: String) = option(
 fun CliktCommand.blockchainRidOption() =
         option("-brid", "--blockchain-rid", help = "Blockchain RID", envvar = "POSTCHAIN_BRID")
                 .convert { BlockchainRid.buildFromHex(it) }
+fun OptionGroup.blockchainRidOption() =
+        option("-brid", "--blockchain-rid", help = "Blockchain RID", envvar = "POSTCHAIN_BRID")
+                .convert { BlockchainRid.buildFromHex(it) }
 
 fun CliktCommand.heightOption() = option("-h", "--height", envvar = "POSTCHAIN_HEIGHT").long()
+fun OptionGroup.heightOption() = option("-h", "--height", envvar = "POSTCHAIN_HEIGHT").long()
 
 fun CliktCommand.forceOption() = option("-f", "--force").flag()
         .convert { if (it) AlreadyExistMode.FORCE else AlreadyExistMode.ERROR }
