@@ -10,7 +10,8 @@ import net.postchain.mc.cli.util.pubkeyOption
 
 class CommandListBlockchainsForNode : PmcCommand(
         name = "blockchains",
-        help = "List blockchains for node"
+        help = "List blockchains for node",
+        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

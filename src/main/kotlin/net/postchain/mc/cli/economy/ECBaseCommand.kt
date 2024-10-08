@@ -1,29 +1,26 @@
 package net.postchain.mc.cli.economy
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.core.PrintMessage
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.client.core.PostchainClient
-import net.postchain.mc.cli.util.pmcConfigOption
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.network.Version
+import net.postchain.mc.network.requireApiVersion
 
 abstract class ECBaseCommand(
         name: String,
         help: String,
         private val requiresECVersion: Long? = null,
-        override val printHelpOnEmptyArgs: Boolean = false
-) : PmcCommand(name = name, help = help) {
-    protected val config by pmcConfigOption()
-    private val client get() = config.client
+        override val printHelpOnEmptyArgs: Boolean = true
+) : DCBaseCommand(name = name, help = help) {
+
     protected lateinit var ecVersion: Version
 
-    override fun run() {
+    override fun runDC() {
 
         val economyChainClient = getEconomyChainClient(client, config.config)
         ecVersion = Version(economyChainClient)
 
-        if (requiresECVersion != null && ecVersion.version < requiresECVersion) {
-            throw PrintMessage("Command not supported by economy chain version. Requires version $requiresECVersion but is ${ecVersion.version}")
+        requiresECVersion?.let {
+            economyChainClient.requireApiVersion(requiresECVersion)
         }
 
         runEC(client, economyChainClient)

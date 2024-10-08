@@ -6,7 +6,8 @@ import net.postchain.mc.cli.util.pmcTable
 
 class CommandListTags : ECBaseCommand(
         name = "list-tags",
-        help = "List all existing tags"
+        help = "List all existing tags",
+        printHelpOnEmptyArgs = false
 ) {
     private val headers = listOf("Name", "SCU price", "Extra storage price")
 

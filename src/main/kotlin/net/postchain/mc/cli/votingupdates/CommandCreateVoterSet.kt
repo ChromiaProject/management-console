@@ -1,28 +1,22 @@
 package net.postchain.mc.cli.votingupdates
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal.voting.createVoterSetOperation
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.entityNameValidator
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pubkeysOption
 
 
-class CommandCreateVoterSet : PmcCommand(
+class CommandCreateVoterSet : DCBaseCommand(
         name = "create",
         help = "Create a new voter set with a list of providers"
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val name by nameOption("Name of new voter set").required().validate(entityNameValidator())
 
     private val pubkeys by pubkeysOption("Comma separated list of provider pubkeys for this voter set")
@@ -43,10 +37,10 @@ class CommandCreateVoterSet : PmcCommand(
             help = "Name of another voter set which can update this voter set. Default: voter set is its own governor."
     )
 
-    override fun run() {
+    override fun runDC() {
         client.transactionBuilder()
                 .createVoterSetOperation(
-                        client.config.pubkey().data,
+                        clientProviderPubkey,
                         name,
                         threshold,
                         pubkeys.map { it.data },

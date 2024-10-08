@@ -1,14 +1,12 @@
 package net.postchain.mc.cli.container
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.deprecated
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.proposal_container.proposal_container_limits.proposeContainerLimitsOperation
-import net.postchain.chain0.version.apiVersion
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.cluster.CommandProposeClusterResourceLimits.Companion.setIfNotNull
@@ -16,7 +14,6 @@ import net.postchain.mc.cli.util.containerUnitsOption
 import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.maxBlockchainsOption
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV2.proposeContainerLimitsOperationV2
@@ -24,7 +21,7 @@ import net.postchain.mc.compatibility.ApiCompatV22
 import net.postchain.mc.compatibility.ApiCompatV22.proposeContainerLimitsOperationV22
 
 
-class CommandProposeContainerResourceLimits : PmcCommand(
+class CommandProposeContainerResourceLimits : DCBaseCommand(
         name = "limits",
         help = """
             Propose new resource limits for given container
@@ -33,9 +30,6 @@ class CommandProposeContainerResourceLimits : PmcCommand(
             Proposal can contain all types of limits or a subset of them.
         """.trimIndent()
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val containerName by nameOption("Container name").required()
 
     private val containerUnits by containerUnitsOption()
@@ -55,11 +49,10 @@ class CommandProposeContainerResourceLimits : PmcCommand(
     private val _ioRead by option("-ir", "--io-read", help = "Disk I/O read limit (MiB/s)").long().deprecated()
     private val _ioWrite by option("-iw", "--io-write", help = "Disk I/O write limit (MiB/s)").long().deprecated()
 
-    override fun run() {
-        val apiVersion = client.apiVersion()
+    override fun runDC() {
         when {
 
-            apiVersion >= 24 -> {
+            dcVersion >= 24 -> {
                 if (containerUnits == null && maxBlockchains == null && extraStorage == null) {
                     echo("No resource limits are specified. At least one value should be specified.")
                     return
@@ -73,14 +66,14 @@ class CommandProposeContainerResourceLimits : PmcCommand(
                         }
 
                 client.transactionBuilder()
-                        .proposeContainerLimitsOperation(client.config.pubkey().data, containerName, limits, description)
+                        .proposeContainerLimitsOperation(clientProviderPubkey, containerName, limits, description)
                         .postAwaitConfirmation()
                         .printResult(
                                 "Container limits proposed",
                                 "Failed proposing new container limits")
             }
 
-            apiVersion >= 3 -> {
+            dcVersion >= 3 -> {
                 if (containerUnits == null && maxBlockchains == null) {
                     echo("No resource limits are specified. At least one value should be specified.")
                     return

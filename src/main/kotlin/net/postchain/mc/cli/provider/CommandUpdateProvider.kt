@@ -1,32 +1,26 @@
 package net.postchain.mc.cli.provider
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.operations.updateProviderOperation
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.metadataTextValidator
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.urlOption
 
 
-class CommandUpdateProvider : PmcCommand(
+class CommandUpdateProvider : DCBaseCommand(
         name = "update",
         help = "Update provider information"
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val name by nameOption("Provider name").required().validate(metadataTextValidator())
 
     private val url by urlOption("Provider url")
 
-    override fun run() {
+    override fun runDC() {
         client.transactionBuilder()
-                .updateProviderOperation(client.config.pubkey().data, name, url)
+                .updateProviderOperation(clientProviderPubkey, name, url)
                 .postAwaitConfirmation()
                 .printResult("Information updated", "Could not update provider data")
     }

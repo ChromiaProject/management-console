@@ -2,6 +2,7 @@ package net.postchain.mc.cli.provider
 
 import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.subcommands
+import net.postchain.mc.cli.provider.keys.providerKeyCommands
 
 class CommonProviderCommand : PmcCommand(
         name = "provider",
@@ -11,7 +12,8 @@ class CommonProviderCommand : PmcCommand(
 
     override fun aliases(): Map<String, List<String>> {
         return mapOf(
-                "add" to listOf("register")
+                "add" to listOf("register"),
+                "keys" to listOf("key", "list"),
         )
     }
 }
@@ -27,4 +29,5 @@ fun providerCommands() = CommonProviderCommand().subcommands(
         CommandPromoteProvider(),
         CommandProposeDisableProvider(),
         CommandTransferActionPoints(),
+        providerKeyCommands(),
 )

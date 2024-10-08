@@ -10,7 +10,8 @@ import net.postchain.mc.cli.util.pmcTable
 
 class CommandListVoterSets : PmcCommand(
         name = "list",
-        help = "List all voter sets"
+        help = "List all voter sets",
+        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

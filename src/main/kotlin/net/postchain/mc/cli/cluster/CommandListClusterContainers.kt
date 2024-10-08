@@ -11,7 +11,8 @@ import net.postchain.mc.cli.util.pmcTable
 
 class CommandListClusterContainers : PmcCommand(
         name = "containers",
-        help = "List all existing cluster containers"
+        help = "List all existing cluster containers",
+        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

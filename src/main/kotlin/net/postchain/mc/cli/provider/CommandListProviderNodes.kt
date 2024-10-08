@@ -13,7 +13,8 @@ import java.util.Date
 
 class CommandListProviderNodes : PmcCommand(
         name = "nodes",
-        help = "List nodes by provider"
+        help = "List nodes by provider",
+        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

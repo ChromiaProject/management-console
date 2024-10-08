@@ -1,27 +1,23 @@
 package net.postchain.mc.cli.cluster
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.deprecated
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal_cluster.proposeClusterLimitsOperation
-import net.postchain.chain0.version.apiVersion
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.clusterUnitsOption
 import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.maxBlockchainsOption
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV2.proposeClusterLimitsOperationV2
 import net.postchain.mc.compatibility.ApiCompatV22.proposeClusterLimitsOperationV22
 
 
-class CommandProposeClusterResourceLimits : PmcCommand(
+class CommandProposeClusterResourceLimits : DCBaseCommand(
         name = "limits",
         help = "Propose new resource limits for given cluster"
 ) {
@@ -30,9 +26,6 @@ class CommandProposeClusterResourceLimits : PmcCommand(
             value?.let { put(key, it) }
         }
     }
-
-    private val config by pmcConfigOption()
-    private val client get() = config.client
 
     private val clusterName by nameOption("Cluster name").required()
 
@@ -53,13 +46,12 @@ class CommandProposeClusterResourceLimits : PmcCommand(
     private val _ioRead by option("-ir", "--io-read", help = "Disk I/O read limit (MiB/s)").long().deprecated()
     private val _ioWrite by option("-iw", "--io-write", help = "Disk I/O write limit (MiB/s)").long().deprecated()
 
-    override fun run() {
-        val apiVersion = client.apiVersion()
+    override fun runDC() {
         client.transactionBuilder()
                 .apply {
                     when {
-                        apiVersion >= 24 -> proposeClusterLimitsOperation(client.config.pubkey().data, clusterName, clusterUnits, extraStorage, description)
-                        apiVersion >= 3 -> proposeClusterLimitsOperationV22(client.config.pubkey().data, clusterName, clusterUnits, description)
+                        dcVersion >= 24 -> proposeClusterLimitsOperation(clientProviderPubkey, clusterName, clusterUnits, extraStorage, description)
+                        dcVersion >= 3 -> proposeClusterLimitsOperationV22(clientProviderPubkey, clusterName, clusterUnits, description)
                         else -> {
                             val limits = mutableMapOf<ApiCompatV2.ClusterResourceLimitType, Long>()
                                     .apply {
@@ -71,7 +63,7 @@ class CommandProposeClusterResourceLimits : PmcCommand(
                                         setIfNotNull(ApiCompatV2.ClusterResourceLimitType.default_container_io_read, _ioRead)
                                         setIfNotNull(ApiCompatV2.ClusterResourceLimitType.default_container_io_write, _ioWrite)
                                     }
-                            proposeClusterLimitsOperationV2(client.config.pubkey().data, clusterName, limits, description)
+                            proposeClusterLimitsOperationV2(clientProviderPubkey, clusterName, limits, description)
 
                         }
                     }

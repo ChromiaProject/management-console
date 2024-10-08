@@ -16,7 +16,8 @@ import net.postchain.mc.compatibility.ApiCompatV3.getBlockchainInfoListV3
 
 class CommandListBlockchains : PmcCommand(
         name = "list",
-        help = "List blockchains"
+        help = "List blockchains",
+        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val interactive by interactiveOption()
