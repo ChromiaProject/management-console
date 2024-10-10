@@ -1,22 +1,23 @@
 package net.postchain.mc.network
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.evm_event_receiver_price_oracle.initEvmEventReceiverPriceOracleChainOperation
 import net.postchain.gtv.GtvEncoder
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.pmcConfigOption
 
-class CommandInitEvmEventReceiverPriceOracleChain : CliktCommand(
+class CommandInitEvmEventReceiverPriceOracleChain : PmcCommand(
         name = "initialize-evm-event-receiver-price-oracle-chain",
-        help = "Create and initialize EVM event receiver price oracle chain",
-        printHelpOnEmptyArgs = true
+        help = "Create and initialize EVM event receiver price oracle chain"
 ) {
+    override val printHelpOnEmptyArgs: Boolean
+        get() = true
 
     private val config by pmcConfigOption()
     private val client get() = config.client

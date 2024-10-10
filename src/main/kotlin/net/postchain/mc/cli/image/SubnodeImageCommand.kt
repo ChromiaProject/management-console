@@ -1,9 +1,9 @@
 package net.postchain.mc.cli.image
 
-import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
+import net.postchain.mc.cli.PmcCommand
 
-class SubnodeImageCommand : CliktCommand("Interacting with subnode images") {
+class SubnodeImageCommand : PmcCommand(help = "Interacting with subnode images") {
     override fun run() = Unit
 }
 

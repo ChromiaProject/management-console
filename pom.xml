@@ -19,10 +19,10 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.17.5</postchain.version>
-        <postchain.client.version>3.16.1</postchain.client.version>
+        <postchain.version>3.20.1</postchain.version>
+        <postchain.client.version>3.18.1</postchain.client.version>
         <directory.chain.version>1.64.0</directory.chain.version>
-        <chr.version>0.20.11</chr.version>
+        <chr.version>0.20.15</chr.version>
         <rell.maven.plugin.version>0.12.2</rell.maven.plugin.version>
         <web3j.version>4.12.0</web3j.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
@@ -87,7 +87,12 @@
         <dependency>
             <groupId>com.github.ajalt.clikt</groupId>
             <artifactId>clikt-jvm</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ajalt.mordant</groupId>
+            <artifactId>mordant-jvm-jna-jvm</artifactId>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.chromia.cli</groupId>

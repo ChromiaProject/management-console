@@ -22,13 +22,14 @@ import net.postchain.client.request.EndpointPool
 import net.postchain.common.BlockchainRid
 import net.postchain.common.wrap
 import net.postchain.crypto.PubKey
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.BlockHeightClient
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.compatibility.ApiCompatV33.getImportingForeignBlockchainInfoV33
 
-class CommandGetBlockchainInfo : CliktCommand(
+class CommandGetBlockchainInfo : PmcCommand(
         name = "info",
         help = "Get blockchain info"
 ) {

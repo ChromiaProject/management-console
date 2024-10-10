@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.node
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.anchoring.anchoring_chain_common.getLastAnchoredBlock
 import net.postchain.chain0.cm_api.cmGetClusterInfo
@@ -17,7 +17,7 @@ import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.util.pubkeyOption
 import net.postchain.mc.network.NodeVerifier
 
-class CommandNodeVerify : CliktCommand(
+class CommandNodeVerify : PmcCommand(
         name = "verify",
         help = "Verify node status"
 ) {

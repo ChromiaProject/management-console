@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
@@ -14,7 +14,7 @@ import net.postchain.common.toHex
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.network.requireApiVersion
 
-class CommandGetProposedBlockchainRid : CliktCommand(
+class CommandGetProposedBlockchainRid : PmcCommand(
         name = "get-proposed-blockchain-rid",
         help = "Get proposed blockchain rid"
 ) {

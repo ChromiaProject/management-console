@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.cluster
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getClusters
 import net.postchain.chain0.version.apiVersion
@@ -10,7 +10,7 @@ import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 
-class CommandListClusters : CliktCommand(
+class CommandListClusters : PmcCommand(
         name = "list",
         help = "List all existing clusters"
 ) {

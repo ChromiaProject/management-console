@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.cluster
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -13,7 +13,7 @@ import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.pubkeyOption
 
 
-class CommandProposeClusterProvider : CliktCommand(
+class CommandProposeClusterProvider : PmcCommand(
         name = "provider",
         help = """
             Proposes an update of a cluster's providers

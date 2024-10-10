@@ -2,7 +2,6 @@ package net.postchain.mc.cli.blockchain.import_chain
 
 import com.chromia.directory1.common.queries.getContainerData
 import com.chromia.directory1.common.queries.getVoterSetInfo
-import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
@@ -26,6 +25,7 @@ import net.postchain.common.hexStringToByteArray
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.gtv.Gtv
 import net.postchain.gtv.GtvDecoder
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.configurationsFileOption
@@ -39,7 +39,7 @@ import java.io.BufferedInputStream
 import java.io.FileInputStream
 import java.io.InputStream
 
-class CommandProposeImportBlockchain : CliktCommand(
+class CommandProposeImportBlockchain : PmcCommand(
         name = "import",
         help = """
             Propose importing a blockchain in a specific container 
@@ -178,7 +178,7 @@ class CommandProposeImportBlockchain : CliktCommand(
                             listOf(info.type.toString(), info.id.id.toString(), info.state.toString())
                         },
                         null,
-                        terminal.info.outputInteractive
+                        terminal.terminalInfo.outputInteractive
                 ))
 
             } else {

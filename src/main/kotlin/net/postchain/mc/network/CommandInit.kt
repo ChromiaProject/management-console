@@ -1,7 +1,7 @@
 package net.postchain.mc.network
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
@@ -15,7 +15,7 @@ import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.pmcConfigOption
 import java.io.File
 
-class CommandInit : CliktCommand(
+class CommandInit : PmcCommand(
         name = "initialize",
         help = "Create system cluster with naked system container for the directory blockchain. Module argument initial_provider becomes first member of SYSTEM_P voter set."
 ) {

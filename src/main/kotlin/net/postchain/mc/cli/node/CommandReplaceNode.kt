@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.node
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
@@ -25,7 +25,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.urlOption
 
 
-class CommandReplaceNode : CliktCommand(
+class CommandReplaceNode : PmcCommand(
         name = "replace",
         help = """
         Replace a node with a new one (used to rotate keypairs)

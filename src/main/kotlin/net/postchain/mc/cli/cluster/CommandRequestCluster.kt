@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.cluster
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -14,7 +14,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.compatibility.ApiCompatV28.requestClusterOperationV28
 
 
-class CommandRequestCluster : CliktCommand(
+class CommandRequestCluster : PmcCommand(
         name = "request",
         help = "Request system creating a new cluster (is not supported after version 29)",
 ) {

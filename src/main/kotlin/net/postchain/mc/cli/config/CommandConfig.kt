@@ -3,6 +3,7 @@ package net.postchain.mc.cli.config
 import com.chromia.build.tools.config.ChromiaConfigLoader
 import com.chromia.build.tools.config.ChromiaConfigWriter
 import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.default
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
@@ -23,7 +24,7 @@ fun CliktCommand.configFileOption() = mutuallyExclusiveOptions(
         name = "Config file location",
 ).default(ChromiaConfigWriter.local)
 
-class CommandConfig : CliktCommand(
+class CommandConfig : PmcCommand(
         name = "config",
         help = "Configure the management console"
 ) {

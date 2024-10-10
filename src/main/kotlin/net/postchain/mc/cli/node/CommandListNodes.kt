@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.node
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getAllNodes
 import net.postchain.crypto.PubKey
@@ -10,7 +10,7 @@ import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 
-class CommandListNodes : CliktCommand(
+class CommandListNodes : PmcCommand(
         name = "list",
         help = "List all nodes"
 ) {

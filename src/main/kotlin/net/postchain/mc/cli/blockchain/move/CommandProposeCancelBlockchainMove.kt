@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.blockchain.move
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
@@ -8,7 +8,7 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 
-class CommandProposeCancelBlockchainMove : CliktCommand(
+class CommandProposeCancelBlockchainMove : PmcCommand(
         name = "cancel-moving",
         help = """
             Propose canceling of the blockchain moving

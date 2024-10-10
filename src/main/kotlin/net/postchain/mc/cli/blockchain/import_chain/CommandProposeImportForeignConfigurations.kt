@@ -1,7 +1,7 @@
 package net.postchain.mc.cli.blockchain.import_chain
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
@@ -36,7 +36,7 @@ import net.postchain.mc.cli.util.pubkeyOption
 import net.postchain.mc.cli.util.requiredUrlOption
 import net.postchain.mc.network.requireApiVersion
 
-class CommandProposeImportForeignConfigurations : CliktCommand(
+class CommandProposeImportForeignConfigurations : PmcCommand(
         name = "import-foreign-configurations",
         help = """
             Propose importing a foreign blockchain configurations in a specific container 

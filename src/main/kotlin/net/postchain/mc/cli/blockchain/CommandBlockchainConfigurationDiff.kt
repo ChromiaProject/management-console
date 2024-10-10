@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.blockchain
 
-import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.groups.cooccurring
@@ -17,6 +16,7 @@ import net.postchain.common.BlockchainRid
 import net.postchain.gtv.Gtv
 import net.postchain.gtv.GtvDecoder.decodeGtv
 import net.postchain.gtv.GtvDictionary
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
@@ -46,7 +46,7 @@ class BlockchainOptions : OptionGroup() {
 open class CommandBlockchainConfigurationDiff(
         name: String = "configuration-diff",
         help: String = "Blockchain configuration diff"
-) : CliktCommand(
+) : PmcCommand(
         name = name,
         help = help
 ) {

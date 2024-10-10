@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.provider
 
 import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.mordant.table.SectionBuilder
 import net.postchain.chain0.common.queries.getNodesByProvider
@@ -16,7 +17,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.compatibility.ApiCompatV47.getProviderData47
 
-class CommandGetProviderInfo : CliktCommand(
+class CommandGetProviderInfo : PmcCommand(
         name = "info",
         help = "Show provider information"
 ) {

@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.cluster
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.deprecated
 import com.github.ajalt.clikt.parameters.options.option
@@ -21,7 +21,7 @@ import net.postchain.mc.compatibility.ApiCompatV2.proposeClusterLimitsOperationV
 import net.postchain.mc.compatibility.ApiCompatV22.proposeClusterLimitsOperationV22
 
 
-class CommandProposeClusterResourceLimits : CliktCommand(
+class CommandProposeClusterResourceLimits : PmcCommand(
         name = "limits",
         help = "Propose new resource limits for given cluster"
 ) {

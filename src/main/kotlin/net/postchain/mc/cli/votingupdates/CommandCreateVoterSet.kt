@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.votingupdates
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
@@ -16,7 +16,7 @@ import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pubkeysOption
 
 
-class CommandCreateVoterSet : CliktCommand(
+class CommandCreateVoterSet : PmcCommand(
         name = "create",
         help = "Create a new voter set with a list of providers"
 ) {

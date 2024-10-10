@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.keys
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -12,7 +12,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.Properties
 
-class CommandKeygen : CliktCommand(name = "keygen", help = "Generates public/private key pair") {
+class CommandKeygen : PmcCommand(name = "keygen", help = "Generates public/private key pair") {
 
     private val wordList by option(
             "-m", "--mnemonic",

@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.proposal
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
@@ -23,7 +23,7 @@ import net.postchain.mc.compatibility.ApiCompatV6.getProposalsSinceV6
 import net.postchain.mc.compatibility.ApiCompatV6.getProviderVotesV6
 import net.postchain.mc.compatibility.ApiCompatV6.getRelevantProposalsV6
 
-class CommandListProposals : CliktCommand(
+class CommandListProposals : PmcCommand(
         name = "list",
         help = "List all proposals that you can vote on"
 ) {

@@ -1,9 +1,9 @@
 package net.postchain.mc.cli.economy.mint
 
-import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
+import net.postchain.mc.cli.PmcCommand
 
-class MintCommand : CliktCommand("Manage voter set and proposals for minting") {
+class MintCommand : PmcCommand(help = "Manage voter set and proposals for minting") {
     override fun run() = Unit
 }
 

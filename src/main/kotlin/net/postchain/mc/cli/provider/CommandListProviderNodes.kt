@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.provider
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getNodesByProvider
 import net.postchain.mc.cli.base.PUBKEY_LENGTH
@@ -11,7 +11,7 @@ import net.postchain.mc.cli.util.pmcTable
 import java.time.Instant
 import java.util.Date
 
-class CommandListProviderNodes : CliktCommand(
+class CommandListProviderNodes : PmcCommand(
         name = "nodes",
         help = "List nodes by provider"
 ) {

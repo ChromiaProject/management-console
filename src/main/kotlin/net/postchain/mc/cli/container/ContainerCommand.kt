@@ -1,9 +1,9 @@
 package net.postchain.mc.cli.container
 
-import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
+import net.postchain.mc.cli.PmcCommand
 
-class ContainerCommand : CliktCommand("Container commands") {
+class ContainerCommand : PmcCommand(help = "Container commands") {
     override fun run() = Unit
 }
 

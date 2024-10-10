@@ -2,14 +2,14 @@ package net.postchain.mc.test
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import com.github.ajalt.clikt.core.parse
 import net.postchain.common.PropertiesFileLoader
-import net.postchain.common.toHex
 import net.postchain.crypto.Secp256K1CryptoSystem
 import net.postchain.mc.cli.keys.CommandKeygen
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.io.path.absolutePathString
-import org.junit.jupiter.api.Assertions.assertEquals
 
 class KeygenTest {
 

@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.cluster
 
-import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
@@ -14,12 +13,13 @@ import net.postchain.client.request.RandomizedEndpointPool
 import net.postchain.common.BlockchainRid
 import net.postchain.common.wrap
 import net.postchain.crypto.PubKey
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.BlockHeightClient
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 
-class CommandClusterVerify : CliktCommand(
+class CommandClusterVerify : PmcCommand(
         name = "verify",
         help = "Verify cluster status"
 ) {
@@ -32,7 +32,7 @@ class CommandClusterVerify : CliktCommand(
         val clusterInfo = client.cmGetClusterInfo(cluster)
         val clusterEndpoints = clusterInfo.peers.map { Endpoint.sanitizeUrl(it.apiUrl) }.let { EndpointPool.default(it) }
 
-        if (terminal.info.outputInteractive) echo("Verifying cluster $cluster")
+        if (terminal.terminalInfo.outputInteractive) echo("Verifying cluster $cluster")
 
         echo(pmcTable(
                 "nodes",

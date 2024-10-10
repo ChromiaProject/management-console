@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.blockchain.import_chain
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.deprecated
 import com.github.ajalt.clikt.parameters.options.option
@@ -15,7 +15,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.requireApiVersion
 
-class CommandProposeImportForeignBlocks : CliktCommand(
+class CommandProposeImportForeignBlocks : PmcCommand(
         name = "import-foreign-blocks",
         help = """
             Propose importing a foreign blockchain blocks 

@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.cluster
 
 import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.queries.getClusterContainers
@@ -18,7 +19,7 @@ import net.postchain.mc.compatibility.ApiCompatV28.getClusterDataV28
 import net.postchain.mc.compatibility.ApiCompatV33.getClusterDataV33
 import net.postchain.mc.compatibility.ApiCompatV56.getClusterDataV56
 
-class CommandGetClusterInfo : CliktCommand(
+class CommandGetClusterInfo : PmcCommand(
         name = "info",
         help = "Get information about a cluster"
 ) {

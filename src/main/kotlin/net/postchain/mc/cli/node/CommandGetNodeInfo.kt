@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.node
 
 import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getNodeData
 import net.postchain.chain0.common.queries.listClustersOfNode
@@ -10,7 +11,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.util.pubkeyOption
 
-class CommandGetNodeInfo : CliktCommand(
+class CommandGetNodeInfo : PmcCommand(
         name = "info",
         help = "Get node info for given node pubkey"
 ) {

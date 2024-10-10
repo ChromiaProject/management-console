@@ -78,7 +78,7 @@ fun CliktCommand.showECProposalInfo(client: PostchainClient, economyChainClient:
     })
 
     if (proposal.state == CommonProposalState.PENDING) {
-        if (terminal.info.outputInteractive) echo("Proposal details")
+        if (terminal.terminalInfo.outputInteractive) echo("Proposal details")
         echo(formatECPendingProposal(economyChainClient, proposal.id, proposal.type, ecVersion))
     }
 }

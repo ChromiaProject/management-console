@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.provider
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
@@ -13,7 +13,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.urlOption
 
 
-class CommandUpdateProvider : CliktCommand(
+class CommandUpdateProvider : PmcCommand(
         name = "update",
         help = "Update provider information"
 ) {

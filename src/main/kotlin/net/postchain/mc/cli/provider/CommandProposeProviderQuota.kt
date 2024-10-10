@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.provider
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -14,7 +14,7 @@ import net.postchain.mc.cli.util.providerQuotaTypeOption
 import net.postchain.mc.cli.util.providerTierOption
 
 
-class CommandProposeProviderQuota : CliktCommand(
+class CommandProposeProviderQuota : PmcCommand(
         name = "quota",
         help = "Propose provider quota"
 ) {

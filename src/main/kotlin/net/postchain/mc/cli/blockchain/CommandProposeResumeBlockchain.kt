@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_blockchain.BlockchainAction
@@ -11,7 +11,7 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 
-class CommandProposeResumeBlockchain : CliktCommand(
+class CommandProposeResumeBlockchain : PmcCommand(
         name = "start",
         help = "Propose starting a blockchain that has previously been stopped"
 ) {

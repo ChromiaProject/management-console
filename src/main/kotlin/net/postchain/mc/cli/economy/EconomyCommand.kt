@@ -1,11 +1,11 @@
 package net.postchain.mc.cli.economy
 
-import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.economy.mint.mintCommands
 import net.postchain.mc.cli.economy.proposal.proposalCommands
 
-class EconomyCommand : CliktCommand("Economy chain commands") {
+class EconomyCommand : PmcCommand(help = "Economy chain commands") {
     override fun run() = Unit
 
     override fun aliases(): Map<String, List<String>> {

@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
@@ -23,7 +23,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
-class CommandGetAllBlockchainConfigurations : CliktCommand(
+class CommandGetAllBlockchainConfigurations : PmcCommand(
         name = "get-all-configurations",
         help = "List all blockchain configuration heights or download and save all configurations to the specified directory"
 ) {

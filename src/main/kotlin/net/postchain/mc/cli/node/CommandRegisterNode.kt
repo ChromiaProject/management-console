@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.node
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
@@ -31,7 +31,7 @@ import net.postchain.mc.compatibility.ApiCompatV28.NodeCapabilityTypeV28
 import net.postchain.mc.compatibility.ApiCompatV28.updateNodeCapabilityOperationV28
 import net.postchain.mc.network.NodeVerifier
 
-class CommandRegisterNode : CliktCommand(
+class CommandRegisterNode : PmcCommand(
         name = "register",
         help = "Registers a node"
 ) {
