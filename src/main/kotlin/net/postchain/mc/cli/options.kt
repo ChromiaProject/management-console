@@ -1,6 +1,7 @@
 package net.postchain.mc.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.options.OptionTransformContext
 import com.github.ajalt.clikt.parameters.options.convert
@@ -13,6 +14,7 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.mordant.terminal.ConversionResult
+import com.github.ajalt.mordant.terminal.prompt
 import net.postchain.common.BlockchainRid
 import net.postchain.mc.cli.base.HOST_NAME_LENGTH_MAX
 import java.time.Instant

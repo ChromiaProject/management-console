@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.provider
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -13,7 +13,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.pubkeyOption
 
-class CommandPromoteProvider : CliktCommand(
+class CommandPromoteProvider : PmcCommand(
         name = "promote",
         help = "Gives a provider access to add signer nodes to clusters"
 ) {

@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.container
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
@@ -31,7 +31,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeysOrVotersetOption
 
 
-class CommandProposeContainer : CliktCommand(
+class CommandProposeContainer : PmcCommand(
         name = "add",
         help = """
             Propose a new container in an existing cluster 

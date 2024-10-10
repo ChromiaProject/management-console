@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.proposal
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal.revokeProposalOperation
@@ -11,7 +11,7 @@ import net.postchain.mc.cli.proposal.util.proposalIndexOption
 import net.postchain.mc.cli.util.pmcConfigOption
 
 
-class CommandRevokeProposal : CliktCommand(
+class CommandRevokeProposal : PmcCommand(
         name = "revoke",
         help = "Revoke/remove a proposal submitted by you"
 ) {

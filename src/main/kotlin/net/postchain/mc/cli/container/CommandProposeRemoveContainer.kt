@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.container
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
@@ -17,7 +17,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 
 
-class CommandProposeRemoveContainer : CliktCommand(
+class CommandProposeRemoveContainer : PmcCommand(
         name = "remove",
         help = "Propose removal of container. Command is irreversible"
 ) {

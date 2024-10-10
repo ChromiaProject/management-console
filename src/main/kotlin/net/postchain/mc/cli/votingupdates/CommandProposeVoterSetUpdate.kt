@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.votingupdates
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
@@ -17,7 +17,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 
 
-class CommandProposeVoterSetUpdate : CliktCommand(
+class CommandProposeVoterSetUpdate : PmcCommand(
         name = "update",
         help = """
             Propose an update of a voter set's governor

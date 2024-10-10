@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.replica
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.operations.removeBlockchainReplicaOperation
@@ -10,7 +10,7 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeyOption
 
-class CommandRemoveBlockchainReplica : CliktCommand(
+class CommandRemoveBlockchainReplica : PmcCommand(
         name = "remove",
         help = "Remove replica of a blockchain"
 ) {

@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.blockchain.import_chain
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.groups.required
@@ -23,7 +23,7 @@ import net.postchain.mc.network.requireApiVersion
 import java.io.BufferedInputStream
 import java.io.FileInputStream
 
-class CommandProposeFinishBlockchainImport : CliktCommand(
+class CommandProposeFinishBlockchainImport : PmcCommand(
         name = "finish-import",
         help = """
             Propose finishing import of a blockchain

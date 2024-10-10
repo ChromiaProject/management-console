@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.image
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getSubnodeImages
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
@@ -10,7 +10,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.network.requireApiVersion
 
-class CommandListSubnodeImages : CliktCommand(
+class CommandListSubnodeImages : PmcCommand(
         name = "list",
         help = "List all subnode images"
 ) {

@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.container
 
 import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.queries.getContainerBlockchain
@@ -14,7 +15,7 @@ import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV3.getContainerBlockchainV3
 
-class CommandGetContainerInfo : CliktCommand(
+class CommandGetContainerInfo : PmcCommand(
         name = "info",
         help = "Get information about a container"
 ) {

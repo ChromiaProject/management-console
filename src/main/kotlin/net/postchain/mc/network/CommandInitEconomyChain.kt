@@ -1,7 +1,7 @@
 package net.postchain.mc.network
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
@@ -13,7 +13,7 @@ import net.postchain.mc.cli.economy.DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION
 import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.pmcConfigOption
 
-class CommandInitEconomyChain : CliktCommand(
+class CommandInitEconomyChain : PmcCommand(
         name = "initialize-economy-chain",
         help = "Create and initialize economy chain. Please run the command without supplying the configuration to retry a failed initialization."
 ) {

@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.cluster
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
@@ -30,7 +30,7 @@ import net.postchain.mc.compatibility.ApiCompatV33
 import net.postchain.mc.compatibility.ApiCompatV33.createClusterFromWithClusterDataOperationV33
 import net.postchain.mc.compatibility.ApiCompatV33.createClusterWithClusterDataOperationV33
 
-class CommandAddCluster : CliktCommand(
+class CommandAddCluster : PmcCommand(
         name = "add",
         help = "Create a new cluster that can hold containers with blockchains. " +
                 "This cluster will not be tracked by economy chain and nodes running in it will not be rewarded. " +

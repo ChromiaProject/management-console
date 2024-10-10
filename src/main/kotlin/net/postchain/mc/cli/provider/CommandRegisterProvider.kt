@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.provider
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
@@ -57,7 +57,7 @@ class BatchOptions : OptionGroup() {
     }
 }
 
-class CommandRegisterProvider : CliktCommand(
+class CommandRegisterProvider : PmcCommand(
         name = "register",
         help = """
             Register new provider with given pubkey

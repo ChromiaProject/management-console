@@ -1,6 +1,5 @@
 package net.postchain.mc.network
 
-import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
@@ -8,10 +7,11 @@ import com.github.ajalt.clikt.parameters.options.option
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.queries.getAllNodes
 import net.postchain.common.BlockchainRid
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 
-class VerifyCommand : CliktCommand(help = "Verify that all nodes are accessible") {
+class VerifyCommand : PmcCommand(help = "Verify that all nodes are accessible") {
     private val config by pmcConfigOption()
     private val client get() = config.client
 
@@ -24,7 +24,7 @@ class VerifyCommand : CliktCommand(help = "Verify that all nodes are accessible"
                 "nodes",
                 listOf("Node public key", "Node host", "Node provider", "Network", "Api", "Management chain", "System anchoring"),
                 client.getAllNodes(false).map { node ->
-                    if (showProgress and terminal.info.outputInteractive) echo("Verifying node: ${node.info.apiUrl}, ${node.info.pubkey}")
+                    if (showProgress and terminal.terminalInfo.outputInteractive) echo("Verifying node: ${node.info.apiUrl}, ${node.info.pubkey}")
                     val (apiAccessible, height, sacHeight) = nodeVerifier.verifyApi(node.info)
                     val hostResponds = nodeVerifier.verifyHost(node.info)
                     listOf(

@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.provider
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getAllProviders
 import net.postchain.chain0.version.apiVersion
@@ -12,7 +12,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.compatibility.ApiCompatV47.getAllProviders47
 
-class CommandListProviders : CliktCommand(
+class CommandListProviders : PmcCommand(
         name = "list",
         help = "List all providers"
 ) {

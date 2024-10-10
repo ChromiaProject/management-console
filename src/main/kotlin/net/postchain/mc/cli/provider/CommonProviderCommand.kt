@@ -1,9 +1,9 @@
 package net.postchain.mc.cli.provider
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.subcommands
 
-class CommonProviderCommand : CliktCommand(
+class CommonProviderCommand : PmcCommand(
         name = "provider",
         help = "Provider commands"
 ) {

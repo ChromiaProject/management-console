@@ -1,7 +1,7 @@
 package net.postchain.mc.cli.blockchain
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.core.ProgramResult
@@ -26,7 +26,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 
 
-class CommandProposeBlockchain : CliktCommand(
+class CommandProposeBlockchain : PmcCommand(
         name = "add",
         help = """
             Propose a new blockchain in a specific container

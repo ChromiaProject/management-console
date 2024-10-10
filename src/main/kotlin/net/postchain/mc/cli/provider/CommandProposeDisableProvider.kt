@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.provider
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.proposal_provider.proposeProviderStateOperation
 import net.postchain.mc.cli.base.printResult
@@ -10,7 +10,7 @@ import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.pubkeyOption
 
 
-class CommandProposeDisableProvider : CliktCommand(
+class CommandProposeDisableProvider : PmcCommand(
         name = "disable",
         help = "Propose disabling an existing provider"
 ) {

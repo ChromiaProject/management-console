@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.container
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -12,7 +12,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.requireApiVersion
 
-class CommandProposeContainerSubnodeImage : CliktCommand(
+class CommandProposeContainerSubnodeImage : PmcCommand(
         name = "subnode-image",
         help = "Propose assigning subnode image to a container"
 ) {

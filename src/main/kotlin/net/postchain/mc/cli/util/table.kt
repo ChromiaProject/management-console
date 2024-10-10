@@ -10,14 +10,14 @@ import com.github.ajalt.mordant.table.TableBuilder
 import java.util.Locale
 
 fun CliktCommand.pmcTable(init: TableBuilder.() -> Unit): Any =
-        if (terminal.info.outputInteractive)
+        if (terminal.terminalInfo.outputInteractive)
             defaultTable(init)
         else {
             jsonTable(init)
         }
 
 fun CliktCommand.pmcTable(name: String, headers: List<String>, rows: List<List<String>>, idColumn: Pair<Int, Int>? = null, interactive: Boolean = false): Any =
-        if (terminal.info.outputInteractive)
+        if (terminal.terminalInfo.outputInteractive)
             if (rows.isNotEmpty()) {
                 prettyTable(name, headers, rows, idColumn, interactive)
             } else {

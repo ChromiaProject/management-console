@@ -1,9 +1,9 @@
 package net.postchain.mc.cli.node
 
-import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
+import net.postchain.mc.cli.PmcCommand
 
-class NodeCommand : CliktCommand("Node commands") {
+class NodeCommand : PmcCommand(help = "Node commands") {
     override fun run() = Unit
 
     override fun aliases(): Map<String, List<String>> {

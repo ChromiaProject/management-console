@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.queries.getBlockchainSigners
@@ -10,7 +10,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.renderNodes
 
 
-class CommandListBlockchainSigners : CliktCommand(
+class CommandListBlockchainSigners : PmcCommand(
         name = "signers",
         help = "List blockchain signers"
 ) {

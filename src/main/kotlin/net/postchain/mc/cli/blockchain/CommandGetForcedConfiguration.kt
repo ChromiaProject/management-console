@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_blockchain.ForcedConfigurationData
@@ -10,7 +10,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.network.Version
 
-class CommandGetForcedConfiguration : CliktCommand(
+class CommandGetForcedConfiguration : PmcCommand(
         name = "get-forced-configuration",
         help = "Get forced configuration"
 ) {

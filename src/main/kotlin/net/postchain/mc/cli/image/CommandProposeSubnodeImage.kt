@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.image
 
-import com.github.ajalt.clikt.core.CliktCommand
+import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
@@ -19,7 +19,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.requireApiVersion
 
-class CommandProposeSubnodeImage : CliktCommand(
+class CommandProposeSubnodeImage : PmcCommand(
         name = "add",
         help = "Register new subnode image"
 ) {
