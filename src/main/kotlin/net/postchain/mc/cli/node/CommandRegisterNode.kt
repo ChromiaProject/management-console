@@ -68,7 +68,7 @@ class CommandRegisterNode : PmcCommand(
         if (!verifier.verifyHost(host, port)) throw CliktError("Node is not accessible")
         val apiVersion = client.apiVersion()
 
-        if (territory != null && apiVersion < 15) {
+        if (apiVersion < 15) {
             echo("Territory is not supported in API version $apiVersion and will be ignored")
         }
         if (capability.isNotEmpty() && apiVersion > 28) {
