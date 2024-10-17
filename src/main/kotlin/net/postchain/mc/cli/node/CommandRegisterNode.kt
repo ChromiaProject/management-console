@@ -79,15 +79,11 @@ class CommandRegisterNode : PmcCommand(
                 .apply {
                     when {
                         apiVersion >= 24 -> {
-                            territory?.let {
-                                registerNodeWithNodeDataOperation(client.pubkey, RegisterNodeData(WrappedByteArray(key.data), host, port.toLong(), apiUrl, clusters, clusterUnits, it, extraStorage))
-                            } ?: throw CliktError("Territory must be specified")
+                            registerNodeWithNodeDataOperation(client.pubkey, RegisterNodeData(WrappedByteArray(key.data), host, port.toLong(), apiUrl, clusters, clusterUnits, territory, extraStorage))
                         }
 
                         apiVersion >= 15 -> {
-                            territory?.let {
-                                registerNodeWithTerritoryAndUnitsOperation(client.pubkey, key.data, host, port.toLong(), apiUrl, it, clusterUnits, clusters)
-                            } ?: throw CliktError("Territory must be specified")
+                            registerNodeWithTerritoryAndUnitsOperation(client.pubkey, key.data, host, port.toLong(), apiUrl, territory, clusterUnits, clusters)
                         }
 
                         apiVersion >= 3 -> registerNodeWithUnitsOperation(client.pubkey, key.data, host, port.toLong(), apiUrl, clusters, clusterUnits)
