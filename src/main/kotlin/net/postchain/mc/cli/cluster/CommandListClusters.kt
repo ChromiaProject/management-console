@@ -13,7 +13,6 @@ import net.postchain.mc.cli.util.pmcTable
 class CommandListClusters : PmcCommand(
         name = "list",
         help = "List all existing clusters",
-        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

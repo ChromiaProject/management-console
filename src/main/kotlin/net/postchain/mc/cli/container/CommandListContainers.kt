@@ -17,7 +17,6 @@ import net.postchain.mc.compatibility.ApiCompatV3.getBlockchainInfoListV3
 class CommandListContainers : PmcCommand(
         name = "list",
         help = "List all existing containers",
-        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

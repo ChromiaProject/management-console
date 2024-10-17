@@ -13,7 +13,6 @@ import net.postchain.mc.network.requireApiVersion
 class CommandListSubnodeImages : PmcCommand(
         name = "list",
         help = "List all subnode images",
-        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

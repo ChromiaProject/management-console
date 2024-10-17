@@ -23,7 +23,6 @@ class CommandUpdatePriceOracleRates : ECBaseCommand(
             ```
     """.trimIndent(),
         requiresECVersion = ECONOMY_CHAIN_PRICE_ORACLE_RATE_PROPOSAL_VERSION,
-        printHelpOnEmptyArgs = true
 ) {
 
     private val tokenRates by option(

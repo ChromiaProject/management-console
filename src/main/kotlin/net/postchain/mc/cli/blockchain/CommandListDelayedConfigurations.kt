@@ -20,7 +20,6 @@ import java.util.Date
 class CommandListDelayedConfigurations : PmcCommand(
         name = "list-delayed-configurations",
         help = "List delayed configuration proposals for a blockchain",
-        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val blockchainRID by blockchainRidOption().required()

@@ -13,7 +13,6 @@ import net.postchain.mc.cli.util.renderNodes
 class CommandListBlockchainReplicas : PmcCommand(
         name = "replicas",
         help = "List blockchain replicas",
-        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

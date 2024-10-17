@@ -10,7 +10,6 @@ import net.postchain.mc.cli.util.pubkeyOption
 class CommandListContainersForNode : PmcCommand(
         name = "containers",
         help = "List containers for node",
-        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client
