@@ -46,7 +46,7 @@ class CommandRegisterNode : PmcCommand(
 
     private val apiUrl by requiredUrlOption("api url", "-a", "--api-url")
 
-    private val territory by option("-t", "--territory", help = "ISO 3166-1 alpha-2 code").validate {
+    private val territory by option("-t", "--territory", help = "ISO 3166-1 alpha-2 code").required().validate {
         require(it.length == 2)
     }
 
