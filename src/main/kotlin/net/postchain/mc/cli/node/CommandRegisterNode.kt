@@ -46,7 +46,7 @@ class CommandRegisterNode : PmcCommand(
 
     private val apiUrl by requiredUrlOption("api url", "-a", "--api-url")
 
-    private val territory by option("-t", "--territory", help = "ISO 3166-1 alpha-2 code").validate {
+    private val territory by option("-t", "--territory", help = "ISO 3166-1 alpha-2 code").required().validate {
         require(it.length == 2)
     }
 
@@ -68,7 +68,7 @@ class CommandRegisterNode : PmcCommand(
         if (!verifier.verifyHost(host, port)) throw CliktError("Node is not accessible")
         val apiVersion = client.apiVersion()
 
-        if (territory != null && apiVersion < 15) {
+        if (apiVersion < 15) {
             echo("Territory is not supported in API version $apiVersion and will be ignored")
         }
         if (capability.isNotEmpty() && apiVersion > 28) {
@@ -79,15 +79,11 @@ class CommandRegisterNode : PmcCommand(
                 .apply {
                     when {
                         apiVersion >= 24 -> {
-                            territory?.let {
-                                registerNodeWithNodeDataOperation(client.pubkey, RegisterNodeData(WrappedByteArray(key.data), host, port.toLong(), apiUrl, clusters, clusterUnits, it, extraStorage))
-                            } ?: throw CliktError("Territory must be specified")
+                            registerNodeWithNodeDataOperation(client.pubkey, RegisterNodeData(WrappedByteArray(key.data), host, port.toLong(), apiUrl, clusters, clusterUnits, territory, extraStorage))
                         }
 
                         apiVersion >= 15 -> {
-                            territory?.let {
-                                registerNodeWithTerritoryAndUnitsOperation(client.pubkey, key.data, host, port.toLong(), apiUrl, it, clusterUnits, clusters)
-                            } ?: throw CliktError("Territory must be specified")
+                            registerNodeWithTerritoryAndUnitsOperation(client.pubkey, key.data, host, port.toLong(), apiUrl, territory, clusterUnits, clusters)
                         }
 
                         apiVersion >= 3 -> registerNodeWithUnitsOperation(client.pubkey, key.data, host, port.toLong(), apiUrl, clusters, clusterUnits)
