@@ -23,9 +23,6 @@ class CommandListProviderKeys : DCBaseCommand(
     private val singleProviderHeader = listOf("Role", "Threshold", "Key")
     private val multiProviderHeader = listOf("Provider", "Role", "Threshold", "Key")
 
-    override val printHelpOnEmptyArgs: Boolean
-        get() = false
-
     override fun runDC() {
 
         val providers = getProviders()

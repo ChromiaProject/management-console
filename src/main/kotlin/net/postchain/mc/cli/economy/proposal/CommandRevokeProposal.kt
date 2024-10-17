@@ -10,7 +10,7 @@ import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.economy.ECBaseCommand
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_PROVIDER_MULTI_KEY
+import net.postchain.mc.cli.economy.ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
 import net.postchain.mc.compatibility.ApiCompatECV21.revokeProposalOperationECV20
 
@@ -32,7 +32,7 @@ class CommandRevokeProposal : ECBaseCommand(
                                 "Cannot revoke proposal"
                         )
             }
-            ecVersion.version < ECONOMY_CHAIN_PROVIDER_MULTI_KEY -> {
+            ecVersion.version < ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .revokeCommonProposalOperation(PubKey(client.pubkey), RowId(idx))
                         .postAwaitConfirmation()

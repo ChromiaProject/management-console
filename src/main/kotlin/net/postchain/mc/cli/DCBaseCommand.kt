@@ -8,7 +8,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.network.Version
 import net.postchain.mc.network.requireApiVersion
 
-const val DIRECTORY_CHAIN_PROVIDER_MULTI_KEY = 65
+const val DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION = 65
 
 abstract class DCBaseCommand(
         name: String,

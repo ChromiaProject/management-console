@@ -5,7 +5,7 @@ import net.postchain.chain0.proposal.revokeProposalOperation
 import net.postchain.chain0.proposal.revokeProposalV65Operation
 import net.postchain.common.types.RowId
 import net.postchain.mc.cli.DCBaseCommand
-import net.postchain.mc.cli.DIRECTORY_CHAIN_PROVIDER_MULTI_KEY
+import net.postchain.mc.cli.DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
@@ -20,7 +20,7 @@ class CommandRevokeProposal : DCBaseCommand(
 
         client.transactionBuilder().apply {
             when {
-                dcVersion < DIRECTORY_CHAIN_PROVIDER_MULTI_KEY -> {
+                dcVersion < DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION -> {
                     revokeProposalOperation(client.pubkey, RowId(idx))
                 }
                 else -> {
