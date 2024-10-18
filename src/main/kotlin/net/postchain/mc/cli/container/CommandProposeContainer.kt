@@ -82,6 +82,8 @@ class CommandProposeContainer : PmcCommand(
         val apiVersion = client.apiVersion()
 
         if (direct) {
+            if (subnodeImageName != null)
+                throw CliktError("Cannot assign subnode image when creating container directly, use --proposal")
             var hasDirectContainer = true
             if (apiVersion >= 49)
                 hasDirectContainer = client.hasDirectContainer()
