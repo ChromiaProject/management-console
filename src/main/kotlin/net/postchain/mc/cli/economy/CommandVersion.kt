@@ -6,7 +6,8 @@ import net.postchain.mc.network.Version
 
 class CommandVersion : ECBaseCommand(
         name = "version",
-        help = "Shows economy chain version"
+        help = "Shows economy chain version",
+        printHelpOnEmptyArgs = false
 ) {
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
