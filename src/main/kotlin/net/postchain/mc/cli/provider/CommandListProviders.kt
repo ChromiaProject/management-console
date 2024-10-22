@@ -14,7 +14,8 @@ import net.postchain.mc.compatibility.ApiCompatV47.getAllProviders47
 
 class CommandListProviders : PmcCommand(
         name = "list",
-        help = "List all providers"
+        help = "List all providers",
+        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

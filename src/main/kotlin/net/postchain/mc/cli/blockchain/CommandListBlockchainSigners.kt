@@ -12,7 +12,7 @@ import net.postchain.mc.cli.util.renderNodes
 
 class CommandListBlockchainSigners : PmcCommand(
         name = "signers",
-        help = "List blockchain signers"
+        help = "List blockchain signers",
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

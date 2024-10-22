@@ -22,7 +22,8 @@ import net.postchain.mc.compatibility.ApiCompatECV21.getRelevantProposalsECV20
 
 class CommandListProposals : ECBaseCommand(
         name = "list",
-        help = "List all proposals that you can vote on"
+        help = "List all proposals that you can vote on",
+        printHelpOnEmptyArgs = false
 ) {
     private val from by dateToTimestampOption("List proposals from date (YYYY-MM-DD)")
     private val to by dateToTimestampOption("List proposals to date (YYYY-MM-DD)", Long.MAX_VALUE, "9999-12-31", 1)

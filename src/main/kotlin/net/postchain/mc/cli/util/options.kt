@@ -72,8 +72,8 @@ fun CliktCommand.pmcConfigOption() = PmcClientConfigOption(::echo)
 class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConfigOption(logger) {
     private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup").flag()
     val network by option("--network", help = "Target network to make requests to (if chromia.yml is configured)")
+    val rawConfig by lazy { ChromiaConfigLoader(logger).loadProperties(configFile) }
     val client by lazy {
-        val rawConfig = ChromiaConfigLoader(logger).loadProperties(configFile)
         if (network != null) {
             requireNotNull(model) { "chromia.yml not found" }
             val networkModel = model!!.deployments[network]
@@ -86,7 +86,7 @@ class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConf
                 .getEnvOrBooleanProperty("POSTCHAIN_CLIENT_COMPRESS_REQUEST_BODIES", "compress.requests", true)
         NopPostchainClient.withCachedBrid(config, configuredBrid, lookupBrid, useRequestCompression)
     }
-
+    val providerPubkey by lazy { rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_PROVIDER_PUBKEY", "provider.pubkey") }
 }
 
 fun CliktCommand.nameOption(helpMessage: String) = option("-n", "--name", help = helpMessage)

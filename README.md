@@ -27,12 +27,13 @@ env CHROMIA_CONFIG # overriding file
 
 Configuration can be done using for example `pmc config --global/--local --set api.url=<url>`
 
-| Property | Definition                               | Comment                                           |
-|----------|------------------------------------------|---------------------------------------------------|
-| api.url  | Api url of a node in the chromia network | Can be a comma-delimited list                     |
-| brid     | Blockchain rid of the directory chain    |                                                   |
-| pubkey   | Public key                               |                                                   |
-| privkey  | Private Key                              | Used to sign any transactions sent to the network |
+| Property        | Definition                                           | Comment                                                                   |
+|-----------------|------------------------------------------------------|---------------------------------------------------------------------------|
+| api.url         | Api url of a node in the chromia network             | Can be a comma-delimited list                                             |
+| brid            | Blockchain rid of the directory chain                |                                                                           |
+| pubkey          | Public key                                           |                                                                           |
+| privkey         | Private Key                                          | Used to sign any transactions sent to the network                         |
+| provider.pubkey | The default provider to be set for provider commands | This is by default looked up automatically, but can be set to be skipped. |
 
 Note: The public/private keypair is only needed if you intend to send operations
 

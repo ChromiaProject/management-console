@@ -19,7 +19,6 @@ class CommandSetProviderStakingAccount : ECBaseCommand(
             Transaction must be signed by provider, current and new staking account key.
         """.trimIndent(),
         requiresECVersion = 40,
-        printHelpOnEmptyArgs = true
 ) {
     private val providerPubkey by pubkeyOption("Provider public key")
     private val accountPubkey by option("--account-pk", help = "Public key of new staking account")

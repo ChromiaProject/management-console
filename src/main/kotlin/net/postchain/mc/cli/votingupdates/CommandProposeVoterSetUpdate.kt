@@ -1,7 +1,5 @@
 package net.postchain.mc.cli.votingupdates
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
@@ -11,13 +9,12 @@ import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal_voter_set.proposeUpdateVoterSetOperation
 import net.postchain.common.hexStringToByteArray
 import net.postchain.common.toHex
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 
 
-class CommandProposeVoterSetUpdate : PmcCommand(
+class CommandProposeVoterSetUpdate : DCBaseCommand(
         name = "update",
         help = """
             Propose an update of a voter set's governor
@@ -25,9 +22,6 @@ class CommandProposeVoterSetUpdate : PmcCommand(
             New governor must be an existing voter set.
         """.trimIndent()
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val voterSet by option(
             "-vs", "--voter-set",
             help = "Name of existing voter set to update"
@@ -50,10 +44,10 @@ class CommandProposeVoterSetUpdate : PmcCommand(
                 "remove members: ${removeMember.map { it.toHex() }.toTypedArray().contentToString()}"
     }
 
-    override fun run() {
+    override fun runDC() {
         client.transactionBuilder()
                 .proposeUpdateVoterSetOperation(
-                        client.config.pubkey().data,
+                        clientProviderPubkey,
                         voterSet, threshold, governor, newMember, removeMember, description
                 )
                 .postAwaitConfirmation()

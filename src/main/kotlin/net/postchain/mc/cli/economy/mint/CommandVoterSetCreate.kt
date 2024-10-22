@@ -11,7 +11,8 @@ class CommandVoterSetCreate : ECBaseCommand(
         help = """
             Creates the voter set with members to manage minting proposals. Operation can only be run once and adds the signer as first member.
         """.trimIndent(),
-        requiresECVersion = ECONOMY_CHAIN_MINTING_VERSION
+        requiresECVersion = ECONOMY_CHAIN_MINTING_VERSION,
+        printHelpOnEmptyArgs = false
 ) {
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {

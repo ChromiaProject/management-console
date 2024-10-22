@@ -1,33 +1,26 @@
 package net.postchain.mc.cli.blockchain
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_blockchain.BlockchainAction
 import net.postchain.chain0.proposal_blockchain.proposeBlockchainActionOperation
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
-import net.postchain.mc.network.requireApiVersion
 
-class CommandProposeArchiveBlockchain : PmcCommand(
+class CommandProposeArchiveBlockchain : DCBaseCommand(
         name = "archive",
-        help = "Propose archiving of blockchain. Command is irreversible"
+        help = "Propose archiving of blockchain. Command is irreversible",
+        requiresVersion = 33
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val blockchainRID by blockchainRidOption().required()
 
     private val description by proposalDescriptionOption { "Archive blockchain $blockchainRID" }
 
-    override fun run() {
-        client.requireApiVersion(33)
+    override fun runDC() {
         client.transactionBuilder()
                 .proposeBlockchainActionOperation(
-                        client.config.pubkey().data,
+                        clientProviderPubkey,
                         blockchainRID,
                         BlockchainAction.archive,
                         description

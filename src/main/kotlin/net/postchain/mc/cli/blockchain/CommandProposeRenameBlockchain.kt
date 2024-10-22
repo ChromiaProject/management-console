@@ -1,36 +1,28 @@
 package net.postchain.mc.cli.blockchain
 
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.proposal_blockchain.proposeBlockchainRenameOperation
 import net.postchain.chain0.version.apiVersion
-import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 
-class CommandProposeRenameBlockchain : PmcCommand(
+class CommandProposeRenameBlockchain : DCBaseCommand(
         name = "rename",
         help = "Propose renaming a blockchain."
 ) {
-    override val printHelpOnEmptyArgs: Boolean
-        get() = true
-
-    private val config by pmcConfigOption()
-
     private val blockchainRID by blockchainRidOption().required()
 
     private val name by nameOption("Name of blockchain").required().validate(entityNameValidator())
 
     private val description by proposalDescriptionOption { "Rename blockchain $blockchainRID to $name" }
 
-    override fun run() {
+    override fun runDC() {
 
         val client = config.client
         val apiVersion = client.apiVersion()
@@ -40,7 +32,7 @@ class CommandProposeRenameBlockchain : PmcCommand(
 
         client.transactionBuilder()
                 .proposeBlockchainRenameOperation(
-                        client.config.pubkey().data,
+                        clientProviderPubkey,
                         blockchainRID,
                         name,
                         description

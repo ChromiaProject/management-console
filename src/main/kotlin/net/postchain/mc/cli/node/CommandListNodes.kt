@@ -12,7 +12,7 @@ import net.postchain.mc.cli.util.pmcTable
 
 class CommandListNodes : PmcCommand(
         name = "list",
-        help = "List all nodes"
+        help = "List all nodes",
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

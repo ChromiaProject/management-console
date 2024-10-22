@@ -11,7 +11,8 @@ import net.postchain.mc.cli.util.pmcTable
 
 class CommandListProviderQuotas : PmcCommand(
         name = "quotas",
-        help = "List provider quotas"
+        help = "List provider quotas",
+        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client

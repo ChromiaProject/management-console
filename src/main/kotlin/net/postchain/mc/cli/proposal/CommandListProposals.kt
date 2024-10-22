@@ -25,7 +25,7 @@ import net.postchain.mc.compatibility.ApiCompatV6.getRelevantProposalsV6
 
 class CommandListProposals : PmcCommand(
         name = "list",
-        help = "List all proposals that you can vote on"
+        help = "List all proposals that you can vote on",
 ) {
 
     private val config by pmcConfigOption()

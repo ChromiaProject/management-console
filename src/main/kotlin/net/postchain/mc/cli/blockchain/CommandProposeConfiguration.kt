@@ -1,8 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
@@ -11,18 +9,16 @@ import net.postchain.chain0.proposal_blockchain.proposeConfigurationOperation
 import net.postchain.gtv.GtvEncoder
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.AlreadyExistMode
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.forceOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
-import net.postchain.mc.network.Version
 
 
-class CommandProposeConfiguration : PmcCommand(
+class CommandProposeConfiguration : DCBaseCommand(
         name = "update",
         help = """
         Propose a new configuration to blockchain
@@ -33,9 +29,6 @@ class CommandProposeConfiguration : PmcCommand(
         at a height < previously approved config heights. Change will be applied after voting.
         """.trimIndent()
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val blockchainConfigFile by option("-bc", "--blockchain-config", help = "Blockchain config to propose")
             .file(mustExist = true, mustBeReadable = true, canBeDir = false)
             .required()
@@ -51,32 +44,31 @@ class CommandProposeConfiguration : PmcCommand(
         else "Update of blockchain configuration for $blockchainRID at height $height with force: $force"
     }
 
-    override fun run() {
-        val version = Version(client)
+    override fun runDC() {
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
-        val compressedConfigurationData = GtvEncoder.encodeGtv(BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, version.version))
+        val compressedConfigurationData = GtvEncoder.encodeGtv(BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, dcVersion))
 
         client.transactionBuilder()
                 .apply {
                     if (height == null) {
-                        when (version.version) {
+                        when (dcVersion) {
                             1L -> {
                                 addOperation("propose_configuration",
-                                        gtv(client.config.pubkey().data),
+                                        gtv(clientProviderPubkey),
                                         gtv(blockchainRID),
                                         gtv(bcConfig.data)
                                 )
                             }
 
                             else -> {
-                                proposeConfigurationOperation(client.config.pubkey().data, blockchainRID, compressedConfigurationData, description)
+                                proposeConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, description)
                             }
                         }
                     } else {
-                        when (version.version) {
+                        when (dcVersion) {
                             1L -> {
                                 addOperation("propose_configuration_at",
-                                        gtv(client.config.pubkey().data),
+                                        gtv(clientProviderPubkey),
                                         gtv(blockchainRID),
                                         gtv(bcConfig.data),
                                         gtv(height!!),
@@ -84,7 +76,7 @@ class CommandProposeConfiguration : PmcCommand(
                             }
 
                             else -> {
-                                proposeConfigurationAtOperation(client.config.pubkey().data, blockchainRID, compressedConfigurationData, height!!, force == AlreadyExistMode.FORCE, description)
+                                proposeConfigurationAtOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, height!!, force == AlreadyExistMode.FORCE, description)
                             }
                         }
                     }

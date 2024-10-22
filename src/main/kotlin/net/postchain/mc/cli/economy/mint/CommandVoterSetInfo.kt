@@ -10,7 +10,8 @@ import net.postchain.mc.cli.votingupdates.formatThreshold
 class CommandVoterSetInfo : ECBaseCommand(
         name = "voter-set-info",
         help = "Show information of voter set",
-        requiresECVersion = ECONOMY_CHAIN_MINTING_VERSION
+        requiresECVersion = ECONOMY_CHAIN_MINTING_VERSION,
+        printHelpOnEmptyArgs = false
 ) {
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
         val voterSet = economyChainClient.getChromiaFoundationVoterSetInfo()

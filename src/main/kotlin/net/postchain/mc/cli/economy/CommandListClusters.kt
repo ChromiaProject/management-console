@@ -10,7 +10,8 @@ import net.postchain.mc.cli.util.pmcTable
 
 class CommandListClusters : ECBaseCommand(
         name = "list-clusters",
-        help = "List all clusters that are tracked by economy chain"
+        help = "List all clusters that are tracked by economy chain",
+        printHelpOnEmptyArgs = false
 ) {
     private val interactive by interactiveOption()
 

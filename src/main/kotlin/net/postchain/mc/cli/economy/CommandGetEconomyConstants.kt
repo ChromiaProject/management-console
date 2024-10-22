@@ -6,7 +6,8 @@ import net.postchain.mc.cli.util.pmcTable
 
 class CommandGetEconomyConstants : ECBaseCommand(
         name = "get-constants",
-        help = "Get economy chain constants"
+        help = "Get economy chain constants",
+        printHelpOnEmptyArgs = false,
 ) {
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 

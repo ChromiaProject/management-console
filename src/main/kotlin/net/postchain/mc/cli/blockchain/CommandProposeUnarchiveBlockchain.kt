@@ -1,26 +1,20 @@
 package net.postchain.mc.cli.blockchain
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal_blockchain.proposeBlockchainUnarchiveActionOperation
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
-import net.postchain.mc.network.requireApiVersion
 
-class CommandProposeUnarchiveBlockchain : PmcCommand(
+class CommandProposeUnarchiveBlockchain : DCBaseCommand(
         name = "unarchive",
-        help = "Propose unarchiving of blockchain. Command is irreversible"
+        help = "Propose unarchiving of blockchain. Command is irreversible",
+        requiresVersion = 33
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val blockchainRID by blockchainRidOption().required()
 
     private val finalHeight by option("--final-height",
@@ -35,11 +29,10 @@ class CommandProposeUnarchiveBlockchain : PmcCommand(
         "Unarchive blockchain $blockchainRID to the container $destinationContainer with final-height: $finalHeight"
     }
 
-    override fun run() {
-        client.requireApiVersion(33)
+    override fun runDC() {
         client.transactionBuilder()
                 .proposeBlockchainUnarchiveActionOperation(
-                        client.config.pubkey().data,
+                        clientProviderPubkey,
                         blockchainRID,
                         destinationContainer,
                         finalHeight,
