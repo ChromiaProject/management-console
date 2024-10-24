@@ -40,9 +40,11 @@ abstract class DCBaseCommand(
     abstract fun runDC()
 
     fun getProviderByClientKeys(): ByteArray? {
-        config.config.signers.forEach {
-            client.getProviderByKey(it.pubKey)?.let { provider ->
-                return provider
+        if (dcVersion >= 65) {
+            config.config.signers.forEach {
+                client.getProviderByKey(it.pubKey)?.let { provider ->
+                    return provider
+                }
             }
         }
         return null
