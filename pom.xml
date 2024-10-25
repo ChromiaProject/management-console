@@ -21,7 +21,7 @@
         <revision>dev</revision>
         <postchain.version>3.20.4</postchain.version>
         <postchain.client.version>3.18.2</postchain.client.version>
-        <directory.chain.version>1.65.0</directory.chain.version>
+        <directory.chain.version>1.67.0</directory.chain.version>
         <chr.version>0.20.15</chr.version>
         <rell.maven.plugin.version>0.12.5</rell.maven.plugin.version>
         <web3j.version>4.12.0</web3j.version>
