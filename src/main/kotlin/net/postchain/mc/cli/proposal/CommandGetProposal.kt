@@ -109,6 +109,9 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
                     proposal.applyAt?.let {
                         row("Apply at", "${Date.from(Instant.ofEpochMilli(it))}")
                     }
+                    if (apiVersion >= 67 && proposal.voterSetName != null) {
+                        row("Voter set", proposal.voterSetName)
+                    }
                     printVotingInfo(client, proposal, apiVersion)
                     row("Description", proposal.description)
                 }
