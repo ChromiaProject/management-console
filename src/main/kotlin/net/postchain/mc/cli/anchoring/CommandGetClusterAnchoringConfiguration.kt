@@ -1,12 +1,12 @@
 package net.postchain.mc.cli.anchoring
 
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.common.queries.getClusterAnchoringConfiguration
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.gtvml.GtvMLEncoder
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandGetClusterAnchoringConfiguration : PmcCommand(
@@ -15,16 +15,21 @@ class CommandGetClusterAnchoringConfiguration : PmcCommand(
 ) {
     private val config by pmcConfigOption()
 
-    private val save by option(help = "where to save configuration XML").file(canBeFile = true, canBeDir = false)
+    private val save by option(help = "where to save configuration, format will be determined by file extension: .xml or .gtv").file(canBeFile = true, canBeDir = false)
 
     override fun run() {
         val ac = config.client.getClusterAnchoringConfiguration()
-        val xmlGtv = GtvMLEncoder.encodeXMLGtv(GtvDecoder.decodeGtv(ac))
         if (save != null) {
-            save!!.parentFile.mkdirs()
-            save!!.writeText(xmlGtv)
+            save!!.parentFile?.mkdirs()
+            when (save!!.extension) {
+                "gtv" -> save!!.writeBytes(ac)
+
+                else -> save!!.writer().use {
+                    GtvMLEncoder.encodeXML(GtvDecoder.decodeGtv(ac), it, strict = false)
+                }
+            }
         } else {
-            println(xmlGtv)
+            echo(GtvMLEncoder.encodeXMLGtv(GtvDecoder.decodeGtv(ac)))
         }
     }
 }
