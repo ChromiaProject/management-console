@@ -139,6 +139,7 @@ class CommandProposeImportBlockchain : PmcCommand(
                     val height = gtv.asArray()[0].asInteger()
                     require(height > 0)
                     val configData = gtv.asArray()[1].asByteArray()
+                    echo("Importing configuration at height $height...")
                     val wasAdded = txBuilder.tryAddConfiguration(blockchainRid, height, configData)
                     if (!wasAdded) {
                         postTransaction(txBuilder)?.also(::add)
