@@ -22,7 +22,7 @@
         <postchain.version>3.21.2</postchain.version>
         <postchain.client.version>3.18.2</postchain.client.version>
         <directory.chain.version>1.68.0</directory.chain.version>
-        <chr.version>0.20.15</chr.version>
+        <chr.version>0.21.3</chr.version>
         <rell.maven.plugin.version>0.12.5</rell.maven.plugin.version>
         <web3j.version>4.12.0</web3j.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
@@ -102,8 +102,13 @@
 
         <!-- logging -->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
             <scope>runtime</scope>
         </dependency>
 

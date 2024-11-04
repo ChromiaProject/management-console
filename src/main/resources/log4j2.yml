@@ -1,0 +1,44 @@
+Properties:
+  Property:
+    - name: logpattern
+      value: "%-5level %d{yyyy-MM-dd HH:mm:ss.SSS}%replace{%notEmpty{ [%notEmpty{bc-rid=%.-2X{blockchainRID}:%.4X{blockchainRID}}%notEmpty{, chain-id=%X{chainIID}}%notEmpty{, block-rid=%.-2X{blockRID}:%.4X{blockRID}}]}}{\\[, }{[} - [%t] %c{1} %msg%n"
+
+Appenders:
+  Console:
+    name: ConsoleAppender
+    target: SYSTEM_OUT
+    PatternLayout:
+      pattern: ${logpattern}
+
+  RollingFile:
+    name: LogToRollingFile
+    fileName: ${sys:CHR_LOG_FOLDER:-logs}/pmc.log
+    filePattern: "${sys:CHR_LOG_FOLDER:-logs}/pmc-%d{MM-dd-yyyy}-%i.log.gz"
+    createOnDemand: true
+    PatternLayout:
+      pattern: ${logpattern}
+    Policies:
+      SizeBasedTriggeringPolicy:
+        size: 10MB
+    DefaultRollOverStrategy:
+      max: 10
+
+Loggers:
+  Root:
+    level: warn
+    AppenderRef:
+      - ref: LogToRollingFile
+  Logger:
+    - name: net.postchain
+      level: ${env:CHR_LOG_LEVEL:-info}
+      additivity: false
+      AppenderRef:
+        - ref: ConsoleAppender
+        - ref: LogToRollingFile
+          level: warn
+    - name: net.postchain.gtv.merkle
+      level: error
+    - name: net.postchain.rell.toolbox.formatter
+      level: error
+    - name: org.apache.commons.beanutils
+      level: error
