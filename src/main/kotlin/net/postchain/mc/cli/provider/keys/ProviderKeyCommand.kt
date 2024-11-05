@@ -11,6 +11,6 @@ class ProviderKeyCommand : NoOpCliktCommand(name = "key") {
 fun providerKeyCommands() = ProviderKeyCommand().subcommands(
         CommandListProviderKeys(),
         CommandAddProviderKey(),
-        CommandRemoveProviderKey(),
+        CommandRevokeProviderKey(),
         CommandSetProviderKeyThreshold(),
 )
