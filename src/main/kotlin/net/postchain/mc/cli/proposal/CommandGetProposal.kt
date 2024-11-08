@@ -104,7 +104,7 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
 
             echo(pmcTable {
                 body {
-                    printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name)
+                    printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name, proposal.txRid)
                     row("State", proposal.state.toString())
                     proposal.applyAt?.let {
                         row("Apply at", "${Date.from(Instant.ofEpochMilli(it))}")
@@ -131,7 +131,7 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
 
             echo(pmcTable {
                 body {
-                    printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name)
+                    printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name, null)
                     printVotingResults(client.getProposalVotingResults(proposal.id))
                     row("Description", proposal.description)
                 }
@@ -194,10 +194,11 @@ private fun SectionBuilder.printVotingResults(votingResults: ProposalVotingResul
     row("Status", votingResults.votingResult.toString())
 }
 
-private fun SectionBuilder.printProposalHeader(id: RowId, type: ProposalType, timestamp: Long, proposedByPubkey: WrappedByteArray, proposedByName: String) {
+private fun SectionBuilder.printProposalHeader(id: RowId, type: ProposalType, timestamp: Long, proposedByPubkey: WrappedByteArray, proposedByName: String, txRid: WrappedByteArray?) {
     row("Proposal", "${id.id} - ${type.name}")
     row("Proposed by", formatProvider(proposedByPubkey, proposedByName))
     row("Time", "${Date.from(Instant.ofEpochMilli(timestamp))}")
+    txRid?.let { row("Transaction", it.toHex()) }
 }
 
 private fun formatProvider(providerPubKey: WrappedByteArray, providerName: String) =
