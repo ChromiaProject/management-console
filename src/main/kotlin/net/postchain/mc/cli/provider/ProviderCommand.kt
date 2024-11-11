@@ -1,7 +1,7 @@
 package net.postchain.mc.cli.provider
 
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.subcommands
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.provider.keys.providerKeyCommands
 
 class CommonProviderCommand : PmcCommand(
@@ -29,5 +29,6 @@ fun providerCommands() = CommonProviderCommand().subcommands(
         CommandPromoteProvider(),
         CommandProposeDisableProvider(),
         CommandTransferActionPoints(),
+        CommandProviderBlockchainAuth(),
         providerKeyCommands(),
 )
