@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.container
 
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
@@ -9,9 +8,11 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.direct_container.createContainerFromOperation
+import net.postchain.chain0.direct_container.createContainerFromWithResourceLimitsAndSubnodeImageOperation
 import net.postchain.chain0.direct_container.createContainerFromWithResourceLimitsOperation
 import net.postchain.chain0.direct_container.createContainerFromWithUnitsOperation
 import net.postchain.chain0.direct_container.createContainerOperation
+import net.postchain.chain0.direct_container.createContainerWithResourceLimitsAndSubnodeImageOperation
 import net.postchain.chain0.direct_container.createContainerWithResourceLimitsOperation
 import net.postchain.chain0.direct_container.createContainerWithUnitsOperation
 import net.postchain.chain0.features.hasDirectContainer
@@ -19,6 +20,7 @@ import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.proposal_container.proposeContainerOperation
 import net.postchain.chain0.proposal_container.proposeContainerWithSubnodeImageOperation
 import net.postchain.chain0.version.apiVersion
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.VoterSetOrPubkeysOption
@@ -82,8 +84,11 @@ class CommandProposeContainer : PmcCommand(
         val apiVersion = client.apiVersion()
 
         if (direct) {
-            if (subnodeImageName != null)
-                throw CliktError("Cannot assign subnode image when creating container directly, use --proposal")
+            if (subnodeImageName != null) {
+                if (apiVersion < 72) {
+                    throw CliktError("Cannot assign subnode image when creating container directly, use --proposal")
+                }
+            }
             var hasDirectContainer = true
             if (apiVersion >= 49)
                 hasDirectContainer = client.hasDirectContainer()
@@ -91,6 +96,42 @@ class CommandProposeContainer : PmcCommand(
                 client.transactionBuilder()
                         .apply {
                             when {
+
+                                apiVersion >= 72 -> {
+                                    when (deployerOption) {
+                                        is VoterSetOrPubkeysOption.Pubkeys -> {
+                                            createContainerWithResourceLimitsAndSubnodeImageOperation(
+                                                    client.pubkey,
+                                                    name,
+                                                    clusterName,
+                                                    consensusThreshold,
+                                                    (deployerOption as VoterSetOrPubkeysOption.Pubkeys).pubkeys,
+                                                    mapOf(
+                                                            ContainerResourceLimitType.container_units to containerUnits,
+                                                            ContainerResourceLimitType.max_blockchains to maxBlockchains,
+                                                            ContainerResourceLimitType.extra_storage to extraStorage
+                                                    ),
+                                                    subnodeImageName ?: ""
+                                            )
+                                        }
+
+                                        is VoterSetOrPubkeysOption.VoterSet -> {
+                                            createContainerFromWithResourceLimitsAndSubnodeImageOperation(
+                                                    client.pubkey,
+                                                    name,
+                                                    clusterName,
+                                                    consensusThreshold,
+                                                    (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
+                                                    mapOf(
+                                                            ContainerResourceLimitType.container_units to containerUnits,
+                                                            ContainerResourceLimitType.max_blockchains to maxBlockchains,
+                                                            ContainerResourceLimitType.extra_storage to extraStorage
+                                                    ),
+                                                    subnodeImageName ?: ""
+                                            )
+                                        }
+                                    }
+                                }
 
                                 apiVersion >= 24 -> {
                                     when (deployerOption) {
