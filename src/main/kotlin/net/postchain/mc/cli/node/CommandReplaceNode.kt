@@ -1,11 +1,14 @@
 package net.postchain.mc.cli.node
 
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.operations.replaceNodeOperation
+import net.postchain.chain0.common.operations.replaceNodeWithNodeDataAndKeepOldNodeAsReplicaOperation
 import net.postchain.chain0.common.operations.replaceNodeWithNodeDataOperation
 import net.postchain.chain0.common.operations.replaceNodeWithUnitsAndTerritoryOperation
 import net.postchain.chain0.common.operations.replaceNodeWithUnitsOperation
@@ -49,6 +52,8 @@ class CommandReplaceNode : DCBaseCommand(
 
     private val extraStorage by extraStorageOption().default(0)
 
+    private val keepOldNodeAsReplica by option("--keep-as-replica", help = "Keep replaced node as a replica node").flag()
+
     override fun runDC() {
         if (territory != null && dcVersion < 15) {
             echo("Territory is not supported in API version $dcVersion and will be ignored")
@@ -56,11 +61,18 @@ class CommandReplaceNode : DCBaseCommand(
 
         client.transactionBuilder()
                 .apply {
-                    when {
-                        dcVersion >= 24 -> replaceNodeWithNodeDataOperation(clientProviderPubkey, ReplaceNodeData(WrappedByteArray(old.data), WrappedByteArray(new.data), host, port?.toLong(), apiUrl, clusterUnits, territory, extraStorage))
-                        dcVersion >= 15 -> replaceNodeWithUnitsAndTerritoryOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, territory, clusterUnits)
-                        dcVersion >= 3 -> replaceNodeWithUnitsOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, clusterUnits)
-                        else -> replaceNodeOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl)
+                    if (keepOldNodeAsReplica) {
+                        if (dcVersion < 73) {
+                            throw CliktError("Keeping node as replica '--keep-as-replica' is not supported by network")
+                        }
+                        replaceNodeWithNodeDataAndKeepOldNodeAsReplicaOperation(clientProviderPubkey, ReplaceNodeData(WrappedByteArray(old.data), WrappedByteArray(new.data), host, port?.toLong(), apiUrl, clusterUnits, territory, extraStorage))
+                    } else {
+                        when {
+                            dcVersion >= 24 -> replaceNodeWithNodeDataOperation(clientProviderPubkey, ReplaceNodeData(WrappedByteArray(old.data), WrappedByteArray(new.data), host, port?.toLong(), apiUrl, clusterUnits, territory, extraStorage))
+                            dcVersion >= 15 -> replaceNodeWithUnitsAndTerritoryOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, territory, clusterUnits)
+                            dcVersion >= 3 -> replaceNodeWithUnitsOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, clusterUnits)
+                            else -> replaceNodeOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl)
+                        }
                     }
                 }
                 .postAwaitConfirmation()
