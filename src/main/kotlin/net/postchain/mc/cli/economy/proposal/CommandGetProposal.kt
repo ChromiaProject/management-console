@@ -30,6 +30,7 @@ import net.postchain.economy.economy_chain.getTagProposal
 import net.postchain.mc.cli.base.rowIfNotNull
 import net.postchain.mc.cli.economy.ECBaseCommand
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
+import net.postchain.mc.cli.economy.ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION
 import net.postchain.mc.cli.economy.doEcSupportMinorUnits
 import net.postchain.mc.cli.economy.formatChr
 import net.postchain.mc.cli.economy.formatUsd
@@ -40,6 +41,7 @@ import net.postchain.mc.compatibility.ApiCompatECV21.EcProposalTypeECV20
 import net.postchain.mc.compatibility.ApiCompatECV21.getProposalECV20
 import net.postchain.mc.compatibility.ApiCompatECV21.getProposalVoterInfoECV20
 import net.postchain.mc.compatibility.ApiCompatECV21.getProposalVotingResultsECV20
+import net.postchain.mc.compatibility.ApiCompatECV45.getStakingRequirementConstantsProposalV45
 import java.time.Instant
 import java.util.Date
 
@@ -224,7 +226,7 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
             val proposalDetails = economyChainClient.getSystemProviderEconomyConstantsProposal(proposalId)
             return pmcTable {
                 body {
-                    rowIfNotNull(proposalDetails.totalCostSystemProviders) { listOf("Total cost system provider in USD", formatUsd(proposalDetails.totalCostSystemProviders, ecVersion)) }
+                    proposalDetails.totalCostSystemProviders?.let { row("Total cost system provider in USD", formatUsd(it, ecVersion)) }
                     rowIfNotNull("System provider fee share", proposalDetails.systemProviderFeeShare)
                     rowIfNotNull("System provider risk share", proposalDetails.systemProviderRiskShare)
                 }
@@ -232,15 +234,29 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
         }
 
         CommonProposalType.ec_staking_requirement_constants_update -> {
-            val proposalDetails = economyChainClient.getStakingRequirementConstantsProposal(proposalId)
-            return pmcTable {
-                body {
-                    rowIfNotNull("Staking requirements enabled", proposalDetails.enabled)
-                    rowIfNotNull("Stop payout days", proposalDetails.stopPayoutDays)
-                    rowIfNotNull(proposalDetails.systemProviderOwnStakeChr) { listOf("Requirement - system provider own staking in CHR", formatChr(proposalDetails.systemProviderOwnStakeChr, ecVersion)) }
-                    rowIfNotNull(proposalDetails.systemProviderTotalStakeChr) { listOf("Requirement - system provider total staking in CHR", formatChr(proposalDetails.systemProviderTotalStakeChr, ecVersion)) }
-                    rowIfNotNull(proposalDetails.dappProviderOwnStakeChr) { listOf("Requirement - dapp provider own staking in CHR", formatChr(proposalDetails.dappProviderOwnStakeChr, ecVersion)) }
-                    rowIfNotNull(proposalDetails.dappProviderTotalStakeChr) { listOf("Requirement - dapp provider total staking in CHR", formatChr(proposalDetails.dappProviderTotalStakeChr, ecVersion)) }
+            if (ecVersion < ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION) {
+                val proposalDetails = economyChainClient.getStakingRequirementConstantsProposalV45(proposalId)
+                return pmcTable {
+                    body {
+                        proposalDetails.enabled?.let { row("Staking requirements enabled", it) }
+                        proposalDetails.stopPayoutDays?.let { row("Stop payout days", it) }
+                        proposalDetails.systemProviderOwnStakeChr?.let { row("Requirement - system provider own staking in CHR", formatChr(it, ecVersion)) }
+                        proposalDetails.systemProviderTotalStakeChr?.let { row("Requirement - system provider total staking in CHR", formatChr(it, ecVersion)) }
+                        proposalDetails.dappProviderOwnStakeChr?.let { row("Requirement - dapp provider own staking in CHR", formatChr(it, ecVersion)) }
+                        proposalDetails.dappProviderTotalStakeChr?.let { row("Requirement - dapp provider total staking in CHR", formatChr(it, ecVersion)) }
+                    }
+                }
+            } else {
+                val proposalDetails = economyChainClient.getStakingRequirementConstantsProposal(proposalId)
+                return pmcTable {
+                    body {
+                        proposalDetails.enabled?.let { row("Staking requirements enabled", it) }
+                        proposalDetails.stopPayoutDays?.let { row("Stop payout days", it) }
+                        proposalDetails.systemNodeOwnStakeChr?.let { row("Requirement - system node own staking in CHR", formatChr(it, ecVersion)) }
+                        proposalDetails.systemNodeTotalStakeChr?.let { row("Requirement - system node total staking in CHR", formatChr(it, ecVersion)) }
+                        proposalDetails.dappNodeOwnStakeChr?.let { row("Requirement - dapp node own staking in CHR", formatChr(it, ecVersion)) }
+                        proposalDetails.dappNodeTotalStakeChr?.let { row("Requirement - dapp node total staking in CHR", formatChr(it, ecVersion)) }
+                    }
                 }
             }
         }
