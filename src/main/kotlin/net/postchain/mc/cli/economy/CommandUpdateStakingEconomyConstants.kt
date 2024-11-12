@@ -17,10 +17,10 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
 
     private val stakingRequirementsEnabled by option("--staking-requirements-enabled", help = "Enable or disable the staking requirement check on reward pay out").boolean()
     private val stakingRequirementsStopPayoutDays by option("--staking-requirements-stop-payout-days", help = "Number of days a provider can fail to meet the staking requirements no longer receiving reward payouts").long()
-    private val stakingRequirementsSystemProviderOwnStakeChr by option("--staking-requirements-sp-own", help = "Required provider staking amount in CHR for system providers").long()
-    private val stakingRequirementsSystemProviderTotalStakeChr by option("--staking-requirements-sp-total", help = "Required total staking amount in CHR for system providers").long()
-    private val stakingRequirementsDappProviderOwnStakeChr by option("--staking-requirements-dp-own", help = "Required provider staking amount in CHR for dapp providers").long()
-    private val stakingRequirementsDappProviderTotalStakeChr by option("--staking-requirements-dp-total", help = "Required total staking amount in CHR for dapp providers").long()
+    private val stakingRequirementsSystemNodeOwnStakeChr by option("--staking-requirements-sn-own", help = "Required provider staking amount in CHR for system node").long()
+    private val stakingRequirementsSystemNodeTotalStakeChr by option("--staking-requirements-sn-total", help = "Required total staking amount in CHR for system node").long()
+    private val stakingRequirementsDappNodeOwnStakeChr by option("--staking-requirements-dn-own", help = "Required provider staking amount in CHR for dapp node").long()
+    private val stakingRequirementsDappNodeTotalStakeChr by option("--staking-requirements-dn-total", help = "Required total staking amount in CHR for dapp node").long()
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
@@ -28,13 +28,13 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                 listOfNotNull(
                         stakingRequirementsEnabled,
                         stakingRequirementsStopPayoutDays,
-                        stakingRequirementsSystemProviderOwnStakeChr,
-                        stakingRequirementsSystemProviderTotalStakeChr,
-                        stakingRequirementsDappProviderOwnStakeChr,
-                        stakingRequirementsDappProviderTotalStakeChr,
+                        stakingRequirementsSystemNodeOwnStakeChr,
+                        stakingRequirementsSystemNodeTotalStakeChr,
+                        stakingRequirementsDappNodeOwnStakeChr,
+                        stakingRequirementsDappNodeTotalStakeChr,
                 ).isEmpty()
         ) {
-            throw CliktError("No variable provided")
+            throw CliktError("No value provided")
         }
 
         when {
@@ -43,10 +43,10 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                         .updateStakingRequirementsEconomyConstantsOperationECV28(
                                 stakingRequirementsEnabled,
                                 stakingRequirementsStopPayoutDays,
-                                stakingRequirementsSystemProviderOwnStakeChr,
-                                stakingRequirementsSystemProviderTotalStakeChr,
-                                stakingRequirementsDappProviderOwnStakeChr,
-                                stakingRequirementsDappProviderTotalStakeChr,
+                                stakingRequirementsSystemNodeOwnStakeChr,
+                                stakingRequirementsSystemNodeTotalStakeChr,
+                                stakingRequirementsDappNodeOwnStakeChr,
+                                stakingRequirementsDappNodeTotalStakeChr,
                         )
             }
             ecVersion.version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
@@ -54,10 +54,10 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                         .proposeStakingRequirementConstantsOperation(
                                 stakingRequirementsEnabled,
                                 stakingRequirementsStopPayoutDays,
-                                stakingRequirementsSystemProviderOwnStakeChr,
-                                stakingRequirementsSystemProviderTotalStakeChr,
-                                stakingRequirementsDappProviderOwnStakeChr,
-                                stakingRequirementsDappProviderTotalStakeChr,
+                                stakingRequirementsSystemNodeOwnStakeChr,
+                                stakingRequirementsSystemNodeTotalStakeChr,
+                                stakingRequirementsDappNodeOwnStakeChr,
+                                stakingRequirementsDappNodeTotalStakeChr,
                         )
             }
             else -> {
@@ -65,10 +65,10 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                         .proposeStakingRequirementConstantsOperation(
                                 stakingRequirementsEnabled,
                                 stakingRequirementsStopPayoutDays,
-                                stakingRequirementsSystemProviderOwnStakeChr?.times(UNITS_PER_CHR),
-                                stakingRequirementsSystemProviderTotalStakeChr?.times(UNITS_PER_CHR),
-                                stakingRequirementsDappProviderOwnStakeChr?.times(UNITS_PER_CHR),
-                                stakingRequirementsDappProviderTotalStakeChr?.times(UNITS_PER_CHR),
+                                stakingRequirementsSystemNodeOwnStakeChr?.times(UNITS_PER_CHR),
+                                stakingRequirementsSystemNodeTotalStakeChr?.times(UNITS_PER_CHR),
+                                stakingRequirementsDappNodeOwnStakeChr?.times(UNITS_PER_CHR),
+                                stakingRequirementsDappNodeTotalStakeChr?.times(UNITS_PER_CHR),
                         )
             }
         }
