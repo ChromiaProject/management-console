@@ -1,7 +1,7 @@
 package net.postchain.mc.cli.provider.keys
 
-import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.common.setProviderKeyThresholdOperation
@@ -24,7 +24,8 @@ class CommandSetProviderKeyThreshold : DCBaseCommand(
         positive number: that many keys required
     """.trimIndent()
     )
-            .long().default(0L)
+            .long()
+            .required()
             .validate { require(it >= -1L) { "Threshold must be -1, 0 or a positive integer" } }
 
     override fun runDC() {
