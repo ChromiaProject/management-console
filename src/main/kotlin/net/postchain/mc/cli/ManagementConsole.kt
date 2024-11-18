@@ -45,7 +45,7 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
     protected open fun extraProviderCommands(command: CliktCommand) {}
 
     override fun aliases(): Map<String, List<String>> {
-        return super.aliases() + mapOf(
+        return mapOf(
                 "init" to listOf("network", "initialize"),
                 "initialize" to listOf("network", "initialize"),
                 "blockchains" to listOf("blockchain", "list"),
