@@ -237,7 +237,6 @@
                                 <mainModule>management_chain_mainnet</mainModule>
                                 <mainModule>direct_cluster</mainModule>
                                 <mainModule>direct_container</mainModule>
-                                <mainModule>proposal_subnode_image</mainModule>
                             </mainModules>
                         </configuration>
                     </execution>
