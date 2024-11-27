@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.provider
 
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
@@ -23,6 +22,7 @@ import net.postchain.crypto.PubKey
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtv.parse.GtvParser
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.PropertiesConfigurationValueSource
@@ -142,7 +142,7 @@ class CommandRegisterProvider : PmcCommand(
                     }
                     .postAwaitConfirmation()
                     .printResult(
-                            "Provider has been added ${enable.let { if (it) "and proposed for enabling " else "" }}",
+                            "Provider has been added${enable.let { if (it) " and proposed for enabling" else "" }}",
                             "Failed to add provider"
                     )
         }
