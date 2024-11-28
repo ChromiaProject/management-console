@@ -21,7 +21,7 @@
         <revision>dev</revision>
         <postchain.version>3.21.2</postchain.version>
         <postchain.client.version>3.18.2</postchain.client.version>
-        <directory.chain.version>1.73.1</directory.chain.version>
+        <directory.chain.version>1.74.0</directory.chain.version>
         <chr.version>0.21.4</chr.version>
         <rell.maven.plugin.version>0.12.5</rell.maven.plugin.version>
         <web3j.version>4.12.0</web3j.version>
@@ -260,7 +260,7 @@
                         </goals>
                         <configuration>
                             <packageName>net.postchain.economy</packageName>
-                            <mainModule>economy_chain</mainModule>
+                            <mainModule>economy_chain_test</mainModule>
                             <target>${project.build.directory}/generated-sources/rell-client/economy</target>
                         </configuration>
                     </execution>

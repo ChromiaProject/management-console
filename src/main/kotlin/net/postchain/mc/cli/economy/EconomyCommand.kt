@@ -37,4 +37,5 @@ fun economyCommands() = EconomyCommand().subcommands(
         mintCommands(),
         proposalCommands(),
         CommandSetProviderStakingAccount(),
+        CommandForceRemoveContainer(),
 )
