@@ -2,7 +2,6 @@ package net.postchain.mc.cli.node
 
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.convert
-import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -48,9 +47,9 @@ class CommandReplaceNode : DCBaseCommand(
         require(it.isNotBlank())
     }
 
-    private val clusterUnits by clusterUnitsOption().default(1)
+    private val clusterUnits by clusterUnitsOption()
 
-    private val extraStorage by extraStorageOption().default(0)
+    private val extraStorage by extraStorageOption()
 
     private val keepOldNodeAsReplica by option("--keep-as-replica", help = "Keep replaced node as a replica node").flag()
 
@@ -69,8 +68,8 @@ class CommandReplaceNode : DCBaseCommand(
                     } else {
                         when {
                             dcVersion >= 24 -> replaceNodeWithNodeDataOperation(clientProviderPubkey, ReplaceNodeData(WrappedByteArray(old.data), WrappedByteArray(new.data), host, port?.toLong(), apiUrl, clusterUnits, territory, extraStorage))
-                            dcVersion >= 15 -> replaceNodeWithUnitsAndTerritoryOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, territory, clusterUnits)
-                            dcVersion >= 3 -> replaceNodeWithUnitsOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, clusterUnits)
+                            dcVersion >= 15 -> replaceNodeWithUnitsAndTerritoryOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, territory, clusterUnits ?: 1)
+                            dcVersion >= 3 -> replaceNodeWithUnitsOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, clusterUnits ?: 1)
                             else -> replaceNodeOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl)
                         }
                     }
