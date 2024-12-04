@@ -3,7 +3,6 @@ package net.postchain.mc.cli.config
 import com.chromia.build.tools.config.ChromiaConfigLoader
 import com.chromia.build.tools.config.ChromiaConfigWriter
 import com.github.ajalt.clikt.core.CliktCommand
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.default
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
@@ -12,6 +11,7 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.CHROMIA_CONFIG
 import java.awt.Desktop
 
@@ -30,7 +30,7 @@ class CommandConfig : PmcCommand(
 ) {
 
     private val configWriter by configFileOption()
-    private val configLoader = ChromiaConfigLoader(::echo)
+    private val configLoader = ChromiaConfigLoader { msg -> echo(msg, err = true) }
     private val configFile get() = configWriter.configFile
 
     private val get by option(help = "get value: name [value pattern]", metavar = "KEY")

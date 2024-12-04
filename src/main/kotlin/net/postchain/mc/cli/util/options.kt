@@ -67,7 +67,7 @@ fun OptionTransformContext.validatePubkey(pubKey: PubKey) {
     }
 }
 
-fun CliktCommand.pmcConfigOption() = PmcClientConfigOption(::echo)
+fun CliktCommand.pmcConfigOption() = PmcClientConfigOption { msg -> echo(msg, err = true) }
 
 class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConfigOption(logger) {
     private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup").flag()
