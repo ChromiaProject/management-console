@@ -11,9 +11,11 @@ class NetworkCommand : NoOpCliktCommand() {
 fun networkCommands() = NetworkCommand().subcommands(
         CommandInit(),
         CommandInitEconomyChain(),
+        CommandInitTokenChain(),
         CommandInitEvmTransactionSubmitterChain(),
         CommandInitEvmEventReceiverChain(),
         CommandInitEvmEventReceiverPriceOracleChain(),
+        CommandInitEvmEventReceiverTokenChain(),
         CommandInitPriceOracleChain(),
         SummaryCommand(),
         CommandVersion(),

@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.common.init.initOperation
 import net.postchain.chain0.economy_chain_in_directory_chain.initEconomyChainOperation
+import net.postchain.chain0.token_chain_in_directory_chain.initTokenChainOperation
 import net.postchain.client.core.PostchainClient
 import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.base.printResult
@@ -41,6 +42,12 @@ class CommandInit : PmcCommand(
             help = "Configuration file for economy chain (GtvML (*.xml) or Gtv (*.gtv))"
     ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
 
+    private val tokenChainConfig by option(
+            "-tcc",
+            "--token-chain-config",
+            help = "Configuration file for token chain (GtvML (*.xml) or Gtv (*.gtv))"
+    ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
+
     override fun run() {
         if (systemAnchoringConfig != null && clusterAnchoringConfig == null) {
             echo("System anchoring requires cluster anchoring. Please specify a cluster anchoring configuration.")
@@ -57,11 +64,20 @@ class CommandInit : PmcCommand(
             return
         }
 
+        val tokenChainConfigData = tokenChainConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
+        if (version < 75 && tokenChainConfigData != null) {
+            echo("Token chain requires directory chain version 75, found version $version")
+            return
+        }
+
         client.transactionBuilder()
                 .initOperation(systemAnchoringConfigData, clusterAnchoringConfigData)
                 .apply {
-                    if (economyChainConfigData != null) {
-                        initEconomyChainOperation(client.pubkey, economyChainConfigData)
+                    economyChainConfigData?.let {
+                        initEconomyChainOperation(client.pubkey, it)
+                    }
+                    tokenChainConfigData?.let {
+                        initTokenChainOperation(client.pubkey, it)
                     }
                 }
                 .postAwaitConfirmation()
@@ -72,6 +88,9 @@ class CommandInit : PmcCommand(
                 )
         if (economyChainConfigData != null) {
             initEconomyChain(client, config.config)
+        }
+        if (tokenChainConfigData != null) {
+            initTokenChain(client, config.config)
         }
     }
 

@@ -14,11 +14,9 @@ import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandInitEvmTransactionSubmitterChain : PmcCommand(
         name = "initialize-evm-transaction-submitter-chain",
-        help = "Create and initialize EVM transaction submitter chain"
+        help = "Create and initialize EVM transaction submitter chain",
+        printHelpOnEmptyArgs = true
 ) {
-    override val printHelpOnEmptyArgs: Boolean
-        get() = true
-
     private val config by pmcConfigOption()
     private val client get() = config.client
 

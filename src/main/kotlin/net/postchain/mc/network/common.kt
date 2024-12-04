@@ -3,12 +3,14 @@ package net.postchain.mc.network
 import com.chromia.build.tools.config.ChromiaClientConfig
 import com.github.ajalt.clikt.core.CliktError
 import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
+import net.postchain.chain0.token_chain_in_directory_chain.getTokenChainRid
 import net.postchain.client.core.PostchainClient
 import net.postchain.client.impl.PostchainClientProviderImpl
 import net.postchain.common.BlockchainRid
 import net.postchain.economy.economy_chain.apiVersion
 import net.postchain.economy.economy_chain.initOperation
 import net.postchain.mc.cli.base.printResult
+import net.postchain.token.token_chain.initTokenChainOperation
 import java.lang.Thread.sleep
 
 fun initEconomyChain(client: PostchainClient, config: ChromiaClientConfig) {
@@ -34,7 +36,30 @@ fun initEconomyChain(client: PostchainClient, config: ChromiaClientConfig) {
     }
 }
 
-fun repeatUntilSuccessful(times: Int = 30, interval: Long = 5_00, function: (Int) -> Unit) {
+fun initTokenChain(client: PostchainClient, config: ChromiaClientConfig) {
+    val tokenChainRid = client.getTokenChainRid()
+    if (tokenChainRid.isNotEmpty()) {
+        val tokenChainClient = config.setBrid(BlockchainRid(tokenChainRid)).client(PostchainClientProviderImpl())
+
+        // Make sure postchain has attached model to REST API
+        repeatUntilSuccessful {
+            tokenChainClient.apiVersion()
+        }
+
+        tokenChainClient.transactionBuilder()
+                .initTokenChainOperation()
+                .postAwaitConfirmation()
+                .printResult(
+                        "Token chain was initiated",
+                        "Failed to initiate token chain",
+                        printOnSuccess = false
+                )
+    } else {
+        throw CliktError("""Token chain not yet available, please run "pmc network initialize-token-chain" after a while""")
+    }
+}
+
+fun repeatUntilSuccessful(times: Int = 30, interval: Long = 500, function: (Int) -> Unit) {
 
     var exception: Exception? = null
     repeat(times) {

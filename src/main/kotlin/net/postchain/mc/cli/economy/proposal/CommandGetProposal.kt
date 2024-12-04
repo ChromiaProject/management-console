@@ -109,7 +109,7 @@ private fun SectionBuilder.printECVotingInfo(economyChainClient: PostchainClient
     } else {
         val votingInfo = when {
             version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProposalVoterInfoECV20(proposal.id)
-                    .map { CommonProposalVoter(it.provider, it.vote) }
+                    .map { CommonProposalVoter(it.provider, it.vote, null, null) }
             else -> economyChainClient.getCommonProposalVoterInfo(proposal.id)
         }
         row("Pubkeys that accepted", votingInfo.filter { it.vote }.joinToString { formatProvider(it.pubkey, "") })
