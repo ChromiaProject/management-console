@@ -14,11 +14,9 @@ import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandInitEvmEventReceiverChain : PmcCommand(
         name = "initialize-evm-event-receiver-chain",
-        help = "Create and initialize EVM event receiver chain"
+        help = "Create and initialize EVM event receiver chain",
+        printHelpOnEmptyArgs = true
 ) {
-    override val printHelpOnEmptyArgs: Boolean
-        get() = true
-
     private val config by pmcConfigOption()
     private val client get() = config.client
 

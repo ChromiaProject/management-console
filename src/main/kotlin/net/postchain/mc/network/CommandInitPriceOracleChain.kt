@@ -14,11 +14,9 @@ import net.postchain.mc.cli.util.pmcConfigOption
 
 class CommandInitPriceOracleChain : PmcCommand(
         name = "initialize-price-oracle-chain",
-        help = "Create and initialize Price oracle chain"
+        help = "Create and initialize Price oracle chain",
+        printHelpOnEmptyArgs = true
 ) {
-    override val printHelpOnEmptyArgs: Boolean
-        get() = true
-
     private val config by pmcConfigOption()
     private val client get() = config.client
 

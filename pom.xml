@@ -21,7 +21,7 @@
         <revision>dev</revision>
         <postchain.version>3.21.2</postchain.version>
         <postchain.client.version>3.18.2</postchain.client.version>
-        <directory.chain.version>1.74.0</directory.chain.version>
+        <directory.chain.version>1.75.2</directory.chain.version>
         <chr.version>0.21.4</chr.version>
         <rell.maven.plugin.version>0.12.5</rell.maven.plugin.version>
         <web3j.version>4.12.0</web3j.version>
@@ -237,6 +237,7 @@
                                 <mainModule>management_chain_mainnet</mainModule>
                                 <mainModule>direct_cluster</mainModule>
                                 <mainModule>direct_container</mainModule>
+                                <mainModule>proposal_subnode_image</mainModule>
                             </mainModules>
                         </configuration>
                     </execution>
@@ -262,6 +263,18 @@
                             <packageName>net.postchain.economy</packageName>
                             <mainModule>economy_chain_test</mainModule>
                             <target>${project.build.directory}/generated-sources/rell-client/economy</target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>rell-token-chain-client</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>rell-generate-client</goal>
+                        </goals>
+                        <configuration>
+                            <packageName>net.postchain.token</packageName>
+                            <mainModule>token_chain</mainModule>
+                            <target>${project.build.directory}/generated-sources/rell-client/token</target>
                         </configuration>
                     </execution>
                 </executions>
