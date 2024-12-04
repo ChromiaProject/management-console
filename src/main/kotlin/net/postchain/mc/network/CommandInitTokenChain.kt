@@ -15,7 +15,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 class CommandInitTokenChain : PmcCommand(
         name = "initialize-token-chain",
         help = "Create and initialize token chain. Please run the command without supplying the configuration to retry a failed initialization.",
-        printHelpOnEmptyArgs = true
+        printHelpOnEmptyArgs = false
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client
