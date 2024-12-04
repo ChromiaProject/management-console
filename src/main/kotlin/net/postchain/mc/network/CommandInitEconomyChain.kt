@@ -16,7 +16,7 @@ import net.postchain.mc.cli.util.pmcConfigOption
 class CommandInitEconomyChain : PmcCommand(
         name = "initialize-economy-chain",
         help = "Create and initialize economy chain. Please run the command without supplying the configuration to retry a failed initialization.",
-        printHelpOnEmptyArgs = true
+        printHelpOnEmptyArgs = false
 ) {
 
     private val config by pmcConfigOption()
