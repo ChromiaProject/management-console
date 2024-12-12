@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.deprecated
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -62,10 +63,14 @@ class CommandRegisterNode : PmcCommand(
 
     private val capability by option(help = "Node capability").enum<NodeCapabilityTypeV28>().multiple().deprecated()
 
+    private val disableAccessChecks by option("--disable-access-checks", help = "Disable node and REST API access checks").flag()
+
     override fun run() {
-        val verifier = NodeVerifier(client.config, null)
-        if (!verifier.verifyApi(apiUrl).responds) throw CliktError("Api url is not accessible for host")
-        if (!verifier.verifyHost(host, port)) throw CliktError("Node is not accessible")
+        if (!disableAccessChecks) {
+            val verifier = NodeVerifier(client.config, null)
+            if (!verifier.verifyApi(apiUrl).responds) throw CliktError("Api url is not accessible for host")
+            if (!verifier.verifyHost(host, port)) throw CliktError("Node is not accessible")
+        }
         val apiVersion = client.apiVersion()
 
         if (apiVersion < 15) {
