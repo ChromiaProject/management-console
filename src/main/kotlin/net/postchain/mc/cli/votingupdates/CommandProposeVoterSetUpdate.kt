@@ -5,13 +5,13 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.split
-import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal_voter_set.proposeUpdateVoterSetOperation
 import net.postchain.common.hexStringToByteArray
 import net.postchain.common.toHex
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.cli.util.thresholdOption
 
 
 class CommandProposeVoterSetUpdate : DCBaseCommand(
@@ -27,7 +27,7 @@ class CommandProposeVoterSetUpdate : DCBaseCommand(
             help = "Name of existing voter set to update"
     ).required()
 
-    private val threshold by option("--threshold", help = "New threshold").long()
+    private val threshold by thresholdOption()
     private val governor by option("--governor", help = "Name of new governor")
     private val newMember by option("--add-member", help = "Provider pubkey(s) to add to voter set")
             .convert { it.hexStringToByteArray() }

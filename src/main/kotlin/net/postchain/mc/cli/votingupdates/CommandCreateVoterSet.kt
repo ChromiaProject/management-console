@@ -4,13 +4,13 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
-import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal.voting.createVoterSetOperation
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pubkeysOption
+import net.postchain.mc.cli.util.thresholdOption
 
 
 class CommandCreateVoterSet : DCBaseCommand(
@@ -21,15 +21,7 @@ class CommandCreateVoterSet : DCBaseCommand(
 
     private val pubkeys by pubkeysOption("Comma separated list of provider pubkeys for this voter set")
 
-    private val threshold by option(
-            "-t", "--threshold",
-            help = """
-        0: supermajority of voters, specifically  `n - (n - 1) / 3` (which is usually around 67%)
-        -1: simple majority
-        positive number: that many voters
-    """.trimIndent()
-    )
-            .long().default(0L)
+    private val threshold by thresholdOption().default(0L)
             .validate { require(it >= -1L) { "Threshold must be -1, 0 or a positive integer" } }
 
     private val governorName by option(
