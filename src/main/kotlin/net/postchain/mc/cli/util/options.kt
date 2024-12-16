@@ -189,3 +189,12 @@ fun CliktCommand.proposalDescriptionOption(helpMessage: String = "Proposal descr
 
 fun CliktCommand.configurationsFileOption() = option("--configurations-file", help = "File to import blockchain configurations from")
         .path(mustExist = true, canBeDir = false, canBeFile = true, mustBeReadable = true)
+
+fun CliktCommand.thresholdOption() = option(
+        "-t", "--threshold",
+        help = """
+        0: supermajority of voters, specifically  `n - (n - 1) / 3` (which is usually around 67%)
+        -1: simple majority
+        positive number: that many voters
+    """.trimIndent()
+).long()

@@ -1,13 +1,12 @@
 package net.postchain.mc.cli.provider.keys
 
-import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
-import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.common.setProviderKeyThresholdOperation
 import net.postchain.chain0.provider_auth.model.ProviderKeyRole
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
+import net.postchain.mc.cli.util.thresholdOption
 
 class CommandSetProviderKeyThreshold : DCBaseCommand(
         name = "threshold",
@@ -16,15 +15,7 @@ class CommandSetProviderKeyThreshold : DCBaseCommand(
         """.trimIndent(),
         requiresVersion = 65,
 ) {
-    private val threshold by option(
-            "-t", "--threshold",
-            help = """
-        0: supermajority of voters, specifically  `n - (n - 1) / 3` (which is usually around 67%)
-        -1: simple majority
-        positive number: that many keys required
-    """.trimIndent()
-    )
-            .long()
+    private val threshold by thresholdOption()
             .required()
             .validate { require(it >= -1L) { "Threshold must be -1, 0 or a positive integer" } }
 
