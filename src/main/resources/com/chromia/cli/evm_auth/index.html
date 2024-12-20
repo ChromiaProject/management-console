@@ -16,9 +16,7 @@
             const signer = await provider.getSigner();
             const signerAddress = await signer.getAddress();
             if (myAddress.toUpperCase() !== signerAddress.toUpperCase()) {
-                const err = `Wrong address, expected ${myAddress} but was ${signerAddress}`;
-                window.alert(err);
-                throw new Error(err);
+                throw new Error(`Wrong address, expected ${myAddress} but was ${signerAddress}`);
             }
             const signatures = [];
             for (const message of messages) {
@@ -36,11 +34,9 @@
 
         try {
             if (window.ethereum == null) {
-                window.alert("No EVM wallet found");
                 throw new Error("No EVM wallet found");
             } else {
                 await signIt(window.ethereum);
-                window.alert("Signing done, please close this window");
             }
         } catch (err) {
             await fetch("/error", {
@@ -48,6 +44,7 @@
                 body: err.message
             });
         }
+        window.close();
     </script>
 </head>
 <body>

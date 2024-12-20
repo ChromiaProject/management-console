@@ -87,7 +87,7 @@ class CommandAuthDescriptorEvmSwap : ECBaseCommand(
                         UPDATE_MAIN_AUTH_DESCRIPTOR to listOf(authDescriptor)
                 ),
                 evmAddress, accountId, accountMainAuthDescriptor.id.data)
-
+        echo("Signing done, posting transaction...")
         economyChainClient.transactionBuilder()
                 .evmSignaturesOperation(listOf(evmAddress), listOf(linkEvmEoaAccountSignature))
                 .ftAuthOperation(accountId, accountMainAuthDescriptor.id.data)
