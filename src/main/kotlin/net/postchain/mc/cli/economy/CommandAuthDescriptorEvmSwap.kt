@@ -8,7 +8,7 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.mordant.rendering.TextStyles.Companion.hyperlink
 import com.google.gson.Gson
-import com.google.gson.JsonObject
+import com.google.gson.JsonArray
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.hexStringToByteArray
 import net.postchain.common.toHex
@@ -76,16 +76,16 @@ class CommandAuthDescriptorEvmSwap : ECBaseCommand(
 
         val accountMainAuthDescriptor = economyChainClient.getAccountMainAuthDescriptor(accountId)
 
-        val linkEvmEoaAccountSignature = fetchEvmSignature(
-                economyChainClient, LINK_EVM_EOA_ACCOUNT, listOf(gtv(evmAddress)),
-                evmAddress, accountId, accountMainAuthDescriptor.id.data)
-
         val authDescriptor = gtv(
                 gtv(AuthType.S.ordinal.toLong()),
                 gtv(gtv(gtv("A"), gtv("T")), gtv(evmAddress)),
                 GtvNull)
-        val updateMainAuthDescriptorSignature = fetchEvmSignature(
-                economyChainClient, UPDATE_MAIN_AUTH_DESCRIPTOR, listOf(authDescriptor),
+        val (linkEvmEoaAccountSignature, updateMainAuthDescriptorSignature) = fetchEvmSignatures(
+                economyChainClient,
+                listOf(
+                        LINK_EVM_EOA_ACCOUNT to listOf(gtv(evmAddress)),
+                        UPDATE_MAIN_AUTH_DESCRIPTOR to listOf(authDescriptor)
+                ),
                 evmAddress, accountId, accountMainAuthDescriptor.id.data)
 
         economyChainClient.transactionBuilder()
@@ -106,37 +106,40 @@ class CommandAuthDescriptorEvmSwap : ECBaseCommand(
 
 // TODO move to chromia-cli-tools
 
-fun CoreCliktCommand.fetchEvmSignature(client: PostchainClient,
-                                       opName: String, opArgs: List<Gtv>, evmAddress: ByteArray,
-                                       accountId: ByteArray, authDescriptorId: ByteArray,
-                                       launchWebBrowser: Boolean = true, urlNotifier: (String) -> Unit = {}): Signature {
-    val authMessageTemplate = client.getAuthMessageTemplate(opName, gtv(opArgs))
-    val counter = client.getAuthDescriptorCounter(accountId, authDescriptorId)
-    if (counter == null) throw CliktError("Invalid auth descriptor counter. Was the auth descriptor too close to expiration?")
-    val nonce = gtv(listOf(
-            gtv(client.config.blockchainRid),
-            gtv(opName),
-            gtv(opArgs),
-            gtv(counter),
-    )).merkleHash(GtvMerkleHashCalculator(::sha256Digest))
-    val authMessage = authMessageTemplate
-            .replace("{blockchain_rid}", client.config.blockchainRid.toHex().uppercase())
-            .replace("{nonce}", nonce.toHex().uppercase())
-            .replace("{account_id}", accountId.toHex().uppercase())
-            .replace("{auth_descriptor_id}", authDescriptorId.toHex().uppercase())
+fun CoreCliktCommand.fetchEvmSignatures(client: PostchainClient,
+                                        operations: List<Pair<String, List<Gtv>>>,
+                                        evmAddress: ByteArray,
+                                        accountId: ByteArray, authDescriptorId: ByteArray,
+                                        launchWebBrowser: Boolean = true, urlNotifier: (String) -> Unit = {}): List<Signature> {
+    val authMessages = operations.map { (opName, opArgs) ->
+        val authMessageTemplate = client.getAuthMessageTemplate(opName, gtv(opArgs))
+        val counter = client.getAuthDescriptorCounter(accountId, authDescriptorId)
+        if (counter == null) throw CliktError("Invalid auth descriptor counter. Was the auth descriptor too close to expiration?")
+        val nonce = gtv(listOf(
+                gtv(client.config.blockchainRid),
+                gtv(opName),
+                gtv(opArgs),
+                gtv(counter),
+        )).merkleHash(GtvMerkleHashCalculator(::sha256Digest))
+        authMessageTemplate
+                .replace("{blockchain_rid}", client.config.blockchainRid.toHex().uppercase())
+                .replace("{nonce}", nonce.toHex().uppercase())
+                .replace("{account_id}", accountId.toHex().uppercase())
+                .replace("{auth_descriptor_id}", authDescriptorId.toHex().uppercase())
+    }
 
     val html = this::class.java.getResource("/com/chromia/cli/evm_auth/index.html")!!.readText()
             .replace("{{address}}", "0x${evmAddress.toHex()}")
-            .replace("{{message}}", StringEscapeUtils.escapeEcmaScript(authMessage))
-    val signatureFuture = CompletableFuture<String>()
+            .replace("{{messages}}", authMessages.joinToString(separator = "") { "\"${StringEscapeUtils.escapeEcmaScript(it)}\",\n" })
+    val signaturesFuture = CompletableFuture<String>()
     val server = routes(
             "/" bind GET to { Response(OK).header("Content-Type", "text/html").body(html) },
-            "/signature" bind POST to { request ->
-                signatureFuture.complete(request.bodyString())
+            "/signatures" bind POST to { request ->
+                signaturesFuture.complete(request.bodyString())
                 Response(OK)
             },
             "/error" bind POST to { request ->
-                signatureFuture.completeExceptionally(CliktError(request.bodyString()))
+                signaturesFuture.completeExceptionally(CliktError(request.bodyString()))
                 Response(OK)
             },
             webJars()
@@ -146,19 +149,20 @@ fun CoreCliktCommand.fetchEvmSignature(client: PostchainClient,
         openWebLink(url)
     }
     urlNotifier(url)
-    val rawSignature = try {
-        signatureFuture.get()
+    val rawSignatures = try {
+        signaturesFuture.get()
     } catch (e: ExecutionException) {
         throw (e.cause ?: e)
     } finally {
         server.stop()
     }
-    val signature = Gson().fromJson(rawSignature, JsonObject::class.java)
-    return Signature(
-            r = signature.get("r").asString.drop(2).hexStringToByteArray().wrap(),
-            s = signature.get("s").asString.drop(2).hexStringToByteArray().wrap(),
-            v = signature.get("v").asLong
-    )
+    val signatures = Gson().fromJson(rawSignatures, JsonArray::class.java)
+    return signatures.asList().map {
+        Signature(
+                r = it.asJsonObject.get("r").asString.drop(2).hexStringToByteArray().wrap(),
+                s = it.asJsonObject.get("s").asString.drop(2).hexStringToByteArray().wrap(),
+                v = it.asJsonObject.get("v").asLong)
+    }
 }
 
 fun CoreCliktCommand.openWebLink(url: String) {

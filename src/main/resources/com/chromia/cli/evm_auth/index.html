@@ -6,7 +6,9 @@
         import {ethers} from "/webjars/ethers/6.13.1/dist/ethers.min.js";
 
         const myAddress = "{{address}}";
-        const message = "{{message}}";
+        const messages = [
+            {{messages}}
+        ];
 
         async function signIt(ethereum) {
             const provider = new ethers.BrowserProvider(ethereum)
@@ -18,14 +20,17 @@
                 window.alert(err);
                 throw new Error(err);
             }
-            const signature = await signer.signMessage(message);
-            const jsonSignature = ethers.Signature.from(signature).toJSON();
-            await fetch("/signature", {
+            const signatures = [];
+            for (const message of messages) {
+                const rawSignature = await signer.signMessage(message);
+                signatures.push(ethers.Signature.from(rawSignature).toJSON());
+            }
+            await fetch("/signatures", {
                 method: "POST",
                 headers: {
-                  "Content-Type": "application/json",
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify(jsonSignature)
+                body: JSON.stringify(signatures)
             });
         }
 
