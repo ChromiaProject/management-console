@@ -189,6 +189,7 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
                 body {
                     rowIfNotNull("Min lease time weeks", economyConstantsProposal.minLeaseTimeWeeks)
                     rowIfNotNull("Max lease time weeks", economyConstantsProposal.maxLeaseTimeWeeks)
+                    rowIfNotNull("Staking reward rate", economyConstantsProposal.stakingRewardRate)
                     rowIfNotNull("Staking reward fee share", economyConstantsProposal.stakingRewardFeeShare)
                     rowIfNotNull("Chromia foundation fee share", economyConstantsProposal.chromiaFoundationFeeShare)
                     rowIfNotNull("Resource pool margin fee share", economyConstantsProposal.resourcePoolMarginFeeShare)
