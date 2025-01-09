@@ -6,6 +6,7 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.table.SectionBuilder
+import net.postchain.base.configuration.BlockchainConfigurationData
 import net.postchain.chain0.common.queries.getProviderData
 import net.postchain.chain0.nm_api.nmFindPreviousConfigurationHeight
 import net.postchain.chain0.nm_api.nmGetBlockchainConfiguration
@@ -62,10 +63,7 @@ import net.postchain.common.wrap
 import net.postchain.crypto.PubKey
 import net.postchain.gtv.GtvDecoder.decodeGtv
 import net.postchain.gtv.GtvDictionary
-import net.postchain.gtv.merkle.GtvMerkleHashCalculator
-import net.postchain.gtv.merkleHash
 import net.postchain.mc.cli.PmcCommand
-import net.postchain.mc.cli.base.cryptoSystem
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
@@ -700,6 +698,5 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
     }
 }
 
-private fun getDataHash(configData: WrappedByteArray) = decodeGtv(configData.data)
-        .merkleHash(GtvMerkleHashCalculator(cryptoSystem))
-        .wrap()
+private fun getDataHash(configData: WrappedByteArray): WrappedByteArray =
+        BlockchainConfigurationData.fromRaw(configData.data).configHash.wrap()
