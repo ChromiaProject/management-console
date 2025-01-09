@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.node
 
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
@@ -19,6 +18,7 @@ import net.postchain.chain0.common.operations.registerNodeWithUnitsOperation
 import net.postchain.chain0.model.RegisterNodeData
 import net.postchain.chain0.version.apiVersion
 import net.postchain.common.types.WrappedByteArray
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.portOption
@@ -31,6 +31,7 @@ import net.postchain.mc.cli.util.requiredUrlOption
 import net.postchain.mc.compatibility.ApiCompatV28.NodeCapabilityTypeV28
 import net.postchain.mc.compatibility.ApiCompatV28.updateNodeCapabilityOperationV28
 import net.postchain.mc.network.NodeVerifier
+import java.io.IOException
 
 class CommandRegisterNode : PmcCommand(
         name = "register",
@@ -69,7 +70,11 @@ class CommandRegisterNode : PmcCommand(
         if (!disableAccessChecks) {
             val verifier = NodeVerifier(client.config, null)
             if (!verifier.verifyApi(apiUrl).responds) throw CliktError("Api url is not accessible for host")
-            if (!verifier.verifyHost(host, port)) throw CliktError("Node is not accessible")
+            try {
+                verifier.verifyHost(host, port)
+            } catch (e: IOException) {
+                throw CliktError("Node is not accessible: $e")
+            }
         }
         val apiVersion = client.apiVersion()
 

@@ -26,4 +26,5 @@ fun nodeCommands() = NodeCommand().subcommands(
         CommandListBlockchainsForNode(),
         CommandListContainersForNode(),
         CommandListNodes(),
+        CommandPingNode(),
 )
