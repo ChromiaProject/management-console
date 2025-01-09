@@ -1,14 +1,12 @@
 package net.postchain.mc.cli.util
 
+import net.postchain.base.configuration.BlockchainConfigurationData
 import net.postchain.common.types.WrappedByteArray
 import net.postchain.common.wrap
 import net.postchain.gtv.Gtv
 import net.postchain.gtv.GtvEncoder
 import net.postchain.gtv.GtvFactory
 import net.postchain.gtv.gtvml.GtvMLParser
-import net.postchain.gtv.merkle.GtvMerkleHashCalculator
-import net.postchain.gtv.merkleHash
-import net.postchain.mc.cli.base.cryptoSystem
 import java.io.File
 
 class BlockchainConfig(
@@ -35,7 +33,7 @@ class BlockchainConfig(
         fun readFromByteArray(data: ByteArray): BlockchainConfig = create(GtvFactory.decodeGtv(data), data)
 
         private fun create(gtv: Gtv, data: ByteArray): BlockchainConfig = BlockchainConfig(
-                gtv.merkleHash(GtvMerkleHashCalculator(cryptoSystem)).wrap(),
+                BlockchainConfigurationData.fromRaw(data).configHash.wrap(),
                 data,
                 gtv
         )

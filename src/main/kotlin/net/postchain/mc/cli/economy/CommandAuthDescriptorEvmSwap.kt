@@ -30,7 +30,7 @@ import net.postchain.economy.lib.hbridge.linkEvmEoaAccountOperation
 import net.postchain.gtv.Gtv
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.GtvNull
-import net.postchain.gtv.merkle.GtvMerkleHashCalculator
+import net.postchain.gtv.merkle.GtvMerkleHashCalculatorV2
 import net.postchain.gtv.merkleHash
 import net.postchain.mc.cli.base.printResult
 import org.apache.commons.text.StringEscapeUtils
@@ -120,7 +120,7 @@ fun CoreCliktCommand.fetchEvmSignatures(client: PostchainClient,
                 gtv(opName),
                 gtv(opArgs),
                 gtv(counter),
-        )).merkleHash(GtvMerkleHashCalculator(::sha256Digest))
+        )).merkleHash(GtvMerkleHashCalculatorV2(::sha256Digest))
         authMessageTemplate
                 .replace("{blockchain_rid}", client.config.blockchainRid.toHex().uppercase())
                 .replace("{nonce}", nonce.toHex().uppercase())
