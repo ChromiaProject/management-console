@@ -17,7 +17,7 @@ open class ECTestBase {
 
     fun ecRestApiTest(dir: Path, ecVersion: Long, function: (ECTestModel) -> Unit) {
 
-        RestApi(0, "", clock = Clock.fixed(Instant.EPOCH, ZoneOffset.UTC)).use { it ->
+        RestApi(0, "").use { it ->
             val ecModel = ECTestModel(ecBcrid, ecVersion)
             it.attachModel(ecBcrid, ecModel)
             it.attachModel(testBrid, D1TestModel(testBrid, ecBcrid))

@@ -34,7 +34,7 @@ class ConfiguresBridIT {
 
     @Test
     fun `missing brid gets auto-configured`(@TempDir dir: Path) {
-        RestApi(0, "", clock = Clock.fixed(Instant.EPOCH, ZoneOffset.UTC)).use {
+        RestApi(0, "").use {
             it.attachModel(testBrid, SummaryModel(testBrid))
             with(File(dir.toFile(), ".chromia/config")) {
                 parentFile.mkdirs()
