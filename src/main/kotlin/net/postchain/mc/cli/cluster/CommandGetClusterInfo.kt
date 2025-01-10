@@ -1,7 +1,6 @@
 package net.postchain.mc.cli.cluster
 
 import com.github.ajalt.clikt.core.CliktCommand
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.queries.getClusterContainers
@@ -12,6 +11,7 @@ import net.postchain.chain0.common.queries.getClusterReplicaNodes
 import net.postchain.chain0.common.queries.getClusterSubnodeImages
 import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainClient
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
@@ -44,6 +44,7 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainClient, name
                     row("Name:", info.name)
                     row("Governor:", info.governor)
                     row("Is Operational:", info.isOperational.toString())
+                    info.numberOfNodes?.let { row("Number of nodes:", it.toString()) }
                     info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
                     info.extraStorage?.let { row("Extra Storage:", it.toString()) }
                     info.containerUnitsAvailable?.let { row("Container Units available:", it.toString()) }
