@@ -20,7 +20,6 @@ import net.postchain.economy.common_proposal.getCommonProposalVoterInfo
 import net.postchain.economy.common_proposal.getCommonProposalVotingResults
 import net.postchain.economy.economy_chain.getClusterChangeTagProposal
 import net.postchain.economy.economy_chain.getClusterCreateProposal
-import net.postchain.economy.economy_chain.getEcVoterSetUpdateProposal
 import net.postchain.economy.economy_chain.getEcononyConstantsProposal
 import net.postchain.economy.economy_chain.getMintingProposal
 import net.postchain.economy.economy_chain.getPriceOracleRateProposal
@@ -42,6 +41,7 @@ import net.postchain.mc.compatibility.ApiCompatECV21.getProposalECV20
 import net.postchain.mc.compatibility.ApiCompatECV21.getProposalVoterInfoECV20
 import net.postchain.mc.compatibility.ApiCompatECV21.getProposalVotingResultsECV20
 import net.postchain.mc.compatibility.ApiCompatECV45.getStakingRequirementConstantsProposalV45
+import net.postchain.token.common_proposal.voter_set_proposal.getVoterSetUpdateProposal
 import java.time.Instant
 import java.util.Date
 
@@ -198,15 +198,15 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
             }
         }
 
-        CommonProposalType.ec_voter_set_update -> {
-            val proposalDetails = economyChainClient.getEcVoterSetUpdateProposal(proposalId)
+        CommonProposalType.common_voter_set_update -> {
+            val proposalDetails = economyChainClient.getVoterSetUpdateProposal(proposalId)
             return pmcTable {
                 body {
-                    rowIfNotNull("Threshold", proposalDetails?.threshold)
-                    if (proposalDetails?.addMember != null && proposalDetails.addMember.isNotEmpty()) {
+                    rowIfNotNull("Threshold", proposalDetails.threshold)
+                    if (proposalDetails.addMember != null && proposalDetails.addMember.isNotEmpty()) {
                         row("Add member(s)", proposalDetails.addMember.joinToString(", "))
                     }
-                    if (proposalDetails?.removeMember != null && proposalDetails.removeMember.isNotEmpty()) {
+                    if (proposalDetails.removeMember != null && proposalDetails.removeMember.isNotEmpty()) {
                         row("Remove member(s)", proposalDetails.removeMember.joinToString(", "))
                     }
                 }
