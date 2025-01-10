@@ -5,25 +5,21 @@ import net.postchain.client.config.PostchainClientConfig
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.EndpointPool
 import net.postchain.common.BlockchainRid
-import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
+import kotlin.time.Duration.Companion.seconds
 
 class NodeVerifier(private val configTemplate: PostchainClientConfig, private val sacBrid: BlockchainRid?) {
 
-    fun verifyHost(node: NodeInfo): Boolean {
-        return verifyHost(node.host, node.port.toInt())
+    private val connectTimeout = 5.seconds
+
+    fun verifyHost(node: NodeInfo) {
+        verifyHost(node.host, node.port.toInt())
     }
 
-    fun verifyHost(host: String, port: Int): Boolean {
-        return try {
-            val socket = Socket()
-            socket.connect(InetSocketAddress(host, port), 5000)
-            socket.close()
-            true
-        } catch (e: IOException) {
-            System.err.println(e)
-            false
+    fun verifyHost(host: String, port: Int) {
+        Socket().use { socket ->
+            socket.connect(InetSocketAddress(host, port), connectTimeout.inWholeMilliseconds.toInt())
         }
     }
 

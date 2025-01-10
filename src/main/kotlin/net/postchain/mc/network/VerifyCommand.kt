@@ -10,6 +10,7 @@ import net.postchain.common.BlockchainRid
 import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
+import java.io.IOException
 
 class VerifyCommand : PmcCommand(help = "Verify that all nodes are accessible") {
     private val config by pmcConfigOption()
@@ -26,12 +27,17 @@ class VerifyCommand : PmcCommand(help = "Verify that all nodes are accessible") 
                 client.getAllNodes(false).map { node ->
                     if (showProgress and terminal.terminalInfo.outputInteractive) echo("Verifying node: ${node.info.apiUrl}, ${node.info.pubkey}")
                     val (apiAccessible, height, sacHeight) = nodeVerifier.verifyApi(node.info)
-                    val hostResponds = nodeVerifier.verifyHost(node.info)
+                    val hostResponds = try {
+                        nodeVerifier.verifyHost(node.info)
+                        "OK"
+                    } catch (e: IOException) {
+                        e.message ?: e.toString()
+                    }
                     listOf(
                             node.info.pubkey.toHex(),
                             node.info.host,
                             "${node.provider.pubkey.toHex()}${if (node.provider.name.isNotEmpty()) " - ${node.provider.name}" else ""}",
-                            hostResponds.isOk(),
+                            hostResponds,
                             apiAccessible.isOk(),
                             "$height",
                             "$sacHeight"
