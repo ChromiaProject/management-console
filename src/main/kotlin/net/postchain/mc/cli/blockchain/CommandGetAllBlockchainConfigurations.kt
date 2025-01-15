@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.blockchain
 
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
@@ -8,7 +7,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.long
-import net.postchain.chain0.common.queries.getBlockchains
+import net.postchain.chain0.common.queries.getBlockchainInfo
 import net.postchain.chain0.nm_api.nmFindNextConfigurationHeight
 import net.postchain.chain0.nm_api.nmGetBlockchainConfiguration
 import net.postchain.gtv.GtvDecoder
@@ -16,6 +15,7 @@ import net.postchain.gtv.GtvEncoder
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.GtvNull
 import net.postchain.gtv.gtvml.GtvMLEncoder
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import java.io.BufferedOutputStream
@@ -42,7 +42,7 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
     private val toHeight by option("--to-height", help = "Fetch to height").long()
 
     override fun run() {
-        if (config.client.getBlockchains(true).none { it.rid == blockchainRID.wData }) {
+        if (config.client.getBlockchainInfo(blockchainRID.data) == null) {
             echo("Unknown blockchain: $blockchainRID")
             return
         }

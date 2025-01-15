@@ -1,7 +1,6 @@
 package net.postchain.mc.cli.blockchain.import_chain
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
@@ -10,7 +9,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
-import net.postchain.chain0.common.queries.getBlockchains
+import net.postchain.chain0.common.queries.getBlockchainInfo
 import net.postchain.chain0.model.BlockchainState
 import net.postchain.chain0.nm_api.nmFindNextConfigurationHeight
 import net.postchain.chain0.nm_api.nmGetBlockchainConfiguration
@@ -22,6 +21,7 @@ import net.postchain.client.request.EndpointPool
 import net.postchain.common.BlockchainRid
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.GtvEncoder
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
@@ -111,9 +111,7 @@ class CommandProposeImportForeignConfigurations : PmcCommand(
 
     private fun proposeImportBlockchain(foreignClient: PostchainClient, version: Long): Boolean {
         // ensure blockchain is IMPORTING if already added
-        client.getBlockchains(true).firstOrNull {
-            BlockchainRid(it.rid) == blockchainRID
-        }?.also {
+        client.getBlockchainInfo(blockchainRID.data)?.also {
             if (it.state != BlockchainState.IMPORTING) {
                 throw CliktError("Configurations import is allowed only for blockchain in ${BlockchainState.IMPORTING} state")
             } else {
