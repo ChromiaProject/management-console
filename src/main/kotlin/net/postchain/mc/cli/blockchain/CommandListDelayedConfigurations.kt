@@ -1,12 +1,15 @@
 package net.postchain.mc.cli.blockchain
 
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.mordant.input.interactiveSelectList
 import net.postchain.chain0.common.queries.getBlockchainInfo
 import net.postchain.chain0.delay.listDelayedBlockchainConfigs
 import net.postchain.chain0.version.apiVersion
+import net.postchain.common.types.RowId
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.RID_LENGTH
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.interactiveOption
@@ -43,22 +46,30 @@ class CommandListDelayedConfigurations : PmcCommand(
         when {
             apiVersion >= 63 -> {
                 val proposals = client.listDelayedBlockchainConfigs(blockchainRID)
-                echo(pmcTable(
-                        "delayed configurations",
-                        headers,
-                        proposals.map {
-                            listOf(
-                                    it.proposalId.id.toString(),
-                                    it.proposalType.name,
-                                    it.proposalState.name,
-                                    it.delay?.toString() ?: "N/A",
-                                    if (it.applyAt != null) "${Date.from(Instant.ofEpochMilli(it.applyAt))}" else "N/A")
-                        },
-                        1 to RID_LENGTH,
-                        interactive))
-                if (interactive && proposals.isNotEmpty()) {
-                    promptForIndex(proposals)?.let {
-                        showProposalInfo(client, proposals[it].proposalId)
+                if (interactive && proposals.isNotEmpty() && proposals.size < terminal.size.height) {
+                    terminal.interactiveSelectList(proposals.map {
+                        "${it.proposalId.id} - ${it.proposalType.name} (${it.proposalState.name}) - ${it.delay}"
+                    }, "Select proposal")?.let {
+                        showProposalInfo(client, RowId(it.split(' ').first().toLong()))
+                    }
+                } else {
+                    echo(pmcTable(
+                            "delayed configurations",
+                            headers,
+                            proposals.map {
+                                listOf(
+                                        it.proposalId.id.toString(),
+                                        it.proposalType.name,
+                                        it.proposalState.name,
+                                        it.delay?.toString() ?: "N/A",
+                                        if (it.applyAt != null) "${Date.from(Instant.ofEpochMilli(it.applyAt))}" else "N/A")
+                            },
+                            1 to RID_LENGTH,
+                            interactive))
+                    if (interactive && proposals.isNotEmpty()) {
+                        promptForIndex(proposals)?.let {
+                            showProposalInfo(client, proposals[it].proposalId)
+                        }
                     }
                 }
             }

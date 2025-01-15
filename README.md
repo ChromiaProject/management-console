@@ -1,6 +1,6 @@
 # Management Console
 
-The management console is a cli for interracting with the directory chain (management chain) on a chromia network.
+The management console is a cli for interacting with the directory chain (management chain) on a chromia network.
 
 ## Build
 
@@ -45,4 +45,4 @@ The tool is built to be backwards compatible with at least the publicly deployed
 
 After dev branch has been built in the CI, open up the pipeline and start either `release-patch` or `release-minor` stage to create a release.
 
-Whenever a new command is added, removed or has changed behavior to the user, a minor release can be created. Any bugs or minor estetics that is useful to have for the user can be a patch release.
+Whenever a new command is added, removed or has changed behavior to the user, a minor release can be created. Any bugs or minor aesthetics that is useful to have for the user can be a patch release.

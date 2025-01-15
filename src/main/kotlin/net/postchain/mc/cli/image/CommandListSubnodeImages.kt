@@ -1,8 +1,10 @@
 package net.postchain.mc.cli.image
 
-import net.postchain.mc.cli.PmcCommand
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.mordant.input.interactiveSelectList
 import net.postchain.chain0.common.queries.getSubnodeImages
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
@@ -23,16 +25,24 @@ class CommandListSubnodeImages : PmcCommand(
     override fun run() {
         client.requireApiVersion(57)
         val images = client.getSubnodeImages()
-        echo(pmcTable(
-                "images",
-                headers,
-                images.map { listOf(it.name, it.url, it.digest, it.subnodeImageType.name, it.owner.toHex(), it.description, it.active.toString()) },
-                0 to NAME_LENGTH_MAX,
-                interactive
-        ))
-        if (interactive && images.isNotEmpty()) {
-            promptForIndex(images)?.let {
-                showSubnodeImageInfo(client, images[it].name)
+        if (interactive && images.isNotEmpty() && images.size < terminal.size.height) {
+            terminal.interactiveSelectList(images.map {
+                "${it.name} - ${it.url}"
+            }, "Select subnode image")?.let {
+                showSubnodeImageInfo(client, it.split(' ').first())
+            }
+        } else {
+            echo(pmcTable(
+                    "images",
+                    headers,
+                    images.map { listOf(it.name, it.url, it.digest, it.subnodeImageType.name, it.owner.toHex(), it.description, it.active.toString()) },
+                    0 to NAME_LENGTH_MAX,
+                    interactive
+            ))
+            if (interactive && images.isNotEmpty()) {
+                promptForIndex(images)?.let {
+                    showSubnodeImageInfo(client, images[it].name)
+                }
             }
         }
     }

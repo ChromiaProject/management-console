@@ -1,7 +1,9 @@
 package net.postchain.mc.cli.economy.proposal
 
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.mordant.input.interactiveSelectList
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.types.RowId
 import net.postchain.crypto.PubKey
@@ -57,20 +59,28 @@ class CommandListProposals : ECBaseCommand(
             else -> economyChainClient.getCommonPubkeyVotes(from, to, PubKey(client.pubkey))
         }
 
-        echo(pmcTable(
-                "proposals",
-                headers,
-                proposals.map { info ->
-                    val vote = votes.find { it.proposal == info.rowId }
-                    val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
-                    listOf(info.proposalType, info.rowId.id.toString(), info.state, voteStatus)
-                },
-                null,
-                interactive
-        ))
-        if (interactive && proposals.isNotEmpty()) {
-            promptForIndex(proposals)?.let {
-                showECProposalInfo(client, economyChainClient, proposals[it].rowId, ecVersion.version)
+        if (interactive && proposals.isNotEmpty() && proposals.size < terminal.size.height) {
+            terminal.interactiveSelectList(proposals.map {
+                "${it.rowId.id} - ${it.proposalType} (${it.state})"
+            }, "Select proposal")?.let {
+                showECProposalInfo(client, economyChainClient, RowId(it.split(' ').first().toLong()), ecVersion.version)
+            }
+        } else {
+            echo(pmcTable(
+                    "proposals",
+                    headers,
+                    proposals.map { info ->
+                        val vote = votes.find { it.proposal == info.rowId }
+                        val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
+                        listOf(info.proposalType, info.rowId.id.toString(), info.state, voteStatus)
+                    },
+                    null,
+                    interactive
+            ))
+            if (interactive && proposals.isNotEmpty()) {
+                promptForIndex(proposals)?.let {
+                    showECProposalInfo(client, economyChainClient, proposals[it].rowId, ecVersion.version)
+                }
             }
         }
     }
