@@ -1,11 +1,14 @@
 package net.postchain.mc.cli.blockchain
 
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.mordant.input.interactiveSelectList
 import net.postchain.chain0.common.queries.getBlockchainInfoList
 import net.postchain.chain0.version.apiVersion
 import net.postchain.common.BlockchainRid
+import net.postchain.common.hexStringToByteArray
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.RID_LENGTH
 import net.postchain.mc.cli.includeInactiveOption
 import net.postchain.mc.cli.interactiveOption
@@ -35,18 +38,26 @@ class CommandListBlockchains : PmcCommand(
         when {
             apiVersion >= 4 -> {
                 val blockchains = client.getBlockchainInfoList(includeInactive)
-                echo(pmcTable(
-                        "blockchains",
-                        headers,
-                        blockchains.map {
-                            listOf(it.name, it.rid.toHex(), it.state.toString(), it.container ?: "N/A", it.cluster
-                                    ?: "N/A")
-                        },
-                        1 to RID_LENGTH,
-                        interactive))
-                if (interactive && blockchains.isNotEmpty()) {
-                    promptForIndex(blockchains)?.let {
-                        showBlockchainInfo(client, apiVersion, BlockchainRid(blockchains[it].rid))
+                if (interactive && blockchains.isNotEmpty() && blockchains.size < terminal.size.height) {
+                    terminal.interactiveSelectList(blockchains.map {
+                        "${it.rid.toHex()} - ${it.name}"
+                    }, "Select blockchain")?.let {
+                        showBlockchainInfo(client, apiVersion, BlockchainRid(it.take(RID_LENGTH).hexStringToByteArray()))
+                    }
+                } else {
+                    echo(pmcTable(
+                            "blockchains",
+                            headers,
+                            blockchains.map {
+                                listOf(it.name, it.rid.toHex(), it.state.toString(), it.container ?: "N/A", it.cluster
+                                        ?: "N/A")
+                            },
+                            1 to RID_LENGTH,
+                            interactive))
+                    if (interactive && blockchains.isNotEmpty()) {
+                        promptForIndex(blockchains)?.let {
+                            showBlockchainInfo(client, apiVersion, BlockchainRid(blockchains[it].rid))
+                        }
                     }
                 }
             }

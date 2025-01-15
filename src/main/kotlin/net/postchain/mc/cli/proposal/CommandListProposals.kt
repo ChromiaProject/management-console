@@ -1,11 +1,12 @@
 package net.postchain.mc.cli.proposal
 
-import net.postchain.mc.cli.PmcCommand
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.long
+import com.github.ajalt.mordant.input.interactiveSelectList
 import net.postchain.chain0.proposal.ProposalState
 import net.postchain.chain0.proposal.ProposalType
 import net.postchain.chain0.proposal.getProposalsRange
@@ -13,6 +14,7 @@ import net.postchain.chain0.proposal.getRelevantProposals
 import net.postchain.chain0.proposal.voting.getProviderVotes
 import net.postchain.chain0.version.apiVersion
 import net.postchain.common.types.RowId
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.dateToTimestampOption
 import net.postchain.mc.cli.interactiveOption
@@ -53,20 +55,28 @@ class CommandListProposals : PmcCommand(
 
                 val votes = client.getProviderVotes(from, to, client.pubkey)
 
-                echo(pmcTable(
-                        "proposals",
-                        headers,
-                        proposals.map { info ->
-                            val vote = votes.find { it.proposal == info.rowId }
-                            val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
-                            listOf(info.proposalType.toString(), info.rowId.id.toString(), info.state.toString(), voteStatus)
-                        },
-                        null,
-                        interactive
-                ))
-                if (interactive && proposals.isNotEmpty()) {
-                    promptForIndex(proposals)?.let {
-                        showProposalInfo(client, proposals[it].rowId)
+                if (interactive && proposals.isNotEmpty() && proposals.size < terminal.size.height) {
+                    terminal.interactiveSelectList(proposals.map {
+                        "${it.rowId.id} - ${it.proposalType} (${it.state})"
+                    }, "Select proposal")?.let {
+                        showProposalInfo(client, RowId(it.split(' ').first().toLong()))
+                    }
+                } else {
+                    echo(pmcTable(
+                            "proposals",
+                            headers,
+                            proposals.map { info ->
+                                val vote = votes.find { it.proposal == info.rowId }
+                                val voteStatus = if (vote == null) "No vote registered" else if (vote.vote) "Accept" else "Reject"
+                                listOf(info.proposalType.toString(), info.rowId.id.toString(), info.state.toString(), voteStatus)
+                            },
+                            null,
+                            interactive
+                    ))
+                    if (interactive && proposals.isNotEmpty()) {
+                        promptForIndex(proposals)?.let {
+                            showProposalInfo(client, proposals[it].rowId)
+                        }
                     }
                 }
             }
