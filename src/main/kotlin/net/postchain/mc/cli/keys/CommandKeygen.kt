@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.keys
 
-import net.postchain.mc.cli.PmcCommand
+import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -8,6 +8,7 @@ import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.common.toHex
 import net.postchain.crypto.KeyPair
 import net.postchain.crypto.Secp256K1CryptoSystem
+import net.postchain.mc.cli.PmcCommand
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Properties
@@ -28,11 +29,14 @@ class CommandKeygen : PmcCommand(name = "keygen", help = "Generates public/priva
 
     private val nodeFormat by option("-n", "--node", help = "Save the generated keypair in format to be included in node properties file").flag()
 
+    private val printMnemonic by option("-pm", "--print-mnemonic", help = "Print the generated mnemonic").flag()
 
     /**
      * Cryptographic key generator. Will generate a pair of public and private keys and print to stdout.
      */
     override fun run() {
+        if (file == null && nodeFormat) throw UsageError("Cannot use --node without --save")
+
         val (keyPair, mnemonic) = generateSecp256k1KeyPairWithMnemonic(wordList)
 
         file?.let {
@@ -42,7 +46,9 @@ class CommandKeygen : PmcCommand(name = "keygen", help = "Generates public/priva
             echo("privkey:   ${keyPair.privKey.data.toHex()}")
         }
         echo("pubkey:    ${keyPair.pubKey.data.toHex()}")
-        echo("mnemonic:  $mnemonic")
+        if (printMnemonic) {
+            echo("mnemonic:  $mnemonic")
+        }
     }
 }
 
