@@ -7,7 +7,9 @@ import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.proposeStakingRequirementConstantsOperation
 import net.postchain.mc.cli.base.printResult
+import net.postchain.mc.cli.util.scheduleAt
 import net.postchain.mc.compatibility.ApiCompatECV28.updateStakingRequirementsEconomyConstantsOperationECV28
+import net.postchain.mc.compatibility.ApiCompatECV51.proposeStakingRequirementConstantsOperationECV51
 
 class CommandUpdateStakingEconomyConstants : ECBaseCommand(
         name = "update-staking-constants",
@@ -21,6 +23,7 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
     private val stakingRequirementsSystemNodeTotalStakeChr by option("--staking-requirements-sn-total", help = "Required total staking amount in CHR for system node").long()
     private val stakingRequirementsDappNodeOwnStakeChr by option("--staking-requirements-dn-own", help = "Required provider staking amount in CHR for dapp node").long()
     private val stakingRequirementsDappNodeTotalStakeChr by option("--staking-requirements-dn-total", help = "Required total staking amount in CHR for dapp node").long()
+    private val scheduleAt by scheduleAt()
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
@@ -49,9 +52,9 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                                 stakingRequirementsDappNodeTotalStakeChr,
                         )
             }
-            ecVersion.version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
+            ecVersion.version < ECONOMY_CHAIN_SCHEDULED_PROPOSAL_VERSION -> {
                 economyChainClient.transactionBuilder()
-                        .proposeStakingRequirementConstantsOperation(
+                        .proposeStakingRequirementConstantsOperationECV51(
                                 stakingRequirementsEnabled,
                                 stakingRequirementsStopPayoutDays,
                                 stakingRequirementsSystemNodeOwnStakeChr,
@@ -69,6 +72,7 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                                 stakingRequirementsSystemNodeTotalStakeChr?.times(UNITS_PER_CHR),
                                 stakingRequirementsDappNodeOwnStakeChr?.times(UNITS_PER_CHR),
                                 stakingRequirementsDappNodeTotalStakeChr?.times(UNITS_PER_CHR),
+                                scheduleAt
                         )
             }
         }

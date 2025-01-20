@@ -225,3 +225,13 @@ fun CliktCommand.thresholdOption() = option(
         positive number: that many voters
     """.trimIndent()
 ).long()
+
+fun CliktCommand.scheduleAt(vararg names: String = arrayOf("--schedule-at"), helpMsg: String = "Set the time to apply this proposal") = option(names = names, help = helpMsg)
+        .convert { input ->
+            if (input.all { it.isDigit() } && input.length == 13) {
+                input.toLong()
+            } else {
+                parseDateTimeAsEpochMillis(input, DATE_TIME_FORMATS.values.toList())
+                        ?: throw IllegalArgumentException("Invalid time format: $input supported formats: ${DATE_TIME_FORMATS.keys.joinToString(", ")} and epoch time in milliseconds")
+            }
+        }
