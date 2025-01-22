@@ -232,6 +232,6 @@ fun CliktCommand.scheduleAt(vararg names: String = arrayOf("--schedule-at"), hel
                 input.toLong()
             } else {
                 parseDateTimeAsEpochMillis(input, DATE_TIME_FORMATS.values.toList())
-                        ?: throw IllegalArgumentException("Invalid time format: $input supported formats: ${DATE_TIME_FORMATS.keys.joinToString(", ")} and epoch time in milliseconds")
+                        ?: throw IllegalArgumentException("Invalid time format: $input supported formats: ${DATE_TIME_FORMATS.keys.joinToString(", ")} and milliseconds since 1970 (unix/epoch time)")
             }
         }
