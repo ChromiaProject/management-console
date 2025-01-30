@@ -1,12 +1,10 @@
 package net.postchain.mc.cli.economy
 
-import com.chromia.build.tools.config.ChromiaClientConfig
 import com.github.ajalt.clikt.core.CliktError
 import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
 import net.postchain.client.core.PostchainClient
-import net.postchain.client.impl.PostchainClientProviderImpl
 import net.postchain.common.BlockchainRid
-import net.postchain.mc.cli.util.NopPostchainClient
+import net.postchain.d1.client.ChromiaClient
 import net.postchain.mc.network.Version
 
 const val DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION = 30L // The version of directory chain introducing economy chain
@@ -22,7 +20,7 @@ const val ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION = 46L
 const val UNITS_PER_CHR = 1_000_000
 const val UNITS_PER_USD = 1_000_000
 
-fun getEconomyChainClient(directoryChainClient: PostchainClient, config: ChromiaClientConfig): PostchainClient {
+fun getEconomyChainClient(directoryChainClient: PostchainClient, chromiaClient: ChromiaClient): PostchainClient {
 
     val version = Version(directoryChainClient).version
     if (version < DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION) {
@@ -32,7 +30,7 @@ fun getEconomyChainClient(directoryChainClient: PostchainClient, config: Chromia
     val economyChainBrid = directoryChainClient.getEconomyChainRid()
             ?: throw CliktError("Economy chain is not initialized")
 
-    return NopPostchainClient(config.setBrid(BlockchainRid(economyChainBrid)).client(PostchainClientProviderImpl()))
+    return chromiaClient.getClient(BlockchainRid(economyChainBrid), addNop = true)
 }
 
 fun formatUsd(chr: Long?, ecVersion: Long): String = formatCurrency(chr, UNITS_PER_USD, ecVersion)

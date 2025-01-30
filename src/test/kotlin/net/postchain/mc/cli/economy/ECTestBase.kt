@@ -6,25 +6,22 @@ import net.postchain.api.rest.controller.RestApi
 import net.postchain.common.BlockchainRid
 import java.io.File
 import java.nio.file.Path
-import java.time.Clock
-import java.time.Instant
-import java.time.ZoneOffset
 
 open class ECTestBase {
-
-    val testBrid = BlockchainRid.buildRepeat(0)
-    val ecBcrid = BlockchainRid.buildRepeat(1)
+    val dcBcRid = BlockchainRid.buildRepeat(0)
+    val ecBcRid = BlockchainRid.buildRepeat(1)
 
     fun ecRestApiTest(dir: Path, ecVersion: Long, function: (ECTestModel) -> Unit) {
 
         RestApi(0, "").use { it ->
-            val ecModel = ECTestModel(ecBcrid, ecVersion)
-            it.attachModel(ecBcrid, ecModel)
-            it.attachModel(testBrid, D1TestModel(testBrid, ecBcrid))
+            val apiUrl = "http://localhost:${it.server.port()}"
+            val ecModel = ECTestModel(ecBcRid, ecVersion)
+            it.attachModel(ecBcRid, ecModel)
+            it.attachModel(dcBcRid, D1TestModel(dcBcRid, apiUrl, ecBcRid))
             with(File(dir.toFile(), ".chromia/config")) {
                 parentFile.mkdirs()
                 writeText("""
-                api.url=http://localhost:${it.server.port()}
+                api.url=$apiUrl
             """.trimIndent())
             }
 

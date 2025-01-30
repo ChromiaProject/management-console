@@ -1,22 +1,21 @@
 package net.postchain.mc.network
 
-import com.chromia.build.tools.config.ChromiaClientConfig
 import com.github.ajalt.clikt.core.CliktError
 import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
 import net.postchain.chain0.token_chain_in_directory_chain.getTokenChainRid
 import net.postchain.client.core.PostchainClient
-import net.postchain.client.impl.PostchainClientProviderImpl
 import net.postchain.common.BlockchainRid
+import net.postchain.d1.client.ChromiaClient
 import net.postchain.economy.economy_chain.apiVersion
 import net.postchain.economy.economy_chain.initOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.token.token_chain.initTokenChainOperation
 import java.lang.Thread.sleep
 
-fun initEconomyChain(client: PostchainClient, config: ChromiaClientConfig) {
+fun initEconomyChain(client: PostchainClient, chromiaClient: ChromiaClient) {
     val economyChainRid = client.getEconomyChainRid()
     if (economyChainRid != null) {
-        val economyChainClient = config.setBrid(BlockchainRid(economyChainRid)).client(PostchainClientProviderImpl())
+        val economyChainClient = chromiaClient.getClient(BlockchainRid(economyChainRid), addNop = true)
 
         // Make sure postchain has attached model to REST API
         repeatUntilSuccessful {
@@ -36,10 +35,10 @@ fun initEconomyChain(client: PostchainClient, config: ChromiaClientConfig) {
     }
 }
 
-fun initTokenChain(client: PostchainClient, config: ChromiaClientConfig) {
+fun initTokenChain(client: PostchainClient, chromiaClient: ChromiaClient) {
     val tokenChainRid = client.getTokenChainRid()
     if (tokenChainRid.isNotEmpty()) {
-        val tokenChainClient = config.setBrid(BlockchainRid(tokenChainRid)).client(PostchainClientProviderImpl())
+        val tokenChainClient = chromiaClient.getClient(BlockchainRid(tokenChainRid), addNop = true)
 
         // Make sure postchain has attached model to REST API
         repeatUntilSuccessful {
@@ -73,7 +72,7 @@ fun repeatUntilSuccessful(times: Int = 30, interval: Long = 500, function: (Int)
     }
 
     if (exception != null) {
-        throw exception!!
+        throw exception
     }
     throw CliktError("Command timed out")
 }

@@ -20,9 +20,9 @@
     <properties>
         <revision>dev</revision>
         <postchain.version>3.27.1</postchain.version>
-        <postchain.client.version>3.21.0</postchain.client.version>
+        <postchain.client.version>3.23.0</postchain.client.version>
         <directory.chain.version>1.76.0</directory.chain.version>
-        <cli.tools.version>0.1.6</cli.tools.version>
+        <cli.tools.version>0.2.0</cli.tools.version>
         <rell.maven.plugin.version>0.12.5</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
@@ -84,6 +84,11 @@
         <dependency>
             <groupId>net.postchain.client</groupId>
             <artifactId>postchain-client</artifactId>
+            <version>${postchain.client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.postchain.client</groupId>
+            <artifactId>chromia-client</artifactId>
             <version>${postchain.client.version}</version>
         </dependency>
 

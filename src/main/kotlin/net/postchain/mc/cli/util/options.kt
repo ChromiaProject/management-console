@@ -1,8 +1,10 @@
 package net.postchain.mc.cli.util
 
 import com.chromia.build.tools.config.ChromiaConfigLoader
+import com.chromia.build.tools.config.ChromiaConfigWriter
 import com.chromia.cli.tools.config.OptionalChromiaModelConfigOption
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.groups.single
@@ -19,11 +21,14 @@ import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.model.ProviderQuotaType
+import net.postchain.client.config.PostchainClientConfig
 import net.postchain.client.request.Endpoint
+import net.postchain.common.BlockchainRid
 import net.postchain.common.config.getEnvOrBooleanProperty
 import net.postchain.common.config.getEnvOrStringProperty
 import net.postchain.common.hexStringToByteArray
 import net.postchain.crypto.PubKey
+import net.postchain.d1.client.StandardChromiaClient
 import net.postchain.mc.cli.base.CommandBase
 import net.postchain.mc.cli.base.DIGEST_LENGTH_MAX
 import net.postchain.mc.cli.base.METADATA_LENGTH_MAX
@@ -31,7 +36,6 @@ import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.base.URL_LENGTH_MAX
 import java.net.URI
 import java.net.URISyntaxException
-
 
 const val CHROMIA_CONFIG = "CHROMIA_CONFIG"
 const val ECDSA_COMPRESSED_KEY_SIZE = 33
@@ -73,19 +77,36 @@ class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConf
     private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup").flag()
     val network by option("--network", help = "Target network to make requests to (if chromia.yml is configured)")
     val rawConfig by lazy { ChromiaConfigLoader(logger).loadProperties(configFile) }
-    val client by lazy {
+
+    val chromiaClient by lazy {
         if (network != null) {
             requireNotNull(model) { "chromia.yml not found" }
             val networkModel = model!!.deployments[network]
                     ?: throw IllegalArgumentException("Network $network not found in configuration")
+            rawConfig.setProperty("api.url", networkModel.urls.joinToString(",") { Endpoint.sanitizeUrl(it) })
             rawConfig.setProperty("brid", networkModel.blockchainRid.toHex())
-            config.setApiUrls(networkModel.urls.joinToString(",") { Endpoint.sanitizeUrl(it) })
         }
-        val configuredBrid = rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
+        val configuredBrid = if (lookupBrid) null else rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
         val useRequestCompression = rawConfig
                 .getEnvOrBooleanProperty("POSTCHAIN_CLIENT_COMPRESS_REQUEST_BODIES", "compress.requests", true)
-        NopPostchainClient.withCachedBrid(config, configuredBrid, lookupBrid, useRequestCompression)
+
+        if (!rawConfig.containsKey("api.url")) throw CliktError("No api.url specified")
+        rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
+        val postchainClientConfig = PostchainClientConfig.fromConfiguration(rawConfig)
+
+        val chromiaClient = StandardChromiaClient(postchainClientConfig.copy(compressRequestBodies = useRequestCompression))
+
+        if (configuredBrid == null) {
+            ChromiaConfigWriter.local.setBrid(chromiaClient.directoryChainRid)
+        }
+
+        chromiaClient
     }
+
+    val client by lazy {
+        chromiaClient.getDirectoryChainClientForQueryReplica(queryNodes = chromiaClient.config.endpointPool, addNop = true)
+    }
+
     val providerPubkey by lazy { rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_PROVIDER_PUBKEY", "provider.pubkey") }
 }
 
@@ -128,7 +149,7 @@ fun OptionTransformContext.validateUrl(url: String) {
     val valid = try {
         URI(url)
         true
-    } catch (e: URISyntaxException) {
+    } catch (_: URISyntaxException) {
         false
     }
     require(valid) { "Invalid URL provided: $url" }

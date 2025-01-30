@@ -27,7 +27,6 @@ import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.portOption
 import net.postchain.mc.cli.requiredHostOption
-import net.postchain.mc.cli.util.NopPostchainClient
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
@@ -156,10 +155,10 @@ class CommandProposeImportForeignConfigurations : PmcCommand(
                 )
     }
 
-    private fun buildForeignClient(): PostchainClient = NopPostchainClient(PostchainClientImpl(
+    private fun buildForeignClient(): PostchainClient = PostchainClientImpl(
             client.config.copy(
                     blockchainRid = chain0BlockchainRID,
                     endpointPool = EndpointPool.singleUrl(apiUrl)
             )
-    ))
+    )
 }

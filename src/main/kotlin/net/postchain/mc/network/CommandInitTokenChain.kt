@@ -46,6 +46,6 @@ class CommandInitTokenChain : PmcCommand(
                     )
         }
 
-        initTokenChain(client, config.config)
+        initTokenChain(client, config.chromiaClient)
     }
 }
