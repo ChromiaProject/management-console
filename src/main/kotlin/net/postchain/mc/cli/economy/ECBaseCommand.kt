@@ -16,7 +16,7 @@ abstract class ECBaseCommand(
 
     override fun runDC() {
 
-        val economyChainClient = getEconomyChainClient(client, config.config)
+        val economyChainClient = getEconomyChainClient(client, config.chromiaClient)
         ecVersion = Version(economyChainClient)
 
         requiresECVersion?.let {

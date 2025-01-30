@@ -1,7 +1,6 @@
 package net.postchain.mc.network
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
@@ -10,6 +9,7 @@ import net.postchain.chain0.economy_chain_in_directory_chain.initEconomyChainOpe
 import net.postchain.chain0.token_chain_in_directory_chain.initTokenChainOperation
 import net.postchain.client.core.PostchainClient
 import net.postchain.gtv.GtvEncoder
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.BlockchainConfig
@@ -87,10 +87,10 @@ class CommandInit : PmcCommand(
                         printOnSuccess = true
                 )
         if (economyChainConfigData != null) {
-            initEconomyChain(client, config.config)
+            initEconomyChain(client, config.chromiaClient)
         }
         if (tokenChainConfigData != null) {
-            initTokenChain(client, config.config)
+            initTokenChain(client, config.chromiaClient)
         }
     }
 
