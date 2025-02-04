@@ -1,28 +1,57 @@
 package net.postchain.mc.network
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.chromia.build.tools.config.ChromiaConfigLoader
+import com.chromia.build.tools.config.ChromiaConfigWriter
+import com.chromia.cli.tools.config.chromiaConfigFileOption
+import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.common.init.initOperation
 import net.postchain.chain0.economy_chain_in_directory_chain.initEconomyChainOperation
 import net.postchain.chain0.token_chain_in_directory_chain.initTokenChainOperation
+import net.postchain.client.config.PostchainClientConfig
 import net.postchain.client.core.PostchainClient
+import net.postchain.client.impl.PostchainClientImpl
+import net.postchain.common.BlockchainRid
+import net.postchain.common.config.getEnvOrBooleanProperty
+import net.postchain.common.config.getEnvOrStringProperty
+import net.postchain.d1.client.StandardChromiaClient
 import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.BlockchainConfig
-import net.postchain.mc.cli.util.pmcConfigOption
 import java.io.File
 
 class CommandInit : PmcCommand(
         name = "initialize",
         help = "Create system cluster with naked system container for the directory blockchain. Module argument initial_provider becomes first member of SYSTEM_P voter set."
 ) {
+    val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup").flag()
+    val configFile by chromiaConfigFileOption()
+    val rawConfig by lazy { ChromiaConfigLoader(::echo).loadProperties(configFile) }
+    val client by lazy {
+        val configuredBrid = if (lookupBrid) null else rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
+        val useRequestCompression = rawConfig
+                .getEnvOrBooleanProperty("POSTCHAIN_CLIENT_COMPRESS_REQUEST_BODIES", "compress.requests", true)
 
-    private val config by pmcConfigOption()
-    private val client get() = config.client
+        if (!rawConfig.containsKey("api.url")) throw CliktError("No api.url specified")
+        rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
+        val initialConfig = PostchainClientConfig.fromConfiguration(rawConfig).copy(compressRequestBodies = useRequestCompression)
+
+        val dcConfig = if (initialConfig.blockchainRid != BlockchainRid.ZERO_RID)
+            initialConfig
+        else
+            initialConfig.copy(blockchainRid = PostchainClientImpl(initialConfig).getBlockchainRID(0))
+
+        if (configuredBrid == null) {
+            ChromiaConfigWriter.local.setBrid(dcConfig.blockchainRid)
+        }
+
+        PostchainClientImpl(dcConfig)
+    }
 
     private val systemAnchoringConfig by option(
             "-sac",
@@ -86,11 +115,16 @@ class CommandInit : PmcCommand(
                         "Failed to initiate network",
                         printOnSuccess = true
                 )
-        if (economyChainConfigData != null) {
-            initEconomyChain(client, config.chromiaClient)
-        }
-        if (tokenChainConfigData != null) {
-            initTokenChain(client, config.chromiaClient)
+
+        if (economyChainConfigData != null || tokenChainConfigData != null) {
+            val chromiaClient = StandardChromiaClient(client.config)
+            val dcClient = chromiaClient.getDirectoryChainClient()
+            if (economyChainConfigData != null) {
+                initEconomyChain(dcClient, chromiaClient)
+            }
+            if (tokenChainConfigData != null) {
+                initTokenChain(dcClient, chromiaClient)
+            }
         }
     }
 
