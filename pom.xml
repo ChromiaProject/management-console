@@ -20,7 +20,7 @@
     <properties>
         <revision>dev</revision>
         <postchain.version>3.27.3</postchain.version>
-        <postchain.client.version>3.23.3</postchain.client.version>
+        <postchain.client.version>3.23.4</postchain.client.version>
         <directory.chain.version>1.76.0</directory.chain.version>
         <cli.tools.version>0.3.1</cli.tools.version>
         <rell.maven.plugin.version>0.12.5</rell.maven.plugin.version>
