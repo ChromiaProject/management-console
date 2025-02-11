@@ -4,7 +4,7 @@ import com.github.ajalt.clikt.core.CliktError
 import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.BlockchainRid
-import net.postchain.d1.client.ChromiaClient
+import net.postchain.mc.cli.util.PmcClientConfigOption
 import net.postchain.mc.network.Version
 
 const val DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION = 30L // The version of directory chain introducing economy chain
@@ -20,17 +20,20 @@ const val ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION = 46L
 const val UNITS_PER_CHR = 1_000_000
 const val UNITS_PER_USD = 1_000_000
 
-fun getEconomyChainClient(directoryChainClient: PostchainClient, chromiaClient: ChromiaClient): PostchainClient {
+fun getEconomyChainClient(config: PmcClientConfigOption): PostchainClient {
 
-    val version = Version(directoryChainClient).version
+    val version = Version(config.client).version
     if (version < DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION) {
         throw CliktError("Economy chain requires directory chain version $DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION, found version $version")
     }
 
-    val economyChainBrid = directoryChainClient.getEconomyChainRid()
+    val economyChainBrid = config.client.getEconomyChainRid()
             ?: throw CliktError("Economy chain is not initialized")
 
-    return chromiaClient.getClient(BlockchainRid(economyChainBrid), addNop = true)
+    return if (config.lookupNodes)
+        config.chromiaClient.getSystemChainClient(BlockchainRid(economyChainBrid), addNop = true)
+    else
+        config.chromiaClient.getSystemChainClientForForwardingReplica(BlockchainRid(economyChainBrid), addNop = true)
 }
 
 fun formatUsd(chr: Long?, ecVersion: Long): String = formatCurrency(chr, UNITS_PER_USD, ecVersion)
