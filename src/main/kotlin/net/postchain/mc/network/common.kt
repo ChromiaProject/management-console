@@ -15,7 +15,7 @@ import java.lang.Thread.sleep
 fun initEconomyChain(client: PostchainClient, chromiaClient: ChromiaClient) {
     val economyChainRid = client.getEconomyChainRid()
     if (economyChainRid != null) {
-        val economyChainClient = chromiaClient.getClient(BlockchainRid(economyChainRid), addNop = true)
+        val economyChainClient = chromiaClient.getSystemChainClient(BlockchainRid(economyChainRid), addNop = true)
 
         // Make sure postchain has attached model to REST API
         repeatUntilSuccessful {
@@ -38,7 +38,7 @@ fun initEconomyChain(client: PostchainClient, chromiaClient: ChromiaClient) {
 fun initTokenChain(client: PostchainClient, chromiaClient: ChromiaClient) {
     val tokenChainRid = client.getTokenChainRid()
     if (tokenChainRid.isNotEmpty()) {
-        val tokenChainClient = chromiaClient.getClient(BlockchainRid(tokenChainRid), addNop = true)
+        val tokenChainClient = chromiaClient.getSystemChainClient(BlockchainRid(tokenChainRid), addNop = true)
 
         // Make sure postchain has attached model to REST API
         repeatUntilSuccessful {

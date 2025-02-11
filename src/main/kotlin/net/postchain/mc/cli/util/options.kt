@@ -74,7 +74,10 @@ fun OptionTransformContext.validatePubkey(pubKey: PubKey) {
 fun CliktCommand.pmcConfigOption() = PmcClientConfigOption { msg -> echo(msg, err = true) }
 
 class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConfigOption(logger) {
-    private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup").flag()
+    private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup")
+            .flag()
+    val lookupNodes by option("--lookup-nodes", help = "Lookup system cluster signer nodes for sending transactions to")
+            .flag("--no-lookup-nodes", default = true, defaultForHelp = "yes")
     val network by option("--network", help = "Target network to make requests to (if chromia.yml is configured)")
     val rawConfig by lazy { ChromiaConfigLoader(logger).loadProperties(configFile) }
 
@@ -104,7 +107,10 @@ class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConf
     }
 
     val client by lazy {
-        chromiaClient.getDirectoryChainClientForQueryReplica(queryNodes = chromiaClient.config.endpointPool, addNop = true)
+        if (lookupNodes)
+            chromiaClient.getDirectoryChainClientForQueryReplica(addNop = true)
+        else
+            chromiaClient.getDirectoryChainClientForForwardingReplica(addNop = true)
     }
 
     val providerPubkey by lazy { rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_PROVIDER_PUBKEY", "provider.pubkey") }
