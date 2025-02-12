@@ -16,6 +16,8 @@ import net.postchain.mc.cli.forceOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.cli.util.scheduleAt
+import net.postchain.mc.compatibility.ApiCompatV77.proposeConfigurationOperationV77
 
 
 class CommandProposeConfiguration : DCBaseCommand(
@@ -34,10 +36,9 @@ class CommandProposeConfiguration : DCBaseCommand(
             .required()
 
     private val blockchainRID by blockchainRidOption().required()
-
     private val height by heightOption()
-
     private val force by forceOption()
+    private val scheduleAt by scheduleAt()
 
     private val description by proposalDescriptionOption {
         if (height == null) "Update of blockchain configuration for $blockchainRID"
@@ -51,17 +52,21 @@ class CommandProposeConfiguration : DCBaseCommand(
         client.transactionBuilder()
                 .apply {
                     if (height == null) {
-                        when (dcVersion) {
-                            1L -> {
+                        when {
+                            dcVersion == 1L -> {
                                 addOperation("propose_configuration",
                                         gtv(clientProviderPubkey),
                                         gtv(blockchainRID),
                                         gtv(bcConfig.data)
                                 )
                             }
-
+                            dcVersion < 78 -> {
+                                proposeConfigurationOperationV77(clientProviderPubkey, blockchainRID,
+                                        compressedConfigurationData, description)
+                            }
                             else -> {
-                                proposeConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, description)
+                                proposeConfigurationOperation(clientProviderPubkey, blockchainRID,
+                                        compressedConfigurationData, description, scheduleAt)
                             }
                         }
                     } else {

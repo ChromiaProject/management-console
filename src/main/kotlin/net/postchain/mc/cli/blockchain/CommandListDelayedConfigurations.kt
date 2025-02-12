@@ -6,7 +6,7 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.mordant.input.interactiveSelectList
 import net.postchain.chain0.common.queries.getBlockchainInfo
-import net.postchain.chain0.delay.listDelayedBlockchainConfigs
+import net.postchain.chain0.delay.blockchain_config_delay.listDelayedBlockchainConfigs
 import net.postchain.chain0.version.apiVersion
 import net.postchain.common.types.RowId
 import net.postchain.mc.cli.PmcCommand
