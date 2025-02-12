@@ -1,7 +1,5 @@
 package net.postchain.mc.cli.economy
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
 import com.chromia.build.tools.restapi.TestModel
 import net.postchain.api.rest.controller.Model
 import net.postchain.api.rest.model.ApiStatus
@@ -10,17 +8,15 @@ import net.postchain.common.BlockchainRid
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.economy.economy_chain.EconomyConstantsData
 import net.postchain.economy.economy_chain.TagData
-import net.postchain.gtv.Gtv
 import net.postchain.gtv.GtvArray
 import net.postchain.gtv.GtvFactory
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtx.GtxQuery
+import net.postchain.mc.cli.BaseTransactionHandler
 import net.postchain.mc.compatibility.ApiCompatECV45
 import java.math.BigDecimal
 
-class ECTestModel(val model: Model, val ecVersion: Long) : Model by model {
-
-    val ops: MutableMap<String, MutableList<List<Gtv>>> = mutableMapOf()
+class ECTestModel(val model: Model, val ecVersion: Long) : Model by model, BaseTransactionHandler() {
 
     constructor(blockchainRid: BlockchainRid, ecVersion: Long) : this(TestModel(blockchainRid), ecVersion)
 
@@ -78,31 +74,11 @@ class ECTestModel(val model: Model, val ecVersion: Long) : Model by model {
     }
 
     override fun postTransaction(tx: ByteArray) {
-        val txGtv = GtvFactory.decodeGtv(tx)
-        for (op in txGtv.asArray()) {
-            if (op.asArray().size > 1) {
-                for (op1 in op[1].asArray()) {
-                    val name = op1[0].asString()
-                    val parameters = op1[1].asArray().toList()
-                    ops.compute(name) { _, list ->
-                        val newList = list ?: mutableListOf()
-                        newList.add(parameters)
-                        newList
-                    }
-                }
-            }
-        }
+        postTransactionImpl(tx)
     }
 
     override fun getStatus(txRID: TxRid): ApiStatus {
         return ApiStatus(TransactionStatus.CONFIRMED)
     }
 
-    fun assertSingleOp(name: String, parameters: List<Gtv>) {
-
-        val opCalls = ops[name]
-
-        assertThat(opCalls?.size).isEqualTo(1)
-        assertThat(opCalls?.get(0)).isEqualTo(parameters)
-    }
 }
