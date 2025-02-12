@@ -226,7 +226,7 @@ fun CliktCommand.thresholdOption() = option(
     """.trimIndent()
 ).long()
 
-fun CliktCommand.scheduleAt(vararg names: String = arrayOf("--schedule-at"), helpMsg: String = "Set the time to apply this proposal") = option(names = names, help = helpMsg)
+fun CliktCommand.scheduleAt(vararg names: String = arrayOf("--schedule-at"), helpMsg: String = "Set the time (UTC) to apply this proposal. Supported formats: ${DATE_TIME_FORMATS.keys.joinToString(", ")} and milliseconds since 1970 (unix/epoch time)") = option(names = names, help = helpMsg)
         .convert { input ->
             if (input.all { it.isDigit() } && input.length == 13) {
                 input.toLong()

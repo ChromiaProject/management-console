@@ -17,7 +17,7 @@ import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.scheduleAt
-import net.postchain.mc.compatibility.ApiCompatV76.proposeConfigurationOperationV76
+import net.postchain.mc.compatibility.ApiCompatV77.proposeConfigurationOperationV77
 
 
 class CommandProposeConfiguration : DCBaseCommand(
@@ -60,8 +60,8 @@ class CommandProposeConfiguration : DCBaseCommand(
                                         gtv(bcConfig.data)
                                 )
                             }
-                            dcVersion < 77 -> {
-                                proposeConfigurationOperationV76(clientProviderPubkey, blockchainRID,
+                            dcVersion < 78 -> {
+                                proposeConfigurationOperationV77(clientProviderPubkey, blockchainRID,
                                         compressedConfigurationData, description)
                             }
                             else -> {

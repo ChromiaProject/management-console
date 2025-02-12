@@ -9,7 +9,7 @@ import net.postchain.economy.economy_chain.proposeStakingRequirementConstantsOpe
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.scheduleAt
 import net.postchain.mc.compatibility.ApiCompatECV28.updateStakingRequirementsEconomyConstantsOperationECV28
-import net.postchain.mc.compatibility.ApiCompatECV51.proposeStakingRequirementConstantsOperationECV51
+import net.postchain.mc.compatibility.ApiCompatECV52.proposeStakingRequirementConstantsOperationECV52
 
 class CommandUpdateStakingEconomyConstants : ECBaseCommand(
         name = "update-staking-constants",
@@ -54,7 +54,7 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
             }
             ecVersion.version < ECONOMY_CHAIN_SCHEDULED_PROPOSAL_VERSION -> {
                 economyChainClient.transactionBuilder()
-                        .proposeStakingRequirementConstantsOperationECV51(
+                        .proposeStakingRequirementConstantsOperationECV52(
                                 stakingRequirementsEnabled,
                                 stakingRequirementsStopPayoutDays,
                                 stakingRequirementsSystemNodeOwnStakeChr,

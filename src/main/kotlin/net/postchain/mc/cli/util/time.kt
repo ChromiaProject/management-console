@@ -7,9 +7,7 @@ import java.time.format.DateTimeParseException
 
 val DATE_TIME_FORMATS = listOf(
         "yyyy-MM-dd HH:mm",
-        "yyyy-MM-dd HH:mm:ss",
         "yyyy-MM-dd'T'HH:mm",
-        "yyyy-MM-dd'T'HH:mm:ss",
 ).associateWith { DateTimeFormatter.ofPattern(it) }
 
 fun parseDateTime(time: String, formats: List<DateTimeFormatter> = DATE_TIME_FORMATS.values.toList()): LocalDateTime? {

@@ -5,8 +5,8 @@ import net.postchain.common.BlockchainRid
 import net.postchain.gtv.GtvFactory.gtv
 import javax.annotation.processing.Generated
 
-object ApiCompatV76 {
-    const val PROPOSE_CONFIGURATION_V76 = "propose_configuration"
+object ApiCompatV77 {
+    const val PROPOSE_CONFIGURATION_V77 = "propose_configuration"
     /**
      * Operation proposal_blockchain:propose_configuration
      *
@@ -18,11 +18,11 @@ object ApiCompatV76 {
      * @param myPubkey pubkey of provider
      */
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "proposal_blockchain:propose_configuration")
-    fun TransactionBuilder.proposeConfigurationOperationV76(myPubkey: ByteArray,
+    fun TransactionBuilder.proposeConfigurationOperationV77(myPubkey: ByteArray,
                                                             blockchainRid: BlockchainRid,
                                                             configData: ByteArray,
                                                             description: String) =
-            addOperation(PROPOSE_CONFIGURATION_V76, gtv(myPubkey),
+            addOperation(PROPOSE_CONFIGURATION_V77, gtv(myPubkey),
                     gtv(blockchainRid),
                     gtv(configData),
                     gtv(description))

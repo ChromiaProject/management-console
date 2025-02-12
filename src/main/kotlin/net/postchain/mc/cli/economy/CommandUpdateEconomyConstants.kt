@@ -7,7 +7,7 @@ import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.updateEconomyConstantsOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.scheduleAt
-import net.postchain.mc.compatibility.ApiCompatECV51.updateEconomyConstantsOperationECV51
+import net.postchain.mc.compatibility.ApiCompatECV52.updateEconomyConstantsOperationECV52
 
 class CommandUpdateEconomyConstants : ECBaseCommand(
     name = "update-constants",
@@ -38,7 +38,7 @@ class CommandUpdateEconomyConstants : ECBaseCommand(
 
         if (ecVersion.version < ECONOMY_CHAIN_SCHEDULED_PROPOSAL_VERSION) {
             economyChainClient.transactionBuilder()
-                    .updateEconomyConstantsOperationECV51(minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
+                    .updateEconomyConstantsOperationECV52(minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
                             stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),
                             resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal()
                     )
