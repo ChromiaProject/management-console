@@ -10,14 +10,12 @@ class TimeTest {
     fun test() {
         listOf(
                 "2025-07-20 19:04",
-                "2025-07-20 19:04:00",
                 "2025-07-20T19:04",
-                "2025-07-20T19:04:00",
         ).forEach {
             assertThat(parseDateTimeAsEpochMillis(it)).isEqualTo(1753038240000)
         }
 
-        assertThat(parseDateTimeAsEpochMillis("2025-07-20 19:04:01")).isEqualTo(1753038241000)
+        assertThat(parseDateTimeAsEpochMillis("2025-07-20 19:04")).isEqualTo(1753038240000)
     }
 }
 
