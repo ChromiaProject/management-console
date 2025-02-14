@@ -217,15 +217,6 @@ fun CliktCommand.proposalDescriptionOption(helpMessage: String = "Proposal descr
 fun CliktCommand.configurationsFileOption() = option("--configurations-file", help = "File to import blockchain configurations from")
         .path(mustExist = true, canBeDir = false, canBeFile = true, mustBeReadable = true)
 
-fun CliktCommand.thresholdOption() = option(
-        "-t", "--threshold",
-        help = """
-        0: supermajority of voters, specifically  `n - (n - 1) / 3` (which is usually around 67%)
-        -1: simple majority
-        positive number: that many voters
-    """.trimIndent()
-).long()
-
 fun CliktCommand.scheduleAt(vararg names: String = arrayOf("--schedule-at"), helpMsg: String = "Set the time (UTC) to apply this proposal. Supported formats: ${DATE_TIME_FORMATS.keys.joinToString(", ")} and milliseconds since 1970 (unix/epoch time)") = option(names = names, help = helpMsg)
         .convert { input ->
             if (input.all { it.isDigit() } && input.length == 13) {

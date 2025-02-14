@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.votingupdates
 
+import com.chromia.cli.tools.util.thresholdOption
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
@@ -11,7 +12,6 @@ import net.postchain.common.toHex
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.proposalDescriptionOption
-import net.postchain.mc.cli.util.thresholdOption
 
 
 class CommandProposeVoterSetUpdate : DCBaseCommand(

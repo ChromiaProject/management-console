@@ -6,7 +6,7 @@ import net.postchain.chain0.common.setProviderKeyThresholdOperation
 import net.postchain.chain0.provider_auth.model.ProviderKeyRole
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.util.thresholdOption
+import com.chromia.cli.tools.util.thresholdOption
 
 class CommandSetProviderKeyThreshold : DCBaseCommand(
         name = "threshold",
