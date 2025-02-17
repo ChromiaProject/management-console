@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.blockchain
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
@@ -12,6 +13,7 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.network.requireApiVersion
 
 
 class CommandProposeForcedConfiguration : DCBaseCommand(
@@ -38,16 +40,21 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
 
     private val height by heightOption().required()
 
+    private val resumeChain by option("-r", "--resume", help = "Automatically resume blockchain after configuration is applied").flag()
+
     private val description by proposalDescriptionOption { "Force update of blockchain configuration for $blockchainRID at height $height" }
 
     override fun runDC() {
+        if (resumeChain) {
+            client.requireApiVersion(79, message = "--resume")
+        }
 
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
         val compressedConfigurationData = GtvEncoder.encodeGtv(BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, dcVersion))
 
         client.transactionBuilder()
                 .apply {
-                   proposeForcedConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, height, description)
+                   proposeForcedConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, height, resumeChain, description)
                 }
                 .postAwaitConfirmation()
                 .printResult(
