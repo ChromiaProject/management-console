@@ -13,6 +13,7 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.compatibility.ApiCompatV78.proposeForcedConfigurationOperationV78
 import net.postchain.mc.network.requireApiVersion
 
 
@@ -46,7 +47,7 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
 
     override fun runDC() {
         if (resumeChain) {
-            client.requireApiVersion(79, message = "--resume")
+            client.requireApiVersion(80, message = "--resume")
         }
 
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
@@ -54,7 +55,11 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
 
         client.transactionBuilder()
                 .apply {
-                   proposeForcedConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, height, resumeChain, description)
+                    if (dcVersion >= 80) {
+                        proposeForcedConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, height, description, resumeChain)
+                    } else {
+                        proposeForcedConfigurationOperationV78(clientProviderPubkey, blockchainRID, compressedConfigurationData, height, description)
+                    }
                 }
                 .postAwaitConfirmation()
                 .printResult(
