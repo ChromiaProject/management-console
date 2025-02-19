@@ -1,10 +1,10 @@
 package net.postchain.mc.cli.blockchain.move
 
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_blockchain_move.proposeBlockchainMoveOperation
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
@@ -15,7 +15,7 @@ import net.postchain.mc.network.requireApiVersion
 class CommandProposeBlockchainMove : PmcCommand(
         name = "move",
         help = """
-            Propose moving of blockchain to a specific container 
+            Propose moving a blockchain to a specific container 
             
             Change will be applied after voting within the deployer voter set 
             of the cluster that the original container belongs to.
@@ -32,14 +32,14 @@ class CommandProposeBlockchainMove : PmcCommand(
 
     override fun run() {
         client.requireApiVersion(33)
-        echo("Blockchain $blockchainRID will start moving to the container $destinationContainer as soon as the proposal approved")
+        echo("Blockchain $blockchainRID will start moving to container $destinationContainer as soon as the proposal is approved")
 
         client.transactionBuilder()
                 .proposeBlockchainMoveOperation(client.pubkey, blockchainRID, destinationContainer, description)
                 .postAwaitConfirmation()
                 .printResult(
-                        "Moving of blockchain ${blockchainRID.toHex()} to the container $destinationContainer proposed",
-                        "Cannot propose moving of blockchain",
+                        "Blockchain move proposed",
+                        "Cannot propose moving the blockchain"
                 )
     }
 }
