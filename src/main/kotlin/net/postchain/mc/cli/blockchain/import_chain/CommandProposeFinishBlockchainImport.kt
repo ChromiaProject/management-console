@@ -84,7 +84,9 @@ class CommandProposeFinishBlockchainImport : PmcCommand(
                     heights.add(nextHeight)
                 }
 
-                return configHeights - heights to blockchainRID
+                val missingConfigHeights = (configHeights - heights).filter { it <= finalHeight }.toSet()
+
+                return missingConfigHeights to blockchainRID
             }
 
 }

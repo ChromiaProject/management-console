@@ -1,7 +1,7 @@
 package net.postchain.mc.cli.util
 
+import com.chromia.cli.base.formatter.jsonTable
 import com.chromia.cli.tools.formatter.defaultTable
-import com.chromia.cli.tools.formatter.jsonTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.mordant.rendering.TextAlign

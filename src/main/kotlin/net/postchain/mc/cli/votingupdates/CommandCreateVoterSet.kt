@@ -10,7 +10,7 @@ import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pubkeysOption
-import net.postchain.mc.cli.util.thresholdOption
+import com.chromia.cli.tools.util.thresholdOption
 
 
 class CommandCreateVoterSet : DCBaseCommand(

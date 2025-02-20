@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.economy.mint
 
+import com.chromia.cli.tools.util.thresholdOption
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
@@ -12,7 +13,6 @@ import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.economy.ECBaseCommand
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_MINTING_VERSION
-import net.postchain.mc.cli.util.thresholdOption
 
 class CommandVoterSetUpdate : ECBaseCommand(
         name = "voter-set-update",
