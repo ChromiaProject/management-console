@@ -1,17 +1,20 @@
 package net.postchain.mc.cli.blockchain.move
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
+import net.postchain.chain0.proposal_blockchain_move.proposeBlockchainMoveCancelOperation
+import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.base.printResult
+import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.network.requireApiVersion
 
 class CommandProposeCancelBlockchainMove : PmcCommand(
-        name = "cancel-moving",
+        name = "cancel-move",
         help = """
-            Propose canceling of the blockchain moving
+            Propose canceling the blockchain move
             
             Change will be applied after voting within the deployer voter set 
             of the cluster that the original container belongs to.
@@ -22,23 +25,18 @@ class CommandProposeCancelBlockchainMove : PmcCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val description by proposalDescriptionOption { "Cancel blockchain moving for $blockchainRID" }
+    private val description by proposalDescriptionOption { "Cancel the blockchain move for $blockchainRID" }
 
     override fun run() {
-        throw PrintMessage("Not yet implemented")
-
-        /*
-        client.requireApiVersion(21)
-        echo("Blockchain moving will be canceled as soon as the proposal is approved")
+        client.requireApiVersion(81)
+        echo("Blockchain move will be canceled as soon as the proposal is approved")
 
         client.transactionBuilder()
                 .proposeBlockchainMoveCancelOperation(client.pubkey, blockchainRID, description)
                 .postAwaitConfirmation()
                 .printResult(
-                        "Canceling of the blockchain moving proposed",
-                        "Cannot propose canceling of the blockchain moving"
+                        "Canceling the blockchain move has been proposed",
+                        "Cannot propose canceling the blockchain move"
                 )
-
-         */
     }
 }

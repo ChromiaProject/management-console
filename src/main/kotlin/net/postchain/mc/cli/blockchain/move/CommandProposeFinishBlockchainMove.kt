@@ -15,12 +15,15 @@ import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.network.requireApiVersion
 
 class CommandProposeFinishBlockchainMove : PmcCommand(
-        name = "finish-moving",
+        name = "finish-move",
         help = """
-            Propose finishing of the blockchain moving
-            
+            Propose finishing the blockchain move
+
             Change will be applied after voting within the deployer voter set 
             of the cluster that the original container belongs to.
+
+            Note: as soon as the blockchain move is finalized, it will no longer be possible to cancel it.
+
         """.trimIndent()
 ) {
     private val config by pmcConfigOption()
@@ -33,18 +36,18 @@ class CommandProposeFinishBlockchainMove : PmcCommand(
                 require(it > 0) { "--final-height arg must be greater than 0" }
             }
 
-    private val description by proposalDescriptionOption { "Finish blockchain moving - blockchain-rid: $blockchainRID, final-height: $finalHeight" }
+    private val description by proposalDescriptionOption { "Finish the blockchain move - blockchain-rid: $blockchainRID, final-height: $finalHeight" }
 
     override fun run() {
         client.requireApiVersion(33)
-        echo("Blockchain moving will be finished as soon as the proposal is approved")
+        echo("Blockchain move will be finished as soon as the proposal is approved")
 
         client.transactionBuilder()
                 .proposeBlockchainMoveFinishOperation(client.pubkey, blockchainRID, finalHeight, description)
                 .postAwaitConfirmation()
                 .printResult(
-                        "Finishing of the blockchain moving proposed",
-                        "Cannot propose finishing of the blockchain moving"
+                        "Finishing the blockchain move has been proposed",
+                        "Cannot propose finishing the blockchain move"
                 )
     }
 }
