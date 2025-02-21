@@ -1,6 +1,7 @@
 package net.postchain.mc.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.ParameterHolder
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.options.OptionTransformContext
@@ -16,6 +17,7 @@ import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.mordant.terminal.ConversionResult
 import com.github.ajalt.mordant.terminal.prompt
 import net.postchain.common.BlockchainRid
+import net.postchain.common.hexStringToByteArray
 import net.postchain.mc.cli.base.HOST_NAME_LENGTH_MAX
 import java.time.Instant
 import java.time.LocalDate
@@ -68,7 +70,7 @@ fun CliktCommand.dateToTimestampOption(helpMessage: String, default: Long = 0, d
         option(help = helpMessage).convert {
             val date = try {
                 LocalDate.parse(it, DateTimeFormatter.ISO_LOCAL_DATE).plusDays(daysOffset).atStartOfDay(ZoneOffset.systemDefault())
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 fail("$it is not a date on the valid format YYYY-MM-DD")
             }
             Instant.from(date).toEpochMilli()
@@ -84,3 +86,10 @@ fun CliktCommand.promptForIndex(items: List<*>) =
                     ?.let { if (it in items.indices) ConversionResult.Valid(it) else ConversionResult.Invalid("No such item: $it") }
                     ?: ConversionResult.Invalid("$s is not a valid integer")
         }
+
+fun ParameterHolder.evmAddressOption() = option(help = "EVM address", metavar = "address")
+        .convert {
+            (if (it.startsWith("0x")) it.drop(2) else it).hexStringToByteArray()
+        }
+        .required()
+        .validate { require(it.size == 20) { "EVM address must be 20 bytes" } }

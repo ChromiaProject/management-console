@@ -6,7 +6,6 @@ import com.chromia.directory1.lib.ft4.external.auth.ftAuthOperation
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.hexStringToByteArray
@@ -22,6 +21,7 @@ import net.postchain.economy.lib.hbridge.linkEvmEoaAccountOperation
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.GtvNull
 import net.postchain.mc.cli.base.printResult
+import net.postchain.mc.cli.evmAddressOption
 
 class CommandAuthDescriptorEvmSwap : ECBaseCommand(
         name = "auth-descriptor-evm-swap",
@@ -33,12 +33,7 @@ class CommandAuthDescriptorEvmSwap : ECBaseCommand(
     val accountIdOption by option("--account-id", help = "Account id of the account to be updated.")
             .convert { it.hexStringToByteArray() }.validate { require(it.isNotEmpty()) { "Account id cannot be empty." } }
 
-    val evmAddress by option(help = "EVM address", metavar = "address")
-            .convert {
-                (if (it.startsWith("0x")) it.drop(2) else it).hexStringToByteArray()
-            }
-            .required()
-            .validate { require(it.size == 20) { "EVM address must be 20 bytes" } }
+    val evmAddress by evmAddressOption()
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
         val providerPubkey = economyChainClient.config.signers.firstOrNull()?.pubKey?.data
