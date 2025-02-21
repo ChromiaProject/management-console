@@ -38,4 +38,5 @@ fun economyCommands() = EconomyCommand().subcommands(
         proposalCommands(),
         CommandSetProviderStakingAccount(),
         CommandForceRemoveContainer(),
+        CommandClaimTestChr(),
 )
