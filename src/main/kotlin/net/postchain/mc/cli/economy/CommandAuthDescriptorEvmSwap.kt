@@ -4,11 +4,7 @@ import com.chromia.cli.tools.ft.fetchEvmSignatures
 import com.chromia.directory1.lib.ft4.external.auth.evmSignaturesOperation
 import com.chromia.directory1.lib.ft4.external.auth.ftAuthOperation
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.parameters.options.convert
-import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.client.core.PostchainClient
-import net.postchain.common.hexStringToByteArray
 import net.postchain.common.toHex
 import net.postchain.economy.economy_chain.getProviderAccountId
 import net.postchain.economy.lib.ft4.core.accounts.AuthDescriptor
@@ -20,6 +16,8 @@ import net.postchain.economy.lib.hbridge.LINK_EVM_EOA_ACCOUNT
 import net.postchain.economy.lib.hbridge.linkEvmEoaAccountOperation
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.GtvNull
+import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.accountIdOption
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.evmAddressOption
 
@@ -30,8 +28,7 @@ class CommandAuthDescriptorEvmSwap : ECBaseCommand(
                 "It will also link the account to an EOA (external owned account) using the EVM address"
 ) {
 
-    val accountIdOption by option("--account-id", help = "Account id of the account to be updated.")
-            .convert { it.hexStringToByteArray() }.validate { require(it.isNotEmpty()) { "Account id cannot be empty." } }
+    val accountIdOption by accountIdOption(help = "Account id of the account to be updated.")
 
     val evmAddress by evmAddressOption()
 

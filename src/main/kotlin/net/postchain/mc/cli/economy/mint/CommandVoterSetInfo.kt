@@ -2,7 +2,7 @@ package net.postchain.mc.cli.economy.mint
 
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.getChromiaFoundationVoterSetInfo
-import net.postchain.mc.cli.economy.ECBaseCommand
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_MINTING_VERSION
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.votingupdates.formatThreshold

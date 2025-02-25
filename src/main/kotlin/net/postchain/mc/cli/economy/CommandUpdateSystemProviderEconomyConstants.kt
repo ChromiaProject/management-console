@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.proposeSystemProviderEconomyConstantsOperation
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.compatibility.ApiCompatECV28.updateSystemProviderEconomyConstantsOperationECV28
 

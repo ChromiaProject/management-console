@@ -2,6 +2,7 @@ package net.postchain.mc.cli.economy
 
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.getEconomyConstants
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.compatibility.ApiCompatECV45.getEconomyConstantsV45
 

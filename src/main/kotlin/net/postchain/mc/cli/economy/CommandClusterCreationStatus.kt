@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.ClusterCreationStatus
 import net.postchain.economy.economy_chain.getClusterCreationStatus
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.util.nameOption
 
 const val CLUSTER_CREATION_STATUS_COMMAND = "cluster-creation-status"

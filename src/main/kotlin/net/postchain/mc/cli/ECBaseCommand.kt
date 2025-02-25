@@ -1,7 +1,7 @@
-package net.postchain.mc.cli.economy
+package net.postchain.mc.cli
 
 import net.postchain.client.core.PostchainClient
-import net.postchain.mc.cli.DCBaseCommand
+import net.postchain.mc.cli.economy.getEconomyChainClient
 import net.postchain.mc.network.Version
 import net.postchain.mc.network.requireApiVersion
 

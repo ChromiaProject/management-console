@@ -42,12 +42,12 @@ const val ECDSA_COMPRESSED_KEY_SIZE = 33
 const val ECDSA_UNCOMPRESSED_KEY_SIZE = 65
 const val DILITHIUM2_KEY_SIZE = 1336
 
-fun CliktCommand.pubkeyOption(helpMsg: String = "Public key") = option("-pk", "--pubkey", help = helpMsg, envvar = "POSTCHAIN_PUBKEY")
+fun CliktCommand.pubkeyOption(helpMsg: String = "Public key") = option("-pk", "--pubkey", help = helpMsg, metavar = "PUBKEY", envvar = "POSTCHAIN_PUBKEY")
         .convert { PubKey(it) }
         .required()
         .validate(pubkeyValidator())
 
-fun CliktCommand.optionalPubkeyOption(helpMsg: String = "Public key") = option("-pk", "--pubkey", help = helpMsg, envvar = "POSTCHAIN_PUBKEY")
+fun CliktCommand.optionalPubkeyOption(helpMsg: String = "Public key") = option("-pk", "--pubkey", help = helpMsg, metavar = "PUBKEY", envvar = "POSTCHAIN_PUBKEY")
         .convert { PubKey(it) }
         .validate(pubkeyValidator())
 

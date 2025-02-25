@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.updateEconomyConstantsOperation
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.scheduleAt
 import net.postchain.mc.compatibility.ApiCompatECV52.updateEconomyConstantsOperationECV52

@@ -8,7 +8,7 @@ import net.postchain.economy.common_proposal.revokeCommonProposalOperation
 import net.postchain.economy.common_proposal.revokeCommonProposalV65Operation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.economy.ECBaseCommand
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION
 import net.postchain.mc.cli.proposal.util.proposalIndexOption

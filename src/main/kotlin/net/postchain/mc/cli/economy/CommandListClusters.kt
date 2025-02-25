@@ -5,6 +5,7 @@ import com.github.ajalt.mordant.input.interactiveSelectList
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.apiVersion
 import net.postchain.economy.economy_chain.getClusters
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.cluster.showClusterInfo
 import net.postchain.mc.cli.interactiveOption

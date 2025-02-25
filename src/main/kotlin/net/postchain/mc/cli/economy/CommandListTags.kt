@@ -2,6 +2,7 @@ package net.postchain.mc.cli.economy
 
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.getTags
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.util.pmcTable
 
 class CommandListTags : ECBaseCommand(
