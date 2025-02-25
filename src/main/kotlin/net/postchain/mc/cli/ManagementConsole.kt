@@ -12,6 +12,7 @@ import net.postchain.mc.cli.container.containerCommands
 import net.postchain.mc.cli.economy.economyCommands
 import net.postchain.mc.cli.image.subnodeImageCommands
 import net.postchain.mc.cli.keys.CommandKeygen
+import net.postchain.mc.cli.lease.leaseCommands
 import net.postchain.mc.cli.node.nodeCommands
 import net.postchain.mc.cli.proposal.proposalCommands
 import net.postchain.mc.cli.provider.providerCommands
@@ -39,6 +40,7 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
                 clusterAnchoringCommands(),
                 economyCommands(),
                 subnodeImageCommands(),
+                leaseCommands(),
         )
     }
 
@@ -57,6 +59,7 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
                 "proposals" to listOf("proposal", "list"),
                 "nodes" to listOf("node", "list"),
                 "subnode-images" to listOf("subnode-image", "list"),
+                "leases" to listOf("lease", "list"),
         )
     }
 }

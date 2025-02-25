@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.client.core.PostchainClient
 import net.postchain.crypto.PubKey
 import net.postchain.economy.economy_chain.setProviderStakingAccountOperation
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.pubkeyOption
 import net.postchain.mc.cli.util.pubkeyValidator
