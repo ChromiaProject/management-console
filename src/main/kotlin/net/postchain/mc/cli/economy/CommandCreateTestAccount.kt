@@ -3,6 +3,7 @@ package net.postchain.mc.cli.economy
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.toHex
 import net.postchain.economy.economy_chain_test_claim_tchr.createAccountOperation
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.evmAddressOption
 
