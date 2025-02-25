@@ -10,6 +10,7 @@ import net.postchain.economy.economy_chain.proposePriceOracleRateOperation
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtv.parse.GtvParser
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.printResult
 
 class CommandUpdatePriceOracleRates : ECBaseCommand(

@@ -8,7 +8,7 @@ import net.postchain.common.hexStringToByteArray
 import net.postchain.economy.economy_chain.proposeMintingOperation
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.economy.ECBaseCommand
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_MINTING_VERSION
 
 class CommandMintPropose : ECBaseCommand(

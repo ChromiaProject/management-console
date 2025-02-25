@@ -3,7 +3,7 @@ package net.postchain.mc.cli.economy.mint
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.createChromiaFoundationVoterSetOperation
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.economy.ECBaseCommand
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_MINTING_VERSION
 
 class CommandVoterSetCreate : ECBaseCommand(

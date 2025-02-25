@@ -32,6 +32,7 @@ fun CliktCommand.includeInactiveOption(helpMessage: String) = option(
 fun CliktCommand.blockchainRidOption() =
         option("-brid", "--blockchain-rid", help = "Blockchain RID", envvar = "POSTCHAIN_BRID")
                 .convert { BlockchainRid.buildFromHex(it) }
+
 fun OptionGroup.blockchainRidOption() =
         option("-brid", "--blockchain-rid", help = "Blockchain RID", envvar = "POSTCHAIN_BRID")
                 .convert { BlockchainRid.buildFromHex(it) }
@@ -87,9 +88,21 @@ fun CliktCommand.promptForIndex(items: List<*>) =
                     ?: ConversionResult.Invalid("$s is not a valid integer")
         }
 
-fun ParameterHolder.evmAddressOption() = option(help = "EVM address", metavar = "address")
+fun ParameterHolder.evmAddressOption() = option("--evm-address", help = "EVM address", metavar = "address")
         .convert {
             (if (it.startsWith("0x")) it.drop(2) else it).hexStringToByteArray()
         }
         .required()
         .validate { require(it.size == 20) { "EVM address must be 20 bytes" } }
+
+fun ParameterHolder.optionalEvmAddressOption() = option("--evm-address", help = "EVM address", metavar = "address")
+        .convert {
+            (if (it.startsWith("0x")) it.drop(2) else it).hexStringToByteArray()
+        }
+        .validate { require(it.size == 20) { "EVM address must be 20 bytes" } }
+
+fun ParameterHolder.accountIdOption(help: String = "Account id") = option("--account-id", help = help, metavar = "id")
+        .convert {
+            it.hexStringToByteArray()
+        }
+        .validate { require(it.isNotEmpty()) { "Account id must not be empty" } }

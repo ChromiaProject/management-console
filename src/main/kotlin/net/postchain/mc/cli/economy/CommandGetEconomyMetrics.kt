@@ -3,6 +3,7 @@ package net.postchain.mc.cli.economy
 import com.github.ajalt.mordant.rendering.TextAlign
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.getEconomyMetrics
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.util.pubkeyOption
 
