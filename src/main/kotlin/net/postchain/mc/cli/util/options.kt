@@ -21,10 +21,11 @@ import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.model.ProviderQuotaType
+import net.postchain.client.config.FailOverConfig
 import net.postchain.client.config.PostchainClientConfig
+import net.postchain.client.impl.TryNextOnErrorRequestStrategyFactory
 import net.postchain.client.request.Endpoint
 import net.postchain.common.BlockchainRid
-import net.postchain.common.config.getEnvOrBooleanProperty
 import net.postchain.common.config.getEnvOrStringProperty
 import net.postchain.common.hexStringToByteArray
 import net.postchain.crypto.PubKey
@@ -36,6 +37,7 @@ import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.base.URL_LENGTH_MAX
 import java.net.URI
 import java.net.URISyntaxException
+import java.time.Duration
 
 const val CHROMIA_CONFIG = "CHROMIA_CONFIG"
 const val ECDSA_COMPRESSED_KEY_SIZE = 33
@@ -73,6 +75,12 @@ fun OptionTransformContext.validatePubkey(pubKey: PubKey) {
 
 fun CliktCommand.pmcConfigOption() = PmcClientConfigOption { msg -> echo(msg, err = true) }
 
+val defaultClientConfig = PostchainClientConfig.defaultConfig.copy(
+        failOverConfig = FailOverConfig(attemptsPerEndpoint = 2),
+        connectTimeout = Duration.ofSeconds(10),
+        requestStrategy = TryNextOnErrorRequestStrategyFactory(),
+        compressRequestBodies = true)
+
 class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConfigOption(logger) {
     private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup")
             .flag()
@@ -90,14 +98,12 @@ class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConf
             rawConfig.setProperty("brid", networkModel.blockchainRid.toHex())
         }
         val configuredBrid = if (lookupBrid) null else rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
-        val useRequestCompression = rawConfig
-                .getEnvOrBooleanProperty("POSTCHAIN_CLIENT_COMPRESS_REQUEST_BODIES", "compress.requests", true)
+        rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
 
         if (!rawConfig.containsKey("api.url")) throw CliktError("No api.url specified")
-        rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
-        val postchainClientConfig = PostchainClientConfig.fromConfiguration(rawConfig)
+        val postchainClientConfig = PostchainClientConfig.fromConfiguration(rawConfig, defaultClientConfig)
 
-        val chromiaClient = StandardChromiaClient(postchainClientConfig.copy(compressRequestBodies = useRequestCompression))
+        val chromiaClient = StandardChromiaClient(postchainClientConfig)
 
         if (configuredBrid == null) {
             ChromiaConfigWriter.local.setBrid(chromiaClient.directoryChainRid)

@@ -15,7 +15,6 @@ import net.postchain.client.config.PostchainClientConfig
 import net.postchain.client.core.PostchainClient
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.common.BlockchainRid
-import net.postchain.common.config.getEnvOrBooleanProperty
 import net.postchain.common.config.getEnvOrStringProperty
 import net.postchain.d1.client.StandardChromiaClient
 import net.postchain.gtv.GtvEncoder
@@ -23,6 +22,7 @@ import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.BlockchainConfig
+import net.postchain.mc.cli.util.defaultClientConfig
 import java.io.File
 
 class CommandInit : PmcCommand(
@@ -34,12 +34,10 @@ class CommandInit : PmcCommand(
     val rawConfig by lazy { ChromiaConfigLoader(::echo).loadProperties(configFile) }
     val client by lazy {
         val configuredBrid = if (lookupBrid) null else rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
-        val useRequestCompression = rawConfig
-                .getEnvOrBooleanProperty("POSTCHAIN_CLIENT_COMPRESS_REQUEST_BODIES", "compress.requests", true)
+        rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
 
         if (!rawConfig.containsKey("api.url")) throw CliktError("No api.url specified")
-        rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
-        val initialConfig = PostchainClientConfig.fromConfiguration(rawConfig).copy(compressRequestBodies = useRequestCompression)
+        val initialConfig = PostchainClientConfig.fromConfiguration(rawConfig, defaultClientConfig)
 
         val dcConfig = if (initialConfig.blockchainRid != BlockchainRid.ZERO_RID)
             initialConfig
