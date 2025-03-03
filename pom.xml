@@ -22,7 +22,7 @@
         <postchain.version>3.27.5</postchain.version>
         <postchain.client.version>3.26.1</postchain.client.version>
         <directory.chain.version>1.81.0</directory.chain.version>
-        <cli.tools.version>0.4.0</cli.tools.version>
+        <cli.tools.version>0.4.1</cli.tools.version>
         <rell.maven.plugin.version>0.14.0</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
