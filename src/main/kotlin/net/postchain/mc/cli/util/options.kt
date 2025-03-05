@@ -88,7 +88,7 @@ class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConf
             .flag("--no-lookup-nodes", default = true, defaultForHelp = "yes")
     val network by option("--network", help = "Target network to make requests to (if chromia.yml is configured)")
     val rawConfig by lazy {
-        ChromiaConfigLoader(logger, suppressKeyStorageDeprecationWarning = true).loadProperties(configFile)
+        ChromiaConfigLoader(logger).loadProperties(configFile)
     }
 
     val chromiaClient by lazy {

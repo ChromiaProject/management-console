@@ -30,10 +30,7 @@ class CommandConfig : PmcCommand(
 ) {
 
     private val configWriter by configFileOption()
-    private val configLoader = ChromiaConfigLoader(
-            { msg -> echo(msg, err = true) },
-            suppressKeyStorageDeprecationWarning = true
-    )
+    private val configLoader = ChromiaConfigLoader { msg -> echo(msg, err = true) }
     private val configFile get() = configWriter.configFile
 
     private val get by option(help = "get value: name [value pattern]", metavar = "KEY")

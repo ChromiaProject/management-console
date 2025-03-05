@@ -32,7 +32,7 @@ class CommandInit : PmcCommand(
     val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup").flag()
     val configFile by chromiaConfigFileOption()
     val rawConfig by lazy {
-        ChromiaConfigLoader(::echo, suppressKeyStorageDeprecationWarning = true).loadProperties(configFile)
+        ChromiaConfigLoader(::echo).loadProperties(configFile)
     }
     val client by lazy {
         val configuredBrid = if (lookupBrid) null else rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
