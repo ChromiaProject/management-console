@@ -34,10 +34,7 @@ class CommandListDelayedConfigurations : PmcCommand(
         val client = config.client
         val apiVersion = client.apiVersion()
 
-        val blockchainInfo = client.getBlockchainInfo(blockchainRID.data)
-        if (blockchainInfo == null) {
-            throw CliktError("Blockchain not found")
-        }
+        val blockchainInfo = client.getBlockchainInfo(blockchainRID.data) ?: throw CliktError("Blockchain not found")
 
         if (blockchainInfo.configDelay == null || blockchainInfo.configDelay <= 0) {
             throw CliktError("No configuration delay is enabled for this blockchain")

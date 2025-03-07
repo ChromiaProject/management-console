@@ -29,6 +29,7 @@ import net.postchain.chain0.proposal_blockchain.getConfigurationProposalAtV64
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposalV64
 import net.postchain.chain0.proposal_blockchain.getForcedConfigurationProposalV64
 import net.postchain.chain0.proposal_blockchain.getProposedForcedConfiguration
+import net.postchain.chain0.proposal_blockchain.getRemoveForcedConfigurationProposal
 import net.postchain.chain0.proposal_blockchain_import.getBlockchainImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getConfigurationImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getFinishBlockchainImportProposal
@@ -695,6 +696,16 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                 body {
                     row("Cluster", pc.cluster)
                     row("Subnode image", pc.subnodeImage)
+                }
+            }
+        }
+
+        ProposalType.remove_forced_configuration -> {
+            val pc = client.getRemoveForcedConfigurationProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Blockchain RID", pc.blockchainRid.toHex())
+                    row("Height", pc.height)
                 }
             }
         }
