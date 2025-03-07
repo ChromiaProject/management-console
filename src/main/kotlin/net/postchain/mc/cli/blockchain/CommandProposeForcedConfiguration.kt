@@ -1,10 +1,16 @@
 package net.postchain.mc.cli.blockchain
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
+import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.UsageError
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
+import com.github.ajalt.mordant.terminal.prompt
+import net.postchain.chain0.common.queries.getBlockchainInfo
+import net.postchain.chain0.model.BlockchainState
 import net.postchain.chain0.proposal_blockchain.proposeForcedConfigurationOperation
 import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.DCBaseCommand
@@ -39,7 +45,9 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val height by heightOption().required()
+    private val height by heightOption()
+
+    private val detectHeight by option("-dh", "--detect-height", help = "Detect and suggest the height").flag()
 
     private val resumeChain by option("-r", "--resume", help = "Automatically resume blockchain after configuration is applied").flag()
 
@@ -50,15 +58,34 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
             client.requireApiVersion(80, message = "--resume")
         }
 
+        if ((height != null) == detectHeight) {
+            throw UsageError("You must specify --height or --detect-height")
+        }
+
+        val proposalHeight: Long = height ?: let {
+            val blockchainInfo = client.getBlockchainInfo(blockchainRID.data) ?: throw CliktError("Blockchain not found")
+            if (blockchainInfo.state != BlockchainState.PAUSED) {
+                throw UsageError("Blockchain is in state ${blockchainInfo.state} but must be ${BlockchainState.PAUSED} to detect the height")
+            }
+            val chainClient = config.chromiaClient.getClient(blockchainRID)
+            val currentHeight = chainClient.currentBlockHeight()
+            if (terminal.terminalInfo.inputInteractive) {
+                val answer = terminal.prompt("The blockchain is ${BlockchainState.PAUSED} and about to build block $currentHeight.\n\nDo you want to proceed and create a forced configuration proposal for height $currentHeight? (y/N)")
+                if (answer == null || !answer.startsWith("Y", ignoreCase = true))
+                    throw CliktError("Canceled", statusCode = 0)
+            }
+            currentHeight
+        }
+
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
         val compressedConfigurationData = GtvEncoder.encodeGtv(BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, dcVersion))
 
         client.transactionBuilder()
                 .apply {
                     if (dcVersion >= 80) {
-                        proposeForcedConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, height, description, resumeChain)
+                        proposeForcedConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, proposalHeight, description, resumeChain)
                     } else {
-                        proposeForcedConfigurationOperationV78(clientProviderPubkey, blockchainRID, compressedConfigurationData, height, description)
+                        proposeForcedConfigurationOperationV78(clientProviderPubkey, blockchainRID, compressedConfigurationData, proposalHeight, description)
                     }
                 }
                 .postAwaitConfirmation()
