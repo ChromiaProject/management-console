@@ -2,6 +2,7 @@ package net.postchain.mc.cli.blockchain
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -58,19 +59,21 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
         }
 
         if ((height != null) == detectHeight) {
-            throw CliktError("You must specify --height or --detect-height")
+            throw UsageError("You must specify --height or --detect-height")
         }
 
-        val proposalHeight: Long = height ?:let {
+        val proposalHeight: Long = height ?: let {
             val blockchainInfo = client.getBlockchainInfo(blockchainRID.data) ?: throw CliktError("Blockchain not found")
             if (blockchainInfo.state != BlockchainState.PAUSED) {
-                throw CliktError("Blockchain is in state ${blockchainInfo.state} but must be ${BlockchainState.PAUSED} to detect the height")
+                throw UsageError("Blockchain is in state ${blockchainInfo.state} but must be ${BlockchainState.PAUSED} to detect the height")
             }
             val chainClient = config.chromiaClient.getClient(blockchainRID)
             val currentHeight = chainClient.currentBlockHeight()
-            val answer = terminal.prompt("The blockchain is ${BlockchainState.PAUSED} and about to build block $currentHeight.\n\nDo you want to proceed and create a forced configuration proposal for height $currentHeight? (y/N)")
-            if (answer == null || !answer.startsWith("Y", ignoreCase = true))
-                throw CliktError("Canceled", statusCode = 0)
+            if (terminal.terminalInfo.inputInteractive) {
+                val answer = terminal.prompt("The blockchain is ${BlockchainState.PAUSED} and about to build block $currentHeight.\n\nDo you want to proceed and create a forced configuration proposal for height $currentHeight? (y/N)")
+                if (answer == null || !answer.startsWith("Y", ignoreCase = true))
+                    throw CliktError("Canceled", statusCode = 0)
+            }
             currentHeight
         }
 
