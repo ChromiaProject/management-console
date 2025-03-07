@@ -1,6 +1,8 @@
 package net.postchain.mc.cli.blockchain
 
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.anchoring.anchoring_chain_common.getAnchoredBlockAtHeight
 import net.postchain.base.extension.CONFIG_HASH_EXTRA_HEADER
@@ -25,17 +27,23 @@ class CommandProposeRemoveForcedConfiguration : DCBaseCommand(
         """.trimIndent(),
         requiresVersion = 82
 ) {
+    companion object {
+        const val DISABLE_CHECKS_LONG_OPTION_NAME = "--disable-checks"
+    }
 
     private val blockchainRID by blockchainRidOption().required()
     private val height by heightOption().required()
     private val description by proposalDescriptionOption { "Remove forced configuration in blockchain $blockchainRID on height $height" }
+    private val disableChecks by option("-dc", DISABLE_CHECKS_LONG_OPTION_NAME, help = "Disable verification checks and ignore warnings").flag(default = false)
 
     override fun runDC() {
 
         val cacClient = config.chromiaClient.getClusterAnchoringClient(blockchainRID)
         val anchoredBlock = cacClient.getAnchoredBlockAtHeight(blockchainRID, height)
         if (anchoredBlock == null) {
-            echo("Warning: Block at height $height is not yet anchored or built. Please ensure the configuration will not be in use when the proposal is approved.")
+            if (!disableChecks) {
+                throw CliktError("Warning: Block at height $height is not yet anchored or built. Please ensure the configuration will not be in use when the proposal is approved. Run command again with $DISABLE_CHECKS_LONG_OPTION_NAME to ignore this warning.")
+            }
         } else {
 
             val chainConfigHash = client.nmGetBlockchainConfigurationInfo(blockchainRID, height)!!.configHash
