@@ -19,7 +19,7 @@ class ConfiguresBridIT {
 
     @Test
     fun `missing brid gets auto-configured`(@TempDir dir: Path) {
-        RestApi(0, "").use {
+        RestApi(0, "", gracefulShutdown = false).use {
             val apiUrl = "http://localhost:${it.server.port()}"
             it.attachModel(dcBcRid, D1TestModel(dcBcRid, apiUrl, ecBcRid))
             with(File(dir.toFile(), ".chromia/config")) {
