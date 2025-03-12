@@ -19,7 +19,7 @@ class CommandProposeFinishBlockchainImportTestIT {
     val dcBcRid = BlockchainRid.buildRepeat(0)
 
     @Test
-    fun `successful creating finish import blockchain proposal if all configurations are found`(@TempDir dir: Path) = RestApi(0, "").use { it ->
+    fun `successful creating finish import blockchain proposal if all configurations are found`(@TempDir dir: Path) = RestApi(0, "", gracefulShutdown = false).use {
         val apiUrl = "http://localhost:${it.server.port()}"
         val dcModel = D1TestFinishImportModel(dcBcRid, apiUrl, mapOf<Long, Gtv>(0L to gtv(33L), 33L to GtvNull))
         it.attachModel(dcBcRid, dcModel)
@@ -56,7 +56,7 @@ class CommandProposeFinishBlockchainImportTestIT {
     }
 
     @Test
-    fun `fail if blockchain configuration are not loaded`(@TempDir dir: Path) = RestApi(0, "").use { it ->
+    fun `fail if blockchain configuration are not loaded`(@TempDir dir: Path) = RestApi(0, "", gracefulShutdown = false).use {
         val apiUrl = "http://localhost:${it.server.port()}"
         val dcModel = D1TestFinishImportModel(dcBcRid, apiUrl, mapOf<Long, Gtv>(0L to GtvNull))
         it.attachModel(dcBcRid, dcModel)

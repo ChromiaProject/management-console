@@ -13,7 +13,7 @@ open class ECTestBase {
 
     fun ecRestApiTest(dir: Path, ecVersion: Long, function: (ECTestModel) -> Unit) {
 
-        RestApi(0, "").use {
+        RestApi(0, "", gracefulShutdown = false).use {
             val apiUrl = "http://localhost:${it.server.port()}"
             val ecModel = ECTestModel(ecBcRid, ecVersion)
             it.attachModel(ecBcRid, ecModel)
