@@ -6,9 +6,8 @@ import net.postchain.common.types.RowId
 import net.postchain.crypto.PubKey
 import net.postchain.economy.common_proposal.revokeCommonProposalOperation
 import net.postchain.economy.common_proposal.revokeCommonProposalV65Operation
-import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
@@ -25,7 +24,7 @@ class CommandRevokeProposal : ECBaseCommand(
         when {
             ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> {
                 economyChainClient.transactionBuilder()
-                        .revokeProposalOperationECV20(client.pubkey, RowId(idx))
+                        .revokeProposalOperationECV20(clientProviderPubkey, RowId(idx))
                         .postAwaitConfirmation()
                         .printResult(
                                 "Proposal revoked successfully",
@@ -34,7 +33,7 @@ class CommandRevokeProposal : ECBaseCommand(
             }
             ecVersion.version < ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION -> {
                 economyChainClient.transactionBuilder()
-                        .revokeCommonProposalOperation(PubKey(client.pubkey), RowId(idx))
+                        .revokeCommonProposalOperation(PubKey(clientProviderPubkey), RowId(idx))
                         .postAwaitConfirmation()
                         .printResult(
                                 "Proposal revoked successfully",

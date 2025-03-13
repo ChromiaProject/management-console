@@ -2,7 +2,6 @@ package net.postchain.mc.cli.blockchain.import_chain
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
@@ -21,21 +20,19 @@ import net.postchain.client.request.EndpointPool
 import net.postchain.common.BlockchainRid
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.GtvEncoder
-import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.portOption
 import net.postchain.mc.cli.requiredHostOption
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.pubkeyOption
 import net.postchain.mc.cli.util.requiredUrlOption
 import net.postchain.mc.network.requireApiVersion
 
-class CommandProposeImportForeignConfigurations : PmcCommand(
+class CommandProposeImportForeignConfigurations : DCBaseCommand(
         name = "import-foreign-configurations",
         help = """
             Propose importing a foreign blockchain configurations in a specific container 
@@ -44,9 +41,6 @@ class CommandProposeImportForeignConfigurations : PmcCommand(
             of the cluster that the container belongs to.
         """.trimIndent()
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val key by pubkeyOption("Node pubkey")
 
     private val host by requiredHostOption()
@@ -80,7 +74,7 @@ class CommandProposeImportForeignConfigurations : PmcCommand(
                 "from-height: $fromHeight, up-to-height: $upToHeight"
     }
 
-    override fun run() {
+    override fun runDC() {
         val version = client.requireApiVersion(19)
         val foreignClient = buildForeignClient()
         val imported = mutableListOf<Long>()
@@ -125,7 +119,7 @@ class CommandProposeImportForeignConfigurations : PmcCommand(
         val compressedConfig = BlockchainConfigurationCompressor.compress(client, GtvDecoder.decodeGtv(configData0), version)
 
         client.transactionBuilder()
-                .proposeForeignBlockchainImportOperation(client.pubkey,
+                .proposeForeignBlockchainImportOperation(clientProviderPubkey,
                         key.data, host, port.toLong(), apiUrl,
                         chain0BlockchainRID.data,
                         name, blockchainRID, GtvEncoder.encodeGtv(compressedConfig), container, description
@@ -142,7 +136,7 @@ class CommandProposeImportForeignConfigurations : PmcCommand(
         val compressedConfig = BlockchainConfigurationCompressor.compress(client, GtvDecoder.decodeGtv(configData), version)
         client.transactionBuilder()
                 .proposeImportConfigurationOperation(
-                        client.pubkey,
+                        clientProviderPubkey,
                         blockchainRID,
                         height,
                         GtvEncoder.encodeGtv(compressedConfig),

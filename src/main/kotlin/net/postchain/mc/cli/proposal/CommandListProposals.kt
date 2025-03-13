@@ -1,7 +1,6 @@
 package net.postchain.mc.cli.proposal
 
 import com.github.ajalt.clikt.core.terminal
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -12,26 +11,21 @@ import net.postchain.chain0.proposal.ProposalType
 import net.postchain.chain0.proposal.getProposalsRange
 import net.postchain.chain0.proposal.getRelevantProposals
 import net.postchain.chain0.proposal.voting.getProviderVotes
-import net.postchain.chain0.version.apiVersion
 import net.postchain.common.types.RowId
-import net.postchain.mc.cli.PmcCommand
-import net.postchain.mc.cli.base.pubkey
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.dateToTimestampOption
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.compatibility.ApiCompatV6.getProposalsSinceV6
 import net.postchain.mc.compatibility.ApiCompatV6.getProviderVotesV6
 import net.postchain.mc.compatibility.ApiCompatV6.getRelevantProposalsV6
 
-class CommandListProposals : PmcCommand(
+class CommandListProposals : DCBaseCommand(
         name = "list",
         help = "List all proposals that you can vote on",
+        printHelpOnEmptyArgs = false,
 ) {
-
-    private val config by pmcConfigOption()
-    private val client get() = config.client
     private val from by dateToTimestampOption("List proposals from date (YYYY-MM-DD)")
     private val to by dateToTimestampOption("List proposals to date (YYYY-MM-DD)", Long.MAX_VALUE, "9999-12-31", 1)
     private val all by option(help = "Include all proposals, including ones you can not vote on").flag()
@@ -43,17 +37,16 @@ class CommandListProposals : PmcCommand(
 
     private val headers = listOf("Type", "Id", "State", "Your vote")
 
-    override fun run() {
-        val apiVersion = client.apiVersion()
+    override fun runDC() {
         when {
-            apiVersion >= 7 -> {
+            dcVersion >= 7 -> {
                 val proposals = if (all) {
                     client.getProposalsRange(from, to, pending).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
                 } else {
-                    client.getRelevantProposals(from, to, pending, client.pubkey).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
+                    client.getRelevantProposals(from, to, pending, clientProviderPubkey).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
                 }
 
-                val votes = client.getProviderVotes(from, to, client.pubkey)
+                val votes = client.getProviderVotes(from, to, clientProviderPubkey)
 
                 if (interactive && proposals.isNotEmpty() && proposals.size < terminal.size.height) {
                     terminal.interactiveSelectList(proposals.map {
@@ -85,10 +78,10 @@ class CommandListProposals : PmcCommand(
                 val proposals = if (all) {
                     client.getProposalsSinceV6(RowId(since)).map { it.rowid to it.proposalType }
                 } else {
-                    client.getRelevantProposalsV6(client.pubkey, RowId(since)).map { it.rowid to it.proposalType }
+                    client.getRelevantProposalsV6(clientProviderPubkey, RowId(since)).map { it.rowid to it.proposalType }
                 }
 
-                val votes = client.getProviderVotesV6(client.pubkey)
+                val votes = client.getProviderVotesV6(clientProviderPubkey)
 
                 echo(pmcTable(
                         "proposals",

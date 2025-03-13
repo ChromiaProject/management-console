@@ -1,7 +1,6 @@
 package net.postchain.mc.cli.node
 
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.deprecated
 import com.github.ajalt.clikt.parameters.options.flag
@@ -18,14 +17,12 @@ import net.postchain.chain0.common.operations.registerNodeWithUnitsOperation
 import net.postchain.chain0.model.RegisterNodeData
 import net.postchain.chain0.version.apiVersion
 import net.postchain.common.types.WrappedByteArray
-import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.portOption
 import net.postchain.mc.cli.requiredHostOption
 import net.postchain.mc.cli.util.clusterUnitsOption
 import net.postchain.mc.cli.util.extraStorageOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeyOption
 import net.postchain.mc.cli.util.requiredUrlOption
 import net.postchain.mc.compatibility.ApiCompatV28.NodeCapabilityTypeV28
@@ -33,13 +30,10 @@ import net.postchain.mc.compatibility.ApiCompatV28.updateNodeCapabilityOperation
 import net.postchain.mc.network.NodeVerifier
 import java.io.IOException
 
-class CommandRegisterNode : PmcCommand(
+class CommandRegisterNode : DCBaseCommand(
         name = "register",
         help = "Registers a node"
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val key by pubkeyOption("Node pubkey")
 
     private val host by requiredHostOption()
@@ -66,7 +60,7 @@ class CommandRegisterNode : PmcCommand(
 
     private val disableAccessChecks by option("--disable-access-checks", help = "Disable node and REST API access checks").flag()
 
-    override fun run() {
+    override fun runDC() {
         if (!disableAccessChecks) {
             val verifier = NodeVerifier(client.config, null)
             if (!verifier.verifyApi(apiUrl).responds) throw CliktError("Api url is not accessible for host")
@@ -89,19 +83,19 @@ class CommandRegisterNode : PmcCommand(
                 .apply {
                     when {
                         apiVersion >= 24 -> {
-                            registerNodeWithNodeDataOperation(client.pubkey, RegisterNodeData(WrappedByteArray(key.data), host, port.toLong(), apiUrl, clusters, clusterUnits, territory, extraStorage))
+                            registerNodeWithNodeDataOperation(clientProviderPubkey, RegisterNodeData(WrappedByteArray(key.data), host, port.toLong(), apiUrl, clusters, clusterUnits, territory, extraStorage))
                         }
 
                         apiVersion >= 15 -> {
-                            registerNodeWithTerritoryAndUnitsOperation(client.pubkey, key.data, host, port.toLong(), apiUrl, territory, clusterUnits, clusters)
+                            registerNodeWithTerritoryAndUnitsOperation(clientProviderPubkey, key.data, host, port.toLong(), apiUrl, territory, clusterUnits, clusters)
                         }
 
-                        apiVersion >= 3 -> registerNodeWithUnitsOperation(client.pubkey, key.data, host, port.toLong(), apiUrl, clusters, clusterUnits)
-                        else -> registerNodeOperation(client.pubkey, key.data, host, port.toLong(), apiUrl, clusters)
+                        apiVersion >= 3 -> registerNodeWithUnitsOperation(clientProviderPubkey, key.data, host, port.toLong(), apiUrl, clusters, clusterUnits)
+                        else -> registerNodeOperation(clientProviderPubkey, key.data, host, port.toLong(), apiUrl, clusters)
                     }
                 }
                 .apply {
-                    if (apiVersion <= 28 && capability.isNotEmpty()) capability.forEach { updateNodeCapabilityOperationV28(client.pubkey, key.data, it, true) }
+                    if (apiVersion <= 28 && capability.isNotEmpty()) capability.forEach { updateNodeCapabilityOperationV28(clientProviderPubkey, key.data, it, true) }
                 }
                 .postAwaitConfirmation()
                 .printResult(

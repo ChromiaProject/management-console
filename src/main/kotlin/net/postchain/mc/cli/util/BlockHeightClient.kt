@@ -3,16 +3,16 @@ package net.postchain.mc.cli.util
 import net.postchain.anchoring.anchoring_chain_common.getLastAnchoredBlock
 import net.postchain.chain0.cm_api.CmPeerInfo
 import net.postchain.client.config.RequestStrategies
-import net.postchain.client.core.PostchainClient
 import net.postchain.client.exception.ClientError
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.EndpointPool
 import net.postchain.client.request.SingleEndpointPool
 import net.postchain.common.BlockchainRid
 import net.postchain.common.types.WrappedByteArray
+import net.postchain.d1.client.ChromiaClient
 import java.time.Duration
 
-class BlockHeightClient(private val parentClient: PostchainClient) {
+class BlockHeightClient(private val chromiaClient: ChromiaClient) {
 
     fun getLastAnchoredBlockHeight(
             anchoringChain: WrappedByteArray?,
@@ -25,7 +25,7 @@ class BlockHeightClient(private val parentClient: PostchainClient) {
                 if (anchoringChain == null) {
                     -1
                 } else {
-                    PostchainClientImpl(parentClient.config.copy(
+                    PostchainClientImpl(chromiaClient.config.copy(
                             blockchainRid = BlockchainRid(anchoringChain),
                             endpointPool = clusterEndpoints,
                             connectTimeout = connectTimeout,
@@ -33,7 +33,7 @@ class BlockHeightClient(private val parentClient: PostchainClient) {
                             requestStrategy = RequestStrategies.TRY_NEXT_ON_ERROR.factory
                     )).getLastAnchoredBlock(blockchainRid)?.blockHeight ?: -1
                 }
-            } catch (e: ClientError) {
+            } catch (_: ClientError) {
                 -1
             }
 
@@ -47,14 +47,14 @@ class BlockHeightClient(private val parentClient: PostchainClient) {
         if (peer.apiUrl.isEmpty()) {
             -1
         } else {
-            PostchainClientImpl(parentClient.config.copy(
+            PostchainClientImpl(chromiaClient.config.copy(
                     blockchainRid = blockchainRid,
                     endpointPool = SingleEndpointPool(peer.apiUrl),
                     connectTimeout = connectTimeout,
                     responseTimeout = responseTimeout,
             )).currentBlockHeight(container)
         }
-    } catch (e: ClientError) {
+    } catch (_: ClientError) {
         -1
     }
 }

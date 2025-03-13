@@ -2,9 +2,13 @@ package net.postchain.mc.cli.util
 
 import com.chromia.build.tools.config.ChromiaConfigLoader
 import com.chromia.build.tools.config.ChromiaConfigWriter
+import com.chromia.build.tools.keystore.ChromiaKeyStore
 import com.chromia.cli.tools.config.OptionalChromiaModelConfigOption
+import com.chromia.cli.tools.config.keyIdOption
+import com.chromia.cli.tools.config.secretOption
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.groups.single
@@ -23,11 +27,15 @@ import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.model.ProviderQuotaType
 import net.postchain.client.config.FailOverConfig
 import net.postchain.client.config.PostchainClientConfig
+import net.postchain.client.core.PostchainClient
+import net.postchain.client.core.PostchainReadClient
 import net.postchain.client.impl.TryNextOnErrorRequestStrategyFactory
 import net.postchain.client.request.Endpoint
 import net.postchain.common.BlockchainRid
+import net.postchain.common.PropertiesFileLoader
 import net.postchain.common.config.getEnvOrStringProperty
 import net.postchain.common.hexStringToByteArray
+import net.postchain.crypto.KeyPair
 import net.postchain.crypto.PubKey
 import net.postchain.d1.client.StandardChromiaClient
 import net.postchain.mc.cli.base.CommandBase
@@ -73,7 +81,42 @@ fun OptionTransformContext.validatePubkey(pubKey: PubKey) {
     }
 }
 
+fun CliktCommand.pmcKeyConfigOption() = PmcKeyClientConfigOption { msg -> echo(msg, err = true) }
+
 fun CliktCommand.pmcConfigOption() = PmcClientConfigOption { msg -> echo(msg, err = true) }
+
+class PmcKeyClientConfigOption(logger: (String) -> Unit) : PmcClientConfigOption(logger) {
+    val secretFile by secretOption()
+    val keyId by keyIdOption()
+
+    override fun fixClientConfig(clientConfig: PostchainClientConfig): PostchainClientConfig {
+        if (secretFile != null && keyId != null) {
+            throw UsageError("You can only specify one of --secret or --key-id")
+        }
+        if (secretFile != null) {
+            val secretProps = PropertiesFileLoader.load(secretFile!!.absolutePath)
+            if (secretProps.containsKey("pubkey") && secretProps.containsKey("privkey")) {
+                return clientConfig.copy(signers = listOf(KeyPair.of(secretProps.getString("pubkey"), secretProps.getString("privkey"))))
+            } else {
+                throw CliktError("Secret file: ${secretFile!!} does not contain 'pubkey' and/or 'privkey' properties")
+            }
+        }
+        if (keyId != null) {
+            return clientConfig.copy(signers = listOf(ChromiaKeyStore(keyId!!).findKeyPair()
+                    ?: throw CliktError("Key with ID '$keyId' not found")))
+        }
+        return clientConfig
+    }
+
+    val txClient: PostchainClient by lazy {
+        if (lookupNodes)
+            chromiaClient.getDirectoryChainClientForQueryReplica(addNop = true)
+        else
+            chromiaClient.getDirectoryChainClientForForwardingReplica(addNop = true)
+    }
+
+    val providerPubkey by lazy { rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_PROVIDER_PUBKEY", "provider.pubkey")?.let { PubKey(it)} }
+}
 
 val defaultClientConfig = PostchainClientConfig.defaultConfig.copy(
         failOverConfig = FailOverConfig(attemptsPerEndpoint = 2),
@@ -81,7 +124,7 @@ val defaultClientConfig = PostchainClientConfig.defaultConfig.copy(
         requestStrategy = TryNextOnErrorRequestStrategyFactory(),
         compressRequestBodies = true)
 
-class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConfigOption(logger) {
+open class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConfigOption(logger) {
     private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup")
             .flag()
     val lookupNodes by option("--lookup-nodes", help = "Lookup system cluster signer nodes for sending transactions to")
@@ -103,7 +146,7 @@ class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConf
         rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
 
         if (!rawConfig.containsKey("api.url")) throw CliktError("No api.url specified")
-        val postchainClientConfig = PostchainClientConfig.fromConfiguration(rawConfig, defaultClientConfig)
+        val postchainClientConfig = fixClientConfig(PostchainClientConfig.fromConfiguration(rawConfig, defaultClientConfig))
 
         val chromiaClient = StandardChromiaClient(postchainClientConfig)
 
@@ -114,14 +157,11 @@ class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConf
         chromiaClient
     }
 
-    val client by lazy {
-        if (lookupNodes)
-            chromiaClient.getDirectoryChainClientForQueryReplica(addNop = true)
-        else
-            chromiaClient.getDirectoryChainClientForForwardingReplica(addNop = true)
-    }
+    open fun fixClientConfig(clientConfig: PostchainClientConfig): PostchainClientConfig = clientConfig
 
-    val providerPubkey by lazy { rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_PROVIDER_PUBKEY", "provider.pubkey") }
+    val client: PostchainReadClient by lazy {
+        chromiaClient.getDirectoryChainClientForQueryReplica(addNop = true)
+    }
 }
 
 fun CliktCommand.nameOption(helpMessage: String) = option("-n", "--name", help = helpMessage)

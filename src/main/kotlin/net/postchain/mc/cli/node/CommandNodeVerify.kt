@@ -1,6 +1,5 @@
 package net.postchain.mc.cli.node
 
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.anchoring.anchoring_chain_common.getLastAnchoredBlock
 import net.postchain.chain0.cm_api.cmGetClusterInfo
@@ -12,6 +11,7 @@ import net.postchain.chain0.nm_api.nmComputeBlockchainInfoList
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.client.request.SingleEndpointPool
 import net.postchain.common.BlockchainRid
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.util.pubkeyOption
@@ -29,7 +29,7 @@ class CommandNodeVerify : PmcCommand(
     private fun Boolean?.isOk(): String = this?.let { if (this) "OK" else "Bad" } ?: "Bad"
     override fun run() {
         val node = client.getNodeData(key)
-        val nodeVerifier = NodeVerifier(client.config, client.cmGetSystemAnchoringChain()?.let { BlockchainRid(it) })
+        val nodeVerifier = NodeVerifier(config.chromiaClient.config, client.cmGetSystemAnchoringChain()?.let { BlockchainRid(it) })
         val clusters = client.listClustersOfNode(key)
         val clusterAnchorChains = clusters.map { client.cmGetClusterInfo(it) }.associate { it.name to BlockchainRid(it.anchoringChain) }
         val clusterAnchorChainsHeights = clusterAnchorChains.map { it.key to nodeVerifier.verifyBlockchain(it.value, node.apiUrl).second }
@@ -53,7 +53,7 @@ class CommandNodeVerify : PmcCommand(
             val anchoredHeight = client.getBlockchainCluster(blockchainRid).let { bcCluster ->
                 clusterAnchorChains[bcCluster]
             }?.let { anchoringBrid ->
-                PostchainClientImpl(client.config.copy(
+                PostchainClientImpl(config.chromiaClient.config.copy(
                         blockchainRid = anchoringBrid,
                         endpointPool = SingleEndpointPool(node.apiUrl)
                 )).getLastAnchoredBlock(blockchainRid)?.blockHeight

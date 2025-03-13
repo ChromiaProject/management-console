@@ -8,9 +8,8 @@ import net.postchain.common.types.RowId
 import net.postchain.crypto.PubKey
 import net.postchain.economy.common_proposal.makeCommonVoteOperation
 import net.postchain.economy.common_proposal.makeCommonVoteV65Operation
-import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
@@ -32,7 +31,7 @@ class CommandVote : ECBaseCommand(
         when {
             ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> {
                 economyChainClient.transactionBuilder()
-                        .makeVoteOperationECV20(client.pubkey, RowId(id), vote)
+                        .makeVoteOperationECV20(clientProviderPubkey, RowId(id), vote)
                         .postAwaitConfirmation()
                         .printResult(
                                 "Vote added successfully",
@@ -41,7 +40,7 @@ class CommandVote : ECBaseCommand(
             }
             ecVersion.version < ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION -> {
                 economyChainClient.transactionBuilder()
-                        .makeCommonVoteOperation(PubKey(client.pubkey), RowId(id), vote)
+                        .makeCommonVoteOperation(PubKey(clientProviderPubkey), RowId(id), vote)
                         .postAwaitConfirmation()
                         .printResult(
                                 "Vote added successfully",

@@ -1,12 +1,12 @@
 package net.postchain.mc.cli.provider.keys
 
+import com.chromia.cli.tools.util.thresholdOption
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.setProviderKeyThresholdOperation
 import net.postchain.chain0.provider_auth.model.ProviderKeyRole
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import com.chromia.cli.tools.util.thresholdOption
 
 class CommandSetProviderKeyThreshold : DCBaseCommand(
         name = "threshold",

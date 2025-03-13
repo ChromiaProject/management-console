@@ -16,12 +16,13 @@ import net.postchain.chain0.common.queries.getMovingBlockchainInfo
 import net.postchain.chain0.common.queries.getNodeData
 import net.postchain.chain0.common.queries.getUnarchivingBlockchainInfo
 import net.postchain.chain0.version.apiVersion
-import net.postchain.client.core.PostchainClient
+import net.postchain.client.core.PostchainReadClient
 import net.postchain.client.request.Endpoint
 import net.postchain.client.request.EndpointPool
 import net.postchain.common.BlockchainRid
 import net.postchain.common.wrap
 import net.postchain.crypto.PubKey
+import net.postchain.d1.client.ChromiaClient
 import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.BlockHeightClient
@@ -41,14 +42,14 @@ class CommandGetBlockchainInfo : PmcCommand(
         val client = config.client
         val apiVersion = client.apiVersion()
         if (apiVersion >= 17) {
-            showBlockchainInfo(client, apiVersion, blockchainRID)
+            showBlockchainInfo(client, config.chromiaClient, apiVersion, blockchainRID)
         } else {
             throw CliktError("blockchain info requires directory chain version 17, found version $apiVersion")
         }
     }
 }
 
-internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion: Long, blockchainRid: BlockchainRid) {
+internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromiaClient: ChromiaClient, apiVersion: Long, blockchainRid: BlockchainRid) {
     val blockchainInfo = client.getBlockchainInfo(blockchainRid.data)
             ?: throw CliktError("Blockchain with rid $blockchainRid not found")
 
@@ -83,8 +84,8 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion
                 }
             })
 
-            showHeightsOnClusterNodes(client, movingInfo.sourceContainer, blockchainRid, "Heights on source nodes:", isMoving)
-            showHeightsOnClusterNodes(client, movingInfo.destinationContainer, blockchainRid, "Heights on destination nodes:", isMoving)
+            showHeightsOnClusterNodes(client, chromiaClient, movingInfo.sourceContainer, blockchainRid, "Heights on source nodes:", isMoving)
+            showHeightsOnClusterNodes(client, chromiaClient, movingInfo.destinationContainer, blockchainRid, "Heights on destination nodes:", isMoving)
         }
     }
 
@@ -141,13 +142,13 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion
 
     // Heights on nodes including anchored height
     if (blockchainInfo.container != null && !isMoving) {
-        showHeightsOnClusterNodes(client, blockchainInfo.container, blockchainRid, "Heights on nodes:", isMoving)
+        showHeightsOnClusterNodes(client, chromiaClient, blockchainInfo.container, blockchainRid, "Heights on nodes:", isMoving)
     }
 
     // Heights on replicas
     val blockchainReplicas = client.getBlockchainReplicas(blockchainRid)
     if (blockchainReplicas.isNotEmpty()) {
-        val blockHeightClient = BlockHeightClient(client)
+        val blockHeightClient = BlockHeightClient(chromiaClient)
         echo(pmcTable(
                 "Heights from replicas",
                 listOf("Node", "Height"),
@@ -166,7 +167,7 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainClient, apiVersion
 
 }
 
-internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainClient, container: String, blockchainRid: BlockchainRid, caption: String, isMoving: Boolean) {
+internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainReadClient, chromiaClient: ChromiaClient, container: String, blockchainRid: BlockchainRid, caption: String, isMoving: Boolean) {
     val cluster = client.getContainerData(container).cluster
     val clusterInfo = client.cmGetClusterInfo(cluster)
     val clusterEndpoints = clusterInfo.peers.map { Endpoint.sanitizeUrl(it.apiUrl) }.let { EndpointPool.default(it) }
@@ -175,7 +176,7 @@ internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainClient, con
         clusterInfo.anchoringChain -> client.cmGetSystemAnchoringChain()?.wrap()
         else -> clusterInfo.anchoringChain
     }
-    val blockHeightClient = BlockHeightClient(client)
+    val blockHeightClient = BlockHeightClient(chromiaClient)
     val anchoredHeight = blockHeightClient.getLastAnchoredBlockHeight(anchoringChain, clusterEndpoints, blockchainRid)
 
     echo(pmcTable {

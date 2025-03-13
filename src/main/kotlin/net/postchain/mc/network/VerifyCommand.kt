@@ -20,7 +20,7 @@ class VerifyCommand : PmcCommand(help = "Verify that all nodes are accessible") 
 
     override fun run() {
         client.requireApiVersion(2)
-        val nodeVerifier = NodeVerifier(client.config, client.cmGetSystemAnchoringChain()?.let { BlockchainRid(it) })
+        val nodeVerifier = NodeVerifier(config.chromiaClient.config, client.cmGetSystemAnchoringChain()?.let { BlockchainRid(it) })
         echo(pmcTable(
                 "nodes",
                 listOf("Node public key", "Node host", "Node provider", "Network", "Api", "Management chain", "System anchoring"),

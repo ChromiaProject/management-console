@@ -44,7 +44,7 @@ class CommandClusterVerify : PmcCommand(
     }
 
     private fun analyzeBlockchains(chainsToAnalyze: Collection<ByteArray>, clusterInfo: CmClusterInfo, clusterEndpoints: RandomizedEndpointPool) {
-        val blockHeightClient = BlockHeightClient(client)
+        val blockHeightClient = BlockHeightClient(config.chromiaClient)
         echo(pmcTable(
                 "cluster chains",
                 listOf("Blockchain RID", "Anchored height", *clusterInfo.peers.map { PubKey(it.pubkey).toShortHex() }.toTypedArray()),

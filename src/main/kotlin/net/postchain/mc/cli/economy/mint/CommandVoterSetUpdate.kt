@@ -9,9 +9,9 @@ import com.github.ajalt.clikt.parameters.options.split
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.hexStringToByteArray
 import net.postchain.economy.economy_chain.updateChromiaFoundationVoterSetOperation
+import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_MINTING_VERSION
 
 class CommandVoterSetUpdate : ECBaseCommand(
@@ -39,7 +39,7 @@ class CommandVoterSetUpdate : ECBaseCommand(
 
         economyChainClient.transactionBuilder()
                 .updateChromiaFoundationVoterSetOperation(
-                        client.config.pubkey().data,
+                        client.pubkey,
                         threshold,
                         newMember,
                         removeMember

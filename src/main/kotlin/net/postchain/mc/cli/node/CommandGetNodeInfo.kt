@@ -1,12 +1,12 @@
 package net.postchain.mc.cli.node
 
 import com.github.ajalt.clikt.core.CliktCommand
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getNodeData
 import net.postchain.chain0.common.queries.listClustersOfNode
-import net.postchain.client.core.PostchainClient
+import net.postchain.client.core.PostchainReadClient
 import net.postchain.crypto.PubKey
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.util.pubkeyOption
@@ -25,7 +25,7 @@ class CommandGetNodeInfo : PmcCommand(
     }
 }
 
-fun CliktCommand.showNodeInfo(client: PostchainClient, pubkey: PubKey) {
+fun CliktCommand.showNodeInfo(client: PostchainReadClient, pubkey: PubKey) {
     val node = client.getNodeData(pubkey)
     echo(pmcTable {
         body {

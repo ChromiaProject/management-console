@@ -11,9 +11,8 @@ import net.postchain.economy.common_proposal.GetCommonPubkeyVotesResult
 import net.postchain.economy.common_proposal.getCommonProposalsRange
 import net.postchain.economy.common_proposal.getCommonPubkeyVotes
 import net.postchain.economy.common_proposal.getRelevantCommonProposals
-import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.dateToTimestampOption
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.dateToTimestampOption
 import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
@@ -46,17 +45,17 @@ class CommandListProposals : ECBaseCommand(
             }
         } else {
             when {
-                ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getRelevantProposalsECV20(from, to, pending, client.pubkey)
+                ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getRelevantProposalsECV20(from, to, pending, clientProviderPubkey)
                         .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
-                else -> economyChainClient.getRelevantCommonProposals(from, to, pending, client.pubkey)
+                else -> economyChainClient.getRelevantCommonProposals(from, to, pending, clientProviderPubkey)
                         .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
             }
         }
 
         val votes = when {
-            ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProviderVotesECV20(from, to, client.pubkey)
+            ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProviderVotesECV20(from, to, clientProviderPubkey)
                     .map { GetCommonPubkeyVotesResult(it.proposal, it.vote) }
-            else -> economyChainClient.getCommonPubkeyVotes(from, to, PubKey(client.pubkey))
+            else -> economyChainClient.getCommonPubkeyVotes(from, to, PubKey(clientProviderPubkey))
         }
 
         if (interactive && proposals.isNotEmpty() && proposals.size < terminal.size.height) {

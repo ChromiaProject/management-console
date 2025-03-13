@@ -36,7 +36,7 @@ class ListProposalsIT {
             "cm_get_blockchain_api_urls" -> gtv(gtv(apiUrl))
             "get_relevant_proposals" -> {
                 val myPubkey = query.args.asDict()["my_pubkey"]!!.asByteArray()
-                if (myPubkey.contentEquals(PUBKEY.hexStringToByteArray())) {
+                if (myPubkey.contentEquals(PROVIDER_PUBKEY.hexStringToByteArray())) {
                     gtv(listOf(GtvObjectMapper.toGtvDictionary(GetRelevantProposalsResult(
                             rowid = RowId(1L),
                             proposalType = ProposalType.configuration,
@@ -69,7 +69,6 @@ class ListProposalsIT {
 
             TestProcess.Builder("proposal", "list")
                     .awaitCompletion(true)
-                    .verbose()
                     .setWorkingDir(dir.toFile())
                     .exitCode(0)
                     .wholeOutput("""
