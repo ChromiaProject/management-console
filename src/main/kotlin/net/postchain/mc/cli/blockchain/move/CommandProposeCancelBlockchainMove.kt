@@ -1,38 +1,31 @@
 package net.postchain.mc.cli.blockchain.move
 
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_blockchain_move.proposeBlockchainMoveCancelOperation
-import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
-import net.postchain.mc.network.requireApiVersion
 
-class CommandProposeCancelBlockchainMove : PmcCommand(
+class CommandProposeCancelBlockchainMove : DCBaseCommand(
         name = "cancel-move",
         help = """
             Propose canceling the blockchain move
             
             Change will be applied after voting within the deployer voter set 
             of the cluster that the original container belongs to.
-        """.trimIndent()
+        """.trimIndent(),
+        requiresVersion = 81
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val blockchainRID by blockchainRidOption().required()
 
     private val description by proposalDescriptionOption { "Cancel the blockchain move for $blockchainRID" }
 
-    override fun run() {
-        client.requireApiVersion(81)
+    override fun runDC() {
         echo("Blockchain move will be canceled as soon as the proposal is approved")
 
         client.transactionBuilder()
-                .proposeBlockchainMoveCancelOperation(client.pubkey, blockchainRID, description)
+                .proposeBlockchainMoveCancelOperation(clientProviderPubkey, blockchainRID, description)
                 .postAwaitConfirmation()
                 .printResult(
                         "Canceling the blockchain move has been proposed",

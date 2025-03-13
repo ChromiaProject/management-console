@@ -1,38 +1,33 @@
 package net.postchain.mc.cli.provider
 
 import com.github.ajalt.clikt.core.CliktCommand
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.mordant.table.SectionBuilder
 import net.postchain.chain0.common.queries.getNodesByProvider
 import net.postchain.chain0.common.queries.getProviderClusters
 import net.postchain.chain0.common.queries.getProviderData
 import net.postchain.chain0.common.queries.getProviderPoints
 import net.postchain.chain0.version.apiVersion
-import net.postchain.client.core.PostchainClient
+import net.postchain.client.core.PostchainReadClient
 import net.postchain.crypto.PubKey
-import net.postchain.mc.cli.base.pubkey
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.util.optionalPubkeyOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.compatibility.ApiCompatV47.getProviderData47
 
-class CommandGetProviderInfo : PmcCommand(
+class CommandGetProviderInfo : DCBaseCommand(
         name = "info",
-        help = "Show provider information"
+        help = "Show provider information",
+        printHelpOnEmptyArgs = false,
 ) {
-    private val config by pmcConfigOption()
-    val client get() = config.client
-
     private val pubkey by optionalPubkeyOption()
 
-    override fun run() {
-        val providerPubkey = pubkey ?: client.config.pubkey()
+    override fun runDC() {
+        val providerPubkey = pubkey ?: PubKey(clientProviderPubkey)
         showProviderInfo(client, providerPubkey)
     }
 }
 
-fun CliktCommand.showProviderInfo(client: PostchainClient, pubkey: PubKey) {
+fun CliktCommand.showProviderInfo(client: PostchainReadClient, pubkey: PubKey) {
     val actionPoints = client.getProviderPoints(pubkey)
     val providerClusters = client.getProviderClusters(pubkey)
     val nodesByProvider = client.getNodesByProvider(pubkey)
@@ -52,7 +47,7 @@ fun CliktCommand.showProviderInfo(client: PostchainClient, pubkey: PubKey) {
     })
 }
 
-internal fun SectionBuilder.fillProviderData47(client: PostchainClient, pubkey: PubKey) {
+internal fun SectionBuilder.fillProviderData47(client: PostchainReadClient, pubkey: PubKey) {
     val providerData = client.getProviderData47(pubkey)
     row("Provider:", providerData.name)
     row("Url:", providerData.url)
@@ -62,7 +57,7 @@ internal fun SectionBuilder.fillProviderData47(client: PostchainClient, pubkey: 
     row("Active:", providerData.active.toString())
 }
 
-internal fun SectionBuilder.fillProviderData(client: PostchainClient, pubkey: PubKey) {
+internal fun SectionBuilder.fillProviderData(client: PostchainReadClient, pubkey: PubKey) {
     val providerData = client.getProviderData(pubkey)
     row("Provider:", providerData.name)
     row("Url:", providerData.url)

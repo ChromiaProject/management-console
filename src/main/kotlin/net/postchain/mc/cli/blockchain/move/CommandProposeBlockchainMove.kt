@@ -1,41 +1,34 @@
 package net.postchain.mc.cli.blockchain.move
 
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_blockchain_move.proposeBlockchainMoveOperation
-import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.blockchainRidOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
-import net.postchain.mc.network.requireApiVersion
 
-class CommandProposeBlockchainMove : PmcCommand(
+class CommandProposeBlockchainMove : DCBaseCommand(
         name = "move",
         help = """
             Propose moving a blockchain to a specific container 
             
             Change will be applied after voting within the deployer voter set 
             of the cluster that the original container belongs to.
-        """.trimIndent()
+        """.trimIndent(),
+        requiresVersion = 33
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val blockchainRID by blockchainRidOption().required()
 
     private val destinationContainer by option("-dc", "--destination-container", help = "Name of container to move blockchain to").required()
 
     private val description by proposalDescriptionOption { "Move blockchain $blockchainRID to the container $destinationContainer" }
 
-    override fun run() {
-        client.requireApiVersion(33)
+    override fun runDC() {
         echo("Blockchain $blockchainRID will start moving to container $destinationContainer as soon as the proposal is approved")
 
         client.transactionBuilder()
-                .proposeBlockchainMoveOperation(client.pubkey, blockchainRID, destinationContainer, description)
+                .proposeBlockchainMoveOperation(clientProviderPubkey, blockchainRID, destinationContainer, description)
                 .postAwaitConfirmation()
                 .printResult(
                         "Blockchain move proposed",

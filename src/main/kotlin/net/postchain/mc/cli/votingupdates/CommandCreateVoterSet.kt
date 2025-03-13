@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.votingupdates
 
+import com.chromia.cli.tools.util.thresholdOption
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -10,7 +11,6 @@ import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pubkeysOption
-import com.chromia.cli.tools.util.thresholdOption
 
 
 class CommandCreateVoterSet : DCBaseCommand(

@@ -1,28 +1,23 @@
 package net.postchain.mc.cli.provider
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.common.queries.getNodesByProvider
+import net.postchain.crypto.PubKey
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.PUBKEY_LENGTH
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.optionalPubkeyOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import java.time.Instant
 import java.util.Date
 
-class CommandListProviderNodes : PmcCommand(
+class CommandListProviderNodes : DCBaseCommand(
         name = "nodes",
         help = "List nodes by provider",
         printHelpOnEmptyArgs = false
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val pubkey by optionalPubkeyOption()
 
-    override fun run() {
-        val providerPubkey = pubkey ?: client.config.pubkey()
+    override fun runDC() {
+        val providerPubkey = pubkey ?: PubKey(clientProviderPubkey)
         val nodes = client.getNodesByProvider(providerPubkey)
         echo(pmcTable(
                 "nodes for provider $providerPubkey",

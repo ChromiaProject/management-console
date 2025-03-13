@@ -56,7 +56,7 @@ import net.postchain.chain0.proposal_subnode_image.getSubnodeImageStateProposal
 import net.postchain.chain0.proposal_subnode_image.getUpdateSubnodeImageProposal
 import net.postchain.chain0.proposal_voter_set.getVoterSetUpdateProposal
 import net.postchain.chain0.version.apiVersion
-import net.postchain.client.core.PostchainClient
+import net.postchain.client.core.PostchainReadClient
 import net.postchain.common.BlockchainRid
 import net.postchain.common.types.RowId
 import net.postchain.common.types.WrappedByteArray
@@ -94,7 +94,7 @@ class CommandGetProposal : PmcCommand(
     }
 }
 
-fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
+fun CliktCommand.showProposalInfo(client: PostchainReadClient, id: RowId?) {
     val apiVersion = client.apiVersion()
     when {
         apiVersion >= 7 -> {
@@ -145,7 +145,7 @@ fun CliktCommand.showProposalInfo(client: PostchainClient, id: RowId?) {
     }
 }
 
-private fun CliktCommand.printApprovedConfigurationStatus(apiVersion: Long, client: PostchainClient, proposal: ProposalData) {
+private fun CliktCommand.printApprovedConfigurationStatus(apiVersion: Long, client: PostchainReadClient, proposal: ProposalData) {
     val updateState = client.getBlockchainConfigurationUpdateAttemptStateByProposal(proposal.id)
     if (updateState != null) {
         val heightInfo = if (updateState.appliedAtHeight > -1) updateState.appliedAtHeight.toString() else "Not applied yet"
@@ -176,7 +176,7 @@ private fun CliktCommand.printApprovedConfigurationStatus(apiVersion: Long, clie
     }
 }
 
-private fun SectionBuilder.printVotingInfo(client: PostchainClient, proposal: ProposalData, apiVersion: Long) {
+private fun SectionBuilder.printVotingInfo(client: PostchainReadClient, proposal: ProposalData, apiVersion: Long) {
     if (proposal.state == ProposalState.PENDING) {
         printVotingResults(client.getProposalVotingResults(proposal.id))
     }
@@ -206,7 +206,7 @@ private fun SectionBuilder.printProposalHeader(id: RowId, type: ProposalType, ti
 private fun formatProvider(providerPubKey: WrappedByteArray, providerName: String) =
         "${providerPubKey.toHex()}${if (providerName.isNotEmpty()) " - $providerName" else ""}"
 
-private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: PostchainClient, proposalId: RowId, proposalType: ProposalType): Any {
+private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: PostchainReadClient, proposalId: RowId, proposalType: ProposalType): Any {
     return when (proposalType) {
         ProposalType.bc -> {
             val bp = client.getBlockchainProposal(proposalId) ?: return ""

@@ -10,7 +10,7 @@ import net.postchain.chain0.common.queries.getClusterProviders
 import net.postchain.chain0.common.queries.getClusterReplicaNodes
 import net.postchain.chain0.common.queries.getClusterSubnodeImages
 import net.postchain.chain0.version.apiVersion
-import net.postchain.client.core.PostchainClient
+import net.postchain.client.core.PostchainReadClient
 import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
@@ -35,7 +35,7 @@ class CommandGetClusterInfo : PmcCommand(
     }
 }
 
-fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainClient, name: String) {
+fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, name: String) {
     when {
         apiVersion >= 57 -> {
             val info = client.getClusterData(name)

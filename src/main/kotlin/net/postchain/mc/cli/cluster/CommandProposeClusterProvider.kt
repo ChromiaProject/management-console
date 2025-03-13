@@ -1,19 +1,15 @@
 package net.postchain.mc.cli.cluster
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_cluster.proposeClusterProviderOperation
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.pubkeyOption
 
-
-class CommandProposeClusterProvider : PmcCommand(
+class CommandProposeClusterProvider : DCBaseCommand(
         name = "provider",
         help = """
             Proposes an update of a cluster's providers
@@ -22,9 +18,6 @@ class CommandProposeClusterProvider : PmcCommand(
             Cluster governance voter set has authority to update a cluster's providers
         """.trimIndent()
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val provider by pubkeyOption()
 
     private val clusterName by option(
@@ -40,9 +33,9 @@ class CommandProposeClusterProvider : PmcCommand(
         else "Remove cluster provider $provider from the cluster $clusterName"
     }
 
-    override fun run() {
+    override fun runDC() {
         client.transactionBuilder()
-                .proposeClusterProviderOperation(client.pubkey, clusterName, provider.data, add, description)
+                .proposeClusterProviderOperation(clientProviderPubkey, clusterName, provider.data, add, description)
                 .postAwaitConfirmation()
                 .printResult(
                         "Cluster $clusterName providers update proposed",

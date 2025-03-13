@@ -42,7 +42,7 @@ class CommandListBlockchains : PmcCommand(
                     terminal.interactiveSelectList(blockchains.map {
                         "${it.rid.toHex()} - ${it.name}"
                     }, "Select blockchain")?.let {
-                        showBlockchainInfo(client, apiVersion, BlockchainRid(it.take(RID_LENGTH).hexStringToByteArray()))
+                        showBlockchainInfo(client, config.chromiaClient, apiVersion, BlockchainRid(it.take(RID_LENGTH).hexStringToByteArray()))
                     }
                 } else {
                     echo(pmcTable(
@@ -56,7 +56,7 @@ class CommandListBlockchains : PmcCommand(
                             interactive))
                     if (interactive && blockchains.isNotEmpty()) {
                         promptForIndex(blockchains)?.let {
-                            showBlockchainInfo(client, apiVersion, BlockchainRid(blockchains[it].rid))
+                            showBlockchainInfo(client, config.chromiaClient, apiVersion, BlockchainRid(blockchains[it].rid))
                         }
                     }
                 }

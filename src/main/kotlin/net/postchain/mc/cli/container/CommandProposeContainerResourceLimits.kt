@@ -8,7 +8,6 @@ import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.proposal_container.proposal_container_limits.proposeContainerLimitsOperation
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.cluster.CommandProposeClusterResourceLimits.Companion.setIfNotNull
 import net.postchain.mc.cli.util.containerUnitsOption
 import net.postchain.mc.cli.util.extraStorageOption
@@ -86,7 +85,7 @@ class CommandProposeContainerResourceLimits : DCBaseCommand(
                         }
 
                 client.transactionBuilder()
-                        .proposeContainerLimitsOperationV22(client.config.pubkey().data, containerName, limits, description)
+                        .proposeContainerLimitsOperationV22(clientProviderPubkey, containerName, limits, description)
                         .postAwaitConfirmation()
                         .printResult(
                                 "Container limits proposed",
@@ -110,7 +109,7 @@ class CommandProposeContainerResourceLimits : DCBaseCommand(
                         }
 
                 client.transactionBuilder()
-                        .proposeContainerLimitsOperationV2(client.config.pubkey().data, containerName, limits, description)
+                        .proposeContainerLimitsOperationV2(clientProviderPubkey, containerName, limits, description)
                         .postAwaitConfirmation()
                         .printResult(
                                 "Container limits proposed",

@@ -1,32 +1,26 @@
 package net.postchain.mc.cli.cluster.replica
 
-import net.postchain.mc.cli.PmcCommand
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.chain0.common.operations.removeReplicaNodeFromClusterOperation
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeyOption
 
-class CommandRemoveClusterReplica : PmcCommand(
+class CommandRemoveClusterReplica : DCBaseCommand(
         name = "remove",
         help = "Remove replica of a cluster"
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val name by nameOption("Cluster Name").required().validate(entityNameValidator())
 
     private val key by pubkeyOption()
 
-    override fun run() {
+    override fun runDC() {
         client.transactionBuilder()
                 .removeReplicaNodeFromClusterOperation(
-                        client.pubkey, key.data, name
+                        clientProviderPubkey, key.data, name
                 )
                 .postAwaitConfirmation()
                 .printResult(

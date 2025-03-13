@@ -1,11 +1,11 @@
 package net.postchain.mc.cli.votingupdates
 
 import com.github.ajalt.clikt.core.CliktCommand
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.queries.getVoterSetInfo
-import net.postchain.client.core.PostchainClient
+import net.postchain.client.core.PostchainReadClient
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
@@ -24,7 +24,7 @@ class CommandVoterSetInfo : PmcCommand(
     }
 }
 
-fun CliktCommand.showVoterSetInfo(client: PostchainClient, name: String) {
+fun CliktCommand.showVoterSetInfo(client: PostchainReadClient, name: String) {
     val voterSet = client.getVoterSetInfo(name)
     echo(pmcTable {
         body {

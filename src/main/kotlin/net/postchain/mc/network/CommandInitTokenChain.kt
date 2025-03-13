@@ -1,43 +1,36 @@
 package net.postchain.mc.network
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.token_chain_in_directory_chain.initTokenChainOperation
 import net.postchain.gtv.GtvEncoder
-import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.BlockchainConfig
-import net.postchain.mc.cli.util.pmcConfigOption
 
-class CommandInitTokenChain : PmcCommand(
+class CommandInitTokenChain : DCBaseCommand(
         name = "initialize-token-chain",
         help = "Create and initialize token chain. Please run the command without supplying the configuration to retry a failed initialization.",
         printHelpOnEmptyArgs = false
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val chainConfig by option(
             "-tcc",
             "--token-chain-config",
             help = "Configuration file for token chain (GtvML (*.xml) or Gtv (*.gtv))"
     ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
 
-    override fun run() {
-        val version = Version(client).version
-        if (version < 75) {
-            echo("Token chain requires directory chain version 75, found version $version")
+    override fun runDC() {
+        if (dcVersion < 75) {
+            echo("Token chain requires directory chain version 75, found version $dcVersion")
             return
         }
 
         chainConfig?.let {
             val chainConfigData = BlockchainConfig.readFromFile(it)
-            val compressedChainConfig = BlockchainConfigurationCompressor.compress(client, chainConfigData.gtv, version)
+            val compressedChainConfig = BlockchainConfigurationCompressor.compress(client, chainConfigData.gtv, dcVersion)
             client.transactionBuilder()
-                    .initTokenChainOperation(client.pubkey, GtvEncoder.encodeGtv(compressedChainConfig))
+                    .initTokenChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedChainConfig))
                     .postAwaitConfirmation()
                     .printResult(
                             "Token chain was created",

@@ -1,14 +1,14 @@
 package net.postchain.mc.cli.container
 
 import com.github.ajalt.clikt.core.CliktCommand
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.queries.getContainerBlockchain
 import net.postchain.chain0.common.queries.getContainerData
 import net.postchain.chain0.nm_api.nmGetContainerLimits
 import net.postchain.chain0.version.apiVersion
-import net.postchain.client.core.PostchainClient
+import net.postchain.client.core.PostchainReadClient
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
@@ -30,7 +30,7 @@ class CommandGetContainerInfo : PmcCommand(
     }
 }
 
-fun CliktCommand.showContainerInfo(client: PostchainClient, name: String) {
+fun CliktCommand.showContainerInfo(client: PostchainReadClient, name: String) {
     val info = client.getContainerData(name)
 
     echo(pmcTable {

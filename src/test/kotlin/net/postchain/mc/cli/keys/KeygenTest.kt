@@ -1,15 +1,15 @@
-package net.postchain.mc.test
+package net.postchain.mc.cli.keys
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.github.ajalt.clikt.core.parse
 import net.postchain.common.PropertiesFileLoader
 import net.postchain.crypto.Secp256K1CryptoSystem
-import net.postchain.mc.cli.keys.CommandKeygen
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.io.path.absolutePathString
+import kotlin.io.path.createTempFile
 
 class KeygenTest {
 
@@ -19,12 +19,12 @@ class KeygenTest {
         val cs = Secp256K1CryptoSystem()
         val (keyPair, mnemonic) = cs.generateKeyPairWithMnemonic()
         val (recoverdKeypair, _) = cs.recoverKeyPairFromMnemonic(mnemonic)
-        assertEquals(keyPair, recoverdKeypair)
+        Assertions.assertEquals(keyPair, recoverdKeypair)
     }
-    
+
     @Test
     fun keygen() {
-        val file = kotlin.io.path.createTempFile()
+        val file = createTempFile()
         CommandKeygen().parse(arrayOf(
                 "-m", "picnic shove leader great protect table leg witness walk night cable caution about produce engage armor first burden olive violin cube gentle bulk train",
                 "-s", file.absolutePathString()))
@@ -41,7 +41,7 @@ class KeygenTest {
 
     @Test
     fun `keygen with node option should save with prefix`() {
-        val file = kotlin.io.path.createTempFile()
+        val file = createTempFile()
         CommandKeygen().parse(arrayOf(
                 "-m", "picnic shove leader great protect table leg witness walk night cable caution about produce engage armor first burden olive violin cube gentle bulk train",
                 "-s", file.absolutePathString(),
@@ -58,6 +58,6 @@ class KeygenTest {
         val exception = assertThrows<IllegalArgumentException> {
             CommandKeygen().parse(arrayOf("-m", "invalid mnemonic"))
         }
-        assertEquals("Invalid number of words in mnemonic. Supported number of words are 12 or 24", exception.message)
+        Assertions.assertEquals("Invalid number of words in mnemonic. Supported number of words are 12 or 24", exception.message)
     }
 }

@@ -1,23 +1,28 @@
 package net.postchain.mc.cli.cluster
 
 import com.github.ajalt.clikt.core.terminal
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.mordant.input.interactiveSelectList
 import net.postchain.chain0.common.queries.getClusters
-import net.postchain.mc.cli.DCBaseCommand
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
+import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.compatibility.ApiCompatV75.getClustersV75
+import net.postchain.mc.network.Version
 
-class CommandListClusters : DCBaseCommand(
+class CommandListClusters : PmcCommand(
         name = "list",
         help = "List all existing clusters",
-        printHelpOnEmptyArgs = false,
 ) {
+    val config by pmcConfigOption()
+    val client get() = config.client
+    val dcVersion get() = Version(config.client).version
     private val interactive by interactiveOption()
 
-    override fun runDC() {
+    override fun run() {
         if (dcVersion >= 76) {
             val clusters = client.getClusters()
             if (interactive && clusters.isNotEmpty() && clusters.size < terminal.size.height) {

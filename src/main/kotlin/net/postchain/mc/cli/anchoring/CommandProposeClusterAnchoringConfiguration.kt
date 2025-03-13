@@ -22,10 +22,10 @@ class CommandProposeClusterAnchoringConfiguration : DCBaseCommand(
     ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true).required()
 
     override fun runDC() {
-        val version = config.client.apiVersion()
+        val version = client.apiVersion()
         val bcConfig = BlockchainConfig.readFromFile(anchoringConfig)
-        val compressedConfig = BlockchainConfigurationCompressor.compress(config.client, bcConfig.gtv, version)
-        config.client.transactionBuilder()
+        val compressedConfig = BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, version)
+        client.transactionBuilder()
                 .proposeClusterAnchoringConfigurationOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedConfig))
                 .postAwaitConfirmation()
                 .printResult(

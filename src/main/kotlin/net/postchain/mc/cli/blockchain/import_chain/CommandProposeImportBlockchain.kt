@@ -4,7 +4,6 @@ import com.chromia.directory1.common.queries.getContainerData
 import com.chromia.directory1.common.queries.getVoterSetInfo
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.terminal
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
@@ -25,21 +24,19 @@ import net.postchain.common.hexStringToByteArray
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.gtv.Gtv
 import net.postchain.gtv.GtvDecoder
-import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.configurationsFileOption
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.nullableProposalDescriptionOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.network.requireApiVersion
 import java.io.BufferedInputStream
 import java.io.FileInputStream
 import java.io.InputStream
 
-class CommandProposeImportBlockchain : PmcCommand(
+class CommandProposeImportBlockchain : DCBaseCommand(
         name = "import",
         help = """
             Propose importing a blockchain in a specific container 
@@ -48,9 +45,6 @@ class CommandProposeImportBlockchain : PmcCommand(
             of the cluster that the container belongs to.
         """.trimIndent()
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val configurationsFile by configurationsFileOption().required()
 
     private val container by option("-c", "--container", help = "Name of container to run in").required()
@@ -67,7 +61,7 @@ class CommandProposeImportBlockchain : PmcCommand(
 
     private var preloadedConfig: Gtv? = null
 
-    override fun run() {
+    override fun runDC() {
         val version = client.requireApiVersion(19)
 
         if (version <= 53) {
@@ -264,7 +258,7 @@ class CommandProposeImportBlockchain : PmcCommand(
 
     private fun proposeImportBlockchain(blockchainRid: BlockchainRid, initialConfigData: ByteArray): TransactionResult {
         return client.transactionBuilder()
-                .proposeImportBlockchainOperation(client.pubkey, initialConfigData, blockchainRid, name, container, description())
+                .proposeImportBlockchainOperation(clientProviderPubkey, initialConfigData, blockchainRid, name, container, description())
                 .postAwaitConfirmation()
                 .also {
                     it.printResult(
@@ -276,10 +270,10 @@ class CommandProposeImportBlockchain : PmcCommand(
     private fun TrackingTransactionBuilder.tryAddConfiguration(blockchainRid: BlockchainRid, height: Long, configData: ByteArray) =
             try {
                 txBuilder.proposeImportConfigurationOperation(
-                        client.pubkey, blockchainRid, height, configData, "Import blockchain configuration from a file - blockchain-rid: $blockchainRid, height: $height")
+                        clientProviderPubkey, blockchainRid, height, configData, "Import blockchain configuration from a file - blockchain-rid: $blockchainRid, height: $height")
                 opCounter++
                 true
-            } catch (e: IllegalStateException) {
+            } catch (_: IllegalStateException) {
                 false
             }
 

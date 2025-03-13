@@ -1,8 +1,6 @@
 package net.postchain.mc.cli.cluster
 
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -15,13 +13,12 @@ import net.postchain.chain0.direct_cluster.createClusterWithUnitsOperation
 import net.postchain.chain0.features.hasDirectCluster
 import net.postchain.chain0.model.ClusterCreationData
 import net.postchain.chain0.version.apiVersion
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.VoterSetOrPubkeysOption
 import net.postchain.mc.cli.util.clusterUnitsOption
 import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.nameOrGenerateOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeysOrVotersetOption
 import net.postchain.mc.compatibility.ApiCompatV28.ClusterQuotaDataV28
 import net.postchain.mc.compatibility.ApiCompatV28.createClusterFromWithClusterQuotaDataDataOperationV28
@@ -30,16 +27,12 @@ import net.postchain.mc.compatibility.ApiCompatV33
 import net.postchain.mc.compatibility.ApiCompatV33.createClusterFromWithClusterDataOperationV33
 import net.postchain.mc.compatibility.ApiCompatV33.createClusterWithClusterDataOperationV33
 
-class CommandAddCluster : PmcCommand(
+class CommandAddCluster : DCBaseCommand(
         name = "add",
         help = "Create a new cluster that can hold containers with blockchains. " +
                 "This cluster will not be tracked by economy chain and nodes running in it will not be rewarded. " +
                 "To create a cluster that is managed by economy chain please see command: 'pmc economy add-cluster'"
 ) {
-
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val name by nameOrGenerateOption("Cluster name")
 
     private val providerOptions by pubkeysOrVotersetOption()
@@ -55,7 +48,7 @@ class CommandAddCluster : PmcCommand(
             help = "Name of another voter set which can update this cluster."
     ).required()
 
-    override fun run() {
+    override fun runDC() {
         val apiVersion = client.apiVersion()
         var hasDirectCluster = true
         if (apiVersion >= 49)
@@ -67,11 +60,11 @@ class CommandAddCluster : PmcCommand(
                             apiVersion >= 34 -> {
                                 when (providerOptions) {
                                     is VoterSetOrPubkeysOption.Pubkeys -> {
-                                        createClusterWithClusterDataOperation(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, ClusterCreationData(clusterUnits, extraStorage))
+                                        createClusterWithClusterDataOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, ClusterCreationData(clusterUnits, extraStorage))
                                     }
 
                                     is VoterSetOrPubkeysOption.VoterSet -> {
-                                        createClusterFromWithClusterDataOperation(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, ClusterCreationData(clusterUnits, extraStorage))
+                                        createClusterFromWithClusterDataOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, ClusterCreationData(clusterUnits, extraStorage))
                                     }
                                 }
                             }
@@ -79,11 +72,11 @@ class CommandAddCluster : PmcCommand(
                             apiVersion >= 29 -> {
                                 when (providerOptions) {
                                     is VoterSetOrPubkeysOption.Pubkeys -> {
-                                        createClusterWithClusterDataOperationV33(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, ApiCompatV33.ClusterCreationDataV33(clusterUnits, extraStorage, clusterClass))
+                                        createClusterWithClusterDataOperationV33(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, ApiCompatV33.ClusterCreationDataV33(clusterUnits, extraStorage, clusterClass))
                                     }
 
                                     is VoterSetOrPubkeysOption.VoterSet -> {
-                                        createClusterFromWithClusterDataOperationV33(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, ApiCompatV33.ClusterCreationDataV33(clusterUnits, extraStorage, clusterClass))
+                                        createClusterFromWithClusterDataOperationV33(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, ApiCompatV33.ClusterCreationDataV33(clusterUnits, extraStorage, clusterClass))
                                     }
                                 }
                             }
@@ -91,11 +84,11 @@ class CommandAddCluster : PmcCommand(
                             apiVersion >= 24 -> {
                                 when (providerOptions) {
                                     is VoterSetOrPubkeysOption.Pubkeys -> {
-                                        createClusterWithClusterQuotaDataOperationV28(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, ClusterQuotaDataV28(clusterUnits, extraStorage))
+                                        createClusterWithClusterQuotaDataOperationV28(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, ClusterQuotaDataV28(clusterUnits, extraStorage))
                                     }
 
                                     is VoterSetOrPubkeysOption.VoterSet -> {
-                                        createClusterFromWithClusterQuotaDataDataOperationV28(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, ClusterQuotaDataV28(clusterUnits, extraStorage))
+                                        createClusterFromWithClusterQuotaDataDataOperationV28(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, ClusterQuotaDataV28(clusterUnits, extraStorage))
                                     }
                                 }
                             }
@@ -103,11 +96,11 @@ class CommandAddCluster : PmcCommand(
                             apiVersion >= 3 -> {
                                 when (providerOptions) {
                                     is VoterSetOrPubkeysOption.Pubkeys -> {
-                                        createClusterWithUnitsOperation(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, clusterUnits)
+                                        createClusterWithUnitsOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, clusterUnits)
                                     }
 
                                     is VoterSetOrPubkeysOption.VoterSet -> {
-                                        createClusterFromWithUnitsOperation(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, clusterUnits)
+                                        createClusterFromWithUnitsOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, clusterUnits)
                                     }
                                 }
                             }
@@ -115,11 +108,11 @@ class CommandAddCluster : PmcCommand(
                             else -> {
                                 when (providerOptions) {
                                     is VoterSetOrPubkeysOption.Pubkeys -> {
-                                        createClusterOperation(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys)
+                                        createClusterOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys)
                                     }
 
                                     is VoterSetOrPubkeysOption.VoterSet -> {
-                                        createClusterFromOperation(client.pubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data)
+                                        createClusterFromOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data)
                                     }
                                 }
                             }

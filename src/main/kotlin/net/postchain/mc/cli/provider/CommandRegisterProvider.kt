@@ -5,7 +5,6 @@ import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.groups.cooccurring
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.options.OptionTransformContext
 import com.github.ajalt.clikt.parameters.options.convert
@@ -22,14 +21,12 @@ import net.postchain.crypto.PubKey
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtv.parse.GtvParser
-import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.PropertiesConfigurationValueSource
 import net.postchain.mc.cli.util.ProviderType
 import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.cli.util.optionalPubkeyOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.validateMetadataText
 import net.postchain.mc.cli.util.validatePubkey
 import net.postchain.mc.cli.util.validateUrl
@@ -57,7 +54,7 @@ class BatchOptions : OptionGroup() {
     }
 }
 
-class CommandRegisterProvider : PmcCommand(
+class CommandRegisterProvider : DCBaseCommand(
         name = "register",
         help = """
             Register new provider with given pubkey
@@ -89,9 +86,6 @@ class CommandRegisterProvider : PmcCommand(
         }
     }
 
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val pubkey by optionalPubkeyOption("Public key to register as provider")
 
     private val batchOptions by BatchOptions().cooccurring()
@@ -120,12 +114,12 @@ class CommandRegisterProvider : PmcCommand(
         } else ""
     }
 
-    override fun run() {
+    override fun runDC() {
         if (batchOptions != null) {
             if (pubkey != null) throw CliktError("use --provider instead of --pubkey in a batch mode")
             client.transactionBuilder()
                     .proposeProvidersOperation(
-                            client.pubkey, batchOptions!!.provider, providerTier.toTier(), providerTier.isSystem(), enable, description()
+                            clientProviderPubkey, batchOptions!!.provider, providerTier.toTier(), providerTier.isSystem(), enable, description()
                     )
                     .postAwaitConfirmation()
                     .printResult(
@@ -135,10 +129,10 @@ class CommandRegisterProvider : PmcCommand(
         } else {
             if (pubkey == null) throw CliktError("--pubkey must be provided")
             client.transactionBuilder()
-                    .registerProviderOperation(client.pubkey, pubkey!!, providerTier.toTier())
+                    .registerProviderOperation(clientProviderPubkey, pubkey!!, providerTier.toTier())
                     .apply {
-                        if (providerTier.shouldEnable(enable)) proposeProviderStateOperation(client.pubkey, pubkey!!.data, enable, description())
-                        if (providerTier == ProviderType.SYSTEM_PROVIDER) proposeProviderIsSystemOperation(client.pubkey, pubkey!!.data, true, description())
+                        if (providerTier.shouldEnable(enable)) proposeProviderStateOperation(clientProviderPubkey, pubkey!!.data, enable, description())
+                        if (providerTier == ProviderType.SYSTEM_PROVIDER) proposeProviderIsSystemOperation(clientProviderPubkey, pubkey!!.data, true, description())
                     }
                     .postAwaitConfirmation()
                     .printResult(

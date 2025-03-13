@@ -1,11 +1,11 @@
 package net.postchain.mc.cli.image
 
 import com.github.ajalt.clikt.core.CliktCommand
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.queries.getSubnodeImage
-import net.postchain.client.core.PostchainClient
+import net.postchain.client.core.PostchainReadClient
+import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
@@ -27,7 +27,7 @@ class CommandGetSubnodeImageInfo : PmcCommand(
     }
 }
 
-fun CliktCommand.showSubnodeImageInfo(client: PostchainClient, name: String) {
+fun CliktCommand.showSubnodeImageInfo(client: PostchainReadClient, name: String) {
     val info = client.getSubnodeImage(name)
     echo(pmcTable {
         body {

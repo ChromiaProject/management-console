@@ -1,43 +1,36 @@
 package net.postchain.mc.network
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.evm_event_receiver.initEvmEventReceiverChainOperation
 import net.postchain.gtv.GtvEncoder
-import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.BlockchainConfig
-import net.postchain.mc.cli.util.pmcConfigOption
 
-class CommandInitEvmEventReceiverChain : PmcCommand(
+class CommandInitEvmEventReceiverChain : DCBaseCommand(
         name = "initialize-evm-event-receiver-chain",
         help = "Create and initialize EVM event receiver chain",
         printHelpOnEmptyArgs = true
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val eventReceiverConfig by option(
             "-erc",
             "--event-receiver-config",
             help = "Configuration file for EVM event receiver chain (GtvML (*.xml) or Gtv (*.gtv))"
     ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
 
-    override fun run() {
-        val version = Version(client).version
-        if (version < 38) {
-            echo("EVM event receiver chain requires directory chain version 38, found version $version")
+    override fun runDC() {
+        if (dcVersion < 38) {
+            echo("EVM event receiver chain requires directory chain version 38, found version $dcVersion")
             return
         }
 
         eventReceiverConfig?.let {
             val config = BlockchainConfig.readFromFile(it)
-            val compressedConfig = BlockchainConfigurationCompressor.compress(client, config.gtv, version)
+            val compressedConfig = BlockchainConfigurationCompressor.compress(client, config.gtv, dcVersion)
             client.transactionBuilder()
-                    .initEvmEventReceiverChainOperation(client.pubkey, GtvEncoder.encodeGtv(compressedConfig))
+                    .initEvmEventReceiverChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedConfig))
                     .postAwaitConfirmation()
                     .printResult(
                             "EVM event receiver chain was created",

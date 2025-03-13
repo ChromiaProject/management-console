@@ -15,14 +15,13 @@ class CommandPingNode : PmcCommand(
         help = "Check if a node is accessible"
 ) {
     private val config by pmcConfigOption()
-    private val client get() = config.client
 
     private val host by requiredHostOption()
 
     private val port by portOption().required()
 
     override fun run() {
-        val verifier = NodeVerifier(client.config, null)
+        val verifier = NodeVerifier(config.chromiaClient.config, null)
         try {
             verifier.verifyHost(host, port)
             echo("Node is accessible")
