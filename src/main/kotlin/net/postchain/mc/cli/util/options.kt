@@ -140,7 +140,7 @@ open class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaMode
             val networkModel = model!!.deployments[network]
                     ?: throw IllegalArgumentException("Network $network not found in configuration")
             rawConfig.setProperty("api.url", networkModel.urls.joinToString(",") { Endpoint.sanitizeUrl(it) })
-            rawConfig.setProperty("brid", networkModel.blockchainRid.toHex())
+            networkModel.blockchainRid?.let { rawConfig.setProperty("brid", it.toHex()) }
         }
         val configuredBrid = if (lookupBrid) null else rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
         rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
