@@ -62,6 +62,17 @@ class ConfigurationIT {
             TestProcess.Builder("network", "summary")
                     .awaitCompletion(true)
                     .setWorkingDir(dir.toFile())
+                    .exitCode(0)
+                    .wholeOutput("""
+                    {
+                      "Voter_sets": "5",
+                      "Providers": "12",
+                      "Clusters": "1",
+                      "Containers": "2",
+                      "Nodes": "10",
+                      "Blockchains": "230"
+                    }
+                    """.trimIndent())
                     .start {
                         val config = PropertiesFileLoader.load(dir.resolve(".chromia/config").absolutePathString())
                         assertThat(config.getString("brid")).isEqualTo(dcBcRid.toHex())

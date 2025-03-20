@@ -16,7 +16,7 @@ import java.io.File
 import java.nio.file.Path
 
 class CommandProposeFinishBlockchainImportTestIT {
-    val dcBcRid = BlockchainRid.buildRepeat(0)
+    val dcBcRid = BlockchainRid.buildRepeat(1)
 
     @Test
     fun `successful creating finish import blockchain proposal if all configurations are found`(@TempDir dir: Path) = RestApi(0, "", gracefulShutdown = false).use {
