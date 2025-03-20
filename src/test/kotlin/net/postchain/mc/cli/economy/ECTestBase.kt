@@ -8,8 +8,8 @@ import java.io.File
 import java.nio.file.Path
 
 open class ECTestBase {
-    val dcBcRid = BlockchainRid.buildRepeat(0)
-    val ecBcRid = BlockchainRid.buildRepeat(1)
+    val dcBcRid = BlockchainRid.buildRepeat(1)
+    val ecBcRid = BlockchainRid.buildRepeat(2)
 
     fun ecRestApiTest(dir: Path, ecVersion: Long, function: (ECTestModel) -> Unit) {
 

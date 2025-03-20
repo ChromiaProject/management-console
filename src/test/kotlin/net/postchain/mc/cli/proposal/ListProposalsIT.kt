@@ -64,6 +64,7 @@ class ListProposalsIT {
                     provider.pubkey=$PROVIDER_PUBKEY
                     pubkey=$PUBKEY
                     privkey=DC36585B89DD64D2F3A107FDA37C1730BEF3B3B13D5845B87C46EE235D0E9827
+                    brid=$dcBcRid
                     """.trimIndent())
             }
 
