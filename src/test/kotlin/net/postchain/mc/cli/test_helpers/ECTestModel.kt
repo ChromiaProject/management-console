@@ -1,31 +1,29 @@
-package net.postchain.mc.cli.economy
+package net.postchain.mc.cli.test_helpers
 
 import com.chromia.build.tools.restapi.TestModel
 import net.postchain.api.rest.controller.Model
-import net.postchain.api.rest.model.ApiStatus
-import net.postchain.api.rest.model.TxRid
 import net.postchain.common.BlockchainRid
-import net.postchain.common.tx.TransactionStatus
 import net.postchain.economy.economy_chain.EconomyConstantsData
 import net.postchain.economy.economy_chain.TagData
 import net.postchain.gtv.GtvArray
 import net.postchain.gtv.GtvFactory
 import net.postchain.gtv.mapper.GtvObjectMapper
-import net.postchain.gtx.GtxQuery
-import net.postchain.mc.cli.BaseTransactionHandler
+import net.postchain.mc.cli.economy.ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION
 import net.postchain.mc.compatibility.ApiCompatECV45
 import java.math.BigDecimal
 
-class ECTestModel(val model: Model, val ecVersion: Long) : Model by model, BaseTransactionHandler() {
+class ECTestModel(
+        model: Model,
+        val ecVersion: Long,
+        override val chainIID: Long = 3
+) : RestTestModel(chainIID, model) {
 
     constructor(blockchainRid: BlockchainRid, ecVersion: Long) : this(TestModel(blockchainRid), ecVersion)
 
-    override fun query(query: GtxQuery) = when (query.name) {
-        "api_version" -> GtvFactory.gtv(ecVersion)
-        "get_tags" -> {
-            GtvArray(arrayOf(GtvObjectMapper.toGtvDictionary(TagData("t1", 1, 2))))
-        }
-        "get_economy_constants" -> {
+    init {
+        withQuery("api_version", GtvFactory.gtv(ecVersion))
+        withQuery("get_tags", GtvArray(arrayOf(GtvObjectMapper.toGtvDictionary(TagData("t1", 1, 2)))))
+        withQuery("get_economy_constants") {
             if (ecVersion < ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION) {
                 GtvObjectMapper.toGtvDictionary(ApiCompatECV45.EconomyConstantsDataV45(
                         minLeaseTimeWeeks = 1,
@@ -70,15 +68,5 @@ class ECTestModel(val model: Model, val ecVersion: Long) : Model by model, BaseT
                 ))
             }
         }
-        else -> throw IllegalArgumentException("Query not found: ${query.name}")
     }
-
-    override fun postTransaction(tx: ByteArray) {
-        postTransactionImpl(tx)
-    }
-
-    override fun getStatus(txRID: TxRid): ApiStatus {
-        return ApiStatus(TransactionStatus.CONFIRMED)
-    }
-
 }

@@ -7,7 +7,7 @@ import net.postchain.mc.cli.util.pmcKeyConfigOption
 import net.postchain.mc.network.Version
 import net.postchain.mc.network.requireApiVersion
 
-const val DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION = 65
+const val DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION = 65L
 
 /**
  * Use this for commands which makes transactions, or otherwise need access to keys.

@@ -18,7 +18,7 @@ import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
-import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.compatibility.ApiCompatV78.proposeForcedConfigurationOperationV78
 import net.postchain.mc.network.requireApiVersion
 
@@ -51,7 +51,7 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
 
     private val resumeChain by option("-r", "--resume", help = "Automatically resume blockchain after configuration is applied").flag()
 
-    private val description by proposalDescriptionOption { "Force update of blockchain configuration for $blockchainRID at height $height" }
+    private val description by nullableProposalDescriptionOption()
 
     override fun runDC() {
         if (resumeChain) {
@@ -76,6 +76,7 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
             }
             currentHeight
         }
+        val proposalDescription = description ?: "Force update of blockchain configuration for $blockchainRID at height $proposalHeight"
 
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
         val compressedConfigurationData = GtvEncoder.encodeGtv(BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, dcVersion))
@@ -83,9 +84,9 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
         client.transactionBuilder()
                 .apply {
                     if (dcVersion >= 80) {
-                        proposeForcedConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, proposalHeight, description, resumeChain)
+                        proposeForcedConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, proposalHeight, proposalDescription, resumeChain)
                     } else {
-                        proposeForcedConfigurationOperationV78(clientProviderPubkey, blockchainRID, compressedConfigurationData, proposalHeight, description)
+                        proposeForcedConfigurationOperationV78(clientProviderPubkey, blockchainRID, compressedConfigurationData, proposalHeight, proposalDescription)
                     }
                 }
                 .postAwaitConfirmation()
