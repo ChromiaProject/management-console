@@ -45,7 +45,7 @@ const val DEFAULT_NODE01_PORT = 7740L
 const val DEFAULT_NODE01_API = "http://$DEFAULT_NODE01_HOST:$DEFAULT_NODE01_PORT"
 
 val DEFAULT_BRID_DIRECTORY_CHAIN = BlockchainRid.buildRepeat(1)
-val DEFAULT_BRID_SYSTEM_ANCHRONING_CHAIN = BlockchainRid.buildRepeat(2)
+val DEFAULT_BRID_SYSTEM_ANCHORING_CHAIN = BlockchainRid.buildRepeat(2)
 val DEFAULT_BRID_CLUSTER_ANCHORING_CHAIN = BlockchainRid.buildRepeat(3)
 val DEFAULT_BRID_ECONOMY_CHAIN = BlockchainRid.buildRepeat(4)
 

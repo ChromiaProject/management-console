@@ -33,8 +33,8 @@ open class RestTestModel(
 
     val capturedOps: MutableMap<String, MutableList<List<Gtv>>> = mutableMapOf()
 
-    open fun withQuery(query: String, vararg gtv: Gtv): RestTestModel {
-        val functionList: List<(query: GtxQuery) -> Gtv> = gtv.map { { _ -> it } }
+    open fun withQuery(query: String, vararg arg: Gtv): RestTestModel {
+        val functionList: List<(query: GtxQuery) -> Gtv> = arg.map { { _ -> it } }
         withQuery(query, *functionList.toTypedArray())
         return this
     }
@@ -84,14 +84,9 @@ open class RestTestModel(
         assertThat(opCalls?.get(0)).isEqualTo(parameters)
     }
 
-    fun assertSingleOp(name: String): Boolean {
-        return capturedOps[name] != null
-    }
-
     override fun getStatus(txRID: TxRid): ApiStatus {
         return ApiStatus(TransactionStatus.CONFIRMED)
     }
-
 
     // Assert that ops was called by constructing them with the TransactionBuilder.
     fun assertCalledOps(opsProvider: (TransactionBuilder) -> Unit) {
@@ -111,7 +106,6 @@ open class RestTestModel(
                         ops.asArray().forEach { op ->
                             val name = op[0].asString()
                             val parameters = op[1].asArray().toList()
-                            opWasCalled(name, parameters)
                             if (!opWasCalled(name, parameters)) {
                                 fail("Operation never called: $name with parameters $parameters but found: ${capturedOps.map { capturedOp ->
                                     "${capturedOp.key}(${capturedOp.value})"
