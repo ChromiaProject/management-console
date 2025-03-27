@@ -2,6 +2,7 @@ package net.postchain.mc.cli.blockchain
 
 import assertk.assertThat
 import assertk.assertions.contains
+import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
 import net.postchain.chain0.model.BlockchainState
 import net.postchain.common.BlockchainRid
@@ -87,6 +88,7 @@ class CommandProposeForcedConfigurationIT {
                         "-brid", blockchainRID.toHex(),
                         "--detect-height"
                 ) { result, api ->
+                    assertThat(result.statusCode).isEqualTo(1)
                     assertThat(result.stderr).contains("Error: Blockchain is in state RUNNING but must be PAUSED to detect the height")
                 }
     }

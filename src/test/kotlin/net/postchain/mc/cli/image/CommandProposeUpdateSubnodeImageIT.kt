@@ -2,6 +2,7 @@ package net.postchain.mc.cli.image
 
 import assertk.assertThat
 import assertk.assertions.contains
+import assertk.assertions.isEqualTo
 import net.postchain.chain0.proposal_subnode_image.proposeUpdateSubnodeImageOperation
 import net.postchain.common.hexStringToByteArray
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
@@ -53,6 +54,7 @@ class CommandProposeUpdateSubnodeImageIT {
                 .testCommand(CommandProposeUpdateSubnodeImage(),
                         "--name", "image01",
                         ) { result, api ->
+                    assertThat(result.statusCode).isEqualTo(1)
                     assertThat(result.stderr).contains("Error: missing option --digest")
                 }
     }

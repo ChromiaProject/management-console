@@ -9,7 +9,7 @@ import net.postchain.gtv.mapper.GtvObjectMapper
 
 class D1TestModel(
         model: Model,
-        ecBcrid: ByteArray,
+        ecBcRid: ByteArray,
         chainIID: Long = 0,
         dcVersion: Long = 1,
         sacBcRid: BlockchainRid? = null,
@@ -18,7 +18,7 @@ class D1TestModel(
 
     init {
         withQuery("api_version", gtv(dcVersion))
-        withQuery("get_economy_chain_rid", gtv(ecBcrid))
+        withQuery("get_economy_chain_rid", gtv(ecBcRid))
         withQuery("get_summary", GtvObjectMapper.toGtvDictionary(GetSummaryResult(12, 1, 2, 5, 10, 230)))
         withQuery("get_relevant_proposals", gtv(listOf()))
         withQuery("cm_get_system_anchoring_chain", buildCmGetSystemAnchoringChainResponse(sacBcRid))

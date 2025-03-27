@@ -109,7 +109,7 @@ class CommandGetBlockchainInfoIT {
     }
 
     @Test
-    fun unarchaving(@TempDir dir: Path) {
+    fun unarchiving(@TempDir dir: Path) {
         ManagedRestTestApi(dir, dcVersion = 33)
                 .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(isUnarchiving = true))
                 .withDCQuery("get_container_data", buildGetContainerDataResponse())

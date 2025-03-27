@@ -2,6 +2,7 @@ package net.postchain.mc.cli.blockchain
 
 import assertk.assertThat
 import assertk.assertions.contains
+import assertk.assertions.isEqualTo
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.assertCommandOutput
 import net.postchain.mc.cli.test_helpers.buildGetBlockchainInfoListResponse
@@ -53,6 +54,7 @@ class CommandListBlockchainsIT {
                 .testCommand(CommandListBlockchains(),
                         "--interactive",
                 ) { result, _ ->
+                    assertThat(result.statusCode).isEqualTo(1)
                     assertThat(result.stderr).contains("--interactive requires directory chain version 17, found version 16")
                 }
     }

@@ -23,12 +23,14 @@ class CommandProposeBlockchainIT {
         var result = CommandProposeBlockchain().test(argv = listOf(
                 "-bc", cityConfig.absolutePath.toString()
         ))
+        assertThat(result.statusCode).isEqualTo(1)
         assertThat(result.stderr).contains("Error: missing option --container")
         assertThat(result.stderr).contains("Error: missing option --name")
 
         result = CommandProposeBlockchain().test(argv = listOf(
                 "--name", "name01"
         ))
+        assertThat(result.statusCode).isEqualTo(1)
         assertThat(result.stderr).contains("Error: missing option --container")
         assertThat(result.stderr).contains("Error: missing option --blockchain-config")
     }
