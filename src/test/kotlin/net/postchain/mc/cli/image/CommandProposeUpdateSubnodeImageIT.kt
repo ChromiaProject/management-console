@@ -6,7 +6,6 @@ import assertk.assertions.isEqualTo
 import net.postchain.chain0.proposal_subnode_image.proposeUpdateSubnodeImageOperation
 import net.postchain.common.hexStringToByteArray
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
-import net.postchain.mc.cli.test_helpers.buildGetSubnodeImageResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path

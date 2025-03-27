@@ -9,8 +9,6 @@ import net.postchain.common.BlockchainRid
 import net.postchain.common.hexStringToByteArray
 import net.postchain.mc.cli.test_helpers.DEFAULT_BRID_ECONOMY_CHAIN
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
-import net.postchain.mc.cli.test_helpers.buildGetBlockchainInfoResponse
-import net.postchain.mc.cli.test_helpers.buildGetCompressedConfigurationParts
 import net.postchain.mc.cli.test_helpers.writeResourceFileToTempDir
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir

@@ -7,8 +7,6 @@ import net.postchain.common.BlockchainRid
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.GtvNull
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
-import net.postchain.mc.cli.test_helpers.buildGetBlockchainInfoResponse
-import net.postchain.mc.cli.test_helpers.buildNmFindNextConfigurationHeightResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path

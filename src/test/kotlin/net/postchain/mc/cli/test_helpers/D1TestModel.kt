@@ -12,7 +12,7 @@ class D1TestModel(
         ecBcRid: ByteArray,
         chainIID: Long = 0,
         dcVersion: Long = 1,
-        sacBcRid: BlockchainRid? = null,
+        sacBcRid: BlockchainRid,
         providerByKey: String? = null,
 ) : RestTestModel(chainIID, model) {
 
@@ -21,7 +21,7 @@ class D1TestModel(
         withQuery("get_economy_chain_rid", gtv(ecBcRid))
         withQuery("get_summary", GtvObjectMapper.toGtvDictionary(GetSummaryResult(12, 1, 2, 5, 10, 230)))
         withQuery("get_relevant_proposals", gtv(listOf()))
-        withQuery("cm_get_system_anchoring_chain", buildCmGetSystemAnchoringChainResponse(sacBcRid))
+        withQuery("cm_get_system_anchoring_chain", gtv(sacBcRid.wData))
         if (providerByKey != null) {
             withQuery("get_provider_by_key", gtv(providerByKey.hexStringToByteArray()))
         }

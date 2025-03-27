@@ -4,7 +4,6 @@ import net.postchain.mc.cli.test_helpers.DEFAULT_PROVIDER01_PUBKEY
 import net.postchain.mc.cli.test_helpers.DEFAULT_PROVIDER02_PUBKEY
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.assertLineValue
-import net.postchain.mc.cli.test_helpers.buildGetAllProvidersResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path

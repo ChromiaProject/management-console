@@ -2,7 +2,6 @@ package net.postchain.mc.cli.image
 
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.assertCommandContains
-import net.postchain.mc.cli.test_helpers.buildGetSubnodeImagesResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path

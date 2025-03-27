@@ -9,7 +9,6 @@ import net.postchain.common.hexStringToByteArray
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.test_helpers.DEFAULT_DAPP_RID
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
-import net.postchain.mc.cli.test_helpers.buildGetCompressedConfigurationParts
 import net.postchain.mc.cli.test_helpers.writeResourceFileToTempDir
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
