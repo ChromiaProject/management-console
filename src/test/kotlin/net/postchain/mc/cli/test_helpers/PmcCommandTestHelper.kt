@@ -3,7 +3,9 @@ package net.postchain.mc.cli.test_helpers
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
+import assertk.assertions.isGreaterThan
 import assertk.assertions.isTrue
+import com.chromia.build.tools.config.SUPPRESS_KEY_STORAGE_DEPRECATION_WARNING_SYSTEM_PROPERTY
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.testing.CliktCommandTestResult
 import com.github.ajalt.clikt.testing.test
@@ -15,6 +17,7 @@ import java.nio.file.Path
  * Run a command and pass the dynamically created .chromia/config file as parameter.
  */
 fun testPmcCommand(dir: Path, command: CliktCommand, vararg args: String): CliktCommandTestResult {
+    System.setProperty(SUPPRESS_KEY_STORAGE_DEPRECATION_WARNING_SYSTEM_PROPERTY, "true")
     val parametersWithConfig = args.toMutableList() + listOf(
             "--config", dir.resolve(".chromia/config").toAbsolutePath().toString()
     )
@@ -38,6 +41,16 @@ fun assertCommandOutput(output: String, expected: String) {
 
 fun assertCommandContains(output: String, expected: String) {
     assertThat(normalizeCommandOutput(output)).contains(normalizeCommandOutput(expected))
+}
+
+fun assertCommandSuccess(result: CliktCommandTestResult, expected: String) {
+    assertThat(result.statusCode).isEqualTo(0)
+    assertThat(normalizeCommandOutput(result.output)).contains(normalizeCommandOutput(expected))
+}
+
+fun assertCommandFailure(result: CliktCommandTestResult, errorMessage: String) {
+    assertThat(result.statusCode).isGreaterThan(0)
+    assertThat(normalizeCommandOutput(result.stderr)).contains(normalizeCommandOutput(errorMessage))
 }
 
 fun normalizeCommandOutput(output: String): String {
