@@ -132,9 +132,15 @@ open class ManagedRestTestApi(
         return this
     }
 
-    // Add a query response to any test chain
+    // Add a query response to directory chain
     fun withDCQuery(query: String, function: (query: GtxQuery) -> Gtv): ManagedRestTestApi {
         models[dcBcRid]!!.withQuery(query, function)
+        return this
+    }
+
+    // Add a query response to economy chain
+    fun withECQuery(query: String, function: (query: GtxQuery) -> Gtv): ManagedRestTestApi {
+        models[ecBcRid]!!.withQuery(query, function)
         return this
     }
 
@@ -153,6 +159,12 @@ open class ManagedRestTestApi(
     // Add a query response to directory chain
     fun withDCQuery(query: String, vararg value: Gtv): ManagedRestTestApi {
         withQuery(dcBcRid, query, *value)
+        return this
+    }
+
+    // Add a query response to economy chain
+    fun withECQuery(query: String, vararg value: Gtv): ManagedRestTestApi {
+        withQuery(ecBcRid, query, *value)
         return this
     }
 }

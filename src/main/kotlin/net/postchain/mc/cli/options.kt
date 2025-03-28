@@ -88,14 +88,14 @@ fun CliktCommand.promptForIndex(items: List<*>) =
                     ?: ConversionResult.Invalid("$s is not a valid integer")
         }
 
-fun ParameterHolder.evmAddressOption() = option("--evm-address", help = "EVM address", metavar = "address")
+fun ParameterHolder.evmAddressOption(help: String = "EVM address") = option("--evm-address", help = help, metavar = "address")
         .convert {
             (if (it.startsWith("0x")) it.drop(2) else it).hexStringToByteArray()
         }
         .required()
         .validate { require(it.size == 20) { "EVM address must be 20 bytes" } }
 
-fun ParameterHolder.optionalEvmAddressOption() = option("--evm-address", help = "EVM address", metavar = "address")
+fun ParameterHolder.optionalEvmAddressOption(help: String = "EVM address") = option("--evm-address", help = help, metavar = "address")
         .convert {
             (if (it.startsWith("0x")) it.drop(2) else it).hexStringToByteArray()
         }
