@@ -16,14 +16,14 @@ class CommandApproveForcedConfigurationIT {
 
     @Test
     fun `approve forced configuration`(@TempDir dir: Path) {
-        ManagedRestTestApi(dir, dcVersion = 83)
+        ManagedRestTestApi(dir, dcVersion = 85)
                 .testCommand(
                         CommandApproveForcedConfiguration(),
                         "-brid", blockchainRID.toHex(),
                 ) { result, api ->
                     assertCommandSuccess(result, "Forced configurations was approved")
                     assertThat(api.getDcModel().opWasCalled(APPROVE_PROPOSED_FORCED_CONFIGURATION) {
-                        it[0].asByteArray().contentEquals(blockchainRID.data)
+                        it[1].asByteArray().contentEquals(blockchainRID.data)
                     }).isTrue()
                 }
     }
