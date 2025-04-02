@@ -20,13 +20,13 @@ class CommandApproveForcedConfiguration : DCBaseCommand(
         Signers lists will be updated with the current cluster's nodes.
         Pending configurations for this blockchain will be removed.
         """.trimIndent(),
-        requiresVersion = 83
+        requiresVersion = 85
 ) {
     private val blockchainRID by blockchainRidOption().required()
 
     override fun runDC() {
         client.transactionBuilder()
-                .approveProposedForcedConfigurationOperation(blockchainRID)
+                .approveProposedForcedConfigurationOperation(clientProviderPubkey, blockchainRID)
                 .postAwaitConfirmation()
                 .printResult(
                         "Forced configurations was approved",
