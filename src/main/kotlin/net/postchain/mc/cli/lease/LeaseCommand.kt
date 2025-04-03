@@ -14,4 +14,5 @@ fun leaseCommands() = LeaseCommand().subcommands(
         CommandAssignSubnodeImageToContainer(),
         CommandCreateContainer(),
         CommandRemoveContainer(),
+        CommandListPendingLeaseTickets(),
 )
