@@ -26,7 +26,7 @@ class CommandProposeUpdateSubnodeImageIT {
                         ) { result, api ->
                     assertThat(result.stdout).contains("Subnode image $name update proposed")
                     api.getDcModel().assertCalledOps {
-                        it.proposeUpdateSubnodeImageOperation(api.pubKey.hexStringToByteArray(), name, url, digest, "Update subnode image $name with URL $url and digest $digest")
+                        it.proposeUpdateSubnodeImageOperation(api.pubKey.hexStringToByteArray(), name, url, digest, "Update subnode image $name with URL $url and digest $digest", null)
                     }
                 }
     }
@@ -41,7 +41,7 @@ class CommandProposeUpdateSubnodeImageIT {
                         ) { result, api ->
                     assertThat(result.stdout).contains("Subnode image $name update proposed")
                     api.getDcModel().assertCalledOps {
-                        it.proposeUpdateSubnodeImageOperation(api.pubKey.hexStringToByteArray(), name, url, digest, "Update subnode image $name with URL $url and digest $digest")
+                        it.proposeUpdateSubnodeImageOperation(api.pubKey.hexStringToByteArray(), name, url, digest, "Update subnode image $name with URL $url and digest $digest", null)
                     }
                 }
     }

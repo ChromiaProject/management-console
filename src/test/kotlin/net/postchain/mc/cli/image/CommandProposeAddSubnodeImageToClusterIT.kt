@@ -20,7 +20,7 @@ class CommandProposeAddSubnodeImageToClusterIT {
                         ) { result, api ->
                     assertThat(result.stdout).contains("Adding image01 to cluster01 proposed")
                     api.getDcModel().assertCalledOps {
-                        it.proposeAddClusterSubnodeImageOperation(api.pubKey.hexStringToByteArray(), "cluster01", "image01", "Add image01 to cluster01")
+                        it.proposeAddClusterSubnodeImageOperation(api.pubKey.hexStringToByteArray(), "cluster01", "image01", "Add image01 to cluster01", null)
                     }
                 }
     }
