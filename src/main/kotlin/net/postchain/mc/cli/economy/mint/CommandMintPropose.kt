@@ -16,7 +16,7 @@ class CommandMintPropose : ECBaseCommand(
         help = "Create a minting proposal",
         requiresECVersion = ECONOMY_CHAIN_MINTING_VERSION
 ) {
-    private val amount by option("--amount", help = "Amount to min")
+    private val amount by option("--amount", help = "Amount to mint")
             .long()
             .required()
     private val accountId by option("--account-id", help = "Destination account id")
