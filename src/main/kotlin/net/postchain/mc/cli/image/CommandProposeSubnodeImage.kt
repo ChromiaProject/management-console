@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.image
 
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -7,6 +8,7 @@ import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.enum
 import net.postchain.chain0.model.SubnodeImageType
 import net.postchain.chain0.proposal_subnode_image.proposeSubnodeImageOperation
+import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.digestValidator
@@ -14,6 +16,8 @@ import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.metadataTextValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.cli.util.scheduleAt
+import net.postchain.mc.compatibility.ApiCompatV85.proposeSubnodeImageOperationV85
 
 class CommandProposeSubnodeImage : DCBaseCommand(
         name = "add",
@@ -30,12 +34,25 @@ class CommandProposeSubnodeImage : DCBaseCommand(
             .default("").validate(metadataTextValidator())
     private val syncExts by option("-sync", "--sync-exts", help = "Synchronization infrastructure extensions exposed by this subnode image (comma separated list of FQCNs)")
             .default("").validate(metadataTextValidator())
+    private val scheduledTime by scheduleAt()
 
     private val description by proposalDescriptionOption { "Register new subnode image $name with URL $url and digest $digest" }
 
     override fun runDC() {
+        val apiVersion = client.apiVersion()
+        
+        if (scheduledTime != null && apiVersion < 86) {
+            throw CliktError("--schedule-at is only supported in API version 86 or higher (current: $apiVersion)")
+        }
+        
         client.transactionBuilder()
-                .proposeSubnodeImageOperation(clientProviderPubkey, name, url, digest, type, imageDescription, gtxModules, syncExts, description)
+                .apply {
+                    if (apiVersion < 86) {
+                        proposeSubnodeImageOperationV85(clientProviderPubkey, name, url, digest, type, imageDescription, gtxModules, syncExts, description)
+                    } else {
+                        proposeSubnodeImageOperation(clientProviderPubkey, name, url, digest, type, imageDescription, gtxModules, syncExts, description, scheduledTime)
+                    }
+                }
                 .postAwaitConfirmation()
                 .printResult(
                         "Subnode image $name proposed",
