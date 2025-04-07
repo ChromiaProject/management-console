@@ -1,7 +1,12 @@
 package net.postchain.mc.cli
 
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.getProviderByKey
+import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
+import net.postchain.chain0.token_chain_in_directory_chain.getTokenChainRid
+import net.postchain.common.BlockchainRid
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.pmcKeyConfigOption
 import net.postchain.mc.network.Version
@@ -51,5 +56,20 @@ abstract class DCBaseCommand(
             }
         }
         return null
+    }
+
+    fun resolveBlockchainRid(systemBlockchain: SystemBlockchain): BlockchainRid = when (systemBlockchain) {
+        SystemBlockchain.chain0 -> client.config.blockchainRid
+        SystemBlockchain.economy_chain -> BlockchainRid(client.getEconomyChainRid()
+                ?: throw CliktError("Economy chain is not installed"))
+
+        SystemBlockchain.token_chain -> {
+            val brid = client.getTokenChainRid()
+            if (brid.isEmpty()) throw CliktError("Token chain is not installed")
+            BlockchainRid(brid)
+        }
+
+        SystemBlockchain.system_anchoring_chain -> BlockchainRid(client.cmGetSystemAnchoringChain()
+                ?: throw CliktError("System anchoring chain is not installed"))
     }
 }
