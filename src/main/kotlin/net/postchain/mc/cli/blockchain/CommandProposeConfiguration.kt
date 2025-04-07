@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.blockchain
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
+import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
@@ -9,9 +10,10 @@ import net.postchain.chain0.proposal_blockchain.proposeConfigurationOperation
 import net.postchain.gtv.GtvEncoder
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.AlreadyExistMode
+import net.postchain.mc.cli.BlockchainOption
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.blockchainRidOption
+import net.postchain.mc.cli.blockchainOption
 import net.postchain.mc.cli.forceOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
@@ -35,19 +37,28 @@ class CommandProposeConfiguration : DCBaseCommand(
             .file(mustExist = true, mustBeReadable = true, canBeDir = false)
             .required()
 
-    private val blockchainRID by blockchainRidOption().required()
+    private val blockchain by blockchainOption().required()
     private val height by heightOption()
     private val force by forceOption()
     private val scheduleAt by scheduleAt()
 
-    private val description by proposalDescriptionOption {
-        if (height == null) "Update of blockchain configuration for $blockchainRID"
-        else "Update of blockchain configuration for $blockchainRID at height $height with force: $force"
-    }
+    private val description by proposalDescriptionOption()
 
     override fun runDC() {
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
         val compressedConfigurationData = GtvEncoder.encodeGtv(BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, dcVersion))
+
+        val blockchainRID = when (val bc = blockchain) {
+            is BlockchainOption.Name -> resolveBlockchainRid(bc.name)
+            is BlockchainOption.Rid -> bc.rid
+        }
+
+        val proposalDescription = if (description.isEmpty()) {
+            if (height == null) "Update of blockchain configuration for $blockchainRID"
+            else "Update of blockchain configuration for $blockchainRID at height $height with force: $force"
+        } else {
+            description
+        }
 
         client.transactionBuilder()
                 .apply {
@@ -60,13 +71,15 @@ class CommandProposeConfiguration : DCBaseCommand(
                                         gtv(bcConfig.data)
                                 )
                             }
+
                             dcVersion < 78 -> {
                                 proposeConfigurationOperationV77(clientProviderPubkey, blockchainRID,
-                                        compressedConfigurationData, description)
+                                        compressedConfigurationData, proposalDescription)
                             }
+
                             else -> {
                                 proposeConfigurationOperation(clientProviderPubkey, blockchainRID,
-                                        compressedConfigurationData, description, scheduleAt)
+                                        compressedConfigurationData, proposalDescription, scheduleAt)
                             }
                         }
                     } else {
@@ -81,7 +94,9 @@ class CommandProposeConfiguration : DCBaseCommand(
                             }
 
                             else -> {
-                                proposeConfigurationAtOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, height!!, force == AlreadyExistMode.FORCE, description)
+                                proposeConfigurationAtOperation(clientProviderPubkey, blockchainRID,
+                                        compressedConfigurationData, height!!, force == AlreadyExistMode.FORCE,
+                                        proposalDescription)
                             }
                         }
                     }

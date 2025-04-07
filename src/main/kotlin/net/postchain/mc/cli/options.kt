@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.ParameterHolder
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
+import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.options.OptionTransformContext
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
@@ -11,6 +12,7 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
+import com.github.ajalt.clikt.parameters.types.enum
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
@@ -29,13 +31,26 @@ fun CliktCommand.includeInactiveOption(helpMessage: String) = option(
         help = helpMessage
 ).flag()
 
-fun CliktCommand.blockchainRidOption() =
-        option("-brid", "--blockchain-rid", help = "Blockchain RID", envvar = "POSTCHAIN_BRID")
+enum class SystemBlockchain {
+    chain0, economy_chain, token_chain, system_anchoring_chain;
+}
+
+sealed interface BlockchainOption {
+    data class Rid(val rid: BlockchainRid): BlockchainOption
+    data class Name(val name: SystemBlockchain): BlockchainOption
+}
+
+fun ParameterHolder.blockchainOption() = mutuallyExclusiveOptions(
+        blockchainRidOption().convert { BlockchainOption.Rid(it) },
+        blockchainNameOption().convert { BlockchainOption.Name(it) }
+)
+
+fun ParameterHolder.blockchainRidOption() =
+        option("-brid", "--blockchain-rid", help = "Blockchain RID", envvar = "POSTCHAIN_BRID", metavar = "RID")
                 .convert { BlockchainRid.buildFromHex(it) }
 
-fun OptionGroup.blockchainRidOption() =
-        option("-brid", "--blockchain-rid", help = "Blockchain RID", envvar = "POSTCHAIN_BRID")
-                .convert { BlockchainRid.buildFromHex(it) }
+fun ParameterHolder.blockchainNameOption() =
+        option("-chain", "--blockchain-name", help = "Blockchain name", metavar = "NAME").enum<SystemBlockchain>()
 
 fun CliktCommand.heightOption() = option("-h", "--height", envvar = "POSTCHAIN_HEIGHT").long()
 fun OptionGroup.heightOption() = option("-h", "--height", envvar = "POSTCHAIN_HEIGHT").long()
