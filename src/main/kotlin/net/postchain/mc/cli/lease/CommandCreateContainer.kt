@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.lease
 
 import com.chromia.cli.tools.ft.addEvmAuthOperation
+import com.chromia.cli.tools.ft.addFtAuthOperation
 import com.chromia.cli.tools.ft.findFtAccountIdWithAuthDescriptorId
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.PrintMessage
@@ -21,7 +22,7 @@ import net.postchain.economy.economy_chain.getCreateContainerTicketByTransaction
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.accountIdOption
-import net.postchain.mc.cli.evmAddressOption
+import net.postchain.mc.cli.optionalEvmAddressOption
 
 class CommandCreateContainer : ECBaseCommand(
         name = "create-container",
@@ -29,7 +30,7 @@ class CommandCreateContainer : ECBaseCommand(
 ) {
     val accountIdOption by accountIdOption()
 
-    val evmAddress by evmAddressOption()
+    val evmAddress by optionalEvmAddressOption()
 
     val clusterName by option("-cn", "--cluster-name", help = "Name of the cluster").required()
 
@@ -51,24 +52,30 @@ class CommandCreateContainer : ECBaseCommand(
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
         val (accountId, authDescriptorId) =
-                findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption, evmAddress, CREATE_CONTAINER_WITH_SUBNODE_IMAGE, null)
+                findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption,
+                        evmAddress ?: client.config.signers.first().pubKey.data,
+                        CREATE_CONTAINER_WITH_SUBNODE_IMAGE, null)
 
         val pubkey = economyChainClient.config.signers.first().pubKey
 
         val transactionResult = economyChainClient.transactionBuilder().also {
-            addEvmAuthOperation(
-                    economyChainClient, it,
-                    CREATE_CONTAINER_WITH_SUBNODE_IMAGE, listOf(
-                    gtv(pubkey.data),
-                    gtv(scus.toLong()),
-                    gtv(duration.toLong()),
-                    gtv(extraStorage.toLong()),
-                    gtv(clusterName),
-                    gtv(autoRenew),
-                    gtv(subnodeImageName)
-            ),
-                    evmAddress, accountId, authDescriptorId)
-            echo("Signing done, posting transaction...")
+            evmAddress?.let { evmAddress ->
+                addEvmAuthOperation(
+                        economyChainClient, it,
+                        CREATE_CONTAINER_WITH_SUBNODE_IMAGE, listOf(
+                        gtv(pubkey.data),
+                        gtv(scus.toLong()),
+                        gtv(duration.toLong()),
+                        gtv(extraStorage.toLong()),
+                        gtv(clusterName),
+                        gtv(autoRenew),
+                        gtv(subnodeImageName)
+                ),
+                        evmAddress, accountId, authDescriptorId)
+                echo("Signing done, posting transaction...")
+            } ?: run {
+                addFtAuthOperation(it, accountId, authDescriptorId)
+            }
         }
                 .createContainerWithSubnodeImageOperation(
                         providerPubkey = pubkey.data,
