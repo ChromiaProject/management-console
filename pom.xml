@@ -22,7 +22,7 @@
         <postchain.version>3.29.0</postchain.version>
         <postchain.client.version>3.27.0</postchain.client.version>
         <directory.chain.version>1.86.0</directory.chain.version>
-        <cli.tools.version>0.4.12</cli.tools.version>
+        <cli.tools.version>0.5.0</cli.tools.version>
         <rell.maven.plugin.version>0.14.0</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
@@ -190,6 +190,12 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.org.webcompere</groupId>
+            <artifactId>system-stubs-jupiter</artifactId>
+            <version>2.1.6</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
