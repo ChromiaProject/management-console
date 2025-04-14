@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.createTagOperation
+import net.postchain.mc.compatibility.ApiCompatECV57.createTagOperation
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.entityNameValidator
@@ -41,9 +42,14 @@ class CommandAddTag : ECBaseCommand(
                         .createTagOperation(name, scuPrice.toLong(), extraStoragePrice.toLong())
             }
 
-            else -> {
+            ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .createTagOperation(name, scuPrice.times(UNITS_PER_USD.toBigDecimal()).toLong(), extraStoragePrice.times(UNITS_PER_USD.toBigDecimal()).toLong())
+            }
+
+            else -> {
+                economyChainClient.transactionBuilder()
+                        .createTagOperation(clientProviderPubkey, name, scuPrice.times(UNITS_PER_USD.toBigDecimal()).toLong(), extraStoragePrice.times(UNITS_PER_USD.toBigDecimal()).toLong())
             }
         }
                 .postAwaitConfirmation()

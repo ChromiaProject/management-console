@@ -6,6 +6,7 @@ import com.github.ajalt.clikt.parameters.types.boolean
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.proposeStakingRequirementConstantsOperation
+import net.postchain.mc.compatibility.ApiCompatECV57.proposeStakingRequirementConstantsOperation
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.scheduleAt
@@ -64,9 +65,22 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                                 stakingRequirementsDappNodeTotalStakeChr,
                         )
             }
+            ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
+                economyChainClient.transactionBuilder()
+                        .proposeStakingRequirementConstantsOperation(
+                                stakingRequirementsEnabled,
+                                stakingRequirementsStopPayoutDays,
+                                stakingRequirementsSystemNodeOwnStakeChr?.times(UNITS_PER_CHR),
+                                stakingRequirementsSystemNodeTotalStakeChr?.times(UNITS_PER_CHR),
+                                stakingRequirementsDappNodeOwnStakeChr?.times(UNITS_PER_CHR),
+                                stakingRequirementsDappNodeTotalStakeChr?.times(UNITS_PER_CHR),
+                                scheduleAt
+                        )
+            }
             else -> {
                 economyChainClient.transactionBuilder()
                         .proposeStakingRequirementConstantsOperation(
+                                clientProviderPubkey,
                                 stakingRequirementsEnabled,
                                 stakingRequirementsStopPayoutDays,
                                 stakingRequirementsSystemNodeOwnStakeChr?.times(UNITS_PER_CHR),

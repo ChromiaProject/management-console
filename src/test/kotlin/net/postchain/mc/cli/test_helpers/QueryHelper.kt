@@ -48,3 +48,11 @@ fun buildGetContainerDataResponse(): Gtv {
             null
     ))
 }
+
+fun ManagedRestTestApi.addDcEmptyListQueries(vararg queries: String): ManagedRestTestApi {
+    queries.forEach {
+        withDCQuery(it, gtv(listOf()))
+    }
+    return this
+}
+

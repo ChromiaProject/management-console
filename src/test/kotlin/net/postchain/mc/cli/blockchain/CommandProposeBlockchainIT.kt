@@ -9,6 +9,7 @@ import net.postchain.common.hexStringToByteArray
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.test_helpers.DEFAULT_DAPP_RID
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
+import net.postchain.mc.cli.test_helpers.addDcEmptyListQueries
 import net.postchain.mc.cli.test_helpers.writeResourceFileToTempDir
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -38,7 +39,7 @@ class CommandProposeBlockchainIT {
     fun `successful add`(@TempDir dir: Path) {
         val cityConfig = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
         ManagedRestTestApi(dir)
-                .withDCQuery("get_compressed_configuration_parts", buildGetCompressedConfigurationParts())
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
                 .withDCQuery("find_blockchain_rid", gtv(DEFAULT_DAPP_RID))
                 .testCommand(
                         CommandProposeBlockchain(),
@@ -62,7 +63,7 @@ class CommandProposeBlockchainIT {
     fun `successful add quiet`(@TempDir dir: Path) {
         val cityConfig = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
         ManagedRestTestApi(dir)
-                .withDCQuery("get_compressed_configuration_parts", buildGetCompressedConfigurationParts())
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
                 .withDCQuery("find_blockchain_rid", gtv(DEFAULT_DAPP_RID))
                 .testCommand(
                         CommandProposeBlockchain(),

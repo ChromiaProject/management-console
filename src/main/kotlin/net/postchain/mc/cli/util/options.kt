@@ -274,3 +274,10 @@ fun CliktCommand.scheduleAt(vararg names: String = arrayOf("--schedule-at"), hel
                         ?: throw IllegalArgumentException("Invalid time format: $input supported formats: ${DATE_TIME_FORMATS.keys.joinToString(", ")} and milliseconds since 1970 (unix/epoch time)")
             }
         }
+
+fun CliktCommand.systemContainerUnitsOption() = option("--system-container-units", help = "Number of container units to reserve for cluster system container").long().default(4)
+fun CliktCommand.containerUnitCpuOption() = option("--cu-cpu", help = "Container unit CPU limit (percent of cpus, 10 == 0.1 cpu(s), 150 == 1.5 cpu(s))").long().default(50)
+fun CliktCommand.containerUnitRamOption() = option("--cu-ram", help = "Container unit RAM limit (MiB)").long().default(2048)
+fun CliktCommand.containerUnitStorageOption() = option("--cu-storage", help = "Container unit storage limit (MiB)").long().default(16384)
+fun CliktCommand.containerUnitIoReadOption() = option("--cu-io-read", help = "Container unit storage I/O read limit (MiB/s)").long().default(25)
+fun CliktCommand.containerUnitIoWriteOption() = option("--cu-io-write", help = "Container unit storage I/O write limit (MiB/s)").long().default(20)

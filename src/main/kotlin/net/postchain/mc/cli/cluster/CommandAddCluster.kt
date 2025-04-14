@@ -17,15 +17,24 @@ import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.VoterSetOrPubkeysOption
 import net.postchain.mc.cli.util.clusterUnitsOption
+import net.postchain.mc.cli.util.containerUnitCpuOption
+import net.postchain.mc.cli.util.containerUnitIoReadOption
+import net.postchain.mc.cli.util.containerUnitIoWriteOption
+import net.postchain.mc.cli.util.containerUnitRamOption
+import net.postchain.mc.cli.util.containerUnitStorageOption
 import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.nameOrGenerateOption
 import net.postchain.mc.cli.util.pubkeysOrVotersetOption
+import net.postchain.mc.cli.util.systemContainerUnitsOption
 import net.postchain.mc.compatibility.ApiCompatV28.ClusterQuotaDataV28
 import net.postchain.mc.compatibility.ApiCompatV28.createClusterFromWithClusterQuotaDataDataOperationV28
 import net.postchain.mc.compatibility.ApiCompatV28.createClusterWithClusterQuotaDataOperationV28
 import net.postchain.mc.compatibility.ApiCompatV33
 import net.postchain.mc.compatibility.ApiCompatV33.createClusterFromWithClusterDataOperationV33
 import net.postchain.mc.compatibility.ApiCompatV33.createClusterWithClusterDataOperationV33
+import net.postchain.mc.compatibility.ApiCompatV87
+import net.postchain.mc.compatibility.ApiCompatV87.createClusterFromWithClusterDataOperationV87
+import net.postchain.mc.compatibility.ApiCompatV87.createClusterWithClusterDataOperationV87
 
 class CommandAddCluster : DCBaseCommand(
         name = "add",
@@ -48,6 +57,13 @@ class CommandAddCluster : DCBaseCommand(
             help = "Name of another voter set which can update this cluster."
     ).required()
 
+    private val systemContainerUnits by systemContainerUnitsOption()
+    private val containerUnitCpu by containerUnitCpuOption()
+    private val containerUnitRam by containerUnitRamOption()
+    private val containerUnitStorage by containerUnitStorageOption()
+    private val containerUnitIoRead by containerUnitIoReadOption()
+    private val containerUnitIoWrite by containerUnitIoWriteOption()
+
     override fun runDC() {
         val apiVersion = client.apiVersion()
         var hasDirectCluster = true
@@ -57,14 +73,28 @@ class CommandAddCluster : DCBaseCommand(
             client.transactionBuilder()
                     .apply {
                         when {
-                            apiVersion >= 34 -> {
+                            apiVersion >= 88 -> {
+                                val clusterCreationData = ClusterCreationData(clusterUnits, extraStorage, systemContainerUnits,
+                                        containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite, containerUnitStorage)
                                 when (providerOptions) {
                                     is VoterSetOrPubkeysOption.Pubkeys -> {
-                                        createClusterWithClusterDataOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, ClusterCreationData(clusterUnits, extraStorage))
+                                        createClusterWithClusterDataOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, clusterCreationData)
+                                    }
+                                    is VoterSetOrPubkeysOption.VoterSet -> {
+                                        createClusterFromWithClusterDataOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, clusterCreationData)
+                                    }
+                                }
+                            }
+
+                            apiVersion >= 34 -> {
+                                val clusterCreationData = ApiCompatV87.ClusterCreationDataV87(clusterUnits, extraStorage)
+                                when (providerOptions) {
+                                    is VoterSetOrPubkeysOption.Pubkeys -> {
+                                        createClusterWithClusterDataOperationV87(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, clusterCreationData)
                                     }
 
                                     is VoterSetOrPubkeysOption.VoterSet -> {
-                                        createClusterFromWithClusterDataOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, ClusterCreationData(clusterUnits, extraStorage))
+                                        createClusterFromWithClusterDataOperationV87(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, clusterCreationData)
                                     }
                                 }
                             }

@@ -9,6 +9,7 @@ import net.postchain.common.BlockchainRid
 import net.postchain.common.hexStringToByteArray
 import net.postchain.mc.cli.test_helpers.DEFAULT_BRID_ECONOMY_CHAIN
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
+import net.postchain.mc.cli.test_helpers.addDcEmptyListQueries
 import net.postchain.mc.cli.test_helpers.writeResourceFileToTempDir
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -34,7 +35,7 @@ class CommandProposeForcedConfigurationIT {
     fun `propose forced configuration - with height - api v80+`(@TempDir dir: Path) {
         val configFile = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
         ManagedRestTestApi(dir, dcVersion = 80)
-                .withDCQuery("get_compressed_configuration_parts", buildGetCompressedConfigurationParts())
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
                 .testCommand(CommandProposeForcedConfiguration(),
                         "--blockchain-config", configFile.absolutePath,
                         "-brid", blockchainRID.toHex(),
@@ -57,7 +58,7 @@ class CommandProposeForcedConfigurationIT {
     fun `propose forced configuration - with height - api v40-79`(@TempDir dir: Path) {
         val configFile = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
         ManagedRestTestApi(dir, dcVersion = 40)
-                .withDCQuery("get_compressed_configuration_parts", buildGetCompressedConfigurationParts())
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
                 .testCommand(CommandProposeForcedConfiguration(),
                         "--blockchain-config", configFile.absolutePath,
                         "-brid", blockchainRID.toHex(),
@@ -80,7 +81,7 @@ class CommandProposeForcedConfigurationIT {
 
         ManagedRestTestApi(dir, dcVersion = 80)
                 .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse())
-                .withDCQuery("get_compressed_configuration_parts", buildGetCompressedConfigurationParts())
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
                 .testCommand(CommandProposeForcedConfiguration(),
                         "--blockchain-config", configFile.absolutePath,
                         "-brid", blockchainRID.toHex(),
@@ -96,7 +97,7 @@ class CommandProposeForcedConfigurationIT {
         val configFile = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
         ManagedRestTestApi(dir, dcVersion = 80)
                 .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(state = BlockchainState.PAUSED))
-                .withDCQuery("get_compressed_configuration_parts", buildGetCompressedConfigurationParts())
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
                 .withECModel { it.height = 567 }
                 .testCommand(CommandProposeForcedConfiguration(),
                         "--blockchain-config", configFile.absolutePath,

@@ -3,6 +3,7 @@ package net.postchain.mc.cli.cluster
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
+import net.postchain.chain0.common.queries.getClusterContainerUnitLimits
 import net.postchain.chain0.common.queries.getClusterContainers
 import net.postchain.chain0.common.queries.getClusterData
 import net.postchain.chain0.common.queries.getClusterNodes
@@ -96,6 +97,20 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, 
                 }
             })
         }
+    }
+
+    if (apiVersion >= 88) {
+        val clusterUnit = client.getClusterContainerUnitLimits(name)
+        echo(pmcTable(
+                "container unit limits",
+                listOf("Resource", "Limit"),
+                listOf(
+                        listOf("CPU", clusterUnit.cpu.toString()),
+                        listOf("RAM", clusterUnit.ram.toString()),
+                        listOf("I/O read", clusterUnit.ioRead.toString()),
+                        listOf("I/O write", clusterUnit.ioWrite.toString()),
+                        listOf("Storage", clusterUnit.storage.toString())
+                )))
     }
 
     if (apiVersion >= 56) {

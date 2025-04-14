@@ -8,6 +8,7 @@ import net.postchain.common.hexStringToByteArray
 import net.postchain.mc.cli.AlreadyExistMode
 import net.postchain.mc.cli.test_helpers.DEFAULT_BRID_ECONOMY_CHAIN
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
+import net.postchain.mc.cli.test_helpers.addDcEmptyListQueries
 import net.postchain.mc.cli.test_helpers.assertCommandSuccess
 import net.postchain.mc.cli.test_helpers.writeResourceFileToTempDir
 import org.junit.jupiter.api.Test
@@ -19,7 +20,7 @@ class CommandProposeConfigurationIT {
     fun `simple update`(@TempDir dir: Path) {
         val cityConfig = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
         ManagedRestTestApi(dir)
-                .withDCQuery("get_compressed_configuration_parts", buildGetCompressedConfigurationParts())
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
                 .testCommand(
                         CommandProposeConfiguration(),
                         "-brid", DEFAULT_BRID_ECONOMY_CHAIN.toHex(),
@@ -41,7 +42,7 @@ class CommandProposeConfigurationIT {
     fun `simple update with height and force`(@TempDir dir: Path) {
         val cityConfig = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
         ManagedRestTestApi(dir)
-                .withDCQuery("get_compressed_configuration_parts", buildGetCompressedConfigurationParts())
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
                 .testCommand(
                         CommandProposeConfiguration(),
                         "-brid", DEFAULT_BRID_ECONOMY_CHAIN.toHex(),
@@ -66,7 +67,7 @@ class CommandProposeConfigurationIT {
     fun `simple update with blockchain alias`(@TempDir dir: Path) {
         val cityConfig = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
         ManagedRestTestApi(dir)
-                .withDCQuery("get_compressed_configuration_parts", buildGetCompressedConfigurationParts())
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
                 .testCommand(
                         CommandProposeConfiguration(),
                         "-chain", "economy_chain",
