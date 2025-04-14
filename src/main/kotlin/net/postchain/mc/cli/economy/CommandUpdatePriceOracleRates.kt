@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.PendingPriceOracleRateData
 import net.postchain.economy.economy_chain.proposePriceOracleRateOperation
+import net.postchain.mc.compatibility.ApiCompatECV57.proposePriceOracleRateOperation
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtv.parse.GtvParser
@@ -41,9 +42,13 @@ class CommandUpdatePriceOracleRates : ECBaseCommand(
         }
 
         when {
-            else -> {
+            ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .proposePriceOracleRateOperation(tokenRates)
+            }
+            else -> {
+                economyChainClient.transactionBuilder()
+                        .proposePriceOracleRateOperation(clientProviderPubkey, tokenRates)
             }
         }
                 .postAwaitConfirmation()

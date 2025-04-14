@@ -3,7 +3,6 @@ package net.postchain.mc.cli.proposal
 import assertk.assertThat
 import assertk.assertions.contains
 import net.postchain.chain0.proposal.voting.makeVoteOperation
-import net.postchain.chain0.proposal.voting.makeVoteV65Operation
 import net.postchain.common.hexStringToByteArray
 import net.postchain.mc.cli.DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
@@ -65,7 +64,7 @@ class CommandVoteIT {
                 ) { result, api ->
                     assertThat(result.stdout).contains("Vote added successfully")
                     api.getDcModel().assertCalledOps {
-                        it.makeVoteV65Operation(123, true)
+                        it.makeVoteOperation(api.pubKey.hexStringToByteArray(), 123, true)
                     }
                 }
     }
@@ -79,7 +78,7 @@ class CommandVoteIT {
                 ) { result, api ->
                     assertThat(result.stdout).contains("Vote added successfully")
                     api.getDcModel().assertCalledOps {
-                        it.makeVoteV65Operation(123, false)
+                        it.makeVoteOperation(api.pubKey.hexStringToByteArray(), 123, false)
                     }
                 }
     }

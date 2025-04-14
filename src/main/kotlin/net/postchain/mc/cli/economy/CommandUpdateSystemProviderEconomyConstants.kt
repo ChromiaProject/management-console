@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.proposeSystemProviderEconomyConstantsOperation
+import net.postchain.mc.compatibility.ApiCompatECV57.proposeSystemProviderEconomyConstantsOperation
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.compatibility.ApiCompatECV28.updateSystemProviderEconomyConstantsOperationECV28
@@ -40,9 +41,18 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
                                 systemProviderRiskShare?.toBigDecimal(),
                         )
             }
+            ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
+                economyChainClient.transactionBuilder()
+                        .proposeSystemProviderEconomyConstantsOperation(
+                                totalCostSystemProviders?.toLong()?.times(UNITS_PER_USD),
+                                systemProviderFeeShare?.toBigDecimal(),
+                                systemProviderRiskShare?.toBigDecimal(),
+                        )
+            }
             else -> {
                 economyChainClient.transactionBuilder()
                         .proposeSystemProviderEconomyConstantsOperation(
+                                clientProviderPubkey,
                                 totalCostSystemProviders?.toLong()?.times(UNITS_PER_USD),
                                 systemProviderFeeShare?.toBigDecimal(),
                                 systemProviderRiskShare?.toBigDecimal(),

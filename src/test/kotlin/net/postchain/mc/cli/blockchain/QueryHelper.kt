@@ -143,10 +143,6 @@ fun buildGetBlockchainInfoListResponse(): (query: GtxQuery) -> Gtv {
     }
 }
 
-fun buildGetCompressedConfigurationParts(): Gtv {
-    return gtv(listOf())
-}
-
 fun buildCmGetClusterInfoResponse(
         apiUrl: String = DEFAULT_NODE01_API,
         clusterAnchoringBrid: BlockchainRid = BlockchainRid.buildRepeat(99)
