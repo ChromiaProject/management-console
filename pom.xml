@@ -20,8 +20,8 @@
     <properties>
         <revision>dev</revision>
         <postchain.version>3.29.0</postchain.version>
-        <postchain.client.version>3.27.0</postchain.client.version>
-        <directory.chain.version>1.88.0</directory.chain.version>
+        <postchain.client.version>3.29.1</postchain.client.version>
+        <directory.chain.version>1.89.0</directory.chain.version>
         <cli.tools.version>0.5.0</cli.tools.version>
         <rell.maven.plugin.version>0.14.0</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
@@ -259,8 +259,8 @@
                                 <mainModule>management_chain_mainnet</mainModule>
                                 <mainModule>direct_cluster</mainModule>
                                 <mainModule>direct_container</mainModule>
-                                <mainModule>proposal_subnode_image</mainModule>
                             </mainModules>
+                            <target>${project.build.directory}/generated-sources/rell-client/directory</target>
                         </configuration>
                     </execution>
                     <execution>

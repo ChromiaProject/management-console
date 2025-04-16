@@ -3,7 +3,7 @@ package net.postchain.mc.cli
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
-import net.postchain.chain0.common.getProviderByKey
+import net.postchain.chain0.common.queries.getProviderByKey
 import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
 import net.postchain.chain0.token_chain_in_directory_chain.getTokenChainRid
 import net.postchain.common.BlockchainRid

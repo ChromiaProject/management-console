@@ -3,10 +3,12 @@ package net.postchain.mc.cli.provider.keys
 import com.chromia.cli.tools.util.thresholdOption
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
-import net.postchain.chain0.common.setProviderKeyThresholdOperation
+import net.postchain.chain0.common.operations.setProviderKeyThresholdOperation
 import net.postchain.chain0.provider_auth.model.ProviderKeyRole
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
+import net.postchain.mc.cli.util.DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER
+import net.postchain.mc.compatibility.ApiCompatV87.setProviderKeyThresholdOperationV87
 
 class CommandSetProviderKeyThreshold : DCBaseCommand(
         name = "threshold",
@@ -20,13 +22,26 @@ class CommandSetProviderKeyThreshold : DCBaseCommand(
             .validate { require(it >= -1L) { "Threshold must be -1, 0 or a positive integer" } }
 
     override fun runDC() {
+        when {
+            dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
+                client.transactionBuilder()
+                        .setProviderKeyThresholdOperationV87(ProviderKeyRole.main, threshold)
+                        .postAwaitConfirmation()
+                        .printResult(
+                                "Threshold set",
+                                "Failed to set provider key threshold"
+                        )
+            }
 
-        client.transactionBuilder()
-                .setProviderKeyThresholdOperation(ProviderKeyRole.main, threshold)
-                .postAwaitConfirmation()
-                .printResult(
-                        "Threshold set",
-                        "Failed to set provider key threshold"
-                )
+            else -> {
+                client.transactionBuilder()
+                        .setProviderKeyThresholdOperation(clientProviderPubkey, ProviderKeyRole.main, threshold)
+                        .postAwaitConfirmation()
+                        .printResult(
+                                "Threshold set",
+                                "Failed to set provider key threshold"
+                        )
+            }
+        }
     }
 }
