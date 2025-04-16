@@ -9,7 +9,6 @@ import net.postchain.base.extension.CONFIG_HASH_EXTRA_HEADER
 import net.postchain.base.gtv.BlockHeaderData
 import net.postchain.chain0.nm_api.nmGetBlockchainConfigurationInfo
 import net.postchain.chain0.proposal_blockchain.proposeRemoveForcedConfigurationOperation
-import net.postchain.mc.compatibility.ApiCompatV88.proposeRemoveForcedConfigurationOperation
 import net.postchain.gtv.GtvDecoder
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
@@ -17,6 +16,7 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER
 import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.compatibility.ApiCompatV87.proposeRemoveForcedConfigurationOperationV87
 
 
 class CommandProposeRemoveForcedConfiguration : DCBaseCommand(
@@ -61,7 +61,7 @@ class CommandProposeRemoveForcedConfiguration : DCBaseCommand(
         when {
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
                 client.transactionBuilder()
-                        .proposeRemoveForcedConfigurationOperation(blockchainRID, height, description)
+                        .proposeRemoveForcedConfigurationOperationV87(blockchainRID, height, description)
                         .postAwaitConfirmation()
                         .printResult(
                                 "Created proposal to remove forced configuration on blockchain RID $blockchainRID at height $height",
