@@ -7,11 +7,11 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.createTagOperation
-import net.postchain.mc.compatibility.ApiCompatECV57.createTagOperation
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
+import net.postchain.mc.compatibility.ApiCompatECV57.createTagOperationV57
 import java.math.BigDecimal
 
 class CommandAddTag : ECBaseCommand(
@@ -23,10 +23,20 @@ class CommandAddTag : ECBaseCommand(
     private val scuPrice by option("-scup", "--scu-price", help = "SCU price in USD per day.")
             .convert { BigDecimal(it) }
             .required()
+            .validate {
+                if (it <= BigDecimal.ZERO) {
+                    throw CliktError("Tag must have a positive SCU price")
+                }
+            }
 
     private val extraStoragePrice by option("-esp", "--extra-storage-price", help = "Extra storage price in USD per day.")
             .convert { BigDecimal(it) }
             .required()
+            .validate {
+                if (it <= BigDecimal.ZERO) {
+                    throw CliktError("Tag must have a positive extra storage price")
+                }
+            }
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
@@ -39,12 +49,12 @@ class CommandAddTag : ECBaseCommand(
                 }
 
                 economyChainClient.transactionBuilder()
-                        .createTagOperation(name, scuPrice.toLong(), extraStoragePrice.toLong())
+                        .createTagOperationV57(name, scuPrice.toLong(), extraStoragePrice.toLong())
             }
 
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
                 economyChainClient.transactionBuilder()
-                        .createTagOperation(name, scuPrice.times(UNITS_PER_USD.toBigDecimal()).toLong(), extraStoragePrice.times(UNITS_PER_USD.toBigDecimal()).toLong())
+                        .createTagOperationV57(name, scuPrice.times(UNITS_PER_USD.toBigDecimal()).toLong(), extraStoragePrice.times(UNITS_PER_USD.toBigDecimal()).toLong())
             }
 
             else -> {

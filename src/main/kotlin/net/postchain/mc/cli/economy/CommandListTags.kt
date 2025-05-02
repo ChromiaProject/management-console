@@ -10,12 +10,18 @@ class CommandListTags : ECBaseCommand(
         help = "List all existing tags",
         printHelpOnEmptyArgs = false
 ) {
-    private val headers = listOf("Name", "SCU price", "Extra storage price")
+    private val headers = listOf("Name", "SCU price", "Extra storage price", "Extra compute request price")
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
         val rows = economyChainClient.getTags()
-                .map { listOf(it.name, formatUsd(it.scuPrice, ecVersion.version), formatUsd(it.extraStoragePrice, ecVersion.version)) }
+                .map {
+                    listOf(
+                            it.name,
+                            formatUsd(it.scuPrice, ecVersion.version),
+                            formatUsd(it.extraStoragePrice, ecVersion.version),
+                    )
+                }
         echo(pmcTable(
                 "tags",
                 headers,

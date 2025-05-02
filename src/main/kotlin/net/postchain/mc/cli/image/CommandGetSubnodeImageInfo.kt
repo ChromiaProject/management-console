@@ -3,12 +3,12 @@ package net.postchain.mc.cli.image
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
-import net.postchain.chain0.common.queries.getSubnodeImage
 import net.postchain.client.core.PostchainReadClient
 import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
+import net.postchain.mc.compatibility.ApiCompatV91.getSubnodeImage
 import net.postchain.mc.network.requireApiVersion
 
 class CommandGetSubnodeImageInfo : PmcCommand(
@@ -40,6 +40,7 @@ fun CliktCommand.showSubnodeImageInfo(client: PostchainReadClient, name: String)
             row("GTX modules:", info.gtxModules)
             row("Sync extensions:", info.syncExts)
             row("Active:", info.active)
+            row("Base compute requests:", info.baseComputeRequests)
         }
     })
 }

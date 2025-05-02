@@ -22,7 +22,8 @@ class ECTestModel(
 
     init {
         withQuery("api_version", GtvFactory.gtv(ecVersion))
-        withQuery("get_tags", GtvArray(arrayOf(GtvObjectMapper.toGtvDictionary(TagData("t1", 1, 2)))))
+        withQuery("get_tags", GtvArray(arrayOf(GtvObjectMapper.toGtvDictionary(
+                TagData("t1", 1, 2)))))
         withQuery("get_economy_constants") {
             if (ecVersion < ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION) {
                 GtvObjectMapper.toGtvDictionary(ApiCompatECV45.EconomyConstantsDataV45(
