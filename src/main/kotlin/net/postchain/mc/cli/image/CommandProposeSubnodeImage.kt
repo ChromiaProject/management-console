@@ -6,6 +6,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.enum
+import com.github.ajalt.clikt.parameters.types.int
 import net.postchain.chain0.model.SubnodeImageType
 import net.postchain.chain0.proposal_subnode_image.proposeSubnodeImageOperation
 import net.postchain.chain0.version.apiVersion
@@ -18,6 +19,7 @@ import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.scheduleAt
 import net.postchain.mc.compatibility.ApiCompatV85.proposeSubnodeImageOperationV85
+import net.postchain.mc.compatibility.ApiCompatV91.proposeSubnodeImageOperationV91
 
 class CommandProposeSubnodeImage : DCBaseCommand(
         name = "add",
@@ -35,22 +37,35 @@ class CommandProposeSubnodeImage : DCBaseCommand(
     private val syncExts by option("-sync", "--sync-exts", help = "Synchronization infrastructure extensions exposed by this subnode image (comma separated list of FQCNs)")
             .default("").validate(metadataTextValidator())
     private val scheduledTime by scheduleAt()
+    private val baseComputeRequests by option("-bcr", "--base-compute-requests", help = "How many compute requests per week a container gets by default").int()
+            .validate {
+                require(it >= 0) { "base compute requests must not be negative" }
+            }
 
     private val description by proposalDescriptionOption { "Register new subnode image $name with URL $url and digest $digest" }
 
     override fun runDC() {
         val apiVersion = client.apiVersion()
-        
+
         if (scheduledTime != null && apiVersion < 86) {
             throw CliktError("--schedule-at is only supported in API version 86 or higher (current: $apiVersion)")
         }
-        
+
+        if (baseComputeRequests != null && apiVersion < 92) {
+            throw CliktError("--base-compute-requests is only supported in API version 92 or higher (current: $apiVersion)")
+        }
+
         client.transactionBuilder()
                 .apply {
                     if (apiVersion < 86) {
                         proposeSubnodeImageOperationV85(clientProviderPubkey, name, url, digest, type, imageDescription, gtxModules, syncExts, description)
+                    } else if (apiVersion < 92) {
+                        proposeSubnodeImageOperationV91(clientProviderPubkey, name, url, digest, type, imageDescription,
+                                gtxModules, syncExts, description, scheduledTime)
                     } else {
-                        proposeSubnodeImageOperation(clientProviderPubkey, name, url, digest, type, imageDescription, gtxModules, syncExts, description, scheduledTime)
+                        proposeSubnodeImageOperation(clientProviderPubkey, name, url, digest, type, imageDescription,
+                                gtxModules, syncExts, description, scheduledTime,
+                                baseComputeRequests = baseComputeRequests?.toLong() ?: 0)
                     }
                 }
                 .postAwaitConfirmation()

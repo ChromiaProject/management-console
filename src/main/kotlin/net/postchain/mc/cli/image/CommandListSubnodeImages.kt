@@ -3,13 +3,13 @@ package net.postchain.mc.cli.image
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.mordant.input.interactiveSelectList
-import net.postchain.chain0.common.queries.getSubnodeImages
 import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
+import net.postchain.mc.compatibility.ApiCompatV91.getSubnodeImages
 import net.postchain.mc.network.requireApiVersion
 
 class CommandListSubnodeImages : PmcCommand(

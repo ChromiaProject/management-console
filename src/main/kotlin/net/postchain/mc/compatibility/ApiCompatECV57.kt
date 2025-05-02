@@ -75,9 +75,9 @@ object ApiCompatECV57 {
      *
      */
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "economy_chain:create_tag")
-    fun TransactionBuilder.createTagOperation(name: String,
-                                              scuPrice: Long,
-                                              extraStoragePrice: Long) =
+    fun TransactionBuilder.createTagOperationV57(name: String,
+                                                 scuPrice: Long,
+                                                 extraStoragePrice: Long) =
             addOperation(CREATE_TAG, gtv(name),
                     gtv(scuPrice),
                     gtv(extraStoragePrice))
@@ -169,9 +169,9 @@ object ApiCompatECV57 {
      *
      */
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "economy_chain:update_tag")
-    fun TransactionBuilder.updateTagOperation(name: String,
-                                              scuPrice: Long?,
-                                              extraStoragePrice: Long?) =
+    fun TransactionBuilder.updateTagOperationV57(name: String,
+                                                 scuPrice: Long?,
+                                                 extraStoragePrice: Long?) =
             addOperation(UPDATE_TAG, gtv(name),
                     scuPrice.let { if (it == null) GtvNull else gtv(it) },
                     extraStoragePrice.let { if (it == null) GtvNull else gtv(it) })

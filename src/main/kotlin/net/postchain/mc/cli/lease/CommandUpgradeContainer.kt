@@ -22,7 +22,9 @@ import net.postchain.economy.economy_chain.upgradeContainerOperation
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.accountIdOption
+import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMPUTE_REQUESTS
 import net.postchain.mc.cli.optionalEvmAddressOption
+import net.postchain.mc.compatibility.ApiCompatECV59.upgradeContainerOperationV59
 
 class CommandUpgradeContainer : ECBaseCommand(
         name = "upgrade-container",
@@ -46,9 +48,17 @@ class CommandUpgradeContainer : ECBaseCommand(
         require(it >= 0) { "Extra storage cannot be negative" }
     }
 
+    val extraComputeRequests by option("--extraComputeRequests").int().validate {
+        require(it >= 0) { "Extra compute requests cannot be negative" }
+    }
+
     val clusterName by option("-cn", "--cluster-name", help = "Name of the cluster").required()
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
+        if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS && extraComputeRequests != null) {
+            throw CliktError("This version of Economy chain does not support extra compute requests")
+        }
+
         val (accountId, authDescriptorId) =
                 findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption,
                         evmAddress ?: client.config.signers.first().pubKey.data,
@@ -71,13 +81,26 @@ class CommandUpgradeContainer : ECBaseCommand(
                 addFtAuthOperation(it, accountId, authDescriptorId)
             }
 
-        }
-                .upgradeContainerOperation(
-                        containerName = containerName,
-                        upgradedContainerUnits = scus.toLong(),
-                        upgradedExtraStorageGib = extraStorage.toLong(),
-                        upgradedClusterName = clusterName,
-                        upgradedDurationWeeks = duration.toLong())
+        }.let {
+                    if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS) {
+                        it.upgradeContainerOperationV59(
+                                containerName = containerName,
+                                upgradedContainerUnits = scus.toLong(),
+                                upgradedExtraStorageGib = extraStorage.toLong(),
+                                upgradedClusterName = clusterName,
+                                upgradedDurationWeeks = duration.toLong(),
+                        )
+                    } else {
+                        it.upgradeContainerOperation(
+                                containerName = containerName,
+                                upgradedContainerUnits = scus.toLong(),
+                                upgradedExtraStorageGib = extraStorage.toLong(),
+                                upgradedClusterName = clusterName,
+                                upgradedDurationWeeks = duration.toLong(),
+                                upgradedExtraComputeRequests = extraComputeRequests?.toLong() ?: 0L,
+                        )
+                    }
+                }
                 .postAwaitConfirmation()
         when (transactionResult.status) {
             TransactionStatus.CONFIRMED -> {

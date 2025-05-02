@@ -9,11 +9,9 @@ import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.direct_container.createContainerFromOperation
 import net.postchain.chain0.direct_container.createContainerFromWithResourceLimitsAndSubnodeImageOperation
 import net.postchain.chain0.direct_container.createContainerFromWithResourceLimitsOperation
-import net.postchain.chain0.direct_container.createContainerFromWithUnitsOperation
 import net.postchain.chain0.direct_container.createContainerOperation
 import net.postchain.chain0.direct_container.createContainerWithResourceLimitsAndSubnodeImageOperation
 import net.postchain.chain0.direct_container.createContainerWithResourceLimitsOperation
-import net.postchain.chain0.direct_container.createContainerWithUnitsOperation
 import net.postchain.chain0.features.hasDirectContainer
 import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.proposal_container.proposeContainerOperation
@@ -27,6 +25,8 @@ import net.postchain.mc.cli.util.maxBlockchainsOption
 import net.postchain.mc.cli.util.nameOrGenerateOption
 import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.cli.util.pubkeysOrVotersetOption
+import net.postchain.mc.compatibility.ApiCompatV89.createContainerFromWithUnitsOperationV89
+import net.postchain.mc.compatibility.ApiCompatV89.createContainerWithUnitsOperationV89
 
 
 class CommandProposeContainer : DCBaseCommand(
@@ -161,7 +161,7 @@ class CommandProposeContainer : DCBaseCommand(
                                 dcVersion >= 3 -> {
                                     when (deployerOption) {
                                         is VoterSetOrPubkeysOption.Pubkeys -> {
-                                            createContainerWithUnitsOperation(
+                                            createContainerWithUnitsOperationV89(
                                                     clientProviderPubkey,
                                                     name,
                                                     clusterName,
@@ -172,7 +172,7 @@ class CommandProposeContainer : DCBaseCommand(
                                         }
 
                                         is VoterSetOrPubkeysOption.VoterSet -> {
-                                            createContainerFromWithUnitsOperation(
+                                            createContainerFromWithUnitsOperationV89(
                                                     clientProviderPubkey,
                                                     name,
                                                     clusterName,

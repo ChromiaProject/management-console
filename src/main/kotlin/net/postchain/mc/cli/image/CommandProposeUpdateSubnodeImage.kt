@@ -5,7 +5,6 @@ import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
-import net.postchain.chain0.common.queries.getSubnodeImage
 import net.postchain.chain0.proposal_subnode_image.proposeUpdateSubnodeImageOperation
 import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.DCBaseCommand
@@ -16,6 +15,7 @@ import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.scheduleAt
 import net.postchain.mc.compatibility.ApiCompatV85.proposeUpdateSubnodeImageOperationV85
+import net.postchain.mc.compatibility.ApiCompatV91.getSubnodeImage
 
 class CommandProposeUpdateSubnodeImage : DCBaseCommand(
         name = "update",

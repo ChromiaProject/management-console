@@ -22,7 +22,9 @@ import net.postchain.economy.economy_chain.getCreateContainerTicketByTransaction
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.accountIdOption
+import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMPUTE_REQUESTS
 import net.postchain.mc.cli.optionalEvmAddressOption
+import net.postchain.mc.compatibility.ApiCompatECV59.createContainerWithSubnodeImageOperationV59
 
 class CommandCreateContainer : ECBaseCommand(
         name = "create-container",
@@ -46,11 +48,19 @@ class CommandCreateContainer : ECBaseCommand(
         require(it >= 0) { "Extra storage cannot be negative" }
     }
 
+    val extraComputeRequests by option("--extraComputeRequests").int().validate {
+        require(it >= 0) { "Extra compute requests cannot be negative" }
+    }
+
     val subnodeImageName by option("-sin", "--subnode-image-name", help = "Subnode image name").default("")
 
     val autoRenew by option("--auto-renew", help = "Auto renew").flag(default = false)
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
+        if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS && extraComputeRequests != null) {
+            throw CliktError("This version of Economy chain does not support extra compute requests")
+        }
+
         val (accountId, authDescriptorId) =
                 findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption,
                         evmAddress ?: client.config.signers.first().pubKey.data,
@@ -76,8 +86,9 @@ class CommandCreateContainer : ECBaseCommand(
             } ?: run {
                 addFtAuthOperation(it, accountId, authDescriptorId)
             }
-        }
-                .createContainerWithSubnodeImageOperation(
+        }.let {
+            if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS) {
+                it.createContainerWithSubnodeImageOperationV59(
                         providerPubkey = pubkey.data,
                         containerUnits = scus.toLong(),
                         durationWeeks = duration.toLong(),
@@ -85,6 +96,18 @@ class CommandCreateContainer : ECBaseCommand(
                         clusterName = clusterName,
                         autoRenew = autoRenew,
                         subnodeImageName = subnodeImageName)
+            } else {
+                it.createContainerWithSubnodeImageOperation(
+                        providerPubkey = pubkey.data,
+                        containerUnits = scus.toLong(),
+                        durationWeeks = duration.toLong(),
+                        extraStorageGib = extraStorage.toLong(),
+                        clusterName = clusterName,
+                        autoRenew = autoRenew,
+                        subnodeImageName = subnodeImageName,
+                        extraComputeRequests = extraComputeRequests?.toLong() ?: 0L)
+            }
+        }
                 .postAwaitConfirmation()
         when (transactionResult.status) {
             TransactionStatus.CONFIRMED -> {
