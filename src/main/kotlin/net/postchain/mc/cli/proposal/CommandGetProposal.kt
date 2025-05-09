@@ -60,7 +60,6 @@ import net.postchain.client.core.PostchainReadClient
 import net.postchain.common.BlockchainRid
 import net.postchain.common.types.RowId
 import net.postchain.common.types.WrappedByteArray
-import net.postchain.common.wrap
 import net.postchain.crypto.PubKey
 import net.postchain.gtv.GtvDecoder.decodeGtv
 import net.postchain.gtv.GtvDictionary
@@ -210,7 +209,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
     return when (proposalType) {
         ProposalType.bc -> {
             val bp = client.getBlockchainProposal(proposalId) ?: return ""
-            "Container: ${bp.container}\nConfig hash: ${getDataHash(bp.data)}"
+            "Container: ${bp.container}\nConfig hash: ${BlockchainConfigurationData.merkleHash(decodeGtv(bp.data.data))}"
         }
 
         ProposalType.configuration -> {
@@ -504,7 +503,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                             row("Blockchain RID", proposal.blockchainRid)
                             row("Blockchain Name", proposal.name)
                             row("Container", proposal.container)
-                            row("Config hash", getDataHash(proposal.configData))
+                            row("Config hash", BlockchainConfigurationData.merkleHash(decodeGtv(proposal.configData.data)))
                         }
                     }
                 }
@@ -521,7 +520,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                         body {
                             row("Blockchain RID", proposal.blockchainRid)
                             row("Height", proposal.height)
-                            row("Config hash", getDataHash(proposal.configData))
+                            row("Config hash", BlockchainConfigurationData.merkleHash(decodeGtv(proposal.configData.data)))
                         }
                     }
                 }
@@ -711,6 +710,3 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
         }
     }
 }
-
-private fun getDataHash(configData: WrappedByteArray): WrappedByteArray =
-        BlockchainConfigurationData.fromRaw(configData.data).configHash.wrap()
