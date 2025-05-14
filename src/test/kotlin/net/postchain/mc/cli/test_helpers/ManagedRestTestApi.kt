@@ -3,6 +3,7 @@ package net.postchain.mc.cli.test_helpers
 import com.chromia.build.tools.restapi.TestModel
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.testing.CliktCommandTestResult
+import net.postchain.api.rest.controller.Model
 import net.postchain.api.rest.controller.RestApi
 import net.postchain.common.BlockchainRid
 import net.postchain.common.exception.ProgrammerMistake
@@ -39,6 +40,8 @@ open class ManagedRestTestApi(
     lateinit var apiUrl: String
     private lateinit var afterServerBeforeTestStep: (ManagedRestTestApi) -> Unit
 
+    private val extraModels = mutableMapOf<Pair<BlockchainRid, String>, Model>()
+
     init {
         models[dcBcRid] = D1TestModel(
                 TestModel(dcBcRid), ecBcRid.data, dcVersion = dcVersion, sacBcRid = sacBcRid,
@@ -56,6 +59,9 @@ open class ManagedRestTestApi(
         RestApi(0, "", gracefulShutdown = false).use {
             apiUrl = "http://localhost:${it.server.port()}"
             models.forEach { (rid, model) -> it.attachModel(rid, model) }
+            extraModels.forEach { (ridContainer, model) ->
+                it.attachModel(ridContainer.first, model, container = ridContainer.second)
+            }
             val dcModel = models[dcBcRid]
             if (dcModel is D1TestModel) {
                 dcModel.setBlockchainApiUrlsByQuery(apiUrl)
@@ -107,6 +113,11 @@ open class ManagedRestTestApi(
     fun getEcModel() = getModel(ecBcRid)
     fun getSacModel() = getModel(sacBcRid)
     fun getCacModel() = getModel(cacBcRid)
+
+    fun withExtraModel(blockchainRid: BlockchainRid, container: String, model: Model): ManagedRestTestApi {
+        extraModels[blockchainRid to container] = model
+        return this
+    }
 
     // Manipulate a test model
     fun withModel(blockchainRid: BlockchainRid, function: (RestTestModel) -> Unit): ManagedRestTestApi {
