@@ -14,4 +14,5 @@ fun containerCommands() = ContainerCommand().subcommands(
         CommandProposeContainerSubnodeImage(),
         CommandListContainers(),
         CommandProposeRemoveContainer(),
+        CommandRestartContainer(),
 )
