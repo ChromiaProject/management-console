@@ -41,6 +41,7 @@ import net.postchain.chain0.proposal_cluster.getClusterLimitsProposal
 import net.postchain.chain0.proposal_cluster.getClusterProviderProposal
 import net.postchain.chain0.proposal_cluster.getClusterRemoveProposal
 import net.postchain.chain0.proposal_cluster_anchoring.getClusterAnchoringConfigurationProposal
+import net.postchain.chain0.proposal_container.getContainerActionProposal
 import net.postchain.chain0.proposal_container.getContainerProposal
 import net.postchain.chain0.proposal_container.getContainerRemoveProposal
 import net.postchain.chain0.proposal_container.getContainerSubnodeImageProposal
@@ -705,6 +706,16 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                 body {
                     row("Blockchain RID", pc.blockchainRid.toHex())
                     row("Height", pc.height)
+                }
+            }
+        }
+
+        ProposalType.container_action -> {
+            val pc = client.getContainerActionProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Container", pc.container)
+                    row("Action", pc.action)
                 }
             }
         }
