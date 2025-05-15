@@ -26,7 +26,6 @@ class CommandProposePauseContainer : DCBaseCommand(
                 .printResult(
                         "Container paused proposition was added successfully",
                         "Cannot add proposal for pausing container",
-                        printOnSuccess = true,
                 )
     }
 }
