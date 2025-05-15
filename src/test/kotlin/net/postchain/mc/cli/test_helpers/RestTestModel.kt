@@ -94,6 +94,7 @@ open class RestTestModel(
         val transactionBuilder = PostchainClientImpl(PostchainClientConfig(
                 BlockchainRid.ZERO_RID,
                 EndpointPool.singleUrl(""),
+                merkleHashVersion = 2,
         )).transactionBuilder()
 
         opsProvider(transactionBuilder)
