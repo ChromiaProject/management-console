@@ -63,7 +63,7 @@ class CommandAuthDescriptorEvmSwap : ECBaseCommand(
                 .updateMainAuthDescriptorOperation(AuthDescriptor(AuthType.S, listOf(gtv(gtv("A"), gtv("T")), gtv(evmAddress)), GtvNull))
                 .postAwaitConfirmation()
                 .printResult(
-                        "Link EVM account to EOA account and update auth description signer with EVM address: 0x${evmAddress.toHex()}",
+                        "Link EVM account to Chromia account and update auth description signer with EVM address: 0x${evmAddress.toHex()}",
                         "Failed to link and update auth descriptor signer to EVM address. "
                 )
     }
