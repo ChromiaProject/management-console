@@ -17,6 +17,7 @@ import net.postchain.mc.cli.lease.leaseCommands
 import net.postchain.mc.cli.node.nodeCommands
 import net.postchain.mc.cli.proposal.proposalCommands
 import net.postchain.mc.cli.provider.providerCommands
+import net.postchain.mc.cli.token.tokenCommands
 import net.postchain.mc.cli.votingupdates.voterSetCommands
 import net.postchain.mc.network.networkCommands
 
@@ -43,6 +44,7 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
                 economyCommands(),
                 subnodeImageCommands(),
                 leaseCommands(),
+                tokenCommands(),
         )
     }
 
