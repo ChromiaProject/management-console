@@ -8,6 +8,7 @@ import net.postchain.mc.cli.util.PmcClientConfigOption
 import net.postchain.mc.network.Version
 
 const val DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION = 30L // The version of directory chain introducing economy chain
+const val DIRECTORY_CHAIN_TOKEN_CHAIN_VERSION = 75L // The version of directory chain introducing token chain
 const val ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION = 21L // EC <= v20 use ec proposals, v21 > use common_proposals
 const val ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION = 43L
 const val ECONOMY_CHAIN_STAKING_REQUIREMENTS_VERSION = 24L // EC >= 24 has staking requirements
