@@ -17,7 +17,7 @@ import net.postchain.gtv.Gtv
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.GtvFactory
 import net.postchain.gtx.GtxQuery
-import net.postchain.rell.base.utils.queueOf
+import java.util.LinkedList
 import java.util.Queue
 
 
@@ -40,12 +40,12 @@ open class RestTestModel(
     }
 
     open fun withQuery(query: String, function: (query: GtxQuery) -> Gtv): RestTestModel {
-        dynamicQueries[query] = queueOf(function)
+        dynamicQueries[query] = LinkedList(listOf(function))
         return this
     }
 
     open fun withQuery(query: String, vararg function: (query: GtxQuery) -> Gtv): RestTestModel {
-        dynamicQueries[query] = queueOf(*function)
+        dynamicQueries[query] = LinkedList(listOf(*function))
         return this
     }
 
@@ -108,9 +108,11 @@ open class RestTestModel(
                             val name = op[0].asString()
                             val parameters = op[1].asArray().toList()
                             if (!opWasCalled(name, parameters)) {
-                                fail("Operation never called: $name with parameters $parameters but found: ${capturedOps.map { capturedOp ->
-                                    "${capturedOp.key}(${capturedOp.value})"
-                                }}")
+                                fail("Operation never called: $name with parameters $parameters but found: ${
+                                    capturedOps.map { capturedOp ->
+                                        "${capturedOp.key}(${capturedOp.value})"
+                                    }
+                                }")
                             }
                         }
                     }
