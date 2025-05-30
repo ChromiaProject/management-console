@@ -19,11 +19,11 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.32.1</postchain.version>
+        <postchain.version>3.37.3</postchain.version>
         <postchain.client.version>3.29.2</postchain.client.version>
         <directory.chain.version>1.94.0</directory.chain.version>
-        <cli.tools.version>0.5.0</cli.tools.version>
-        <rell.maven.plugin.version>0.14.0</rell.maven.plugin.version>
+        <cli.tools.version>0.5.7</cli.tools.version>
+        <rell.maven.plugin.version>0.14.4</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
 
