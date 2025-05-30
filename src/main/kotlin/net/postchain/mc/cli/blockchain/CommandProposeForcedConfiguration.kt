@@ -26,7 +26,7 @@ import net.postchain.mc.network.requireApiVersion
 class CommandProposeForcedConfiguration : DCBaseCommand(
         name = "force-update",
         help = """
-        Propose a new forced configuration to a blockchain.
+        Propose a new forced configuration to a blockchain
         
         WARNING!!! Only use this if absolutely necessary.
         Command is irreversible but forced configs can be overwritten.
