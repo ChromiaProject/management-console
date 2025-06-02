@@ -9,7 +9,8 @@ import net.postchain.mc.cli.blockchainRidOption
 class CommandApproveForcedConfiguration : DCBaseCommand(
         name = "approve-force-update",
         help = """
-        Approve a forced configuration to a blockchain. 
+        Approve a forced configuration to a blockchain
+
         Can only be done by a node provider in the cluster running the blockchain.                
         
         WARNING!!! Only use this if absolutely necessary.

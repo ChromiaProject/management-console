@@ -52,5 +52,7 @@ fun blockchainCommands() = BlockchainCommand().subcommands(
         CommandProposeFinishBlockchainMove(),
 
         CommandProposeArchiveBlockchain(),
-        CommandProposeUnarchiveBlockchain()
+        CommandProposeUnarchiveBlockchain(),
+
+        CommandLinkEvmEoaAccount(),
 )
