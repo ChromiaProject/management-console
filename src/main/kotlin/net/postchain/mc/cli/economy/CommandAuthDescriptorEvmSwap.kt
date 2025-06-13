@@ -2,8 +2,8 @@ package net.postchain.mc.cli.economy
 
 import com.chromia.cli.tools.ft.OperationDescriptor
 import com.chromia.cli.tools.ft.fetchEvmSignatures
-import com.chromia.directory1.lib.ft4.external.auth.evmSignaturesOperation
-import com.chromia.directory1.lib.ft4.external.auth.ftAuthOperation
+import com.chromia.lib.ft4.external.auth.evmSignaturesOperation
+import com.chromia.lib.ft4.external.auth.ftAuthOperation
 import com.github.ajalt.clikt.core.CliktError
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.toHex
