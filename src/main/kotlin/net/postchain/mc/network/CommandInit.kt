@@ -7,6 +7,7 @@ import com.chromia.cli.tools.config.chromiaConfigFileOption
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.common.init.initOperation
 import net.postchain.chain0.economy_chain_in_directory_chain.initEconomyChainOperation
@@ -57,13 +58,13 @@ class CommandInit : PmcCommand(
             "-sac",
             "--system-anchoring-config",
             help = "Configuration file for system anchoring chain (GtvML (*.xml) or Gtv (*.gtv))"
-    ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
+    ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true).required()
 
     private val clusterAnchoringConfig by option(
             "-cac",
             "--cluster-anchoring-config",
             help = "Configuration file for cluster anchoring chain (GtvML (*.xml) or Gtv (*.gtv))"
-    ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
+    ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true).required()
 
     private val economyChainConfig by option(
             "-ecc",
@@ -78,14 +79,9 @@ class CommandInit : PmcCommand(
     ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
 
     override fun run() {
-        if (systemAnchoringConfig != null && clusterAnchoringConfig == null) {
-            echo("System anchoring requires cluster anchoring. Please specify a cluster anchoring configuration.")
-            return
-        }
-
         val version = Version(client).version
-        val systemAnchoringConfigData = systemAnchoringConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
-        val clusterAnchoringConfigData = clusterAnchoringConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
+        val systemAnchoringConfigData = readAndCompressConfigurationFromFile(client, systemAnchoringConfig, version)
+        val clusterAnchoringConfigData = readAndCompressConfigurationFromFile(client, clusterAnchoringConfig, version)
 
         val economyChainConfigData = economyChainConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
         if (version < 30 && economyChainConfigData != null) {
