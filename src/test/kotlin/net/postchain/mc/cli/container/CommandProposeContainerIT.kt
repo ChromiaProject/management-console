@@ -18,7 +18,7 @@ import java.nio.file.Path
 class CommandProposeContainerIT {
 
     @Test
-    fun `direct container - fail due to dc version`(@TempDir dir: Path) {
+    fun `propose container - fail due to dc version`(@TempDir dir: Path) {
         ManagedRestTestApi(dir, dcVersion = 49)
                 .withDCQuery("has_direct_container", gtv(false))
                 .testCommand(CommandProposeContainer(),
@@ -32,7 +32,7 @@ class CommandProposeContainerIT {
     }
 
     @Test
-    fun `direct container - success`(@TempDir dir: Path) {
+    fun `propose container - success`(@TempDir dir: Path) {
         ManagedRestTestApi(dir, dcVersion = 72)
                 .withDCQuery("has_direct_container", gtv(true))
                 .testCommand(CommandProposeContainer(),
@@ -120,7 +120,7 @@ class CommandProposeContainerIT {
     }
 
     @Test
-    fun `propose container - success`(@TempDir dir: Path) {
+    fun `propose container - success with voter set`(@TempDir dir: Path) {
         ManagedRestTestApi(dir, dcVersion = 72)
                 .withDCQuery("has_direct_container", gtv(false))
                 .withDCQuery("get_provider_by_key", gtv(DEFAULT_PROVIDER_PUBKEY.hexStringToByteArray()))

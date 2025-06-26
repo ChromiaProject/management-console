@@ -7,12 +7,14 @@ import com.github.ajalt.clikt.parameters.options.option
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.PendingPriceOracleRateData
 import net.postchain.economy.economy_chain.proposePriceOracleRateOperation
-import net.postchain.mc.compatibility.ApiCompatECV57.proposePriceOracleRateOperation
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtv.parse.GtvParser
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_PRICE_ORACLE_RATE_PROPOSAL_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.base.printResult
+import net.postchain.mc.compatibility.ApiCompatECV57.proposePriceOracleRateOperation
 
 class CommandUpdatePriceOracleRates : ECBaseCommand(
         name = "update-price-oracle-rates",

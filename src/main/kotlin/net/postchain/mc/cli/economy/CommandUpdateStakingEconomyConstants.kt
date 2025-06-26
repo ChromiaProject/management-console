@@ -6,12 +6,16 @@ import com.github.ajalt.clikt.parameters.types.boolean
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.proposeStakingRequirementConstantsOperation
-import net.postchain.mc.compatibility.ApiCompatECV57.proposeStakingRequirementConstantsOperation
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_EC_CONSTANTS_AS_PROPOSALS_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_SCHEDULED_PROPOSAL_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_STAKING_REQUIREMENTS_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.scheduleAt
 import net.postchain.mc.compatibility.ApiCompatECV28.updateStakingRequirementsEconomyConstantsOperationECV28
 import net.postchain.mc.compatibility.ApiCompatECV52.proposeStakingRequirementConstantsOperationECV52
+import net.postchain.mc.compatibility.ApiCompatECV57.proposeStakingRequirementConstantsOperation
 
 class CommandUpdateStakingEconomyConstants : ECBaseCommand(
         name = "update-staking-constants",

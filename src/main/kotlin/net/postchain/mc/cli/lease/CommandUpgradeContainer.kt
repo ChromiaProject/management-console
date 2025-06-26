@@ -22,7 +22,7 @@ import net.postchain.economy.economy_chain.upgradeContainerOperation
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.accountIdOption
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMPUTE_REQUESTS
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMPUTE_REQUESTS
 import net.postchain.mc.cli.optionalEvmAddressOption
 import net.postchain.mc.compatibility.ApiCompatECV59.upgradeContainerOperationV59
 

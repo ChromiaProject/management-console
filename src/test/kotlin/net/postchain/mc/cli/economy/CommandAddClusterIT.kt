@@ -4,7 +4,7 @@ import assertk.assertThat
 import assertk.assertions.contains
 import net.postchain.common.hexStringToByteArray
 import net.postchain.economy.economy_chain.createClusterOperation
-import net.postchain.mc.compatibility.ApiCompatECV57.createClusterOperation
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.compatibility.ApiCompatECV56.createClusterOperationV56
 import org.junit.jupiter.api.Test

@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.economy
 
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.assertLineValue
 import org.junit.jupiter.api.Test

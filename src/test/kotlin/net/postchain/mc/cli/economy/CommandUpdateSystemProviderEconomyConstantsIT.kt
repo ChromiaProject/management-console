@@ -2,6 +2,8 @@ package net.postchain.mc.cli.economy
 
 import net.postchain.common.hexStringToByteArray
 import net.postchain.economy.economy_chain.proposeSystemProviderEconomyConstantsOperation
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.compatibility.ApiCompatECV57.proposeSystemProviderEconomyConstantsOperation
 import org.junit.jupiter.api.Test

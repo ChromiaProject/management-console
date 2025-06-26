@@ -9,7 +9,7 @@ import net.postchain.gtv.GtvNull
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.mc.cli.test_helpers.DEFAULT_BRID_DIRECTORY_CHAIN
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
-import net.postchain.mc.cli.test_helpers.assertCommandSuccess
+import net.postchain.mc.cli.test_helpers.assertCommandSuccessContains
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
@@ -29,7 +29,7 @@ class CommandGetProposedForcedConfigurationIT {
                         CommandGetProposedForcedConfiguration(),
                         "-brid", DEFAULT_BRID_DIRECTORY_CHAIN.toHex(),
                 ) { result, _ ->
-                    assertCommandSuccess(result,
+                    assertCommandSuccessContains(result,
                             """Force for blockchain $DEFAULT_BRID_DIRECTORY_CHAIN at height: 23
                                 
                                Path: foo
@@ -45,7 +45,7 @@ class CommandGetProposedForcedConfigurationIT {
                         CommandGetProposedForcedConfiguration(),
                         "-brid", DEFAULT_BRID_DIRECTORY_CHAIN.toHex(),
                 ) { result, _ ->
-                    assertCommandSuccess(result, "No forced configuration for blockchain $DEFAULT_BRID_DIRECTORY_CHAIN")
+                    assertCommandSuccessContains(result, "No forced configuration for blockchain $DEFAULT_BRID_DIRECTORY_CHAIN")
                 }
     }
 }

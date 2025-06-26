@@ -21,7 +21,7 @@
         <revision>dev</revision>
         <postchain.version>3.37.3</postchain.version>
         <postchain.client.version>3.33.0</postchain.client.version>
-        <directory.chain.version>1.94.0</directory.chain.version>
+        <directory.chain.version>1.95.0</directory.chain.version>
         <cli.tools.version>0.5.9</cli.tools.version>
         <rell.maven.plugin.version>0.14.4</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
@@ -276,7 +276,7 @@
                         </goals>
                         <configuration>
                             <packageName>net.postchain.anchoring</packageName>
-                            <mainModule>anchoring_chain_common</mainModule>
+                            <mainModule>anchoring_chain_cluster</mainModule>
                             <target>${project.build.directory}/generated-sources/rell-client/anchoring</target>
                         </configuration>
                     </execution>
