@@ -87,9 +87,9 @@ class CommandGetContainerInfoIT {
                         ContainerResourceUsageStatistics("000203".hexStringToByteArray().wrap(),
                                 1750930864466L, ResourceType.space_usage_mib, BigDecimal("133")),
                         ContainerResourceUsageStatistics("040506".hexStringToByteArray().wrap(),
-                                1750930864566L, ResourceType.space_usage_percentage, BigDecimal("17")),
+                                1750930865566L, ResourceType.space_usage_percentage, BigDecimal("17")),
                         ContainerResourceUsageStatistics("070809".hexStringToByteArray().wrap(),
-                                1750930864666L, ResourceType.free_space_left_mib, BigDecimal("1500930864466")),
+                                1750930866666L, ResourceType.free_space_left_mib, BigDecimal("1500")),
                 ).map(GtvObjectMapper::toGtvDictionary)
         )
         ManagedRestTestApi(dir)
@@ -110,8 +110,8 @@ class CommandGetContainerInfoIT {
                             {
                                 "Node": "070809",
                                 "Resource_type": "free_space_left_mib",
-                                "Value": "1500930864466",
-                                "Timestamp": "Thu Jun 26 11:41:04 CEST 2025"
+                                "Value": "1500",
+                                "Timestamp": "Thu Jun 26 11:41:06 CEST 2025"
                             },
                             {
                                 "Node": "000203",
@@ -123,7 +123,7 @@ class CommandGetContainerInfoIT {
                                 "Node": "040506",
                                 "Resource_type": "space_usage_percentage",
                                 "Value": "17",
-                                "Timestamp": "Thu Jun 26 11:41:04 CEST 2025"
+                                "Timestamp": "Thu Jun 26 11:41:05 CEST 2025"
                             }
                         ]
                     """.trimIndent())
