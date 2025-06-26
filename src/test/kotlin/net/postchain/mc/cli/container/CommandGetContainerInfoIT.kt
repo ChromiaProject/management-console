@@ -105,27 +105,24 @@ class CommandGetContainerInfoIT {
                         "--name", "container1",
                         "--resource-usage"
                 ) { result, _ ->
+                    // Multiple asserts to exclude timestamp formatted by locale
                     assertCommandSuccessContains(result, """
-                        [
                             {
                                 "Node": "070809",
                                 "Resource_type": "free_space_left_mib",
                                 "Value": "1500",
-                                "Timestamp": "Thu Jun 26 11:41:06 CEST 2025"
-                            },
+                    """.trimIndent())
+                    assertCommandSuccessContains(result, """
                             {
                                 "Node": "000203",
                                 "Resource_type": "space_usage_mib",
                                 "Value": "133",
-                                "Timestamp": "Thu Jun 26 11:41:04 CEST 2025"
-                            },
+                    """.trimIndent())
+                    assertCommandSuccessContains(result, """
                             {
                                 "Node": "040506",
                                 "Resource_type": "space_usage_percentage",
                                 "Value": "17",
-                                "Timestamp": "Thu Jun 26 11:41:05 CEST 2025"
-                            }
-                        ]
                     """.trimIndent())
                 }
     }
