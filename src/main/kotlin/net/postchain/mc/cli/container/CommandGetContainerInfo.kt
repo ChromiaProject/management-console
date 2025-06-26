@@ -87,7 +87,7 @@ fun CliktCommand.showContainerInfo(
         } else {
             val resourceUsageStats = clusterAnchoringClient.getLatestResourceUsageStatistics(name, null, null)
             echo(pmcTable(
-                    "node resources usage",
+                    "resource usage",
                     listOf("Node", "Resource type", "Value", "Timestamp"),
                     resourceUsageStats
                             .sortedWith(compareBy<ContainerResourceUsageStatistics> { it.resourceType.name }
