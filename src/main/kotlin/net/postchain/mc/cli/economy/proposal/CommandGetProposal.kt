@@ -27,10 +27,10 @@ import net.postchain.economy.economy_chain.getStakingRequirementConstantsProposa
 import net.postchain.economy.economy_chain.getSystemProviderEconomyConstantsProposal
 import net.postchain.economy.economy_chain.getTagProposal
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION
 import net.postchain.mc.cli.base.rowIfNotNull
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION
 import net.postchain.mc.cli.economy.doEcSupportMinorUnits
 import net.postchain.mc.cli.economy.formatChr
 import net.postchain.mc.cli.economy.formatUsd

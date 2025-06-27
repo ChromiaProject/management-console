@@ -4,7 +4,7 @@ import net.postchain.chain0.common.queries.ContainerUnitResourceLimits
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.addDcEmptyListQueries
-import net.postchain.mc.cli.test_helpers.assertCommandSuccess
+import net.postchain.mc.cli.test_helpers.assertCommandSuccessContains
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
@@ -24,7 +24,7 @@ class CommandGetClusterInfoIT {
                         CommandGetClusterInfo(),
                         "--name", "cluster1",
                 ) { result, _ ->
-                    assertCommandSuccess(result, """
+                    assertCommandSuccessContains(result, """
                           {
                             "Resource": "CPU",
                             "Limit": "60"

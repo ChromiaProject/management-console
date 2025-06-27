@@ -39,18 +39,18 @@ fun assertCommandOutput(output: String, expected: String) {
     assertThat(normalizeCommandOutput(output)).isEqualTo(normalizeCommandOutput(expected))
 }
 
-fun assertCommandContains(output: String, expected: String) {
+fun assertCommandOutputContains(output: String, expected: String) {
     assertThat(normalizeCommandOutput(output)).contains(normalizeCommandOutput(expected))
 }
 
-fun assertCommandSuccess(result: CliktCommandTestResult, expected: String) {
+fun assertCommandSuccessContains(result: CliktCommandTestResult, expected: String) {
     assertThat(result.statusCode).isEqualTo(0)
-    assertThat(normalizeCommandOutput(result.output)).contains(normalizeCommandOutput(expected))
+    assertCommandOutputContains(result.output, expected)
 }
 
-fun assertCommandFailure(result: CliktCommandTestResult, errorMessage: String) {
+fun assertCommandFailureContains(result: CliktCommandTestResult, errorMessage: String) {
     assertThat(result.statusCode).isGreaterThan(0)
-    assertThat(normalizeCommandOutput(result.stderr)).contains(normalizeCommandOutput(errorMessage))
+    assertCommandOutputContains(result.stderr, errorMessage)
 }
 
 fun normalizeCommandOutput(output: String): String {

@@ -4,12 +4,12 @@ import net.postchain.common.types.WrappedByteArray
 import net.postchain.economy.economy_chain.PendingClusterData
 import net.postchain.economy.economy_chain.PendingClusterStatus
 import net.postchain.gtv.mapper.GtvObjectMapper
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.economy.addEcGetCommonProposal
 import net.postchain.mc.cli.economy.addEcGetCommonProposalVotingResult
 import net.postchain.mc.cli.provider.addDcGetProviderData
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
-import net.postchain.mc.cli.test_helpers.assertCommandSuccess
+import net.postchain.mc.cli.test_helpers.assertCommandSuccessContains
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
@@ -29,7 +29,7 @@ class CommandGetProposalIT {
                         CommandGetProposal(),
                         "--id", "123",
                 ) { result, _ ->
-                    assertCommandSuccess(result, """
+                    assertCommandSuccessContains(result, """
                         {
                           "Name": "name",
                           "Tag": "tag",

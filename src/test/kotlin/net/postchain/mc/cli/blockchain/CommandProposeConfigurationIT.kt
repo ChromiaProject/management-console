@@ -9,7 +9,7 @@ import net.postchain.mc.cli.AlreadyExistMode
 import net.postchain.mc.cli.test_helpers.DEFAULT_BRID_ECONOMY_CHAIN
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.addDcEmptyListQueries
-import net.postchain.mc.cli.test_helpers.assertCommandSuccess
+import net.postchain.mc.cli.test_helpers.assertCommandSuccessContains
 import net.postchain.mc.cli.test_helpers.writeResourceFileToTempDir
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -26,7 +26,7 @@ class CommandProposeConfigurationIT {
                         "-brid", DEFAULT_BRID_ECONOMY_CHAIN.toHex(),
                         "--blockchain-config", cityConfig.absolutePath.toString(),
                 ) { result, api ->
-                    assertCommandSuccess(result, "Configuration was proposed")
+                    assertCommandSuccessContains(result, "Configuration was proposed")
 
                     assertThat(api.getDcModel().opWasCalled(PROPOSE_CONFIGURATION) {
                         it[0].asByteArray().contentEquals(api.pubKey.hexStringToByteArray()) &&
@@ -50,7 +50,7 @@ class CommandProposeConfigurationIT {
                         "--height", "100",
                         "--force"
                 ) { result, api ->
-                    assertCommandSuccess(result, "Configuration was proposed")
+                    assertCommandSuccessContains(result, "Configuration was proposed")
 
                     assertThat(api.getDcModel().opWasCalled(PROPOSE_CONFIGURATION_AT) {
                         it[0].asByteArray().contentEquals(api.pubKey.hexStringToByteArray()) &&
@@ -73,7 +73,7 @@ class CommandProposeConfigurationIT {
                         "-chain", "economy_chain",
                         "--blockchain-config", cityConfig.absolutePath.toString(),
                 ) { result, api ->
-                    assertCommandSuccess(result, "Configuration was proposed")
+                    assertCommandSuccessContains(result, "Configuration was proposed")
 
                     assertThat(api.getDcModel().opWasCalled(PROPOSE_CONFIGURATION) {
                         it[0].asByteArray().contentEquals(api.pubKey.hexStringToByteArray()) &&

@@ -12,8 +12,8 @@ import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtv.merkle.GtvMerkleHashCalculatorV2
 import net.postchain.gtv.merkleHash
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
-import net.postchain.mc.cli.test_helpers.assertCommandFailure
-import net.postchain.mc.cli.test_helpers.assertCommandSuccess
+import net.postchain.mc.cli.test_helpers.assertCommandFailureContains
+import net.postchain.mc.cli.test_helpers.assertCommandSuccessContains
 import org.apache.commons.codec.digest.DigestUtils.sha256
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -33,7 +33,7 @@ class CommandSetProviderStakingAccountIT {
                 .testCommand(CommandSetProviderStakingAccount(),
                         "--pubkey", providerPubkey,
                         "--account-pk", newAccountPubkey) { result, api ->
-                    assertCommandSuccess(result,
+                    assertCommandSuccessContains(result,
                             "Staking account set to ${gtv(newAccountPubkey.hexStringToByteArray()).merkleHash(hashCalculator).toHex()}")
                     assertThat(api.getEcModel().opWasCalled(SET_PROVIDER_STAKING_ACCOUNT) {
                         it[0].asByteArray().contentEquals(providerPubkey.hexStringToByteArray()) &&
@@ -48,7 +48,7 @@ class CommandSetProviderStakingAccountIT {
                 .testCommand(CommandSetProviderStakingAccount(),
                         "--pubkey", providerPubkey,
                         "--account-pk", newAccountPubkey) { result, api ->
-                    assertCommandSuccess(result,
+                    assertCommandSuccessContains(result,
                             "Staking account set to ${gtv(newAccountPubkey.hexStringToByteArray()).merkleHash(hashCalculator).toHex()}")
                     assertThat(api.getEcModel().opWasCalled(SET_PROVIDER_STAKING_ACCOUNT) {
                         it[0].asByteArray().contentEquals(providerPubkey.hexStringToByteArray()) &&
@@ -63,7 +63,7 @@ class CommandSetProviderStakingAccountIT {
                 .testCommand(CommandSetProviderStakingAccount(),
                         "--pubkey", providerPubkey,
                         "--evm-address", evmAddress) { result, _ ->
-                    assertCommandFailure(result, "--account-pk required for EC version < 55 (is 54)")
+                    assertCommandFailureContains(result, "--account-pk required for EC version < 55 (is 54)")
                 }
     }
 
@@ -76,7 +76,7 @@ class CommandSetProviderStakingAccountIT {
                 .testCommand(CommandSetProviderStakingAccount(),
                         "--pubkey", providerPubkey,
                         "--evm-address", evmAddress) { result, _ ->
-                    assertCommandFailure(result, "No FT4 Account found for signer: ${evmAddress.drop(2)}")
+                    assertCommandFailureContains(result, "No FT4 Account found for signer: ${evmAddress.drop(2)}")
                 }
     }
 

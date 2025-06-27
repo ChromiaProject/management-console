@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import net.postchain.gtv.GtvFactory.gtv
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir

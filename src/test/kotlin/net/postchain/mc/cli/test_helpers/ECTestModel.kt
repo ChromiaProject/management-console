@@ -8,7 +8,7 @@ import net.postchain.economy.economy_chain.TagData
 import net.postchain.gtv.GtvArray
 import net.postchain.gtv.GtvFactory
 import net.postchain.gtv.mapper.GtvObjectMapper
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION
 import net.postchain.mc.compatibility.ApiCompatECV45
 import java.math.BigDecimal
 

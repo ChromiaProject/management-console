@@ -6,8 +6,8 @@ import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.economy_chain_in_directory_chain.initEconomyChainOperation
 import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.DCBaseCommand
+import net.postchain.mc.cli.base.DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.economy.DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION
 import net.postchain.mc.cli.util.BlockchainConfig
 
 class CommandInitEconomyChain : DCBaseCommand(

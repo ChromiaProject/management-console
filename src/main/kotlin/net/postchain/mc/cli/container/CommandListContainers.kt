@@ -44,7 +44,7 @@ class CommandListContainers : PmcCommand(
             terminal.interactiveSelectList(containers.map {
                 "${it.name} - ${bcs[it.name]?.joinToString(", ") { bc -> bc.name } ?: ""}"
             }, "Select container")?.let {
-                showContainerInfo(client, it.split(' ').first())
+                showContainerInfo(config.chromiaClient, it.split(' ').first())
             }
         } else {
             echo(pmcTable(
@@ -59,7 +59,7 @@ class CommandListContainers : PmcCommand(
             ))
             if (interactive && containers.isNotEmpty()) {
                 promptForIndex(containers)?.let {
-                    showContainerInfo(client, containers[it].name)
+                    showContainerInfo(config.chromiaClient, containers[it].name)
                 }
             }
         }
