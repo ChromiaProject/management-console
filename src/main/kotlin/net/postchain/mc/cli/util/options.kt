@@ -22,6 +22,7 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.split
 import com.github.ajalt.clikt.parameters.options.switch
 import com.github.ajalt.clikt.parameters.options.validate
+import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.model.ProviderQuotaType
@@ -281,3 +282,8 @@ fun CliktCommand.containerUnitRamOption() = option("--cu-ram", help = "Container
 fun CliktCommand.containerUnitStorageOption() = option("--cu-storage", help = "Container unit storage limit (MiB)").long().default(16384)
 fun CliktCommand.containerUnitIoReadOption() = option("--cu-io-read", help = "Container unit storage I/O read limit (MiB/s)").long().default(25)
 fun CliktCommand.containerUnitIoWriteOption() = option("--cu-io-write", help = "Container unit storage I/O write limit (MiB/s)").long().default(20)
+
+fun CliktCommand.baseComputeRequestsOptions() = option("-bcr", "--base-compute-requests", help = "How many compute requests per week a container gets by default").int()
+        .validate {
+            require(it >= 0) { "base compute requests must not be negative" }
+        }

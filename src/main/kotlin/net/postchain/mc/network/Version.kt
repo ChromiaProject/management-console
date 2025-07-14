@@ -26,5 +26,12 @@ class Version(private val client: PostchainQuery) {
  */
 fun PostchainQuery.requireApiVersion(version: Long, message: String = "Command"): Long {
     val actualVersion = Version(this)
-    if (actualVersion.version < version) throw PrintMessage("$message not supported by network. Requires version $version, but was ${actualVersion.version}") else return actualVersion.version
+    return requireApiVersion(actualVersion.version, version, message)
+}
+
+/**
+ * @return Actual version if it is valid
+ */
+fun PostchainQuery.requireApiVersion(actualVersion: Long, requiredVersion: Long, message: String = "Command"): Long {
+    if (actualVersion < requiredVersion) throw PrintMessage("$message not supported by network. Requires version $requiredVersion, but was $actualVersion") else return actualVersion
 }

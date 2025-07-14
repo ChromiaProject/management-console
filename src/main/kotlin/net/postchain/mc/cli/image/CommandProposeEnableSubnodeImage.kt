@@ -3,7 +3,6 @@ package net.postchain.mc.cli.image
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_subnode_image.proposeSubnodeImageStateOperation
-import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.nameOption
@@ -22,15 +21,13 @@ class CommandProposeEnableSubnodeImage : DCBaseCommand(
     private val description by proposalDescriptionOption { "Enable subnode image $name" }
 
     override fun runDC() {
-        val apiVersion = client.apiVersion()
-        
-        if (scheduledTime != null && apiVersion < 86) {
-            throw CliktError("--schedule-at is only supported in API version 86 or higher (current: $apiVersion)")
+        if (scheduledTime != null && dcVersion < 86) {
+            throw CliktError("--schedule-at is only supported in API version 86 or higher (current: $dcVersion)")
         }
         
         client.transactionBuilder()
                 .apply {
-                    if (apiVersion < 86) {
+                    if (dcVersion < 86) {
                         proposeSubnodeImageStateOperationV85(clientProviderPubkey, name, true, description)
                     } else {
                         proposeSubnodeImageStateOperation(clientProviderPubkey, name, true, description, scheduledTime)

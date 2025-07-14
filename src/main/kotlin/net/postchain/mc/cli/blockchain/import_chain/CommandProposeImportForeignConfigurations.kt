@@ -30,7 +30,6 @@ import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.pubkeyOption
 import net.postchain.mc.cli.util.requiredUrlOption
-import net.postchain.mc.network.requireApiVersion
 
 class CommandProposeImportForeignConfigurations : DCBaseCommand(
         name = "import-foreign-configurations",
@@ -39,7 +38,8 @@ class CommandProposeImportForeignConfigurations : DCBaseCommand(
             
             Change will be applied after voting within the deployer voter set 
             of the cluster that the container belongs to.
-        """.trimIndent()
+        """.trimIndent(),
+        requiresVersion = 19
 ) {
     private val key by pubkeyOption("Node pubkey")
 
@@ -75,12 +75,11 @@ class CommandProposeImportForeignConfigurations : DCBaseCommand(
     }
 
     override fun runDC() {
-        val version = client.requireApiVersion(19)
         val foreignClient = buildForeignClient()
         val imported = mutableListOf<Long>()
 
         // propose foreign config import
-        if (proposeImportBlockchain(foreignClient, version)) {
+        if (proposeImportBlockchain(foreignClient, dcVersion)) {
             imported.add(0)
         }
 
@@ -94,7 +93,7 @@ class CommandProposeImportForeignConfigurations : DCBaseCommand(
             val config = foreignClient.nmGetBlockchainConfiguration(blockchainRID, next0)
                     ?: throw CliktError("Can't get blockchain configuration at height $next0")
             echo("Foreign configuration at height $next0 downloaded")
-            proposeImportBlockchainConfigurations(next0, config, version)
+            proposeImportBlockchainConfigurations(next0, config, dcVersion)
             imported.add(next0)
             next = next0
         }

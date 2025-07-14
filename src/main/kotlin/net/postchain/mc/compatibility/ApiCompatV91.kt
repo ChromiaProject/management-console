@@ -57,7 +57,7 @@ object ApiCompatV91 {
      *
      */
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "common.queries:subnode_image_data")
-    data class SubnodeImageData(
+    data class SubnodeImageDataV91(
             @Name("name") val name: String,
             @Name("url") val url: String,
             @Name("digest") val digest: String,
@@ -76,8 +76,8 @@ object ApiCompatV91 {
      * Returns subnode image data.
      */
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "common.queries:get_subnode_image")
-    fun PostchainQuery.getSubnodeImage(name: String) =
-       query(GET_SUBNODE_IMAGE, gtv(mapOf("name" to gtv(name)))).toObject<SubnodeImageData>()
+    fun PostchainQuery.getSubnodeImageV91(name: String) =
+       query(GET_SUBNODE_IMAGE, gtv(mapOf("name" to gtv(name)))).toObject<SubnodeImageDataV91>()
 
     /**
      * Query common.queries:get_subnode_images
@@ -85,6 +85,6 @@ object ApiCompatV91 {
      * Returns all subnode images.
      */
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "common.queries:get_subnode_images")
-    fun PostchainQuery.getSubnodeImages() =
-       query(GET_SUBNODE_IMAGES, gtv(mapOf())).asArray().map { v1 -> v1.toObject<SubnodeImageData>() }
+    fun PostchainQuery.getSubnodeImagesV91() =
+       query(GET_SUBNODE_IMAGES, gtv(mapOf())).asArray().map { v1 -> v1.toObject<SubnodeImageDataV91>() }
 }

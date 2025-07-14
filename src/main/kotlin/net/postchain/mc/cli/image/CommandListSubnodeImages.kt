@@ -1,35 +1,31 @@
 package net.postchain.mc.cli.image
 
 import com.github.ajalt.clikt.core.terminal
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.mordant.input.interactiveSelectList
-import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
-import net.postchain.mc.compatibility.ApiCompatV91.getSubnodeImages
-import net.postchain.mc.network.requireApiVersion
+import net.postchain.mc.compatibility.ApiCompatV91.getSubnodeImagesV91
 
-class CommandListSubnodeImages : PmcCommand(
+class CommandListSubnodeImages : DCBaseCommand(
         name = "list",
         help = "List all subnode images",
+        requiresVersion = 57,
+        printHelpOnEmptyArgs = false
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
     private val interactive by interactiveOption()
 
     private val headers = listOf("Name", "URL", "Digest", "Type", "Owner", "Description", "Active")
 
-    override fun run() {
-        client.requireApiVersion(57)
-        val images = client.getSubnodeImages()
+    override fun runDC() {
+        val images = client.getSubnodeImagesV91()
         if (interactive && images.isNotEmpty() && images.size < terminal.size.height) {
             terminal.interactiveSelectList(images.map {
                 "${it.name} - ${it.url}"
             }, "Select subnode image")?.let {
-                showSubnodeImageInfo(client, it.split(' ').first())
+                showSubnodeImageInfo(dcVersion, client, it.split(' ').first())
             }
         } else {
             echo(pmcTable(
@@ -41,7 +37,7 @@ class CommandListSubnodeImages : PmcCommand(
             ))
             if (interactive && images.isNotEmpty()) {
                 promptForIndex(images)?.let {
-                    showSubnodeImageInfo(client, images[it].name)
+                    showSubnodeImageInfo(dcVersion, client, images[it].name)
                 }
             }
         }
