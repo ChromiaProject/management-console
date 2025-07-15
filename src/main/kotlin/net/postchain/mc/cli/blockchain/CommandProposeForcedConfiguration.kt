@@ -55,7 +55,7 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
 
     override fun runDC() {
         if (resumeChain) {
-            client.requireApiVersion(dcVersion,80, message = "--resume")
+            client.requireApiVersion(dcVersion, 80, message = "--resume")
         }
 
         if ((height != null) == detectHeight) {
