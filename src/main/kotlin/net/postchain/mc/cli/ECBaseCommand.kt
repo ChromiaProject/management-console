@@ -20,7 +20,7 @@ abstract class ECBaseCommand(
         ecVersion = Version(economyChainClient)
 
         requiresECVersion?.let {
-            economyChainClient.requireApiVersion(requiresECVersion)
+            economyChainClient.requireApiVersion(ecVersion.version, requiresECVersion)
         }
 
         runEC(client, economyChainClient)

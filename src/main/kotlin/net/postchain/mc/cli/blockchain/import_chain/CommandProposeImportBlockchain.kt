@@ -31,7 +31,6 @@ import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.cli.util.pmcTable
-import net.postchain.mc.network.requireApiVersion
 import java.io.BufferedInputStream
 import java.io.FileInputStream
 import java.io.InputStream
@@ -43,7 +42,8 @@ class CommandProposeImportBlockchain : DCBaseCommand(
             
             Change will be applied after voting within the deployer voter set 
             of the cluster that the container belongs to.
-        """.trimIndent()
+        """.trimIndent(),
+        requiresVersion = 19
 ) {
     private val configurationsFile by configurationsFileOption().required()
 
@@ -62,13 +62,11 @@ class CommandProposeImportBlockchain : DCBaseCommand(
     private var preloadedConfig: Gtv? = null
 
     override fun runDC() {
-        val version = client.requireApiVersion(19)
-
-        if (version <= 53) {
+        if (dcVersion <= 53) {
             val containerInfo = client.getContainerData(container)
             val vsInfo = client.getVoterSetInfo(containerInfo.deployer)
             if (vsInfo.members.size > 1 && vsInfo.threshold != 1L) {
-                echo("Directory chain version $version only allows importing the blockchain without voting. " +
+                echo("Directory chain version $dcVersion only allows importing the blockchain without voting. " +
                         "Please set the container deployer threshold value to 1 or update the Directory chain to version 54 or higher.")
                 return
             }

@@ -4,7 +4,6 @@ import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_subnode_image.proposeAddClusterSubnodeImageOperation
-import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.proposalDescriptionOption
@@ -23,15 +22,13 @@ class CommandProposeAddSubnodeImageToCluster : DCBaseCommand(
     private val description by proposalDescriptionOption { "Add $subnodeImageName to $clusterName" }
 
     override fun runDC() {
-        val apiVersion = client.apiVersion()
-        
-        if (scheduledTime != null && apiVersion < 86) {
-            throw CliktError("--schedule-at is only supported in API version 86 or higher (current: $apiVersion)")
+        if (scheduledTime != null && dcVersion < 86) {
+            throw CliktError("--schedule-at is only supported in API version 86 or higher (current: $dcVersion)")
         }
         
         client.transactionBuilder()
                 .apply {
-                    if (apiVersion < 86) {
+                    if (dcVersion < 86) {
                         proposeAddClusterSubnodeImageOperationV85(clientProviderPubkey, clusterName, subnodeImageName, description)
                     } else {
                         proposeAddClusterSubnodeImageOperation(clientProviderPubkey, clusterName, subnodeImageName, description, scheduledTime)

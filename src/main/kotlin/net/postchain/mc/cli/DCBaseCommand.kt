@@ -39,7 +39,7 @@ abstract class DCBaseCommand(
     override fun run() {
 
         requiresVersion?.apply {
-            client.requireApiVersion(requiresVersion)
+            client.requireApiVersion(dcVersion, requiresVersion)
         }
 
         runDC()
