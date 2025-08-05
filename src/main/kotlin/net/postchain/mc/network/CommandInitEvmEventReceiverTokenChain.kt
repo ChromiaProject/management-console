@@ -1,6 +1,7 @@
 package net.postchain.mc.network
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.token_chain_in_directory_chain.initEvmEventReceiverTokenChainOperation
@@ -22,8 +23,7 @@ class CommandInitEvmEventReceiverTokenChain : DCBaseCommand(
 
     override fun runDC() {
         if (dcVersion < 75) {
-            echo("EVM event receiver token chain requires directory chain version 75, found version $dcVersion")
-            return
+            throw CliktError("EVM event receiver token chain requires directory chain version 75, found version $dcVersion")
         }
 
         eventReceiverConfig?.let {

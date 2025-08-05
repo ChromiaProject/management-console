@@ -57,7 +57,7 @@ class CommandSetProviderStakingAccount : ECBaseCommand(
                         SET_PROVIDER_STAKING_ACCOUNT_FT4,
                         listOf(gtv(providerPubkey.data)),
                         evmAddress!!, accountId, authDescriptorId)
-                echo("Signing done, posting transaction...")
+                echo("Signing done, posting transaction...", err = true)
             }
                     .setProviderStakingAccountFt4Operation(providerPubkey.data)
                     .postAwaitConfirmation()

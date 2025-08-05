@@ -1,6 +1,7 @@
 package net.postchain.mc.network
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.price_oracle.initPriceOracleChainOperation
@@ -22,8 +23,7 @@ class CommandInitPriceOracleChain : DCBaseCommand(
 
     override fun runDC() {
         if (dcVersion < 37) {
-            echo("Price oracle chain requires directory chain version 37, found version $dcVersion")
-            return
+            throw CliktError("Price oracle chain requires directory chain version 37, found version $dcVersion")
         }
 
         priceOracleConfig?.let {

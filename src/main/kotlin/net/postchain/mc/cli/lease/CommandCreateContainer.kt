@@ -82,7 +82,7 @@ class CommandCreateContainer : ECBaseCommand(
                         gtv(subnodeImageName)
                 ),
                         evmAddress, accountId, authDescriptorId)
-                echo("Signing done, posting transaction...")
+                echo("Signing done, posting transaction...", err = true)
             } ?: run {
                 addFtAuthOperation(it, accountId, authDescriptorId)
             }

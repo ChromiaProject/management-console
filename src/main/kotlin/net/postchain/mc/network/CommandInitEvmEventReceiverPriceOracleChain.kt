@@ -1,6 +1,7 @@
 package net.postchain.mc.network
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.evm_event_receiver_price_oracle.initEvmEventReceiverPriceOracleChainOperation
@@ -22,8 +23,7 @@ class CommandInitEvmEventReceiverPriceOracleChain : DCBaseCommand(
 
     override fun runDC() {
         if (dcVersion < 51) {
-            echo("EVM event receiver price oracle chain requires directory chain version 51, found version $dcVersion")
-            return
+            throw CliktError("EVM event receiver price oracle chain requires directory chain version 51, found version $dcVersion")
         }
 
         eventReceiverConfig?.let {

@@ -66,9 +66,8 @@ class CommandProposeImportBlockchain : DCBaseCommand(
             val containerInfo = client.getContainerData(container)
             val vsInfo = client.getVoterSetInfo(containerInfo.deployer)
             if (vsInfo.members.size > 1 && vsInfo.threshold != 1L) {
-                echo("Directory chain version $dcVersion only allows importing the blockchain without voting. " +
+                throw CliktError("Directory chain version $dcVersion only allows importing the blockchain without voting. " +
                         "Please set the container deployer threshold value to 1 or update the Directory chain to version 54 or higher.")
-                return
             }
             runImplV53()
         } else {
@@ -171,7 +170,7 @@ class CommandProposeImportBlockchain : DCBaseCommand(
                             listOf(info.type.toString(), info.id.id.toString(), info.state.toString())
                         },
                         null,
-                        terminal.terminalInfo.outputInteractive
+                        terminal.terminalInfo.inputInteractive
                 ))
 
             } else {

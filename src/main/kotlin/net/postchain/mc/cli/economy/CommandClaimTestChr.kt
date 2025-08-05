@@ -28,7 +28,7 @@ class CommandClaimTestChr : ECBaseCommand(
                     economyChainClient, it,
                     FAUCET, listOf(),
                     evmAddress, accountId, authDescriptorId)
-            echo("Signing done, posting transaction...")
+            echo("Signing done, posting transaction...", err = true)
         }
                 .faucetOperation()
                 .postAwaitConfirmation()

@@ -37,7 +37,7 @@ class CommandAuthDescriptorEvmSwap : ECBaseCommand(
         val providerPubkey = economyChainClient.config.signers.firstOrNull()?.pubKey?.data
                 ?: throw CliktError("No provider")
         val accountId = accountIdOption
-                ?: economyChainClient.getProviderAccountId(providerPubkey).also { if (it != null) echo("Using account id ${it.toHex()}") }
+                ?: economyChainClient.getProviderAccountId(providerPubkey).also { if (it != null) echo("Using account id ${it.toHex()}", err = true) }
                 ?: throw CliktError("No account id found for provider")
 
         val accountMainAuthDescriptor = economyChainClient.getAccountMainAuthDescriptor(accountId)
@@ -53,7 +53,7 @@ class CommandAuthDescriptorEvmSwap : ECBaseCommand(
                         OperationDescriptor(UPDATE_MAIN_AUTH_DESCRIPTOR, listOf(authDescriptor), forEvmSignatures = true)
                 ),
                 evmAddress, accountId, accountMainAuthDescriptor.id.data)
-        echo("Signing done, posting transaction...")
+        echo("Signing done, posting transaction...", err = true)
         economyChainClient.transactionBuilder()
                 .evmSignaturesOperation(listOf(evmAddress), listOf(linkEvmEoaAccountSignature))
                 .ftAuthOperation(accountId, accountMainAuthDescriptor.id.data)

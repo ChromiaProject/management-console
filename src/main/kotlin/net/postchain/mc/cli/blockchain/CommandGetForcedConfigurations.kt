@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_blockchain.ForcedConfigurationData
@@ -47,7 +48,7 @@ class CommandGetForcedConfigurations : PmcCommand(
             }
 
             else -> {
-                echo("Force update requires directory chain version 40 or higher, found version $version")
+                throw CliktError("Force update requires directory chain version 40 or higher, found version $version")
             }
         }
 

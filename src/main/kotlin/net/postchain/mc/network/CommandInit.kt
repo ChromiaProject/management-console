@@ -85,14 +85,12 @@ class CommandInit : PmcCommand(
 
         val economyChainConfigData = economyChainConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
         if (version < 30 && economyChainConfigData != null) {
-            echo("Economy chain requires directory chain version 30, found version $version")
-            return
+            throw CliktError("Economy chain requires directory chain version 30, found version $version")
         }
 
         val tokenChainConfigData = tokenChainConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
         if (version < 75 && tokenChainConfigData != null) {
-            echo("Token chain requires directory chain version 75, found version $version")
-            return
+            CliktError("Token chain requires directory chain version 75, found version $version")
         }
 
         client.transactionBuilder()

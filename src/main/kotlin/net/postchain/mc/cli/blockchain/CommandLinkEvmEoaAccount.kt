@@ -35,7 +35,7 @@ class CommandLinkEvmEoaAccount : PmcCommand(
         val accountMainAuthDescriptor = chainClient.getAccountMainAuthDescriptor(accountId)
 
         chainClient.transactionBuilder().also {
-            echo("Adding EVM signatures ...")
+            echo("Adding EVM signatures ...", err = true)
             addEvmSignaturesOperation(
                     chainClient,
                     it,
@@ -46,7 +46,7 @@ class CommandLinkEvmEoaAccount : PmcCommand(
                     accountMainAuthDescriptor.id.data
             )
 
-            echo("Adding EVM auth operation ...")
+            echo("Adding EVM auth operation ...", err = true)
             addEvmAuthOperation(
                     chainClient,
                     it,
@@ -56,7 +56,7 @@ class CommandLinkEvmEoaAccount : PmcCommand(
                     accountId,
                     accountMainAuthDescriptor.id.data
             )
-            echo("Linking EVM account to Chromia account ...")
+            echo("Linking EVM account to Chromia account ...", err = true)
         }
                 .linkEvmEoaAccountOperation(evmAddress)
                 .postAwaitConfirmation()
