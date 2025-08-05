@@ -170,7 +170,7 @@ class CommandProposeImportBlockchain : DCBaseCommand(
                             listOf(info.type.toString(), info.id.id.toString(), info.state.toString())
                         },
                         null,
-                        terminal.terminalInfo.outputInteractive
+                        terminal.terminalInfo.inputInteractive
                 ))
 
             } else {
