@@ -1,6 +1,7 @@
 package net.postchain.mc.network
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.economy_chain_in_directory_chain.initEconomyChainOperation
@@ -23,8 +24,7 @@ class CommandInitEconomyChain : DCBaseCommand(
 
     override fun runDC() {
         if (dcVersion < DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION) {
-            echo("Economy chain requires directory chain version $DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION, found version $dcVersion")
-            return
+            CliktError("Economy chain requires directory chain version $DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION, found version $dcVersion")
         }
 
         economyChainConfig?.let {

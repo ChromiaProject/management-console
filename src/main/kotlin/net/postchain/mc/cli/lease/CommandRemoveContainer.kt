@@ -42,7 +42,7 @@ class CommandRemoveContainer : ECBaseCommand(
                         economyChainClient, it,
                         REMOVE_CONTAINER, listOf(gtv(containerName)),
                         evmAddress, accountId, authDescriptorId)
-                echo("Signing done, posting transaction...")
+                echo("Signing done, posting transaction...", err = true)
             } ?: run {
                 addFtAuthOperation(it, accountId, authDescriptorId)
             }

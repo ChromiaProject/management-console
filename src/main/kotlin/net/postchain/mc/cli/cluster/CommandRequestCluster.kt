@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.cluster
 
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -23,7 +24,7 @@ class CommandRequestCluster : DCBaseCommand(
     override fun runDC() {
         val apiVersion = client.apiVersion()
         if (apiVersion >= 29) {
-            echo("This operation is not supported after version 29 (version = $apiVersion)")
+            throw CliktError("This operation is not supported after version 29 (version = $apiVersion)")
         } else {
             client.transactionBuilder()
                     .requestClusterOperationV28(clientProviderPubkey, name, size, requireFull)

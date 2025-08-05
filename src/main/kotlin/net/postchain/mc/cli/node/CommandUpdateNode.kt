@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.node
 
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.deprecated
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.split
@@ -54,8 +55,7 @@ class CommandUpdateNode : DCBaseCommand(
 
     override fun runDC() {
         if (host == null && port == null && apiUrl == null && clusterUnits == null && clusterName == null && addCapability == null && removeCapability == null && territory == null && extraStorage == null) {
-            echo("No properties to update. At least one node's property should be specified")
-            return
+            throw CliktError("No properties to update. At least one node's property should be specified")
         }
 
         if (territory != null && dcVersion < 15) {
