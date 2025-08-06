@@ -29,6 +29,7 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
             Java version ${System.getProperty("java.version")}            
         """.trimIndent())
         subcommands(
+                HelpCommand(),
                 CommandKeygen(),
                 CommandConfig(),
                 networkCommands(),
