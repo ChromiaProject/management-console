@@ -24,12 +24,14 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
 
     init {
         System.setProperty(SUPPRESS_KEY_STORAGE_DEPRECATION_WARNING_SYSTEM_PROPERTY, "true")
-        versionOption("""
+        val version = """
             ${this::class.java.`package`.implementationVersion ?: "(unknown)"}
             Java version ${System.getProperty("java.version")}            
-        """.trimIndent())
+        """.trimIndent()
+        versionOption(version)
         subcommands(
                 HelpCommand(),
+                VersionCommand("pmc", version),
                 CommandKeygen(),
                 CommandConfig(),
                 networkCommands(),
