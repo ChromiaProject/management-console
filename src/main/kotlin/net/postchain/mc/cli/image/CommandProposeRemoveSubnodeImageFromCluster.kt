@@ -34,7 +34,7 @@ class CommandProposeRemoveSubnodeImageFromCluster : DCBaseCommand(
                         proposeRemoveClusterSubnodeImageOperation(clientProviderPubkey, clusterName, subnodeImageName, description, scheduledTime)
                     }
                 }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Removing $subnodeImageName from $clusterName proposed",
                         "Cannot propose remove subnode image from cluster"

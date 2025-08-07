@@ -87,7 +87,7 @@ class CommandProposeUpdateSubnodeImage : DCBaseCommand(
                         )
                     }
                 }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Subnode image $name update proposed",
                         "Cannot propose subnode image update",

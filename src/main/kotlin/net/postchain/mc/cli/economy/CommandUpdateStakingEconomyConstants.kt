@@ -95,7 +95,7 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                         )
             }
         }
-        .postAwaitConfirmation()
+        .postAwaitConfirmation(txListener())
         .printResult(
                 "Proposal for updating staking economy constants is created and awaits approval.",
                 "Failed to create staking economy constants update proposal"

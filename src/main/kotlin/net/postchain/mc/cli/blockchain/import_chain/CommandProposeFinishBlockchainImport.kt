@@ -51,7 +51,7 @@ class CommandProposeFinishBlockchainImport : DCBaseCommand(
             echo("Import of blockchain ${blockchainRID.toHex()} will be finished")
             val txBuilder = client.transactionBuilder()
             txBuilder.proposeFinishImportBlockchainOperation(clientProviderPubkey, blockchainRID, finalHeight, description(blockchainRID))
-            txBuilder.postAwaitConfirmation().printResult(
+            txBuilder.postAwaitConfirmation(txListener()).printResult(
                     "Import of blockchain ${blockchainRID.toHex()} finished",
                     "Cannot finish blockchain import", true
             )

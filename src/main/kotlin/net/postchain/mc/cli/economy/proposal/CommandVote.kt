@@ -34,7 +34,7 @@ class CommandVote : ECBaseCommand(
             ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .makeVoteOperationECV20(clientProviderPubkey, RowId(id), vote)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Vote added successfully",
                                 "Cannot add vote"
@@ -43,7 +43,7 @@ class CommandVote : ECBaseCommand(
             ecVersion.version < ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .makeCommonVoteOperation(PubKey(clientProviderPubkey), RowId(id), vote)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Vote added successfully",
                                 "Cannot add vote"
@@ -52,7 +52,7 @@ class CommandVote : ECBaseCommand(
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .makeCommonVoteV65Operation(RowId(id), vote)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Vote added successfully",
                                 "Cannot add vote"
@@ -61,7 +61,7 @@ class CommandVote : ECBaseCommand(
             else -> {
                 economyChainClient.transactionBuilder()
                         .makeCommonVoteOperation(clientProviderPubkey, RowId(id), vote)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Vote added successfully",
                                 "Cannot add vote"

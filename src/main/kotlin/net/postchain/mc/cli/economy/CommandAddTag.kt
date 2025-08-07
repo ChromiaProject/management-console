@@ -64,7 +64,7 @@ class CommandAddTag : ECBaseCommand(
                         .createTagOperation(clientProviderPubkey, name, scuPrice.times(UNITS_PER_USD.toBigDecimal()).toLong(), extraStoragePrice.times(UNITS_PER_USD.toBigDecimal()).toLong())
             }
         }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal for creating tag $name is created",
                         "Failed to create tag"

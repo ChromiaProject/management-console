@@ -28,7 +28,7 @@ class CommandRequestCluster : DCBaseCommand(
         } else {
             client.transactionBuilder()
                     .requestClusterOperationV28(clientProviderPubkey, name, size, requireFull)
-                    .postAwaitConfirmation()
+                    .postAwaitConfirmation(txListener())
                     .printResult(
                             "Cluster $name was created",
                             "Could not create cluster"

@@ -67,7 +67,7 @@ class CommandUpdateTag : ECBaseCommand(
                         )
             }
         }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal for updating tag $name is created",
                         "Failed to update tag"

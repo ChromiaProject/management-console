@@ -34,7 +34,7 @@ class CommandProposeRemoveContainer : DCBaseCommand(
             }
             client.transactionBuilder()
                     .removeContainerOperation(clientProviderPubkey, name)
-                    .postAwaitConfirmation()
+                    .postAwaitConfirmation(txListener())
                     .printResult(
                             "Container removed",
                             "Failed to remove container"
@@ -42,7 +42,7 @@ class CommandProposeRemoveContainer : DCBaseCommand(
         } else {
             client.transactionBuilder()
                     .proposeRemoveContainerOperation(clientProviderPubkey, name, description)
-                    .postAwaitConfirmation()
+                    .postAwaitConfirmation(txListener())
                     .printResult(
                             "Container removal proposed",
                             "Failed proposing container removal"

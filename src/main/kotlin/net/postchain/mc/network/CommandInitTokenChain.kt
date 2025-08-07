@@ -38,7 +38,7 @@ class CommandInitTokenChain : DCBaseCommand(
             val compressedChainConfig = BlockchainConfigurationCompressor.compress(client, chainConfigData.gtv, dcVersion)
             client.transactionBuilder()
                     .initTokenChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedChainConfig))
-                    .postAwaitConfirmation()
+                    .postAwaitConfirmation(txListener())
                     .printResult(
                             "Token chain was created",
                             "Failed to create Token chain",

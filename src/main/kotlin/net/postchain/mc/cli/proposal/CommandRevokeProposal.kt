@@ -18,7 +18,7 @@ class CommandRevokeProposal : DCBaseCommand(
         client.transactionBuilder().apply {
             revokeProposalOperation(clientProviderPubkey, RowId(idx))
         }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal revoked successfully",
                         "Cannot revoke proposal"

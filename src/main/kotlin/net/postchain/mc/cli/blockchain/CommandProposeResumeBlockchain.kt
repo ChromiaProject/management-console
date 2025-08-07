@@ -24,7 +24,7 @@ class CommandProposeResumeBlockchain : DCBaseCommand(
                         BlockchainAction.resume,
                         description
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Blockchain resume proposition was added successfully",
                         "Cannot add proposal for resuming blockchain"

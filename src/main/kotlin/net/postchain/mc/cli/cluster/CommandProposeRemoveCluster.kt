@@ -19,7 +19,7 @@ class CommandProposeRemoveCluster : DCBaseCommand(
     override fun runDC() {
         client.transactionBuilder()
                 .proposeRemoveClusterOperation(clientProviderPubkey, name, description)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Cluster removal proposed",
                         "Failed proposing cluster removal"

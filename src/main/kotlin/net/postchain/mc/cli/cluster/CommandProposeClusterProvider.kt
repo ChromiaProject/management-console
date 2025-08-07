@@ -36,7 +36,7 @@ class CommandProposeClusterProvider : DCBaseCommand(
     override fun runDC() {
         client.transactionBuilder()
                 .proposeClusterProviderOperation(clientProviderPubkey, clusterName, provider.data, add, description)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Cluster $clusterName providers update proposed",
                         "Failed proposing cluster $clusterName providers update"

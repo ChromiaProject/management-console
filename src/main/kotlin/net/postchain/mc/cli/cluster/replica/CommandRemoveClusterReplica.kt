@@ -22,7 +22,7 @@ class CommandRemoveClusterReplica : DCBaseCommand(
                 .removeReplicaNodeFromClusterOperation(
                         clientProviderPubkey, key.data, name
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Cluster replica removed",
                         "Cannot remove cluster replica node"

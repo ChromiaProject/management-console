@@ -62,7 +62,7 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
                         )
             }
         }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal for updating system provider economy constants is created and awaits approval.",
                         "Failed to create system provider economy constants update proposal"

@@ -25,7 +25,7 @@ class CommandProposeArchiveBlockchain : DCBaseCommand(
                         BlockchainAction.archive,
                         description
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Blockchain archive proposition was added successfully",
                         "Cannot add proposal for archiving blockchain"

@@ -23,7 +23,7 @@ class CommandVote : DCBaseCommand(
 
         client.transactionBuilder().apply {
                 makeVoteOperation(clientProviderPubkey, id, vote)
-        }.postAwaitConfirmation()
+        }.postAwaitConfirmation(txListener())
                 .printResult(
                         "Vote added successfully",
                         "Cannot add vote"

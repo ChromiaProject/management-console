@@ -60,7 +60,7 @@ class CommandAddCluster : ECBaseCommand(
                 }
             }
         }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal for creating cluster $name is created and awaits approval. You can check economy proposal or $CLUSTER_CREATION_STATUS_COMMAND command to see the status",
                         "Failed to create cluster proposal"

@@ -29,7 +29,7 @@ class CommandProposeRenameBlockchain : DCBaseCommand(
                         name,
                         description
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Blockchain rename proposition was added successfully",
                         "Cannot add proposal for renaming blockchain"

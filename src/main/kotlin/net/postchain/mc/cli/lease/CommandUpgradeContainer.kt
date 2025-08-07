@@ -101,7 +101,7 @@ class CommandUpgradeContainer : ECBaseCommand(
                         )
                     }
                 }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
         when (transactionResult.status) {
             TransactionStatus.CONFIRMED -> {
                 val ticket = economyChainClient.getUpgradeContainerTicketByTransaction(transactionResult.txRid.rid.hexStringToByteArray())

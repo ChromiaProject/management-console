@@ -62,7 +62,7 @@ class CommandProposeRemoveForcedConfiguration : DCBaseCommand(
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
                 client.transactionBuilder()
                         .proposeRemoveForcedConfigurationOperationV87(blockchainRID, height, description)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Created proposal to remove forced configuration on blockchain RID $blockchainRID at height $height",
                                 "Cannot create proposal"
@@ -72,7 +72,7 @@ class CommandProposeRemoveForcedConfiguration : DCBaseCommand(
             else -> {
                 client.transactionBuilder()
                         .proposeRemoveForcedConfigurationOperation(clientProviderPubkey, blockchainRID, height, description)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Created proposal to remove forced configuration on blockchain RID $blockchainRID at height $height",
                                 "Cannot create proposal"

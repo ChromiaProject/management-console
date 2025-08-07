@@ -27,7 +27,7 @@ class CommandRevokeProposal : ECBaseCommand(
             ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .revokeProposalOperationECV20(clientProviderPubkey, RowId(idx))
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Proposal revoked successfully",
                                 "Cannot revoke proposal"
@@ -36,7 +36,7 @@ class CommandRevokeProposal : ECBaseCommand(
             ecVersion.version < ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .revokeCommonProposalOperation(PubKey(clientProviderPubkey), RowId(idx))
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Proposal revoked successfully",
                                 "Cannot revoke proposal"
@@ -45,7 +45,7 @@ class CommandRevokeProposal : ECBaseCommand(
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .revokeCommonProposalV65Operation(RowId(idx))
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Proposal revoked successfully",
                                 "Cannot revoke proposal"
@@ -54,7 +54,7 @@ class CommandRevokeProposal : ECBaseCommand(
             else -> {
                 economyChainClient.transactionBuilder()
                         .revokeCommonProposalOperation(clientProviderPubkey, RowId(idx))
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Proposal revoked successfully",
                                 "Cannot revoke proposal"

@@ -20,7 +20,7 @@ class CommandRevokeProviderKey : DCBaseCommand(
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
                 client.transactionBuilder()
                         .revokeProviderKeyOperationV87(ProviderKeyRole.main, pubkey)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Provider key revoked",
                                 "Failed to revoke provider key"
@@ -31,7 +31,7 @@ class CommandRevokeProviderKey : DCBaseCommand(
             else -> {
                 client.transactionBuilder()
                         .revokeProviderKeyOperation(clientProviderPubkey, ProviderKeyRole.main, pubkey)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Provider key revoked",
                                 "Failed to revoke provider key"

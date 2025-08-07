@@ -33,7 +33,7 @@ class CommandProposeDisableSubnodeImage : DCBaseCommand(
                         proposeSubnodeImageStateOperation(clientProviderPubkey, name, false, description, scheduledTime)
                     }
                 }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Subnode image $name disable proposed",
                         "Cannot propose subnode image disable"

@@ -55,7 +55,7 @@ class CommandAssignSubnodeImageToContainer : ECBaseCommand(
             }
         }
                 .assignSubnodeImageToContainerOperation(containerName, subnodeImageName)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
         when (transactionResult.status) {
             TransactionStatus.CONFIRMED -> {
                 val ticket = economyChainClient.getAssignSubnodeImageToContainerTicketByTransaction(transactionResult.txRid.rid.hexStringToByteArray())

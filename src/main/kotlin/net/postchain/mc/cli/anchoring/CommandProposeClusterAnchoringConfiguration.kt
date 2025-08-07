@@ -27,7 +27,7 @@ class CommandProposeClusterAnchoringConfiguration : DCBaseCommand(
         val compressedConfig = BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, version)
         client.transactionBuilder()
                 .proposeClusterAnchoringConfigurationOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedConfig))
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Cluster anchoring configuration was proposed: ${bcConfig.hash}",
                         "Failed to propose cluster anchoring configuration"

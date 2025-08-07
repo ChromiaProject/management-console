@@ -24,7 +24,7 @@ class CommandForceRemoveContainer : ECBaseCommand(
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .forceRemoveContainerOperation(name)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Container $name will be removed",
                                 "Failed to remove container"
@@ -34,7 +34,7 @@ class CommandForceRemoveContainer : ECBaseCommand(
             else -> {
                 economyChainClient.transactionBuilder()
                         .forceRemoveContainerOperation(clientProviderPubkey, name)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Container $name will be removed",
                                 "Failed to remove container"

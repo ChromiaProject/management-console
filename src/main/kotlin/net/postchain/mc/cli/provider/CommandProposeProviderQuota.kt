@@ -31,7 +31,7 @@ class CommandProposeProviderQuota : DCBaseCommand(
     override fun runDC() {
         client.transactionBuilder()
                 .proposeProviderQuotaOperation(clientProviderPubkey, providerTier.toTier(), providerQuotaType, value, description())
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Provider quota value has been proposed",
                         "Cannot propose a provider quota value"

@@ -24,7 +24,7 @@ class CommandProposeDeleteBlockchain : DCBaseCommand(
                         BlockchainAction.remove,
                         description
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Blockchain delete proposition was added successfully",
                         "Cannot add proposal for deleting blockchain"

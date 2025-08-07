@@ -209,7 +209,7 @@ class CommandProposeContainer : DCBaseCommand(
                                 }
                             }
                         }
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Container $name has been created",
                                 "Failed to create container"
@@ -237,7 +237,7 @@ class CommandProposeContainer : DCBaseCommand(
                         subnodeImageName!!,
                         description()
                 )
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Container creation has been proposed",
                                 "Failed to propose container creation"
@@ -250,7 +250,7 @@ class CommandProposeContainer : DCBaseCommand(
                         (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
                         description()
                 )
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Container creation has been proposed",
                                 "Failed to propose container creation"

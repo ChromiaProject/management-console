@@ -28,7 +28,7 @@ class CommandApproveForcedConfiguration : DCBaseCommand(
     override fun runDC() {
         client.transactionBuilder()
                 .approveProposedForcedConfigurationOperation(clientProviderPubkey, blockchainRID)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Forced configurations was approved",
                         "Failed to approve forced configuration"

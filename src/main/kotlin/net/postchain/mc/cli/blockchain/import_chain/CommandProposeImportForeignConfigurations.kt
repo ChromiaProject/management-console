@@ -123,7 +123,7 @@ class CommandProposeImportForeignConfigurations : DCBaseCommand(
                         chain0BlockchainRID.data,
                         name, blockchainRID, GtvEncoder.encodeGtv(compressedConfig), container, description
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Foreign blockchain import proposed",
                         "Failed to propose a foreign blockchain", true
@@ -141,7 +141,7 @@ class CommandProposeImportForeignConfigurations : DCBaseCommand(
                         GtvEncoder.encodeGtv(compressedConfig),
                         "Import foreign blockchain configuration - blockchain-rid: $blockchainRID, height: $height"
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Foreign configuration proposed at height $height",
                         "Failed to propose a foreign configuration at height $height", true

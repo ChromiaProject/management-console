@@ -31,7 +31,7 @@ class CommandInitEvmEventReceiverTokenChain : DCBaseCommand(
             val compressedConfig = BlockchainConfigurationCompressor.compress(client, config.gtv, dcVersion)
             client.transactionBuilder()
                     .initEvmEventReceiverTokenChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedConfig))
-                    .postAwaitConfirmation()
+                    .postAwaitConfirmation(txListener())
                     .printResult(
                             "EVM event receiver token chain was created",
                             "Failed to create EVM event receiver token chain",

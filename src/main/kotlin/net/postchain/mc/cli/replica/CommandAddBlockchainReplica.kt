@@ -22,7 +22,7 @@ class CommandAddBlockchainReplica : DCBaseCommand(
                         blockchainRID,
                         nodePubKey.data
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Replica added",
                         "Cannot add replica"

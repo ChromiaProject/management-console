@@ -20,7 +20,7 @@ class CommandRemoveTag  : ECBaseCommand(
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .removeTagOperation(name)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Proposal for removing tag $name is created",
                                 "Failed to remove tag"
@@ -30,7 +30,7 @@ class CommandRemoveTag  : ECBaseCommand(
             else -> {
                 economyChainClient.transactionBuilder()
                         .removeTagOperation(clientProviderPubkey, name)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Proposal for removing tag $name is created",
                                 "Failed to remove tag"

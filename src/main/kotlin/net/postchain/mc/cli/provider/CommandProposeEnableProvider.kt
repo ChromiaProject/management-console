@@ -17,7 +17,7 @@ class CommandProposeEnableProvider : DCBaseCommand(
     override fun runDC() {
         client.transactionBuilder()
                 .proposeProviderStateOperation(clientProviderPubkey, key.data, true, description)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Enabling of provider has been proposed",
                         "Cannot propose enabling of provider"

@@ -31,7 +31,7 @@ class CommandInitEvmEventReceiverPriceOracleChain : DCBaseCommand(
             val compressedConfig = BlockchainConfigurationCompressor.compress(client, config.gtv, dcVersion)
             client.transactionBuilder()
                     .initEvmEventReceiverPriceOracleChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedConfig))
-                    .postAwaitConfirmation()
+                    .postAwaitConfirmation(txListener())
                     .printResult(
                             "EVM event receiver price oracle chain was created",
                             "Failed to create EVM event receiver price oracle chain",
