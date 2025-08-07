@@ -22,7 +22,7 @@ class CommandProposePauseContainer : DCBaseCommand(
                                 ContainerAction.pause,
                                 "Pause container $containerName"
                         )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Container paused proposition was added successfully",
                         "Cannot add proposal for pausing container",

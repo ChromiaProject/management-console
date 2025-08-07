@@ -19,7 +19,7 @@ class CommandResumeContainer : DCBaseCommand(
                                 clientProviderPubkey,
                                 containerName
                         )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Container resumed successfully",
                         "Cannot resume container"

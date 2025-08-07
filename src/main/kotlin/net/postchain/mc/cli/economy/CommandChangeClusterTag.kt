@@ -21,7 +21,7 @@ class CommandChangeClusterTag : ECBaseCommand(
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .changeClusterTagOperation(clusterName, tagName)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Proposal created for changing tag of cluster $clusterName to $tagName",
                                 "Failed to change tag of cluster"
@@ -31,7 +31,7 @@ class CommandChangeClusterTag : ECBaseCommand(
             else -> {
                 economyChainClient.transactionBuilder()
                         .changeClusterTagOperation(clientProviderPubkey, clusterName, tagName)
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Proposal created for changing tag of cluster $clusterName to $tagName",
                                 "Failed to change tag of cluster"

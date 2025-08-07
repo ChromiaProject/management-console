@@ -60,7 +60,7 @@ class CommandSetProviderStakingAccount : ECBaseCommand(
                 echo("Signing done, posting transaction...", err = true)
             }
                     .setProviderStakingAccountFt4Operation(providerPubkey.data)
-                    .postAwaitConfirmation()
+                    .postAwaitConfirmation(txListener())
                     .printResult(
                             "Staking account set to ${accountId.toHex()}",
                             "Failed to set staking account"
@@ -69,7 +69,7 @@ class CommandSetProviderStakingAccount : ECBaseCommand(
             economyChainClient
                     .transactionBuilder()
                     .setProviderStakingAccountOperation(providerPubkey.data, accountPubkey!!.data)
-                    .postAwaitConfirmation()
+                    .postAwaitConfirmation(txListener())
                     .printResult(
                             "Staking account set to ${gtv(accountPubkey!!.data).merkleHash(hashCalculator).toHex()}",
                             "Failed to set staking account"

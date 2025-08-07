@@ -15,7 +15,7 @@ class CommandDisableNode : DCBaseCommand(
     override fun runDC() {
         client.transactionBuilder()
                 .disableNodeOperation(clientProviderPubkey, key.data)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Node disabled",
                         "Cannot disable node"

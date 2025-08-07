@@ -103,7 +103,7 @@ class CommandInit : PmcCommand(
                         initTokenChainOperation(client.pubkey, it)
                     }
                 }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Network was initiated",
                         "Failed to initiate network",

@@ -15,7 +15,7 @@ class CommandEnableNode : DCBaseCommand(
     override fun runDC() {
         client.transactionBuilder()
                 .enableNodeOperation(clientProviderPubkey, key.data)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Node enabled",
                         "Cannot enable node"

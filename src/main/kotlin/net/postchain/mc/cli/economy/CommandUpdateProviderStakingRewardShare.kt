@@ -34,7 +34,7 @@ class CommandUpdateProviderStakingRewardShare : ECBaseCommand(
         economyChainClient
                 .transactionBuilder()
                 .updateProviderStakingRewardsShareOperation(providerPubkey.data, stakingRewardShare)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Staking reward share scheduled to be updated",
                         "Failed to update staking reward share"

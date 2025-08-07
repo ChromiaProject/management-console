@@ -48,7 +48,7 @@ class CommandRemoveContainer : ECBaseCommand(
             }
         }
                 .removeContainerOperation(containerName)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
         when (transactionResult.status) {
             TransactionStatus.CONFIRMED -> {
                 val ticket = economyChainClient.getRemoveContainerTicketByTransaction(transactionResult.txRid.rid.hexStringToByteArray())

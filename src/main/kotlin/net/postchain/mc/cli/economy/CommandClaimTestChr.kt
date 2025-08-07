@@ -31,7 +31,7 @@ class CommandClaimTestChr : ECBaseCommand(
             echo("Signing done, posting transaction...", err = true)
         }
                 .faucetOperation()
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "tCHR claimed to account ${accountId.toHex()}",
                         "Failed to claim tCHR to account ${accountId.toHex()}"

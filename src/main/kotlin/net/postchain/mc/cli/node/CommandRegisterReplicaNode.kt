@@ -37,7 +37,7 @@ class CommandRegisterReplicaNode : DCBaseCommand(
                 .apply {
                     registerNodeWithNodeDataOperation(clientProviderPubkey, RegisterNodeData(WrappedByteArray(key.data), host, port.toLong(), apiUrl, emptyList(), 1, territory, 0))
                 }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Replica node registered",
                         "Failed to register replica node"

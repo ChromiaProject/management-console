@@ -20,7 +20,7 @@ class CommandTransferActionPoints : DCBaseCommand(
     override fun runDC() {
         client.transactionBuilder()
                 .transferActionPointsOperation(clientProviderPubkey, pubkey.data, amount)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Action points transferred",
                         "Transferring action points failed"

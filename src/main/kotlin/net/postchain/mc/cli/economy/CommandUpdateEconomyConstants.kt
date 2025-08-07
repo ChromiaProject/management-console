@@ -59,7 +59,7 @@ class CommandUpdateEconomyConstants : ECBaseCommand(
                             resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal(), scheduleAt
                     )
         }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal for updating economy constants is created and awaits approval.",
                         "Failed to create economy constants update proposal"

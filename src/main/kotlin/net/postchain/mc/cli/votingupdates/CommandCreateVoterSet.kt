@@ -38,7 +38,7 @@ class CommandCreateVoterSet : DCBaseCommand(
                         pubkeys.map { it.data },
                         governorName
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Voter set created",
                         "Cannot create voter set"

@@ -53,7 +53,7 @@ class CommandUpdatePriceOracleRates : ECBaseCommand(
                         .proposePriceOracleRateOperation(clientProviderPubkey, tokenRates)
             }
         }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal for updating price oracle rates is created and awaits approval.",
                         "Failed to create price oracle rate proposal"

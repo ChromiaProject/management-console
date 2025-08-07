@@ -15,7 +15,7 @@ class CommandRemoveNode : DCBaseCommand(
     override fun runDC() {
         client.transactionBuilder()
                 .removeNodeOperation(clientProviderPubkey, key.data)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Node removed",
                         "Cannot remove node"

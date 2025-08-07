@@ -24,7 +24,7 @@ class CommandProposePauseBlockchain : DCBaseCommand(
                         BlockchainAction.pause,
                         description
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Blockchain pause proposition was added successfully",
                         "Cannot add proposal for pausing blockchain"

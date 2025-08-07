@@ -59,7 +59,7 @@ class CommandLinkEvmEoaAccount : PmcCommand(
             echo("Linking EVM account to Chromia account ...", err = true)
         }
                 .linkEvmEoaAccountOperation(evmAddress)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Link EVM account to Chromia account and update auth description signer with EVM address: 0x${evmAddress.toHex()}",
                         "Failed to link and update auth descriptor signer to EVM address. "

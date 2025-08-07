@@ -73,7 +73,7 @@ class CommandReplaceNode : DCBaseCommand(
                         }
                     }
                 }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Node has been replaced",
                         "Failed to replace node"

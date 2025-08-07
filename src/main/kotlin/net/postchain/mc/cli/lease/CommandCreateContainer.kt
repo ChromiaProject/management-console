@@ -108,7 +108,7 @@ class CommandCreateContainer : ECBaseCommand(
                         extraComputeRequests = extraComputeRequests?.toLong() ?: 0L)
             }
         }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
         when (transactionResult.status) {
             TransactionStatus.CONFIRMED -> {
                 val ticket = economyChainClient.getCreateContainerTicketByTransaction(transactionResult.txRid.rid.hexStringToByteArray())
