@@ -9,9 +9,13 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.mordant.terminal.prompt
+import com.google.gson.Gson
 import net.postchain.chain0.common.queries.getBlockchainInfo
 import net.postchain.chain0.model.BlockchainState
 import net.postchain.chain0.proposal_blockchain.proposeForcedConfigurationOperation
+import net.postchain.client.exception.NodesDisagree
+import net.postchain.client.impl.PostchainClientImpl
+import net.postchain.client.impl.QueryMajorityRequestStrategyFactory
 import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
@@ -67,8 +71,17 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
             if (blockchainInfo.state != BlockchainState.PAUSED) {
                 throw UsageError("Blockchain is in state ${blockchainInfo.state} but must be ${BlockchainState.PAUSED} to detect the height")
             }
-            val chainClient = config.chromiaClient.getClient(blockchainRID)
-            val currentHeight = chainClient.currentBlockHeight()
+            val chainClient = config.chromiaClient.getClient(blockchainRID, QueryMajorityRequestStrategyFactory())
+            val currentHeight = try {
+                // Intentionally using generic function to force query to multiple nodes
+                val getHeightResponse = chainClient.genericGetJson("/blockchain/$blockchainRID/height")
+                parseHeightResponse(getHeightResponse)
+            } catch (e: NodesDisagree) {
+                val responses = parseNodesDisagreeResponse(e)
+                throw CliktError("""Could not get consensus on current block height:
+                    $responses.
+                    Carefully inspect these heights and run the command again with the appropriate height using the --height flag.""")
+            }
             if (terminal.terminalInfo.inputInteractive) {
                 val answer = terminal.prompt("The blockchain is ${BlockchainState.PAUSED} and about to build block $currentHeight.\n\nDo you want to proceed and create a forced configuration proposal for height $currentHeight? (y/N)")
                 if (answer == null || !answer.startsWith("Y", ignoreCase = true))
@@ -95,4 +108,13 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
                         "Failed to propose forced configuration"
                 )
     }
+
+    private fun parseHeightResponse(response: String): Long =
+            Gson().fromJson(response, PostchainClientImpl.CurrentBlockHeight::class.java).blockHeight
+
+    private fun parseNodesDisagreeResponse(e: NodesDisagree): String = e.errorMessage
+            .removeSurrounding("[", "]")
+            .split(", ")
+            .map { it.split("=") }
+            .joinToString { "${it[1]} node(s) replied ${parseHeightResponse(it[0])}" }
 }
