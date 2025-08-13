@@ -16,7 +16,7 @@ class CommandRemoveBlockchainReplica : DCBaseCommand(
     private val key by pubkeyOption()
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .removeBlockchainReplicaOperation(
                         clientProviderPubkey,
                         blockchainRID,

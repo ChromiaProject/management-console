@@ -15,7 +15,7 @@ class CommandProposeEnableProvider : DCBaseCommand(
     private val description by proposalDescriptionOption { "Enable provider $key" }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeProviderStateOperation(clientProviderPubkey, key.data, true, description)
                 .postAwaitConfirmation(txListener())
                 .printResult(

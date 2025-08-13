@@ -117,7 +117,7 @@ class CommandProposeImportForeignConfigurations : DCBaseCommand(
         echo("Initial configuration of foreign blockchain downloaded")
         val compressedConfig = BlockchainConfigurationCompressor.compress(client, GtvDecoder.decodeGtv(configData0), version)
 
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeForeignBlockchainImportOperation(clientProviderPubkey,
                         key.data, host, port.toLong(), apiUrl,
                         chain0BlockchainRID.data,
@@ -133,7 +133,7 @@ class CommandProposeImportForeignConfigurations : DCBaseCommand(
 
     private fun proposeImportBlockchainConfigurations(height: Long, configData: ByteArray, version: Long) {
         val compressedConfig = BlockchainConfigurationCompressor.compress(client, GtvDecoder.decodeGtv(configData), version)
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeImportConfigurationOperation(
                         clientProviderPubkey,
                         blockchainRID,

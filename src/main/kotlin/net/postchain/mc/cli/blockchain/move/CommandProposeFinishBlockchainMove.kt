@@ -35,7 +35,7 @@ class CommandProposeFinishBlockchainMove : DCBaseCommand(
     override fun runDC() {
         echo("Blockchain move will be finished as soon as the proposal is approved")
 
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainMoveFinishOperation(clientProviderPubkey, blockchainRID, finalHeight, description)
                 .postAwaitConfirmation(txListener())
                 .printResult(

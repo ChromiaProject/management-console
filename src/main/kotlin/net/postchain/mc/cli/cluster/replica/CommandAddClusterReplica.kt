@@ -18,7 +18,7 @@ class CommandAddClusterReplica : DCBaseCommand(
     private val nodePubKey by pubkeyOption()
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .addReplicaNodeToClusterOperation(
                         clientProviderPubkey, nodePubKey.data, name
                 )

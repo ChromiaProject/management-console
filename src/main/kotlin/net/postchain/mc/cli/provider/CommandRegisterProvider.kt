@@ -117,7 +117,7 @@ class CommandRegisterProvider : DCBaseCommand(
     override fun runDC() {
         if (batchOptions != null) {
             if (pubkey != null) throw CliktError("use --provider instead of --pubkey in a batch mode")
-            client.transactionBuilder()
+            transactionBuilder()
                     .proposeProvidersOperation(
                             clientProviderPubkey, batchOptions!!.provider, providerTier.toTier(), providerTier.isSystem(), enable, description()
                     )
@@ -128,7 +128,7 @@ class CommandRegisterProvider : DCBaseCommand(
                     )
         } else {
             if (pubkey == null) throw CliktError("--pubkey must be provided")
-            client.transactionBuilder()
+            transactionBuilder()
                     .registerProviderOperation(clientProviderPubkey, pubkey!!, providerTier.toTier())
                     .apply {
                         if (providerTier.shouldEnable(enable)) proposeProviderStateOperation(clientProviderPubkey, pubkey!!.data, enable, description())

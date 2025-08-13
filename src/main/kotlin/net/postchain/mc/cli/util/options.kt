@@ -6,6 +6,8 @@ import com.chromia.build.tools.keystore.ChromiaKeyStore
 import com.chromia.cli.tools.config.OptionalChromiaModelConfigOption
 import com.chromia.cli.tools.config.keyIdOption
 import com.chromia.cli.tools.config.secretOption
+import com.chromia.cli.tools.util.SUPPORTED_TIME_AT_FORMATS
+import com.chromia.cli.tools.util.timeAtConverter
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.UsageError
@@ -116,7 +118,7 @@ class PmcKeyClientConfigOption(logger: (String) -> Unit) : PmcClientConfigOption
             chromiaClient.getDirectoryChainClientForForwardingReplica(addNop = true)
     }
 
-    val providerPubkey by lazy { rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_PROVIDER_PUBKEY", "provider.pubkey")?.let { PubKey(it)} }
+    val providerPubkey by lazy { rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_PROVIDER_PUBKEY", "provider.pubkey")?.let { PubKey(it) } }
 }
 
 val defaultClientConfig = PostchainClientConfig.defaultConfig.copy(
@@ -266,15 +268,9 @@ fun CliktCommand.proposalDescriptionOption(helpMessage: String = "Proposal descr
 fun CliktCommand.configurationsFileOption() = option("--configurations-file", help = "File to import blockchain configurations from")
         .path(mustExist = true, canBeDir = false, canBeFile = true, mustBeReadable = true)
 
-fun CliktCommand.scheduleAt(vararg names: String = arrayOf("--schedule-at"), helpMsg: String = "Set the time (UTC) to apply this proposal. Supported formats: ${DATE_TIME_FORMATS.keys.joinToString(", ")} and milliseconds since 1970 (unix/epoch time)") = option(names = names, help = helpMsg)
-        .convert { input ->
-            if (input.all { it.isDigit() } && input.length == 13) {
-                input.toLong()
-            } else {
-                parseDateTimeAsEpochMillis(input, DATE_TIME_FORMATS.values.toList())
-                        ?: throw IllegalArgumentException("Invalid time format: $input supported formats: ${DATE_TIME_FORMATS.keys.joinToString(", ")} and milliseconds since 1970 (unix/epoch time)")
-            }
-        }
+fun CliktCommand.scheduleAt(vararg names: String = arrayOf("--schedule-at"),
+                            helpMsg: String = "Set the time (UTC) to apply this proposal. $SUPPORTED_TIME_AT_FORMATS") = option(names = names, help = helpMsg)
+        .convert { timeAtConverter(it) }
 
 fun CliktCommand.systemContainerUnitsOption() = option("--system-container-units", help = "Number of container units to reserve for cluster system container").long().default(4)
 fun CliktCommand.containerUnitCpuOption() = option("--cu-cpu", help = "Container unit CPU limit (percent of cpus, 10 == 0.1 cpu(s), 150 == 1.5 cpu(s))").long().default(50)

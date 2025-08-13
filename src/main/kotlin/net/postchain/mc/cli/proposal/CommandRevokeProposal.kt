@@ -15,7 +15,7 @@ class CommandRevokeProposal : DCBaseCommand(
 
     override fun runDC() {
 
-        client.transactionBuilder().apply {
+        transactionBuilder().apply {
             revokeProposalOperation(clientProviderPubkey, RowId(idx))
         }
                 .postAwaitConfirmation(txListener())

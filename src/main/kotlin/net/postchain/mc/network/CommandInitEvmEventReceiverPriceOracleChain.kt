@@ -29,7 +29,7 @@ class CommandInitEvmEventReceiverPriceOracleChain : DCBaseCommand(
         eventReceiverConfig?.let {
             val config = BlockchainConfig.readFromFile(it)
             val compressedConfig = BlockchainConfigurationCompressor.compress(client, config.gtv, dcVersion)
-            client.transactionBuilder()
+            transactionBuilder()
                     .initEvmEventReceiverPriceOracleChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedConfig))
                     .postAwaitConfirmation(txListener())
                     .printResult(

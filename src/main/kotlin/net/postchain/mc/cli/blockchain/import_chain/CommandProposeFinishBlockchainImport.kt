@@ -49,7 +49,7 @@ class CommandProposeFinishBlockchainImport : DCBaseCommand(
             throw CliktError("Cannot finish blockchain import. Configurations for height(s): ${missingConfigHeights.joinToString(", ")} have not been imported yet.")
         } else {
             echo("Import of blockchain ${blockchainRID.toHex()} will be finished")
-            val txBuilder = client.transactionBuilder()
+            val txBuilder = transactionBuilder()
             txBuilder.proposeFinishImportBlockchainOperation(clientProviderPubkey, blockchainRID, finalHeight, description(blockchainRID))
             txBuilder.postAwaitConfirmation(txListener()).printResult(
                     "Import of blockchain ${blockchainRID.toHex()} finished",

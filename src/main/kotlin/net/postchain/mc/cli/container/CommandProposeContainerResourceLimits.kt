@@ -64,7 +64,7 @@ class CommandProposeContainerResourceLimits : DCBaseCommand(
                             setIfNotNull(ContainerResourceLimitType.extra_storage, extraStorage)
                         }
 
-                client.transactionBuilder()
+                transactionBuilder()
                         .proposeContainerLimitsOperation(clientProviderPubkey, containerName, limits, description)
                         .postAwaitConfirmation(txListener())
                         .printResult(
@@ -84,7 +84,7 @@ class CommandProposeContainerResourceLimits : DCBaseCommand(
                             setIfNotNull(ApiCompatV22.ContainerResourceLimitType.max_blockchains, maxBlockchains)
                         }
 
-                client.transactionBuilder()
+                transactionBuilder()
                         .proposeContainerLimitsOperationV22(clientProviderPubkey, containerName, limits, description)
                         .postAwaitConfirmation(txListener())
                         .printResult(
@@ -108,7 +108,7 @@ class CommandProposeContainerResourceLimits : DCBaseCommand(
                             setIfNotNull(ApiCompatV2.ContainerResourceLimitType.io_write, _ioWrite)
                         }
 
-                client.transactionBuilder()
+                transactionBuilder()
                         .proposeContainerLimitsOperationV2(clientProviderPubkey, containerName, limits, description)
                         .postAwaitConfirmation(txListener())
                         .printResult(

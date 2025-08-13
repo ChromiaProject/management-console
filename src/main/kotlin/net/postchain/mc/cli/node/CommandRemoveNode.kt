@@ -13,7 +13,7 @@ class CommandRemoveNode : DCBaseCommand(
     private val key by pubkeyOption()
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .removeNodeOperation(clientProviderPubkey, key.data)
                 .postAwaitConfirmation(txListener())
                 .printResult(

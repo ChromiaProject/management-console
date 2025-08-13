@@ -17,7 +17,7 @@ class CommandProposeResumeBlockchain : DCBaseCommand(
     private val description by proposalDescriptionOption { "Start blockchain $blockchainRID" }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainActionOperation(
                         clientProviderPubkey,
                         blockchainRID,

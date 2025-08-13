@@ -42,7 +42,7 @@ class CommandProposeUpdateSubnodeImage : DCBaseCommand(
     }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .apply {
                     if (dcVersion < 96) {
                         if (digest == null) {

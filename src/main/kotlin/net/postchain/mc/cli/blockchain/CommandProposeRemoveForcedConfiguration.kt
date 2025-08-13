@@ -60,7 +60,7 @@ class CommandProposeRemoveForcedConfiguration : DCBaseCommand(
         }
         when {
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
-                client.transactionBuilder()
+                transactionBuilder()
                         .proposeRemoveForcedConfigurationOperationV87(blockchainRID, height, description)
                         .postAwaitConfirmation(txListener())
                         .printResult(
@@ -70,7 +70,7 @@ class CommandProposeRemoveForcedConfiguration : DCBaseCommand(
             }
 
             else -> {
-                client.transactionBuilder()
+                transactionBuilder()
                         .proposeRemoveForcedConfigurationOperation(clientProviderPubkey, blockchainRID, height, description)
                         .postAwaitConfirmation(txListener())
                         .printResult(

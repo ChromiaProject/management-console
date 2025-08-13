@@ -17,7 +17,7 @@ class CommandProposePauseBlockchain : DCBaseCommand(
     private val description by proposalDescriptionOption { "Stop blockchain $blockchainRID" }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainActionOperation(
                         clientProviderPubkey,
                         blockchainRID,

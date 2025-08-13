@@ -37,7 +37,7 @@ class CommandProposeImportForeignBlocks : DCBaseCommand(
 
     override fun runDC() {
         echo("Import of blocks of foreign blockchain ${blockchainRID.toHex()} will be proposed", err = true)
-        val txBuilder = client.transactionBuilder()
+        val txBuilder = transactionBuilder()
         txBuilder.proposeForeignBlockchainBlocksImportOperation(clientProviderPubkey, blockchainRID, finalHeight, description)
         txBuilder.postAwaitConfirmation(txListener())
                 .printResult(

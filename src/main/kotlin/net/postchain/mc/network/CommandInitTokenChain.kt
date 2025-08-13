@@ -36,7 +36,7 @@ class CommandInitTokenChain : DCBaseCommand(
         chainConfig?.let {
             val chainConfigData = BlockchainConfig.readFromFile(it)
             val compressedChainConfig = BlockchainConfigurationCompressor.compress(client, chainConfigData.gtv, dcVersion)
-            client.transactionBuilder()
+            transactionBuilder()
                     .initTokenChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedChainConfig))
                     .postAwaitConfirmation(txListener())
                     .printResult(

@@ -1,5 +1,6 @@
 package net.postchain.mc.cli
 
+import com.chromia.cli.tools.util.timebOptions
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
@@ -11,6 +12,7 @@ import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.pmcKeyConfigOption
 import net.postchain.mc.network.Version
 import net.postchain.mc.network.requireApiVersion
+import java.time.Clock
 
 const val DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION = 65L
 
@@ -29,6 +31,8 @@ abstract class DCBaseCommand(
     val client get() = config.txClient
     val dcVersion get() = Version(client).version
 
+    protected val timeb by timebOptions(Clock.systemUTC())
+
     // Get provider pubkey from (1) config, (2) by looking up based on signer keys or (3) use default/first signer key
     val clientProviderPubkey by lazy {
         config.providerPubkey?.data
@@ -37,7 +41,6 @@ abstract class DCBaseCommand(
     }
 
     override fun run() {
-
         requiresVersion?.apply {
             client.requireApiVersion(dcVersion, requiresVersion)
         }
@@ -46,6 +49,13 @@ abstract class DCBaseCommand(
     }
 
     abstract fun runDC()
+
+    fun transactionBuilder() = client.transactionBuilder()
+            .apply {
+                if (timeb != null) {
+                    addTimeBound(0, timeb)
+                }
+            }
 
     fun getProviderByClientKeys(): ByteArray? {
         if (dcVersion >= 65) {

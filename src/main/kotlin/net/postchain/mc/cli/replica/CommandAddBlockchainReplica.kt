@@ -16,7 +16,7 @@ class CommandAddBlockchainReplica : DCBaseCommand(
     private val nodePubKey by pubkeyOption()
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .addBlockchainReplicaOperation(
                         clientProviderPubkey,
                         blockchainRID,

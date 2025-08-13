@@ -30,7 +30,7 @@ class CommandInitEconomyChain : DCBaseCommand(
         economyChainConfig?.let {
             val economyChainConfigData = BlockchainConfig.readFromFile(it)
             val compressedEconomyChainConfig = BlockchainConfigurationCompressor.compress(client, economyChainConfigData.gtv, dcVersion)
-            client.transactionBuilder()
+            transactionBuilder()
                     .initEconomyChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedEconomyChainConfig))
                     .postAwaitConfirmation(txListener())
                     .printResult(

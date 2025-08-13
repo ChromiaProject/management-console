@@ -24,7 +24,7 @@ class CommandSetProviderKeyThreshold : DCBaseCommand(
     override fun runDC() {
         when {
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
-                client.transactionBuilder()
+                transactionBuilder()
                         .setProviderKeyThresholdOperationV87(ProviderKeyRole.main, threshold)
                         .postAwaitConfirmation(txListener())
                         .printResult(
@@ -34,7 +34,7 @@ class CommandSetProviderKeyThreshold : DCBaseCommand(
             }
 
             else -> {
-                client.transactionBuilder()
+                transactionBuilder()
                         .setProviderKeyThresholdOperation(clientProviderPubkey, ProviderKeyRole.main, threshold)
                         .postAwaitConfirmation(txListener())
                         .printResult(

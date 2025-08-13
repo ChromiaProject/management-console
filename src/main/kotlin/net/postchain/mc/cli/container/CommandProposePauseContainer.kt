@@ -15,7 +15,7 @@ class CommandProposePauseContainer : DCBaseCommand(
     private val containerName by nameOption("Container name").required()
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeContainerActionOperation(
                                 clientProviderPubkey,
                                 containerName,

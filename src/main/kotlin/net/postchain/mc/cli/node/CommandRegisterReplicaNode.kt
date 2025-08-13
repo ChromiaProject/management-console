@@ -33,7 +33,7 @@ class CommandRegisterReplicaNode : DCBaseCommand(
             }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .apply {
                     registerNodeWithNodeDataOperation(clientProviderPubkey, RegisterNodeData(WrappedByteArray(key.data), host, port.toLong(), apiUrl, emptyList(), 1, territory, 0))
                 }

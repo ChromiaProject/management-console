@@ -25,7 +25,7 @@ class CommandProposeClusterAnchoringConfiguration : DCBaseCommand(
         val version = client.apiVersion()
         val bcConfig = BlockchainConfig.readFromFile(anchoringConfig)
         val compressedConfig = BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, version)
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeClusterAnchoringConfigurationOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedConfig))
                 .postAwaitConfirmation(txListener())
                 .printResult(

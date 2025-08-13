@@ -22,7 +22,7 @@ class CommandPromoteProvider : DCBaseCommand(
     private val description by proposalDescriptionOption { "Promote provider $key - enable: $enable, system: $system" }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .run {
                     if (system) proposeProviderIsSystemOperation(clientProviderPubkey, key.data, true, description)
                     else promoteNodeProviderOperation(clientProviderPubkey, key.data).apply {

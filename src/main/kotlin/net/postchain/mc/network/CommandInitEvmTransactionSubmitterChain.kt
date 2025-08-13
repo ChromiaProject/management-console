@@ -29,7 +29,7 @@ class CommandInitEvmTransactionSubmitterChain : DCBaseCommand(
         transactionSubmitterConfig?.let {
             val transactionSubmitterChainConfigData = BlockchainConfig.readFromFile(it)
             val compressedTransactionSubmitterChainConfig = BlockchainConfigurationCompressor.compress(client, transactionSubmitterChainConfigData.gtv, dcVersion)
-            client.transactionBuilder()
+            transactionBuilder()
                     .initEvmTransactionSubmitterChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedTransactionSubmitterChainConfig))
                     .postAwaitConfirmation(txListener())
                     .printResult(

@@ -18,7 +18,7 @@ class CommandRevokeProviderKey : DCBaseCommand(
     override fun runDC() {
         when {
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
-                client.transactionBuilder()
+                transactionBuilder()
                         .revokeProviderKeyOperationV87(ProviderKeyRole.main, pubkey)
                         .postAwaitConfirmation(txListener())
                         .printResult(
@@ -29,7 +29,7 @@ class CommandRevokeProviderKey : DCBaseCommand(
             }
 
             else -> {
-                client.transactionBuilder()
+                transactionBuilder()
                         .revokeProviderKeyOperation(clientProviderPubkey, ProviderKeyRole.main, pubkey)
                         .postAwaitConfirmation(txListener())
                         .printResult(

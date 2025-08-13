@@ -25,7 +25,7 @@ class CommandProposeDisableSubnodeImage : DCBaseCommand(
             throw CliktError("--schedule-at is only supported in API version 86 or higher (current: $dcVersion)")
         }
         
-        client.transactionBuilder()
+        transactionBuilder()
                 .apply {
                     if (dcVersion < 86) {
                         proposeSubnodeImageStateOperationV85(clientProviderPubkey, name, false, description)
