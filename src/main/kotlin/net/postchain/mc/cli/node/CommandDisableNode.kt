@@ -13,7 +13,7 @@ class CommandDisableNode : DCBaseCommand(
     private val key by pubkeyOption()
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .disableNodeOperation(clientProviderPubkey, key.data)
                 .postAwaitConfirmation(txListener())
                 .printResult(

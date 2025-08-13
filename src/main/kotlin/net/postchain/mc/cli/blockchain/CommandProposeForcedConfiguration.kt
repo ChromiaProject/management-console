@@ -81,7 +81,7 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
         val compressedConfigurationData = GtvEncoder.encodeGtv(BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, dcVersion))
 
-        client.transactionBuilder()
+        transactionBuilder()
                 .apply {
                     if (dcVersion >= 80) {
                         proposeForcedConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, proposalHeight, proposalDescription, resumeChain)

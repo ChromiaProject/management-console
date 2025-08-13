@@ -70,7 +70,7 @@ class CommandAddCluster : DCBaseCommand(
         if (apiVersion >= 49)
             hasDirectCluster = client.hasDirectCluster()
         if (hasDirectCluster) {
-            client.transactionBuilder()
+            transactionBuilder()
                     .apply {
                         when {
                             apiVersion >= 88 -> {

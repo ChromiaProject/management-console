@@ -18,7 +18,7 @@ class CommandRemoveClusterReplica : DCBaseCommand(
     private val key by pubkeyOption()
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .removeReplicaNodeFromClusterOperation(
                         clientProviderPubkey, key.data, name
                 )

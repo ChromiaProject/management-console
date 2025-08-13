@@ -30,7 +30,7 @@ class CommandProposeUnarchiveBlockchain : DCBaseCommand(
     }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainUnarchiveActionOperation(
                         clientProviderPubkey,
                         blockchainRID,

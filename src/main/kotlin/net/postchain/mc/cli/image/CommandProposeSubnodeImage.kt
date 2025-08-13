@@ -48,7 +48,7 @@ class CommandProposeSubnodeImage : DCBaseCommand(
             throw CliktError("--base-compute-requests is only supported in API version 92 or higher (current: $dcVersion)")
         }
 
-        client.transactionBuilder()
+        transactionBuilder()
                 .apply {
                     if (dcVersion < 86) {
                         proposeSubnodeImageOperationV85(clientProviderPubkey, name, url, digest, type, imageDescription, gtxModules, syncExts, description)

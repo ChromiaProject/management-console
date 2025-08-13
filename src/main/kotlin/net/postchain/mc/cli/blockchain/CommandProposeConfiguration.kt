@@ -60,7 +60,7 @@ class CommandProposeConfiguration : DCBaseCommand(
             description
         }
 
-        client.transactionBuilder()
+        transactionBuilder()
                 .apply {
                     if (height == null) {
                         when {

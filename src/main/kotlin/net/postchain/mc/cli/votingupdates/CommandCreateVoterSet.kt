@@ -30,7 +30,7 @@ class CommandCreateVoterSet : DCBaseCommand(
     )
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .createVoterSetOperation(
                         clientProviderPubkey,
                         name,

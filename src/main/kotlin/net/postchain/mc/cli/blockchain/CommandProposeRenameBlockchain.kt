@@ -22,7 +22,7 @@ class CommandProposeRenameBlockchain : DCBaseCommand(
     private val description by proposalDescriptionOption { "Rename blockchain $blockchainRID to $name" }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainRenameOperation(
                         clientProviderPubkey,
                         blockchainRID,

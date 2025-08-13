@@ -31,7 +31,7 @@ class CommandProviderBlockchainAuth : DCBaseCommand(
         }
         when {
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
-                client.transactionBuilder()
+                transactionBuilder()
                         .addProviderBlockchainAuthOperationV87(blockchainRid)
                         .postAwaitConfirmation(txListener())
                         .printResult(
@@ -41,7 +41,7 @@ class CommandProviderBlockchainAuth : DCBaseCommand(
             }
 
             else -> {
-                client.transactionBuilder()
+                transactionBuilder()
                         .addProviderBlockchainAuthOperation(clientProviderPubkey, blockchainRid)
                         .postAwaitConfirmation(txListener())
                         .printResult(

@@ -23,7 +23,7 @@ class CommandProposeContainerSubnodeImage : DCBaseCommand(
 
     override fun runDC() {
 
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeContainerSubnodeImageOperation(clientProviderPubkey, containerName, subnodeImageName, description)
                 .postAwaitConfirmation(txListener())
                 .printResult(

@@ -29,7 +29,7 @@ class CommandInitPriceOracleChain : DCBaseCommand(
         priceOracleConfig?.let {
             val priceOracleChainConfigData = BlockchainConfig.readFromFile(it)
             val compressedPriceOracleChainConfig = BlockchainConfigurationCompressor.compress(client, priceOracleChainConfigData.gtv, dcVersion)
-            client.transactionBuilder()
+            transactionBuilder()
                     .initPriceOracleChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedPriceOracleChainConfig))
                     .postAwaitConfirmation(txListener())
                     .printResult(

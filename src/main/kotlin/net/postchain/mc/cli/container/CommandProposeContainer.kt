@@ -84,7 +84,7 @@ class CommandProposeContainer : DCBaseCommand(
             if (dcVersion >= 49)
                 hasDirectContainer = client.hasDirectContainer()
             if (hasDirectContainer) {
-                client.transactionBuilder()
+                transactionBuilder()
                         .apply {
                             when {
 
@@ -229,7 +229,7 @@ class CommandProposeContainer : DCBaseCommand(
                 if (dcVersion < 57) {
                     throw CliktError("Setting subnode image for container is not supported by network")
                 }
-                client.transactionBuilder().proposeContainerWithSubnodeImageOperation(
+                transactionBuilder().proposeContainerWithSubnodeImageOperation(
                         clientProviderPubkey,
                         clusterName,
                         name,
@@ -243,7 +243,7 @@ class CommandProposeContainer : DCBaseCommand(
                                 "Failed to propose container creation"
                         )
             } else {
-                client.transactionBuilder().proposeContainerOperation(
+                transactionBuilder().proposeContainerOperation(
                         clientProviderPubkey,
                         clusterName,
                         name,

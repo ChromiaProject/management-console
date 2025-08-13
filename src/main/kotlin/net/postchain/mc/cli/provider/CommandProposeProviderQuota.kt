@@ -29,7 +29,7 @@ class CommandProposeProviderQuota : DCBaseCommand(
     }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeProviderQuotaOperation(clientProviderPubkey, providerTier.toTier(), providerQuotaType, value, description())
                 .postAwaitConfirmation(txListener())
                 .printResult(

@@ -69,7 +69,7 @@ class CommandUpdateNode : DCBaseCommand(
         }
 
         val provider = clientProviderPubkey
-        client.transactionBuilder()
+        transactionBuilder()
                 .apply {
                     when {
                         dcVersion >= 24 -> {

@@ -26,7 +26,7 @@ class CommandRequestCluster : DCBaseCommand(
         if (apiVersion >= 29) {
             throw CliktError("This operation is not supported after version 29 (version = $apiVersion)")
         } else {
-            client.transactionBuilder()
+            transactionBuilder()
                     .requestClusterOperationV28(clientProviderPubkey, name, size, requireFull)
                     .postAwaitConfirmation(txListener())
                     .printResult(

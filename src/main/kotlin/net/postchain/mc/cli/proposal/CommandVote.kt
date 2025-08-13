@@ -21,7 +21,7 @@ class CommandVote : DCBaseCommand(
 
     override fun runDC() {
 
-        client.transactionBuilder().apply {
+        transactionBuilder().apply {
                 makeVoteOperation(clientProviderPubkey, id, vote)
         }.postAwaitConfirmation(txListener())
                 .printResult(

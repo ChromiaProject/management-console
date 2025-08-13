@@ -18,7 +18,7 @@ class CommandProposeArchiveBlockchain : DCBaseCommand(
     private val description by proposalDescriptionOption { "Archive blockchain $blockchainRID" }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainActionOperation(
                         clientProviderPubkey,
                         blockchainRID,

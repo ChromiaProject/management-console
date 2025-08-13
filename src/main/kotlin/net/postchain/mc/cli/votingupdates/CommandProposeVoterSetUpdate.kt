@@ -45,7 +45,7 @@ class CommandProposeVoterSetUpdate : DCBaseCommand(
     }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeUpdateVoterSetOperation(
                         clientProviderPubkey,
                         voterSet, threshold, governor, newMember, removeMember, description

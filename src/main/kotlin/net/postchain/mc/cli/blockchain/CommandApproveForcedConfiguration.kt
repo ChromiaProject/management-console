@@ -26,7 +26,7 @@ class CommandApproveForcedConfiguration : DCBaseCommand(
     private val blockchainRID by blockchainRidOption().required()
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .approveProposedForcedConfigurationOperation(clientProviderPubkey, blockchainRID)
                 .postAwaitConfirmation(txListener())
                 .printResult(

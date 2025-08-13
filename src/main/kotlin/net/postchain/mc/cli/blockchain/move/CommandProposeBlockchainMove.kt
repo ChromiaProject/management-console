@@ -27,7 +27,7 @@ class CommandProposeBlockchainMove : DCBaseCommand(
     override fun runDC() {
         echo("Blockchain $blockchainRID will start moving to container $destinationContainer as soon as the proposal is approved")
 
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainMoveOperation(clientProviderPubkey, blockchainRID, destinationContainer, description)
                 .postAwaitConfirmation(txListener())
                 .printResult(

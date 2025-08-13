@@ -18,7 +18,7 @@ class CommandAddProviderKey : DCBaseCommand(
     override fun runDC() {
         when {
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
-                client.transactionBuilder()
+                transactionBuilder()
                         .addProviderKeyOperationV87(ProviderKeyRole.main, pubkey)
                         .postAwaitConfirmation(txListener())
                         .printResult(
@@ -28,7 +28,7 @@ class CommandAddProviderKey : DCBaseCommand(
             }
 
             else -> {
-                client.transactionBuilder()
+                transactionBuilder()
                         .addProviderKeyOperation(clientProviderPubkey, ProviderKeyRole.main, pubkey)
                         .postAwaitConfirmation(txListener())
                         .printResult(

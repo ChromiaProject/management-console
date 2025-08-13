@@ -79,7 +79,7 @@ class CommandRegisterNode : DCBaseCommand(
             echo("Node capability is not supported in API version $apiVersion and will be ignored")
         }
 
-        client.transactionBuilder()
+        transactionBuilder()
                 .apply {
                     when {
                         apiVersion >= 24 -> {

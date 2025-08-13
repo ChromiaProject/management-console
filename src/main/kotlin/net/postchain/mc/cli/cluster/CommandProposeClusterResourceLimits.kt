@@ -47,7 +47,7 @@ class CommandProposeClusterResourceLimits : DCBaseCommand(
     private val _ioWrite by option("-iw", "--io-write", help = "Disk I/O write limit (MiB/s)").long().deprecated()
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .apply {
                     when {
                         dcVersion >= 24 -> proposeClusterLimitsOperation(clientProviderPubkey, clusterName, clusterUnits, extraStorage, description)

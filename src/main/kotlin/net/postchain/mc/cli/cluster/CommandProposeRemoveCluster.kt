@@ -17,7 +17,7 @@ class CommandProposeRemoveCluster : DCBaseCommand(
     private val description by proposalDescriptionOption { "Remove cluster $name" }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeRemoveClusterOperation(clientProviderPubkey, name, description)
                 .postAwaitConfirmation(txListener())
                 .printResult(

@@ -45,7 +45,7 @@ class CommandProposeBlockchain : DCBaseCommand(
         val apiVersion = client.apiVersion()
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
         val compressedConfig = BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, apiVersion)
-        val txResult = client.transactionBuilder()
+        val txResult = transactionBuilder()
                 .proposeBlockchainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedConfig), name, container, description)
                 .postAwaitConfirmation(txListener())
                 .apply {

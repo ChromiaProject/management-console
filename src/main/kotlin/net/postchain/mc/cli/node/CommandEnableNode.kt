@@ -13,7 +13,7 @@ class CommandEnableNode : DCBaseCommand(
     private val key by pubkeyOption()
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .enableNodeOperation(clientProviderPubkey, key.data)
                 .postAwaitConfirmation(txListener())
                 .printResult(

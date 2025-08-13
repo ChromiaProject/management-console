@@ -24,7 +24,7 @@ class CommandProposeCancelBlockchainMove : DCBaseCommand(
     override fun runDC() {
         echo("Blockchain move will be canceled as soon as the proposal is approved")
 
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainMoveCancelOperation(clientProviderPubkey, blockchainRID, description)
                 .postAwaitConfirmation(txListener())
                 .printResult(
