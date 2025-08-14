@@ -11,7 +11,7 @@ import net.postchain.mc.cli.optionalEvmAddressOption
 import net.postchain.mc.cli.util.pmcTable
 
 class CommandListPendingLeaseTickets : ECBaseCommand(
-        name = "list",
+        name = "list-pending-tickets",
         help = "List pending lease tickets",
         requiresECVersion = 56,
 ) {
