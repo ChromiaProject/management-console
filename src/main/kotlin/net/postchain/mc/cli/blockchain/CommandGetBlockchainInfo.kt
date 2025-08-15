@@ -1,7 +1,10 @@
 package net.postchain.mc.cli.blockchain
 
+import com.chromia.cli.base.formatter.jsonTable
+import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.mordant.rendering.TextAlign
@@ -28,6 +31,7 @@ import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.util.BlockHeightClient
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
+import net.postchain.mc.cli.util.prettyTable
 import net.postchain.mc.compatibility.ApiCompatV33.getImportingForeignBlockchainInfoV33
 
 class CommandGetBlockchainInfo : PmcCommand(
@@ -149,22 +153,35 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromi
     val blockchainReplicas = client.getBlockchainReplicas(blockchainRid)
     if (blockchainReplicas.isNotEmpty()) {
         val blockHeightClient = BlockHeightClient(chromiaClient)
-        echo(pmcTable(
+        echo(if (terminal.terminalInfo.outputInteractive) prettyTable(
                 "Heights from replicas",
-                listOf("Node", "Height"),
+                listOf("Pubkey", "API URL", "Height"),
                 blockchainReplicas
                         .map { PubKey(it[0].asByteArray()) }
                         .map { CmPeerInfo(it.wData, client.getNodeData(it).apiUrl) }
                         .map {
                             val heightOnReplica = blockHeightClient.getCurrentBlockHeightOnPeer(it, blockchainRid)
                             listOf(
-                                    PubKey(it.pubkey).toShortHex(),
+                                    PubKey(it.pubkey).hex(),
+                                    it.apiUrl,
                                     if (heightOnReplica < 0) "Unknown" else heightOnReplica.toString(),
                             )
                         }
-        ))
+        ) else jsonTable {
+            body {
+                blockchainReplicas
+                        .map { PubKey(it[0].asByteArray()) }
+                        .map { CmPeerInfo(it.wData, client.getNodeData(it).apiUrl) }
+                        .forEach {
+                            val heightOnReplica = blockHeightClient.getCurrentBlockHeightOnPeer(it, blockchainRid)
+                            row(
+                                    PubKey(it.pubkey).hex(),
+                                    if (heightOnReplica < 0) "Unknown" else heightOnReplica.toString(),
+                            )
+                        }
+            }
+        })
     }
-
 }
 
 internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainReadClient, chromiaClient: ChromiaClient, container: String, blockchainRid: BlockchainRid, caption: String, isMoving: Boolean) {
@@ -178,15 +195,23 @@ internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainReadClient,
     }
     val blockHeightClient = BlockHeightClient(chromiaClient)
     val anchoredHeight = blockHeightClient.getLastAnchoredBlockHeight(anchoringChain, clusterEndpoints, blockchainRid)
+    val nodeHeights = clusterInfo.peers.parallelStream()
+            .map { peer -> peer to blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid, if (isMoving) container else null) }
+            .toList()
 
-    echo(pmcTable {
+    echo(if (terminal.terminalInfo.outputInteractive) defaultTable {
         captionTop(caption, TextAlign.LEFT)
         body {
-            row("Anchored height", anchoredHeight)
-            clusterInfo.peers.parallelStream()
-                    .map { peer -> Pair(peer.pubkey, blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid, if (isMoving) container else null)) }
-                    .toList()
-                    .forEach { peerHeight -> row(PubKey(peerHeight.first).toShortHex(), peerHeight.second) }
+            row("Anchored height", "", anchoredHeight)
+            nodeHeights
+                    .forEach { (peer, height) -> row(PubKey(peer.pubkey).hex(), peer.apiUrl, height) }
+        }
+    } else jsonTable {
+        body {
+            row("Anchored_height", anchoredHeight)
+            nodeHeights.forEach { (peer, height) ->
+                row(PubKey(peer.pubkey).hex(), height)
+            }
         }
     })
 }

@@ -182,3 +182,13 @@ fun buildGetLastAnchoredBlockResponse(height: Long): Gtv {
     ))
 }
 
+fun buildCmGetClusterBlockchainsResponse(): Gtv {
+    return gtv(listOf(
+            gtv(BlockchainRid.buildRepeat(33).wData)
+    ))
+}
+
+fun buildCmGetSystemAnchoringChainResponse(): Gtv {
+    return gtv(BlockchainRid.buildRepeat(2).wData)
+}
+
