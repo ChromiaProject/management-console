@@ -27,7 +27,7 @@ fun CliktCommand.pmcTable(name: String, headers: List<String>, rows: List<List<S
             jsonTable(headers, rows)
         }
 
-private fun CliktCommand.prettyTable(name: String, headers: List<String>, rows: List<List<String>>, idColumn: Pair<Int, Int>?, interactive: Boolean) = defaultTable {
+fun CliktCommand.prettyTable(name: String, headers: List<String>, rows: List<List<String>>, idColumn: Pair<Int, Int>? = null, interactive: Boolean = false) = defaultTable {
     captionTop("${name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}:", TextAlign.LEFT)
     if (interactive) {
         column(0) {

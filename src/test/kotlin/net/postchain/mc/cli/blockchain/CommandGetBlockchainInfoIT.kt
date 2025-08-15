@@ -6,6 +6,7 @@ import net.postchain.mc.cli.test_helpers.DEFAULT_NODE01_API
 import net.postchain.mc.cli.test_helpers.DEFAULT_NODE01_HOST
 import net.postchain.mc.cli.test_helpers.DEFAULT_NODE01_PORT
 import net.postchain.mc.cli.test_helpers.DEFAULT_NODE01_PUBKEY
+import net.postchain.mc.cli.test_helpers.DEFAULT_PROVIDER01_PUBKEY
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.assertLineValue
 import net.postchain.mc.cli.test_helpers.buildGetContainerDataResponse
@@ -41,11 +42,10 @@ class CommandGetBlockchainInfoIT {
 
                     // Anchored
                     assertLineValue(result.stdout, "Anchored_height", "112230")
-                    assertLineValue(result.stdout, "Height", "112233")
+                    assertLineValue(result.stdout, DEFAULT_PROVIDER01_PUBKEY, "112233")
 
                     // Nodes
-                    assertLineValue(result.stdout, "Node", DEFAULT_NODE01_PUBKEY.toHex().take(8))
-                    assertLineValue(result.stdout, "Height", "112233")
+                    assertLineValue(result.stdout, DEFAULT_NODE01_PUBKEY.toHex(),"112233")
                 }
     }
 
