@@ -1,5 +1,7 @@
 package net.postchain.mc.cli.blockchain
 
+import com.google.gson.Gson
+import com.google.gson.JsonElement
 import net.postchain.common.BlockchainRid
 import net.postchain.mc.cli.test_helpers.DEFAULT_BRID_DIRECTORY_CHAIN
 import net.postchain.mc.cli.test_helpers.DEFAULT_NODE01_API
@@ -32,6 +34,8 @@ class CommandGetBlockchainInfoIT {
                 .testCommand(CommandGetBlockchainInfo(),
                         "-brid", DEFAULT_BRID_DIRECTORY_CHAIN.toHex(),
                 ) { result, _ ->
+                    Gson().fromJson(result.stdout, JsonElement::class.java)
+
                     assertLineValue(result.stdout, "Name", "bc01")
                     assertLineValue(result.stdout, "RID", BlockchainRid.ZERO_RID.toHex())
                     assertLineValue(result.stdout, "State", "RUNNING")
@@ -67,6 +71,8 @@ class CommandGetBlockchainInfoIT {
                 .testCommand(CommandGetBlockchainInfo(),
                         "-brid", DEFAULT_BRID_DIRECTORY_CHAIN.toHex(),
                 ) { result, _ ->
+                    Gson().fromJson(result.stdout, JsonElement::class.java)
+
                     assertLineValue(result.stdout, "Source_container", "container01")
                     assertLineValue(result.stdout, "Destination_container", "container02")
                     assertLineValue(result.stdout, "Final_height", "15000")
@@ -91,6 +97,8 @@ class CommandGetBlockchainInfoIT {
                 .testCommand(CommandGetBlockchainInfo(),
                         "-brid", DEFAULT_BRID_DIRECTORY_CHAIN.toHex(),
                 ) { result, _ ->
+                    Gson().fromJson(result.stdout, JsonElement::class.java)
+
                     assertLineValue(result.stdout, "Node_pubkey", DEFAULT_NODE01_PUBKEY.toHex())
                     assertLineValue(result.stdout, "Node_host", DEFAULT_NODE01_HOST)
                     assertLineValue(result.stdout, "Node_port", "$DEFAULT_NODE01_PORT")
@@ -118,6 +126,8 @@ class CommandGetBlockchainInfoIT {
                 .testCommand(CommandGetBlockchainInfo(),
                         "-brid", DEFAULT_BRID_DIRECTORY_CHAIN.toHex(),
                 ) { result, _ ->
+                    Gson().fromJson(result.stdout, JsonElement::class.java)
+
                     assertLineValue(result.stdout, "Source_container", "container01")
                     assertLineValue(result.stdout, "Destination_container", "container02")
                     assertLineValue(result.stdout, "Final_height", "15000")
