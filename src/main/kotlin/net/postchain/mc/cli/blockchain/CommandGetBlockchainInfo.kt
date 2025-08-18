@@ -57,7 +57,10 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromi
     val blockchainInfo = client.getBlockchainInfo(blockchainRid.data)
             ?: throw CliktError("Blockchain with rid $blockchainRid not found")
 
-    // Basic info
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo("{")
+        echo(""""basic": """, trailingNewline = false)
+    }
     echo(pmcTable {
         captionTop("Basic info:", TextAlign.LEFT)
         body {
@@ -79,6 +82,9 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromi
     if (isMoving) {
         val movingInfo = client.getMovingBlockchainInfo(blockchainRid)
         movingInfo?.let { info ->
+            if (!terminal.terminalInfo.outputInteractive) {
+                echo(""","moving": """, trailingNewline = false)
+            }
             echo(pmcTable {
                 captionTop("Moving blockchain info:", TextAlign.LEFT)
                 body {
@@ -95,6 +101,9 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromi
 
     // Migrating info
     if (blockchainInfo.isForeignImporting == true) {
+        if (!terminal.terminalInfo.outputInteractive) {
+            echo(""","moving": """, trailingNewline = false)
+        }
         when {
             apiVersion >= 33 -> {
                 client.getImportingForeignBlockchainInfo(blockchainRid)?.let { info ->
@@ -133,6 +142,9 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromi
     // Unarchiving info
     if (blockchainInfo.isUnarchiving == true && apiVersion >= 33) {
         client.getUnarchivingBlockchainInfo(blockchainRid)?.let { info ->
+            if (!terminal.terminalInfo.outputInteractive) {
+                echo(""","unarchiving": """, trailingNewline = false)
+            }
             echo(pmcTable {
                 captionTop("Unarchiving blockchain info:", TextAlign.LEFT)
                 body {
@@ -153,6 +165,9 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromi
     val blockchainReplicas = client.getBlockchainReplicas(blockchainRid)
     if (blockchainReplicas.isNotEmpty()) {
         val blockHeightClient = BlockHeightClient(chromiaClient)
+        if (!terminal.terminalInfo.outputInteractive) {
+            echo(""","replica_heights": """, trailingNewline = false)
+        }
         echo(if (terminal.terminalInfo.outputInteractive) prettyTable(
                 "Heights from replicas",
                 listOf("Pubkey", "API URL", "Height"),
@@ -182,6 +197,10 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromi
             }
         })
     }
+
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo("}")
+    }
 }
 
 internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainReadClient, chromiaClient: ChromiaClient, container: String, blockchainRid: BlockchainRid, caption: String, isMoving: Boolean) {
@@ -199,6 +218,9 @@ internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainReadClient,
             .map { peer -> peer to blockHeightClient.getCurrentBlockHeightOnPeer(peer, blockchainRid, if (isMoving) container else null) }
             .toList()
 
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo(""","heights": """, trailingNewline = false)
+    }
     echo(if (terminal.terminalInfo.outputInteractive) defaultTable {
         captionTop(caption, TextAlign.LEFT)
         body {

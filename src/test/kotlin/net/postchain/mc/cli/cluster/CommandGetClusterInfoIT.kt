@@ -1,5 +1,7 @@
 package net.postchain.mc.cli.cluster
 
+import com.google.gson.Gson
+import com.google.gson.JsonElement
 import net.postchain.chain0.common.queries.ContainerUnitResourceLimits
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
@@ -24,7 +26,10 @@ class CommandGetClusterInfoIT {
                         CommandGetClusterInfo(),
                         "--name", "cluster1",
                 ) { result, _ ->
+                    Gson().fromJson(result.stdout, JsonElement::class.java)
+
                     assertCommandSuccessContains(result, """
+                        "container_unit_limits": [
                           {
                             "Resource": "CPU",
                             "Limit": "60"
@@ -45,6 +50,7 @@ class CommandGetClusterInfoIT {
                             "Resource": "Storage",
                             "Limit": "1638"
                           }
+                        ]
                     """.trimIndent())
                 }
     }

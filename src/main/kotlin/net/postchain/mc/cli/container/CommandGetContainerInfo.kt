@@ -2,6 +2,7 @@ package net.postchain.mc.cli.container
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -47,6 +48,11 @@ fun CliktCommand.showContainerInfo(
     val client = chromiaClient.getDirectoryChainClient()
     val info = client.getContainerData(name)
 
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo("{")
+        echo(""""container_info": """, trailingNewline = false)
+    }
+
     echo(pmcTable {
         body {
             row("Name:", info.name)
@@ -65,6 +71,9 @@ fun CliktCommand.showContainerInfo(
     })
 
     val limits = client.nmGetContainerLimits(name)
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo(""","resource_limits": """, trailingNewline = false)
+    }
     echo(pmcTable(
             "resources limits",
             listOf("Resource type", "Value"),
@@ -86,6 +95,9 @@ fun CliktCommand.showContainerInfo(
             throw CliktError("The cluster is running an older version of the cluster anchoring chain, which does not support resource usage statistics")
         } else {
             val resourceUsageStats = clusterAnchoringClient.getLatestResourceUsageStatistics(name, null, null)
+            if (!terminal.terminalInfo.outputInteractive) {
+                echo(""","resource_usage": """, trailingNewline = false)
+            }
             echo(pmcTable(
                     "resource usage",
                     listOf("Node", "Resource type", "Value", "Timestamp"),
@@ -108,6 +120,9 @@ fun CliktCommand.showContainerInfo(
     when {
         apiVersion >= 4 -> {
             val blockchains = client.getContainerBlockchain(name)
+            if (!terminal.terminalInfo.outputInteractive) {
+                echo(""","blockchains": """, trailingNewline = false)
+            }
             echo(pmcTable(
                     "blockchains",
                     listOf("Name", "Rid", "System", "State"),
@@ -119,6 +134,9 @@ fun CliktCommand.showContainerInfo(
 
         else -> {
             val blockchains = client.getContainerBlockchainV3(name)
+            if (!terminal.terminalInfo.outputInteractive) {
+                echo(""","blockchains": """, trailingNewline = false)
+            }
             echo(pmcTable(
                     "blockchains",
                     listOf("Name", "Rid", "System", "Active"),
@@ -127,5 +145,9 @@ fun CliktCommand.showContainerInfo(
                     }
             ))
         }
+    }
+
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo("}")
     }
 }

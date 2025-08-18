@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.cluster
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.common.queries.getClusterContainerUnitLimits
@@ -37,6 +38,10 @@ class CommandGetClusterInfo : PmcCommand(
 }
 
 fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, name: String) {
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo("{")
+        echo(""""basic": """, trailingNewline = false)
+    }
     when {
         apiVersion >= 57 -> {
             val info = client.getClusterData(name)
@@ -101,6 +106,9 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, 
 
     if (apiVersion >= 88) {
         val clusterUnit = client.getClusterContainerUnitLimits(name)
+        if (!terminal.terminalInfo.outputInteractive) {
+            echo(""","container_unit_limits": """, trailingNewline = false)
+        }
         echo(pmcTable(
                 "container unit limits",
                 listOf("Resource", "Limit"),
@@ -115,6 +123,9 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, 
 
     if (apiVersion >= 56) {
         val images = client.getClusterSubnodeImages(name)
+        if (!terminal.terminalInfo.outputInteractive) {
+            echo(""","subnode_images": """, trailingNewline = false)
+        }
         echo(pmcTable(
                 "subnode images",
                 listOf("Name", "URL", "digest"),
@@ -125,6 +136,9 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, 
     }
 
     val clusterProviders = client.getClusterProviders(name)
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo(""","providers": """, trailingNewline = false)
+    }
     echo(pmcTable(
             "providers",
             listOf("Provider", "Alias"),
@@ -134,6 +148,9 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, 
     ))
 
     val clusterNodes = client.getClusterNodes(name)
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo(""","nodes": """, trailingNewline = false)
+    }
     echo(pmcTable(
             "nodes",
             listOf("Node", "Host", "API url"),
@@ -143,6 +160,9 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, 
     ))
 
     val clusterReplicas = client.getClusterReplicaNodes(name)
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo(""","replica_nodes": """, trailingNewline = false)
+    }
     echo(pmcTable(
             "replica nodes",
             listOf("Replica node", "Address"),
@@ -152,6 +172,9 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, 
     ))
 
     val containers = client.getClusterContainers(name)
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo(""","containers": """, trailingNewline = false)
+    }
     echo(pmcTable(
             "containers",
             listOf("Container", "Deployer"),
@@ -159,4 +182,8 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, 
                 listOf(it.name, it.deployer)
             }
     ))
+    
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo("}")
+    }
 }

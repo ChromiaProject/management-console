@@ -1,5 +1,7 @@
 package net.postchain.mc.cli.container
 
+import com.google.gson.Gson
+import com.google.gson.JsonElement
 import net.postchain.anchoring.anchoring_chain_cluster.ContainerResourceUsageStatistics
 import net.postchain.anchoring.common_helpers.resource_usage_statistics.ResourceType
 import net.postchain.common.hexStringToByteArray
@@ -29,8 +31,11 @@ class CommandGetContainerInfoIT {
                 .testCommand(CommandGetContainerInfo(),
                         "--name", "container1",
                 ) { result, _ ->
+                    Gson().fromJson(result.stdout, JsonElement::class.java)
+
                     assertCommandOutputContains(result.output, """
                         {
+                        "container_info": {
                           "Name": "container01",
                           "Cluster": "cluster01",
                           "Deployer": "deployer01",
@@ -38,7 +43,7 @@ class CommandGetContainerInfoIT {
                           "System": "false",
                           "State": "RUNNING"
                         }
-                        [
+                        ,"resource_limits": [
                           {
                             "Resource_type": "container_units",
                             "Value": "1"
@@ -68,13 +73,14 @@ class CommandGetContainerInfoIT {
                             "Value": "16384 MiB"
                           }
                         ]
-                        """.trimIndent())
-                    assertCommandOutputContains(result.output, """
+                        ,"blockchains": [
                         {
                             "Name": "dapp01",
                             "Rid": "2121212121212121212121212121212121212121212121212121212121212121",
                             "System": "false",
                             "State": "RUNNING"
+                        }
+                        ]
                         }
                     """.trimIndent())
                 }
@@ -105,7 +111,12 @@ class CommandGetContainerInfoIT {
                         "--name", "container1",
                         "--resource-usage"
                 ) { result, _ ->
+                    Gson().fromJson(result.stdout, JsonElement::class.java)
+
                     // Multiple asserts to exclude timestamp formatted by locale
+                    assertCommandSuccessContains(result, """
+                        "resource_usage": [
+                    """.trimIndent())
                     assertCommandSuccessContains(result, """
                             {
                                 "Node": "070809",
@@ -123,6 +134,9 @@ class CommandGetContainerInfoIT {
                                 "Node": "040506",
                                 "Resource_type": "space_usage_percentage",
                                 "Value": "17",
+                    """.trimIndent())
+                    assertCommandSuccessContains(result, """
+                        }
                     """.trimIndent())
                 }
     }
