@@ -16,9 +16,9 @@ class CommandProposeDisableProvider : DCBaseCommand(
     private val description by proposalDescriptionOption { "Disable provider $key" }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeProviderStateOperation(clientProviderPubkey, key.data, false, description)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Disabling of provider has been proposed",
                         "Cannot propose disabling of provider"

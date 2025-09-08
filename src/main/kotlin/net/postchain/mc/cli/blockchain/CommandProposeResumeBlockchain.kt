@@ -17,14 +17,14 @@ class CommandProposeResumeBlockchain : DCBaseCommand(
     private val description by proposalDescriptionOption { "Start blockchain $blockchainRID" }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainActionOperation(
                         clientProviderPubkey,
                         blockchainRID,
                         BlockchainAction.resume,
                         description
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Blockchain resume proposition was added successfully",
                         "Cannot add proposal for resuming blockchain"

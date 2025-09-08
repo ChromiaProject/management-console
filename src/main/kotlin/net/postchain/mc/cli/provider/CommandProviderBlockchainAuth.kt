@@ -7,6 +7,8 @@ import net.postchain.chain0.blockchain_auth.addProviderBlockchainAuthOperation
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.blockchainRidOption
+import net.postchain.mc.cli.util.DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER
+import net.postchain.mc.compatibility.ApiCompatV87.addProviderBlockchainAuthOperationV87
 
 val warningMessage = """
            |This will disable normal authentication, and you will no longer be able to access the provider as before. 
@@ -27,12 +29,26 @@ class CommandProviderBlockchainAuth : DCBaseCommand(
             val answer = terminal.prompt("$warningMessage\nAre you sure you want to enable blockchain authentication for blockchain\n${blockchainRid.toHex()}\n(y/N)?")
             if (answer == null || !answer.startsWith("Y", ignoreCase = true)) return
         }
-        client.transactionBuilder()
-                .addProviderBlockchainAuthOperation(blockchainRid)
-                .postAwaitConfirmation()
-                .printResult(
-                        "Blockchain authentication has been enabled",
-                        "Failed to enable blockchain authentication"
-                )
+        when {
+            dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
+                transactionBuilder()
+                        .addProviderBlockchainAuthOperationV87(blockchainRid)
+                        .postAwaitConfirmation(txListener())
+                        .printResult(
+                                "Blockchain authentication has been enabled",
+                                "Failed to enable blockchain authentication"
+                        )
+            }
+
+            else -> {
+                transactionBuilder()
+                        .addProviderBlockchainAuthOperation(clientProviderPubkey, blockchainRid)
+                        .postAwaitConfirmation(txListener())
+                        .printResult(
+                                "Blockchain authentication has been enabled",
+                                "Failed to enable blockchain authentication"
+                        )
+            }
+        }
     }
 }

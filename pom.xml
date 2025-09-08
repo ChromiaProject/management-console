@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.chromia</groupId>
         <artifactId>chromia-parent</artifactId>
-        <version>0.1.5</version>
+        <version>0.2.0</version>
     </parent>
 
     <groupId>net.postchain.mc</groupId>
@@ -19,11 +19,11 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.27.5</postchain.version>
-        <postchain.client.version>3.25.0</postchain.client.version>
-        <directory.chain.version>1.81.0</directory.chain.version>
-        <cli.tools.version>0.3.6</cli.tools.version>
-        <rell.maven.plugin.version>0.14.0</rell.maven.plugin.version>
+        <postchain.version>3.42.4</postchain.version>
+        <postchain.client.version>3.36.0</postchain.client.version>
+        <directory.chain.version>1.96.0</directory.chain.version>
+        <cli.tools.version>0.6.4</cli.tools.version>
+        <rell.maven.plugin.version>0.14.9</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
 
@@ -89,6 +89,11 @@
         <dependency>
             <groupId>net.postchain.client</groupId>
             <artifactId>chromia-client</artifactId>
+            <version>${postchain.client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.postchain.client</groupId>
+            <artifactId>ft4-client</artifactId>
             <version>${postchain.client.version}</version>
         </dependency>
 
@@ -192,6 +197,12 @@
             <artifactId>mockito-inline</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.org.webcompere</groupId>
+            <artifactId>system-stubs-jupiter</artifactId>
+            <version>2.1.6</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -238,7 +249,7 @@
                             <goal>rell-install</goal>
                         </goals>
                         <configuration>
-                            <configPath>${directory.config}</configPath>
+                            <configFile>${directory.config}</configFile>
                         </configuration>
                     </execution>
                     <execution>
@@ -253,8 +264,8 @@
                                 <mainModule>management_chain_mainnet</mainModule>
                                 <mainModule>direct_cluster</mainModule>
                                 <mainModule>direct_container</mainModule>
-                                <mainModule>proposal_subnode_image</mainModule>
                             </mainModules>
+                            <target>${project.build.directory}/generated-sources/rell-client/directory</target>
                         </configuration>
                     </execution>
                     <execution>
@@ -265,7 +276,7 @@
                         </goals>
                         <configuration>
                             <packageName>net.postchain.anchoring</packageName>
-                            <mainModule>anchoring_chain_common</mainModule>
+                            <mainModule>anchoring_chain_cluster</mainModule>
                             <target>${project.build.directory}/generated-sources/rell-client/anchoring</target>
                         </configuration>
                     </execution>
@@ -397,7 +408,7 @@
                     <configuration>
                         <allowInsecureRegistries>false</allowInsecureRegistries>
                         <from>
-                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java21:1.0.6@sha256:9632b057096adccae0963a8d0fa59b741af7541029e60a120b3c9592a070109d</image>
+                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java21:1.0.10@sha256:2b8493ce303c455a24092c4a023c2659c41071db48e9c7107a82687ea50fde2b</image>
                         </from>
                         <to>
                             <image>${image.name}</image>

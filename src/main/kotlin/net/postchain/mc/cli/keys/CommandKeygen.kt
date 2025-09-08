@@ -1,6 +1,11 @@
 package net.postchain.mc.cli.keys
 
+import com.chromia.build.tools.keystore.ChromiaKeyStore
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.UsageError
+import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
+import com.github.ajalt.clikt.parameters.groups.single
+import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -24,8 +29,16 @@ class CommandKeygen : PmcCommand(name = "keygen", help = "Generates public/priva
     )
             .default("")
 
-    private val file by option("-s", "--save", help = "File to save the generated keypair in")
-            .file(canBeDir = false)
+    private val keygenOutputMode: KeygenOutputMode? by mutuallyExclusiveOptions(
+            name = "File format",
+            option1 = option("-s", "--save", help = "File to save the generated keypair in")
+                    .file(canBeDir = false)
+                    .convert { KeygenOutputMode.PropertiesFile(it) },
+
+            option2 = option("--key-id", help = "Name the generated key with an id")
+                    .convert { KeygenOutputMode.KeyIdFile(it) },
+    )
+            .single()
 
     private val nodeFormat by option("-n", "--node", help = "Save the generated keypair in format to be included in node properties file").flag()
 
@@ -35,16 +48,28 @@ class CommandKeygen : PmcCommand(name = "keygen", help = "Generates public/priva
      * Cryptographic key generator. Will generate a pair of public and private keys and print to stdout.
      */
     override fun run() {
-        if (file == null && nodeFormat) throw UsageError("Cannot use --node without --save")
+        if (keygenOutputMode !is KeygenOutputMode.PropertiesFile && nodeFormat) throw UsageError("Cannot use --node without --save")
 
         val (keyPair, mnemonic) = generateSecp256k1KeyPairWithMnemonic(wordList)
 
-        file?.let {
-            saveSecp256k1KeyPair(keyPair, it, nodeFormat)
+        when (val mode = keygenOutputMode) {
+            is KeygenOutputMode.PropertiesFile ->
+                saveSecp256k1KeyPair(keyPair, mode.file, nodeFormat)
+
+            is KeygenOutputMode.KeyIdFile -> {
+                val name = mode.name
+                val chromiaKeyStore = ChromiaKeyStore(name)
+                val existingKeyPair = chromiaKeyStore.findKeyPair()
+                if (existingKeyPair != null) {
+                    throw CliktError("Keypair with id: ${chromiaKeyStore.keyId} already exists")
+                }
+                chromiaKeyStore.saveKeyPair(keyPair, mnemonic)
+            }
+
+            null ->
+                echo("privkey:   ${keyPair.privKey.data.toHex()}")
         }
-        if (file == null) {
-            echo("privkey:   ${keyPair.privKey.data.toHex()}")
-        }
+
         echo("pubkey:    ${keyPair.pubKey.data.toHex()}")
         if (printMnemonic) {
             echo("mnemonic:  $mnemonic")
@@ -73,4 +98,9 @@ private fun saveSecp256k1KeyPair(keyPair: KeyPair, file: File, nodeFormat: Boole
         properties.store(fs, "Keypair generated using secp256k1")
         fs.flush()
     }
+}
+
+sealed class KeygenOutputMode {
+    data class PropertiesFile(val file: File) : KeygenOutputMode()
+    data class KeyIdFile(val name: String) : KeygenOutputMode()
 }

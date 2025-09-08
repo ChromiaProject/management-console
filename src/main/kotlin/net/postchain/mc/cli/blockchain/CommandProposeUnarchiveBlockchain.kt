@@ -30,7 +30,7 @@ class CommandProposeUnarchiveBlockchain : DCBaseCommand(
     }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainUnarchiveActionOperation(
                         clientProviderPubkey,
                         blockchainRID,
@@ -38,7 +38,7 @@ class CommandProposeUnarchiveBlockchain : DCBaseCommand(
                         finalHeight,
                         description
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Blockchain unarchive proposition was added successfully",
                         "Cannot add proposal for unarchiving blockchain"

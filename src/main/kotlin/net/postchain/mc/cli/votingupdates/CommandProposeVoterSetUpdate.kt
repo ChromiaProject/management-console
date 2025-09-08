@@ -45,12 +45,12 @@ class CommandProposeVoterSetUpdate : DCBaseCommand(
     }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeUpdateVoterSetOperation(
                         clientProviderPubkey,
                         voterSet, threshold, governor, newMember, removeMember, description
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal for voter set $voterSet has been added",
                         "Failed to add proposal"

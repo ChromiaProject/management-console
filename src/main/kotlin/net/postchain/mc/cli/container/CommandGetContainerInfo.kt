@@ -1,19 +1,28 @@
 package net.postchain.mc.cli.container
 
 import com.github.ajalt.clikt.core.CliktCommand
-import net.postchain.mc.cli.PmcCommand
+import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import net.postchain.anchoring.anchoring_chain_cluster.ContainerResourceUsageStatistics
+import net.postchain.anchoring.anchoring_chain_cluster.getLatestResourceUsageStatistics
 import net.postchain.chain0.common.queries.getContainerBlockchain
 import net.postchain.chain0.common.queries.getContainerData
 import net.postchain.chain0.nm_api.nmGetContainerLimits
 import net.postchain.chain0.version.apiVersion
-import net.postchain.client.core.PostchainClient
+import net.postchain.d1.client.StandardChromiaClient
+import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.base.CLUSTER_ANCHORING_CHAIN_RESOURCE_USAGE_VERSION
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.compatibility.ApiCompatV2
 import net.postchain.mc.compatibility.ApiCompatV3.getContainerBlockchainV3
+import java.time.Instant
+import java.util.Date
 
 class CommandGetContainerInfo : PmcCommand(
         name = "info",
@@ -21,17 +30,28 @@ class CommandGetContainerInfo : PmcCommand(
 ) {
 
     private val config by pmcConfigOption()
-    private val client get() = config.client
 
     private val name by nameOption("Container Name").required()
+    private val resourceUsage by option("-ru", "--resource-usage", help = "Display container resource usage per node")
+            .flag()
 
     override fun run() {
-        showContainerInfo(client, name)
+        showContainerInfo(config.chromiaClient, name, resourceUsage)
     }
 }
 
-fun CliktCommand.showContainerInfo(client: PostchainClient, name: String) {
+fun CliktCommand.showContainerInfo(
+        chromiaClient: StandardChromiaClient,
+        name: String,
+        resourceUsage: Boolean = false
+) {
+    val client = chromiaClient.getDirectoryChainClient()
     val info = client.getContainerData(name)
+
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo("{")
+        echo(""""container_info": """, trailingNewline = false)
+    }
 
     echo(pmcTable {
         body {
@@ -51,6 +71,9 @@ fun CliktCommand.showContainerInfo(client: PostchainClient, name: String) {
     })
 
     val limits = client.nmGetContainerLimits(name)
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo(""","resource_limits": """, trailingNewline = false)
+    }
     echo(pmcTable(
             "resources limits",
             listOf("Resource type", "Value"),
@@ -66,10 +89,40 @@ fun CliktCommand.showContainerInfo(client: PostchainClient, name: String) {
             }
     ))
 
+    if (resourceUsage) {
+        val clusterAnchoringClient = chromiaClient.getClusterAnchoringClient(info.cluster)
+        if (clusterAnchoringClient.apiVersion() < CLUSTER_ANCHORING_CHAIN_RESOURCE_USAGE_VERSION) {
+            throw CliktError("The cluster is running an older version of the cluster anchoring chain, which does not support resource usage statistics")
+        } else {
+            val resourceUsageStats = clusterAnchoringClient.getLatestResourceUsageStatistics(name, null, null)
+            if (!terminal.terminalInfo.outputInteractive) {
+                echo(""","resource_usage": """, trailingNewline = false)
+            }
+            echo(pmcTable(
+                    "resource usage",
+                    listOf("Node", "Resource type", "Value", "Timestamp"),
+                    resourceUsageStats
+                            .sortedWith(compareBy<ContainerResourceUsageStatistics> { it.resourceType.name }
+                                    .thenBy { it.nodePubkey.toHex() })
+                            .map {
+                        listOf(
+                                it.nodePubkey.toHex(),
+                                it.resourceType.name,
+                                it.metricValue.toString(),
+                                Date.from(Instant.ofEpochMilli(it.measurementTime)).toString()
+                        )
+                    }
+            ))
+        }
+    }
+
     val apiVersion = client.apiVersion()
     when {
         apiVersion >= 4 -> {
             val blockchains = client.getContainerBlockchain(name)
+            if (!terminal.terminalInfo.outputInteractive) {
+                echo(""","blockchains": """, trailingNewline = false)
+            }
             echo(pmcTable(
                     "blockchains",
                     listOf("Name", "Rid", "System", "State"),
@@ -81,6 +134,9 @@ fun CliktCommand.showContainerInfo(client: PostchainClient, name: String) {
 
         else -> {
             val blockchains = client.getContainerBlockchainV3(name)
+            if (!terminal.terminalInfo.outputInteractive) {
+                echo(""","blockchains": """, trailingNewline = false)
+            }
             echo(pmcTable(
                     "blockchains",
                     listOf("Name", "Rid", "System", "Active"),
@@ -89,5 +145,9 @@ fun CliktCommand.showContainerInfo(client: PostchainClient, name: String) {
                     }
             ))
         }
+    }
+
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo("}")
     }
 }

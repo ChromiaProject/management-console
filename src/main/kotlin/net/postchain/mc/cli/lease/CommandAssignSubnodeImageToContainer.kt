@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.lease
 
 import com.chromia.cli.tools.ft.addEvmAuthOperation
+import com.chromia.cli.tools.ft.addFtAuthOperation
 import com.chromia.cli.tools.ft.findFtAccountIdWithAuthDescriptorId
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.PrintMessage
@@ -19,7 +20,7 @@ import net.postchain.economy.economy_chain.getAssignSubnodeImageToContainerTicke
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.accountIdOption
-import net.postchain.mc.cli.evmAddressOption
+import net.postchain.mc.cli.optionalEvmAddressOption
 
 class CommandAssignSubnodeImageToContainer : ECBaseCommand(
         name = "assign-subnode-image",
@@ -27,7 +28,7 @@ class CommandAssignSubnodeImageToContainer : ECBaseCommand(
 ) {
     val accountIdOption by accountIdOption()
 
-    val evmAddress by evmAddressOption()
+    val evmAddress by optionalEvmAddressOption()
 
     val containerName by option("-n", "--name", help = "Container name", metavar = "name").required()
 
@@ -35,20 +36,26 @@ class CommandAssignSubnodeImageToContainer : ECBaseCommand(
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
         val (accountId, authDescriptorId) =
-                findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption, evmAddress, CREATE_CONTAINER_WITH_SUBNODE_IMAGE, null)
+                findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption,
+                        evmAddress ?: client.config.signers.first().pubKey.data,
+                        CREATE_CONTAINER_WITH_SUBNODE_IMAGE, null)
 
         val transactionResult = economyChainClient.transactionBuilder().also {
-            addEvmAuthOperation(
-                    economyChainClient, it,
-                    ASSIGN_SUBNODE_IMAGE_TO_CONTAINER, listOf(
-                    gtv(containerName),
-                    gtv(subnodeImageName)
-            ),
-                    evmAddress, accountId, authDescriptorId)
-            echo("Signing done, posting transaction...")
+            evmAddress?.let { evmAddress ->
+                addEvmAuthOperation(
+                        economyChainClient, it,
+                        ASSIGN_SUBNODE_IMAGE_TO_CONTAINER, listOf(
+                        gtv(containerName),
+                        gtv(subnodeImageName)
+                ),
+                        evmAddress, accountId, authDescriptorId)
+                echo("Signing done, posting transaction...", err = true)
+            } ?: run {
+                addFtAuthOperation(it, accountId, authDescriptorId)
+            }
         }
                 .assignSubnodeImageToContainerOperation(containerName, subnodeImageName)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
         when (transactionResult.status) {
             TransactionStatus.CONFIRMED -> {
                 val ticket = economyChainClient.getAssignSubnodeImageToContainerTicketByTransaction(transactionResult.txRid.rid.hexStringToByteArray())

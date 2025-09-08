@@ -16,7 +16,6 @@ import net.postchain.common.types.WrappedByteArray
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.hostOption
 import net.postchain.mc.cli.portOption
 import net.postchain.mc.cli.util.clusterUnitsOption
@@ -58,7 +57,7 @@ class CommandReplaceNode : DCBaseCommand(
             echo("Territory is not supported in API version $dcVersion and will be ignored")
         }
 
-        client.transactionBuilder()
+        transactionBuilder()
                 .apply {
                     if (keepOldNodeAsReplica) {
                         if (dcVersion < 73) {
@@ -68,13 +67,13 @@ class CommandReplaceNode : DCBaseCommand(
                     } else {
                         when {
                             dcVersion >= 24 -> replaceNodeWithNodeDataOperation(clientProviderPubkey, ReplaceNodeData(WrappedByteArray(old.data), WrappedByteArray(new.data), host, port?.toLong(), apiUrl, clusterUnits, territory, extraStorage))
-                            dcVersion >= 15 -> replaceNodeWithUnitsAndTerritoryOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, territory, clusterUnits ?: 1)
-                            dcVersion >= 3 -> replaceNodeWithUnitsOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl, clusterUnits ?: 1)
-                            else -> replaceNodeOperation(client.config.pubkey().data, old.data, new.data, host, port?.toLong(), apiUrl)
+                            dcVersion >= 15 -> replaceNodeWithUnitsAndTerritoryOperation(clientProviderPubkey, old.data, new.data, host, port?.toLong(), apiUrl, territory, clusterUnits ?: 1)
+                            dcVersion >= 3 -> replaceNodeWithUnitsOperation(clientProviderPubkey, old.data, new.data, host, port?.toLong(), apiUrl, clusterUnits ?: 1)
+                            else -> replaceNodeOperation(clientProviderPubkey, old.data, new.data, host, port?.toLong(), apiUrl)
                         }
                     }
                 }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Node has been replaced",
                         "Failed to replace node"

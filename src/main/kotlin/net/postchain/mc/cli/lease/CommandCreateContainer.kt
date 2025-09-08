@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.lease
 
 import com.chromia.cli.tools.ft.addEvmAuthOperation
+import com.chromia.cli.tools.ft.addFtAuthOperation
 import com.chromia.cli.tools.ft.findFtAccountIdWithAuthDescriptorId
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.PrintMessage
@@ -21,7 +22,9 @@ import net.postchain.economy.economy_chain.getCreateContainerTicketByTransaction
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.accountIdOption
-import net.postchain.mc.cli.evmAddressOption
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMPUTE_REQUESTS
+import net.postchain.mc.cli.optionalEvmAddressOption
+import net.postchain.mc.compatibility.ApiCompatECV59.createContainerWithSubnodeImageOperationV59
 
 class CommandCreateContainer : ECBaseCommand(
         name = "create-container",
@@ -29,7 +32,7 @@ class CommandCreateContainer : ECBaseCommand(
 ) {
     val accountIdOption by accountIdOption()
 
-    val evmAddress by evmAddressOption()
+    val evmAddress by optionalEvmAddressOption()
 
     val clusterName by option("-cn", "--cluster-name", help = "Name of the cluster").required()
 
@@ -45,32 +48,47 @@ class CommandCreateContainer : ECBaseCommand(
         require(it >= 0) { "Extra storage cannot be negative" }
     }
 
+    val extraComputeRequests by option("--extraComputeRequests").int().validate {
+        require(it >= 0) { "Extra compute requests cannot be negative" }
+    }
+
     val subnodeImageName by option("-sin", "--subnode-image-name", help = "Subnode image name").default("")
 
     val autoRenew by option("--auto-renew", help = "Auto renew").flag(default = false)
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
+        if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS && extraComputeRequests != null) {
+            throw CliktError("This version of Economy chain does not support extra compute requests")
+        }
+
         val (accountId, authDescriptorId) =
-                findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption, evmAddress, CREATE_CONTAINER_WITH_SUBNODE_IMAGE, null)
+                findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption,
+                        evmAddress ?: client.config.signers.first().pubKey.data,
+                        CREATE_CONTAINER_WITH_SUBNODE_IMAGE, null)
 
         val pubkey = economyChainClient.config.signers.first().pubKey
 
         val transactionResult = economyChainClient.transactionBuilder().also {
-            addEvmAuthOperation(
-                    economyChainClient, it,
-                    CREATE_CONTAINER_WITH_SUBNODE_IMAGE, listOf(
-                    gtv(pubkey.data),
-                    gtv(scus.toLong()),
-                    gtv(duration.toLong()),
-                    gtv(extraStorage.toLong()),
-                    gtv(clusterName),
-                    gtv(autoRenew),
-                    gtv(subnodeImageName)
-            ),
-                    evmAddress, accountId, authDescriptorId)
-            echo("Signing done, posting transaction...")
-        }
-                .createContainerWithSubnodeImageOperation(
+            evmAddress?.let { evmAddress ->
+                addEvmAuthOperation(
+                        economyChainClient, it,
+                        CREATE_CONTAINER_WITH_SUBNODE_IMAGE, listOf(
+                        gtv(pubkey.data),
+                        gtv(scus.toLong()),
+                        gtv(duration.toLong()),
+                        gtv(extraStorage.toLong()),
+                        gtv(clusterName),
+                        gtv(autoRenew),
+                        gtv(subnodeImageName)
+                ),
+                        evmAddress, accountId, authDescriptorId)
+                echo("Signing done, posting transaction...", err = true)
+            } ?: run {
+                addFtAuthOperation(it, accountId, authDescriptorId)
+            }
+        }.let {
+            if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS) {
+                it.createContainerWithSubnodeImageOperationV59(
                         providerPubkey = pubkey.data,
                         containerUnits = scus.toLong(),
                         durationWeeks = duration.toLong(),
@@ -78,7 +96,19 @@ class CommandCreateContainer : ECBaseCommand(
                         clusterName = clusterName,
                         autoRenew = autoRenew,
                         subnodeImageName = subnodeImageName)
-                .postAwaitConfirmation()
+            } else {
+                it.createContainerWithSubnodeImageOperation(
+                        providerPubkey = pubkey.data,
+                        containerUnits = scus.toLong(),
+                        durationWeeks = duration.toLong(),
+                        extraStorageGib = extraStorage.toLong(),
+                        clusterName = clusterName,
+                        autoRenew = autoRenew,
+                        subnodeImageName = subnodeImageName,
+                        extraComputeRequests = extraComputeRequests?.toLong() ?: 0L)
+            }
+        }
+                .postAwaitConfirmation(txListener())
         when (transactionResult.status) {
             TransactionStatus.CONFIRMED -> {
                 val ticket = economyChainClient.getCreateContainerTicketByTransaction(transactionResult.txRid.rid.hexStringToByteArray())

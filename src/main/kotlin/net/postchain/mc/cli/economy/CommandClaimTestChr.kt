@@ -28,10 +28,10 @@ class CommandClaimTestChr : ECBaseCommand(
                     economyChainClient, it,
                     FAUCET, listOf(),
                     evmAddress, accountId, authDescriptorId)
-            echo("Signing done, posting transaction...")
+            echo("Signing done, posting transaction...", err = true)
         }
                 .faucetOperation()
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "tCHR claimed to account ${accountId.toHex()}",
                         "Failed to claim tCHR to account ${accountId.toHex()}"

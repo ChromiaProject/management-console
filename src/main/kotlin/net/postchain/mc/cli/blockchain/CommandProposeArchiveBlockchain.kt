@@ -18,14 +18,14 @@ class CommandProposeArchiveBlockchain : DCBaseCommand(
     private val description by proposalDescriptionOption { "Archive blockchain $blockchainRID" }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainActionOperation(
                         clientProviderPubkey,
                         blockchainRID,
                         BlockchainAction.archive,
                         description
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Blockchain archive proposition was added successfully",
                         "Cannot add proposal for archiving blockchain"

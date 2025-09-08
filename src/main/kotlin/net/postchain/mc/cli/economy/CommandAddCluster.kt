@@ -7,11 +7,19 @@ import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.createClusterOperation
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.clusterUnitsOption
+import net.postchain.mc.cli.util.containerUnitCpuOption
+import net.postchain.mc.cli.util.containerUnitIoReadOption
+import net.postchain.mc.cli.util.containerUnitIoWriteOption
+import net.postchain.mc.cli.util.containerUnitRamOption
+import net.postchain.mc.cli.util.containerUnitStorageOption
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.nameOption
+import net.postchain.mc.cli.util.systemContainerUnitsOption
+import net.postchain.mc.compatibility.ApiCompatECV56.createClusterOperationV56
 
 class CommandAddCluster : ECBaseCommand(
         name = "add-cluster",
@@ -31,12 +39,28 @@ class CommandAddCluster : ECBaseCommand(
     ).required()
 
     private val tag by option("-t", "--tag", help = "Cluster tag").required()
+    private val systemContainerUnits by systemContainerUnitsOption()
+    private val containerUnitCpu by containerUnitCpuOption()
+    private val containerUnitRam by containerUnitRamOption()
+    private val containerUnitStorage by containerUnitStorageOption()
+    private val containerUnitIoRead by containerUnitIoReadOption()
+    private val containerUnitIoWrite by containerUnitIoWriteOption()
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
+        economyChainClient.transactionBuilder().let {
+            when {
+                ecVersion.version >= ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
+                    it.createClusterOperation(clientProviderPubkey, name, governorName, voterSet, clusterUnits, extraStorage, tag,
+                            containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite,
+                            containerUnitStorage, systemContainerUnits)
+                }
 
-        economyChainClient.transactionBuilder()
-                .createClusterOperation(name, governorName, voterSet, clusterUnits, extraStorage, tag)
-                .postAwaitConfirmation()
+                else -> {
+                    it.createClusterOperationV56(name, governorName, voterSet, clusterUnits, extraStorage, tag)
+                }
+            }
+        }
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal for creating cluster $name is created and awaits approval. You can check economy proposal or $CLUSTER_CREATION_STATUS_COMMAND command to see the status",
                         "Failed to create cluster proposal"

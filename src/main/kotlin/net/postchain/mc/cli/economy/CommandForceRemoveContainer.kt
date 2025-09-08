@@ -3,7 +3,9 @@ package net.postchain.mc.cli.economy
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain_remove_container.forceRemoveContainerOperation
+import net.postchain.mc.compatibility.ApiCompatECV57.forceRemoveContainerOperation
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.nameOption
 
@@ -18,12 +20,26 @@ class CommandForceRemoveContainer : ECBaseCommand(
     private val name by nameOption("Name of container to remove").required()
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
-        economyChainClient.transactionBuilder()
-                .forceRemoveContainerOperation(name)
-                .postAwaitConfirmation()
-                .printResult(
-                        "Container $name will be removed",
-                        "Failed to remove container"
-                )
+        when {
+            ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
+                economyChainClient.transactionBuilder()
+                        .forceRemoveContainerOperation(name)
+                        .postAwaitConfirmation(txListener())
+                        .printResult(
+                                "Container $name will be removed",
+                                "Failed to remove container"
+                        )
+            }
+
+            else -> {
+                economyChainClient.transactionBuilder()
+                        .forceRemoveContainerOperation(clientProviderPubkey, name)
+                        .postAwaitConfirmation(txListener())
+                        .printResult(
+                                "Container $name will be removed",
+                                "Failed to remove container"
+                        )
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package net.postchain.mc.cli
 
+import com.chromia.build.tools.config.SUPPRESS_KEY_STORAGE_DEPRECATION_WARNING_SYSTEM_PROPERTY
 import com.chromia.cli.tools.launcher.CliLauncher
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
@@ -22,11 +23,15 @@ import net.postchain.mc.network.networkCommands
 open class ManagementConsole : CliLauncher(name = "pmc") {
 
     init {
-        versionOption("""
+        System.setProperty(SUPPRESS_KEY_STORAGE_DEPRECATION_WARNING_SYSTEM_PROPERTY, "true")
+        val version = """
             ${this::class.java.`package`.implementationVersion ?: "(unknown)"}
             Java version ${System.getProperty("java.version")}            
-        """.trimIndent())
+        """.trimIndent()
+        versionOption(version)
         subcommands(
+                HelpCommand(),
+                VersionCommand("pmc", version),
                 CommandKeygen(),
                 CommandConfig(),
                 networkCommands(),

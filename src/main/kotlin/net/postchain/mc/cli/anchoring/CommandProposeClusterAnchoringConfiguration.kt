@@ -22,12 +22,12 @@ class CommandProposeClusterAnchoringConfiguration : DCBaseCommand(
     ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true).required()
 
     override fun runDC() {
-        val version = config.client.apiVersion()
+        val version = client.apiVersion()
         val bcConfig = BlockchainConfig.readFromFile(anchoringConfig)
-        val compressedConfig = BlockchainConfigurationCompressor.compress(config.client, bcConfig.gtv, version)
-        config.client.transactionBuilder()
+        val compressedConfig = BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, version)
+        transactionBuilder()
                 .proposeClusterAnchoringConfigurationOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedConfig))
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Cluster anchoring configuration was proposed: ${bcConfig.hash}",
                         "Failed to propose cluster anchoring configuration"

@@ -2,7 +2,6 @@ package net.postchain.mc.cli.economy
 
 import com.github.ajalt.clikt.core.subcommands
 import net.postchain.mc.cli.PmcCommand
-import net.postchain.mc.cli.economy.mint.mintCommands
 import net.postchain.mc.cli.economy.proposal.proposalCommands
 
 class EconomyCommand : PmcCommand(help = "Economy chain commands") {
@@ -34,10 +33,10 @@ fun economyCommands() = EconomyCommand().subcommands(
         CommandUpdateEconomyConstants(),
         CommandAuthDescriptorEvmSwap(),
         CommandUpdatePriceOracleRates(),
-        mintCommands(),
         proposalCommands(),
         CommandSetProviderStakingAccount(),
         CommandForceRemoveContainer(),
         CommandClaimTestChr(),
         CommandCreateTestAccount(),
+        CommandUpdateProviderStakingRewardShare(),
 )

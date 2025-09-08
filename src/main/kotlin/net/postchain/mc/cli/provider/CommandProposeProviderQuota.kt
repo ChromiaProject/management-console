@@ -4,9 +4,9 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.proposal_provider.proposeProviderQuotaOperation
+import net.postchain.common.toHex
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.cli.util.providerQuotaTypeOption
 import net.postchain.mc.cli.util.providerTierOption
@@ -25,13 +25,13 @@ class CommandProposeProviderQuota : DCBaseCommand(
     private val description by nullableProposalDescriptionOption()
 
     private fun description() = description ?: run {
-        "Update quota for provider ${client.config.pubkey()} - provider tier: $providerTier, quota type: $providerQuotaType, value: $value"
+        "Update quota for provider ${clientProviderPubkey.toHex()} - provider tier: $providerTier, quota type: $providerQuotaType, value: $value"
     }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeProviderQuotaOperation(clientProviderPubkey, providerTier.toTier(), providerQuotaType, value, description())
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Provider quota value has been proposed",
                         "Cannot propose a provider quota value"

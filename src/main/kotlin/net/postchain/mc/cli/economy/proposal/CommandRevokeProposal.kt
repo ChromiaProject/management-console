@@ -5,14 +5,15 @@ import net.postchain.client.core.PostchainClient
 import net.postchain.common.types.RowId
 import net.postchain.crypto.PubKey
 import net.postchain.economy.common_proposal.revokeCommonProposalOperation
-import net.postchain.economy.common_proposal.revokeCommonProposalV65Operation
-import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.ECBaseCommand
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
+import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
 import net.postchain.mc.compatibility.ApiCompatECV21.revokeProposalOperationECV20
+import net.postchain.mc.compatibility.ApiCompatECV57.revokeCommonProposalOperation
+import net.postchain.mc.compatibility.ApiCompatECV57.revokeCommonProposalV65Operation
 
 class CommandRevokeProposal : ECBaseCommand(
         name = "revoke",
@@ -25,8 +26,8 @@ class CommandRevokeProposal : ECBaseCommand(
         when {
             ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> {
                 economyChainClient.transactionBuilder()
-                        .revokeProposalOperationECV20(client.pubkey, RowId(idx))
-                        .postAwaitConfirmation()
+                        .revokeProposalOperationECV20(clientProviderPubkey, RowId(idx))
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Proposal revoked successfully",
                                 "Cannot revoke proposal"
@@ -34,8 +35,17 @@ class CommandRevokeProposal : ECBaseCommand(
             }
             ecVersion.version < ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION -> {
                 economyChainClient.transactionBuilder()
-                        .revokeCommonProposalOperation(PubKey(client.pubkey), RowId(idx))
-                        .postAwaitConfirmation()
+                        .revokeCommonProposalOperation(PubKey(clientProviderPubkey), RowId(idx))
+                        .postAwaitConfirmation(txListener())
+                        .printResult(
+                                "Proposal revoked successfully",
+                                "Cannot revoke proposal"
+                        )
+            }
+            ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
+                economyChainClient.transactionBuilder()
+                        .revokeCommonProposalV65Operation(RowId(idx))
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Proposal revoked successfully",
                                 "Cannot revoke proposal"
@@ -43,8 +53,8 @@ class CommandRevokeProposal : ECBaseCommand(
             }
             else -> {
                 economyChainClient.transactionBuilder()
-                        .revokeCommonProposalV65Operation(RowId(idx))
-                        .postAwaitConfirmation()
+                        .revokeCommonProposalOperation(clientProviderPubkey, RowId(idx))
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Proposal revoked successfully",
                                 "Cannot revoke proposal"

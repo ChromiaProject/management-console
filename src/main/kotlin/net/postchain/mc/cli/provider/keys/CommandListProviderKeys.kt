@@ -3,8 +3,8 @@ package net.postchain.mc.cli.provider.keys
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import net.postchain.chain0.common.getProviderKeys
 import net.postchain.chain0.common.queries.getAllProviders
+import net.postchain.chain0.common.queries.getProviderKeys
 import net.postchain.common.toHex
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.DCBaseCommand

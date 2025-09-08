@@ -18,9 +18,9 @@ class CommandTransferActionPoints : DCBaseCommand(
     private val amount by option("-a", "--amount", help = "number of points to transfer").long().required()
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .transferActionPointsOperation(clientProviderPubkey, pubkey.data, amount)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Action points transferred",
                         "Transferring action points failed"

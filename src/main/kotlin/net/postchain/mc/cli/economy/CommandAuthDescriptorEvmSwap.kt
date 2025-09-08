@@ -1,8 +1,9 @@
 package net.postchain.mc.cli.economy
 
+import com.chromia.cli.tools.ft.OperationDescriptor
 import com.chromia.cli.tools.ft.fetchEvmSignatures
-import com.chromia.directory1.lib.ft4.external.auth.evmSignaturesOperation
-import com.chromia.directory1.lib.ft4.external.auth.ftAuthOperation
+import com.chromia.lib.ft4.external.auth.evmSignaturesOperation
+import com.chromia.lib.ft4.external.auth.ftAuthOperation
 import com.github.ajalt.clikt.core.CliktError
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.toHex
@@ -36,7 +37,7 @@ class CommandAuthDescriptorEvmSwap : ECBaseCommand(
         val providerPubkey = economyChainClient.config.signers.firstOrNull()?.pubKey?.data
                 ?: throw CliktError("No provider")
         val accountId = accountIdOption
-                ?: economyChainClient.getProviderAccountId(providerPubkey).also { if (it != null) echo("Using account id ${it.toHex()}") }
+                ?: economyChainClient.getProviderAccountId(providerPubkey).also { if (it != null) echo("Using account id ${it.toHex()}", err = true) }
                 ?: throw CliktError("No account id found for provider")
 
         val accountMainAuthDescriptor = economyChainClient.getAccountMainAuthDescriptor(accountId)
@@ -48,11 +49,11 @@ class CommandAuthDescriptorEvmSwap : ECBaseCommand(
         val (linkEvmEoaAccountSignature, updateMainAuthDescriptorSignature) = fetchEvmSignatures(
                 economyChainClient,
                 listOf(
-                        LINK_EVM_EOA_ACCOUNT to listOf(gtv(evmAddress)),
-                        UPDATE_MAIN_AUTH_DESCRIPTOR to listOf(authDescriptor)
+                        OperationDescriptor(LINK_EVM_EOA_ACCOUNT, listOf(gtv(evmAddress)), forEvmSignatures = true),
+                        OperationDescriptor(UPDATE_MAIN_AUTH_DESCRIPTOR, listOf(authDescriptor), forEvmSignatures = true)
                 ),
                 evmAddress, accountId, accountMainAuthDescriptor.id.data)
-        echo("Signing done, posting transaction...")
+        echo("Signing done, posting transaction...", err = true)
         economyChainClient.transactionBuilder()
                 .evmSignaturesOperation(listOf(evmAddress), listOf(linkEvmEoaAccountSignature))
                 .ftAuthOperation(accountId, accountMainAuthDescriptor.id.data)
@@ -60,9 +61,9 @@ class CommandAuthDescriptorEvmSwap : ECBaseCommand(
                 .evmSignaturesOperation(listOf(evmAddress), listOf(updateMainAuthDescriptorSignature))
                 .ftAuthOperation(accountId, accountMainAuthDescriptor.id.data)
                 .updateMainAuthDescriptorOperation(AuthDescriptor(AuthType.S, listOf(gtv(gtv("A"), gtv("T")), gtv(evmAddress)), GtvNull))
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
-                        "Link EVM account to EOA account and update auth description signer with EVM address: 0x${evmAddress.toHex()}",
+                        "Link EVM account to Chromia account and update auth description signer with EVM address: 0x${evmAddress.toHex()}",
                         "Failed to link and update auth descriptor signer to EVM address. "
                 )
     }

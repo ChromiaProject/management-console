@@ -7,6 +7,7 @@ import com.chromia.cli.tools.config.chromiaConfigFileOption
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.common.init.initOperation
 import net.postchain.chain0.economy_chain_in_directory_chain.initEconomyChainOperation
@@ -15,7 +16,6 @@ import net.postchain.client.config.PostchainClientConfig
 import net.postchain.client.core.PostchainClient
 import net.postchain.client.impl.PostchainClientImpl
 import net.postchain.common.BlockchainRid
-import net.postchain.common.config.getEnvOrBooleanProperty
 import net.postchain.common.config.getEnvOrStringProperty
 import net.postchain.d1.client.StandardChromiaClient
 import net.postchain.gtv.GtvEncoder
@@ -23,6 +23,7 @@ import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.BlockchainConfig
+import net.postchain.mc.cli.util.defaultClientConfig
 import java.io.File
 
 class CommandInit : PmcCommand(
@@ -31,15 +32,15 @@ class CommandInit : PmcCommand(
 ) {
     val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup").flag()
     val configFile by chromiaConfigFileOption()
-    val rawConfig by lazy { ChromiaConfigLoader(::echo).loadProperties(configFile) }
+    val rawConfig by lazy {
+        ChromiaConfigLoader(::echo).loadProperties(configFile)
+    }
     val client by lazy {
         val configuredBrid = if (lookupBrid) null else rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
-        val useRequestCompression = rawConfig
-                .getEnvOrBooleanProperty("POSTCHAIN_CLIENT_COMPRESS_REQUEST_BODIES", "compress.requests", true)
+        rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
 
         if (!rawConfig.containsKey("api.url")) throw CliktError("No api.url specified")
-        rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
-        val initialConfig = PostchainClientConfig.fromConfiguration(rawConfig).copy(compressRequestBodies = useRequestCompression)
+        val initialConfig = PostchainClientConfig.fromConfiguration(rawConfig, defaultClientConfig)
 
         val dcConfig = if (initialConfig.blockchainRid != BlockchainRid.ZERO_RID)
             initialConfig
@@ -57,13 +58,13 @@ class CommandInit : PmcCommand(
             "-sac",
             "--system-anchoring-config",
             help = "Configuration file for system anchoring chain (GtvML (*.xml) or Gtv (*.gtv))"
-    ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
+    ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true).required()
 
     private val clusterAnchoringConfig by option(
             "-cac",
             "--cluster-anchoring-config",
             help = "Configuration file for cluster anchoring chain (GtvML (*.xml) or Gtv (*.gtv))"
-    ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
+    ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true).required()
 
     private val economyChainConfig by option(
             "-ecc",
@@ -78,25 +79,18 @@ class CommandInit : PmcCommand(
     ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
 
     override fun run() {
-        if (systemAnchoringConfig != null && clusterAnchoringConfig == null) {
-            echo("System anchoring requires cluster anchoring. Please specify a cluster anchoring configuration.")
-            return
-        }
-
         val version = Version(client).version
-        val systemAnchoringConfigData = systemAnchoringConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
-        val clusterAnchoringConfigData = clusterAnchoringConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
+        val systemAnchoringConfigData = readAndCompressConfigurationFromFile(client, systemAnchoringConfig, version)
+        val clusterAnchoringConfigData = readAndCompressConfigurationFromFile(client, clusterAnchoringConfig, version)
 
         val economyChainConfigData = economyChainConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
         if (version < 30 && economyChainConfigData != null) {
-            echo("Economy chain requires directory chain version 30, found version $version")
-            return
+            throw CliktError("Economy chain requires directory chain version 30, found version $version")
         }
 
         val tokenChainConfigData = tokenChainConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
         if (version < 75 && tokenChainConfigData != null) {
-            echo("Token chain requires directory chain version 75, found version $version")
-            return
+            CliktError("Token chain requires directory chain version 75, found version $version")
         }
 
         client.transactionBuilder()
@@ -109,7 +103,7 @@ class CommandInit : PmcCommand(
                         initTokenChainOperation(client.pubkey, it)
                     }
                 }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Network was initiated",
                         "Failed to initiate network",

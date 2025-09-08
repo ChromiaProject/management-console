@@ -19,9 +19,9 @@ class CommandUpdateProvider : DCBaseCommand(
     private val url by urlOption("Provider url")
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .updateProviderOperation(clientProviderPubkey, name, url)
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult("Information updated", "Could not update provider data")
     }
 }

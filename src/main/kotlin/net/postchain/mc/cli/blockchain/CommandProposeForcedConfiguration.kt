@@ -1,18 +1,28 @@
 package net.postchain.mc.cli.blockchain
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
+import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.UsageError
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
+import com.github.ajalt.mordant.terminal.prompt
+import com.google.gson.Gson
+import net.postchain.chain0.common.queries.getBlockchainInfo
+import net.postchain.chain0.model.BlockchainState
 import net.postchain.chain0.proposal_blockchain.proposeForcedConfigurationOperation
+import net.postchain.client.exception.NodesDisagree
+import net.postchain.client.impl.PostchainClientImpl
+import net.postchain.client.impl.QueryMajorityRequestStrategyFactory
 import net.postchain.gtv.GtvEncoder
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
-import net.postchain.mc.cli.util.proposalDescriptionOption
+import net.postchain.mc.cli.util.nullableProposalDescriptionOption
 import net.postchain.mc.compatibility.ApiCompatV78.proposeForcedConfigurationOperationV78
 import net.postchain.mc.network.requireApiVersion
 
@@ -20,7 +30,7 @@ import net.postchain.mc.network.requireApiVersion
 class CommandProposeForcedConfiguration : DCBaseCommand(
         name = "force-update",
         help = """
-        Propose a new forced configuration to a blockchain.
+        Propose a new forced configuration to a blockchain
         
         WARNING!!! Only use this if absolutely necessary.
         Command is irreversible but forced configs can be overwritten.
@@ -39,32 +49,72 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
 
     private val blockchainRID by blockchainRidOption().required()
 
-    private val height by heightOption().required()
+    private val height by heightOption()
+
+    private val detectHeight by option("-dh", "--detect-height", help = "Detect and suggest the height").flag()
 
     private val resumeChain by option("-r", "--resume", help = "Automatically resume blockchain after configuration is applied").flag()
 
-    private val description by proposalDescriptionOption { "Force update of blockchain configuration for $blockchainRID at height $height" }
+    private val description by nullableProposalDescriptionOption()
 
     override fun runDC() {
         if (resumeChain) {
-            client.requireApiVersion(80, message = "--resume")
+            client.requireApiVersion(dcVersion, 80, message = "--resume")
         }
+
+        if ((height != null) == detectHeight) {
+            throw UsageError("You must specify --height or --detect-height")
+        }
+
+        val proposalHeight: Long = height ?: let {
+            val blockchainInfo = client.getBlockchainInfo(blockchainRID.data) ?: throw CliktError("Blockchain not found")
+            if (blockchainInfo.state != BlockchainState.PAUSED) {
+                throw UsageError("Blockchain is in state ${blockchainInfo.state} but must be ${BlockchainState.PAUSED} to detect the height")
+            }
+            val chainClient = config.chromiaClient.getClient(blockchainRID, QueryMajorityRequestStrategyFactory())
+            val currentHeight = try {
+                // Intentionally using generic function to force query to multiple nodes
+                val getHeightResponse = chainClient.genericGetJson("/blockchain/$blockchainRID/height")
+                parseHeightResponse(getHeightResponse)
+            } catch (e: NodesDisagree) {
+                val responses = parseNodesDisagreeResponse(e)
+                throw CliktError("""Could not get consensus on current block height:
+                    $responses.
+                    Carefully inspect these heights and run the command again with the appropriate height using the --height flag.""")
+            }
+            if (terminal.terminalInfo.inputInteractive) {
+                val answer = terminal.prompt("The blockchain is ${BlockchainState.PAUSED} and about to build block $currentHeight.\n\nDo you want to proceed and create a forced configuration proposal for height $currentHeight? (y/N)")
+                if (answer == null || !answer.startsWith("Y", ignoreCase = true))
+                    throw CliktError("Canceled", statusCode = 0)
+            }
+            currentHeight
+        }
+        val proposalDescription = description ?: "Force update of blockchain configuration for $blockchainRID at height $proposalHeight"
 
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
         val compressedConfigurationData = GtvEncoder.encodeGtv(BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, dcVersion))
 
-        client.transactionBuilder()
+        transactionBuilder()
                 .apply {
                     if (dcVersion >= 80) {
-                        proposeForcedConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, height, description, resumeChain)
+                        proposeForcedConfigurationOperation(clientProviderPubkey, blockchainRID, compressedConfigurationData, proposalHeight, proposalDescription, resumeChain)
                     } else {
-                        proposeForcedConfigurationOperationV78(clientProviderPubkey, blockchainRID, compressedConfigurationData, height, description)
+                        proposeForcedConfigurationOperationV78(clientProviderPubkey, blockchainRID, compressedConfigurationData, proposalHeight, proposalDescription)
                     }
                 }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
-                        "Forced configurations was proposed: ${bcConfig.hash}",
+                        "Forced configurations was proposed: ${bcConfig.hash}" + (if (dcVersion >=83) "\nA node provider needs to approve this." else ""),
                         "Failed to propose forced configuration"
                 )
     }
+
+    private fun parseHeightResponse(response: String): Long =
+            Gson().fromJson(response, PostchainClientImpl.CurrentBlockHeight::class.java).blockHeight
+
+    private fun parseNodesDisagreeResponse(e: NodesDisagree): String = e.errorMessage
+            .removeSurrounding("[", "]")
+            .split(", ")
+            .map { it.split("=") }
+            .joinToString { "${it[1]} node(s) replied ${parseHeightResponse(it[0])}" }
 }

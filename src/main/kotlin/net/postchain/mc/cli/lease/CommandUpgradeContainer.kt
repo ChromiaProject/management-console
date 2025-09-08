@@ -1,6 +1,7 @@
 package net.postchain.mc.cli.lease
 
 import com.chromia.cli.tools.ft.addEvmAuthOperation
+import com.chromia.cli.tools.ft.addFtAuthOperation
 import com.chromia.cli.tools.ft.findFtAccountIdWithAuthDescriptorId
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.PrintMessage
@@ -21,7 +22,9 @@ import net.postchain.economy.economy_chain.upgradeContainerOperation
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.accountIdOption
-import net.postchain.mc.cli.evmAddressOption
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMPUTE_REQUESTS
+import net.postchain.mc.cli.optionalEvmAddressOption
+import net.postchain.mc.compatibility.ApiCompatECV59.upgradeContainerOperationV59
 
 class CommandUpgradeContainer : ECBaseCommand(
         name = "upgrade-container",
@@ -29,7 +32,7 @@ class CommandUpgradeContainer : ECBaseCommand(
 ) {
     val accountIdOption by accountIdOption()
 
-    val evmAddress by evmAddressOption()
+    val evmAddress by optionalEvmAddressOption()
 
     val containerName by option("-n", "--name", help = "Container name", metavar = "name").required()
 
@@ -45,32 +48,60 @@ class CommandUpgradeContainer : ECBaseCommand(
         require(it >= 0) { "Extra storage cannot be negative" }
     }
 
+    val extraComputeRequests by option("--extraComputeRequests").int().validate {
+        require(it >= 0) { "Extra compute requests cannot be negative" }
+    }
+
     val clusterName by option("-cn", "--cluster-name", help = "Name of the cluster").required()
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
+        if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS && extraComputeRequests != null) {
+            throw CliktError("This version of Economy chain does not support extra compute requests")
+        }
+
         val (accountId, authDescriptorId) =
-                findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption, evmAddress, CREATE_CONTAINER_WITH_SUBNODE_IMAGE, null)
+                findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption,
+                        evmAddress ?: client.config.signers.first().pubKey.data,
+                        CREATE_CONTAINER_WITH_SUBNODE_IMAGE, null)
 
         val transactionResult = economyChainClient.transactionBuilder().also {
-            addEvmAuthOperation(
-                    economyChainClient, it,
-                    UPGRADE_CONTAINER, listOf(
-                    gtv(containerName),
-                    gtv(scus.toLong()),
-                    gtv(extraStorage.toLong()),
-                    gtv(clusterName),
-                    gtv(duration.toLong()),
-            ),
-                    evmAddress, accountId, authDescriptorId)
-            echo("Signing done, posting transaction...")
-        }
-                .upgradeContainerOperation(
-                        containerName = containerName,
-                        upgradedContainerUnits = scus.toLong(),
-                        upgradedExtraStorageGib = extraStorage.toLong(),
-                        upgradedClusterName = clusterName,
-                        upgradedDurationWeeks = duration.toLong())
-                .postAwaitConfirmation()
+            evmAddress?.let { evmAddress ->
+                addEvmAuthOperation(
+                        economyChainClient, it,
+                        UPGRADE_CONTAINER, listOf(
+                        gtv(containerName),
+                        gtv(scus.toLong()),
+                        gtv(extraStorage.toLong()),
+                        gtv(clusterName),
+                        gtv(duration.toLong()),
+                ),
+                        evmAddress, accountId, authDescriptorId)
+                echo("Signing done, posting transaction...")
+            } ?: run {
+                addFtAuthOperation(it, accountId, authDescriptorId)
+            }
+
+        }.let {
+                    if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS) {
+                        it.upgradeContainerOperationV59(
+                                containerName = containerName,
+                                upgradedContainerUnits = scus.toLong(),
+                                upgradedExtraStorageGib = extraStorage.toLong(),
+                                upgradedClusterName = clusterName,
+                                upgradedDurationWeeks = duration.toLong(),
+                        )
+                    } else {
+                        it.upgradeContainerOperation(
+                                containerName = containerName,
+                                upgradedContainerUnits = scus.toLong(),
+                                upgradedExtraStorageGib = extraStorage.toLong(),
+                                upgradedClusterName = clusterName,
+                                upgradedDurationWeeks = duration.toLong(),
+                                upgradedExtraComputeRequests = extraComputeRequests?.toLong() ?: 0L,
+                        )
+                    }
+                }
+                .postAwaitConfirmation(txListener())
         when (transactionResult.status) {
             TransactionStatus.CONFIRMED -> {
                 val ticket = economyChainClient.getUpgradeContainerTicketByTransaction(transactionResult.txRid.rid.hexStringToByteArray())

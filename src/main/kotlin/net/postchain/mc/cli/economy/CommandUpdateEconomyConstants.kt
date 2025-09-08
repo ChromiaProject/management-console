@@ -6,9 +6,12 @@ import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.updateEconomyConstantsOperation
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_SCHEDULED_PROPOSAL_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.scheduleAt
 import net.postchain.mc.compatibility.ApiCompatECV52.updateEconomyConstantsOperationECV52
+import net.postchain.mc.compatibility.ApiCompatECV57.updateEconomyConstantsOperation
 
 class CommandUpdateEconomyConstants : ECBaseCommand(
     name = "update-constants",
@@ -43,14 +46,20 @@ class CommandUpdateEconomyConstants : ECBaseCommand(
                             stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),
                             resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal()
                     )
-        } else {
+        } else if (ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION) {
             economyChainClient.transactionBuilder()
                     .updateEconomyConstantsOperation(minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
                             stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),
                             resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal(), scheduleAt
                     )
+        } else {
+            economyChainClient.transactionBuilder()
+                    .updateEconomyConstantsOperation(clientProviderPubkey, minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
+                            stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),
+                            resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal(), scheduleAt
+                    )
         }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal for updating economy constants is created and awaits approval.",
                         "Failed to create economy constants update proposal"

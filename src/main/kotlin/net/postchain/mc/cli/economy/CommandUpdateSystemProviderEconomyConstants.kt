@@ -5,8 +5,12 @@ import com.github.ajalt.clikt.parameters.options.option
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.proposeSystemProviderEconomyConstantsOperation
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_EC_CONSTANTS_AS_PROPOSALS_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.compatibility.ApiCompatECV28.updateSystemProviderEconomyConstantsOperationECV28
+import net.postchain.mc.compatibility.ApiCompatECV57.proposeSystemProviderEconomyConstantsOperation
 
 class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
         name = "update-system-provider-constants",
@@ -40,7 +44,7 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
                                 systemProviderRiskShare?.toBigDecimal(),
                         )
             }
-            else -> {
+            ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .proposeSystemProviderEconomyConstantsOperation(
                                 totalCostSystemProviders?.toLong()?.times(UNITS_PER_USD),
@@ -48,8 +52,17 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
                                 systemProviderRiskShare?.toBigDecimal(),
                         )
             }
+            else -> {
+                economyChainClient.transactionBuilder()
+                        .proposeSystemProviderEconomyConstantsOperation(
+                                clientProviderPubkey,
+                                totalCostSystemProviders?.toLong()?.times(UNITS_PER_USD),
+                                systemProviderFeeShare?.toBigDecimal(),
+                                systemProviderRiskShare?.toBigDecimal(),
+                        )
+            }
         }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal for updating system provider economy constants is created and awaits approval.",
                         "Failed to create system provider economy constants update proposal"

@@ -32,17 +32,17 @@ class CommandProposeRemoveContainer : DCBaseCommand(
             if (apiVersion >= 53 && !directContainerEnabled(apiVersion)) {
                 throw CliktError("Network does not support direct removal of containers. Create a proposal instead.")
             }
-            client.transactionBuilder()
+            transactionBuilder()
                     .removeContainerOperation(clientProviderPubkey, name)
-                    .postAwaitConfirmation()
+                    .postAwaitConfirmation(txListener())
                     .printResult(
                             "Container removed",
                             "Failed to remove container"
                     )
         } else {
-            client.transactionBuilder()
+            transactionBuilder()
                     .proposeRemoveContainerOperation(clientProviderPubkey, name, description)
-                    .postAwaitConfirmation()
+                    .postAwaitConfirmation(txListener())
                     .printResult(
                             "Container removal proposed",
                             "Failed proposing container removal"

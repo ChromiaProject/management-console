@@ -26,10 +26,11 @@ import net.postchain.economy.economy_chain.getPriceOracleRateProposal
 import net.postchain.economy.economy_chain.getStakingRequirementConstantsProposal
 import net.postchain.economy.economy_chain.getSystemProviderEconomyConstantsProposal
 import net.postchain.economy.economy_chain.getTagProposal
-import net.postchain.mc.cli.base.rowIfNotNull
 import net.postchain.mc.cli.ECBaseCommand
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
-import net.postchain.mc.cli.economy.ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION
+import net.postchain.mc.cli.base.rowIfNotNull
 import net.postchain.mc.cli.economy.doEcSupportMinorUnits
 import net.postchain.mc.cli.economy.formatChr
 import net.postchain.mc.cli.economy.formatUsd
@@ -172,7 +173,15 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
                     row("Voter set", clusterCreateProposal.voterSetName)
                     row("Cluster units", clusterCreateProposal.clusterUnits)
                     row("Extra storage", clusterCreateProposal.extraStorage)
-                    row("Status", clusterCreateProposal.status.name)
+                    if (ecVersion >= ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION) {
+                        row("Container unit - CPU", clusterCreateProposal.containerUnitCpu)
+                        row("Container unit - RAM", clusterCreateProposal.containerUnitRam)
+                        row("Container unit - storage", clusterCreateProposal.containerUnitStorage)
+                        row("Container unit - I/O read", clusterCreateProposal.containerUnitIoRead)
+                        row("Container unit - I/O write", clusterCreateProposal.containerUnitIoWrite)
+                        row("System container units", clusterCreateProposal.systemContainerUnits)
+                        row("Status", clusterCreateProposal.status.name)
+                    }
                 }
             }
         }

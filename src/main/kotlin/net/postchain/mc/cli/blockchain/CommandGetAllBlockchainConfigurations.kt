@@ -1,5 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
@@ -43,8 +44,7 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
 
     override fun run() {
         if (config.client.getBlockchainInfo(blockchainRID.data) == null) {
-            echo("Unknown blockchain: $blockchainRID")
-            return
+            throw CliktError("Unknown blockchain: $blockchainRID")
         }
 
         val heights = if (fromHeight == 0L) {
@@ -63,11 +63,10 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
         if (save != null) {
             save?.mkdirs()
             if (!overwrite && save?.list()?.isNotEmpty() == true) {
-                echo("Directory is not empty: $save", err = true)
-                return
+                throw CliktError("Directory is not empty: $save")
             }
             if (exportFormat) {
-                echo("Generating configuration export file with name: '$blockchainRID.configs'")
+                echo("Generating configuration export file with name: '$blockchainRID.configs'", err = true)
                 exportConfigFile = BufferedOutputStream(FileOutputStream(File(save?.path, "$blockchainRID.configs")))
             }
         }

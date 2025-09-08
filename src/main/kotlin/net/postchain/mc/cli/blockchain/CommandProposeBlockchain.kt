@@ -1,11 +1,9 @@
 package net.postchain.mc.cli.blockchain
 
 import com.chromia.build.tools.config.BlockchainConfigurationCompressor
-import net.postchain.mc.cli.PmcCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.core.ProgramResult
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -17,16 +15,15 @@ import net.postchain.common.hexStringToByteArray
 import net.postchain.common.toHex
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.gtv.GtvEncoder
-import net.postchain.mc.cli.base.pubkey
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.blockchainConfigOption
 import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.nameOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 
 
-class CommandProposeBlockchain : PmcCommand(
+class CommandProposeBlockchain : DCBaseCommand(
         name = "add",
         help = """
             Propose a new blockchain in a specific container
@@ -34,9 +31,6 @@ class CommandProposeBlockchain : PmcCommand(
             Change will be applied after voting within the deployer voter set of the cluster that the container belongs to.
         """.trimIndent()
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val blockchainConfigFile by blockchainConfigOption().required()
 
     private val container by option("-c", "--container", help = "Name of container to run in").required()
@@ -47,13 +41,13 @@ class CommandProposeBlockchain : PmcCommand(
 
     private val description by proposalDescriptionOption { "Add blockchain $name to the container $container" }
 
-    override fun run() {
+    override fun runDC() {
         val apiVersion = client.apiVersion()
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
         val compressedConfig = BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, apiVersion)
-        val txResult = client.transactionBuilder()
-                .proposeBlockchainOperation(client.pubkey, GtvEncoder.encodeGtv(compressedConfig), name, container, description)
-                .postAwaitConfirmation()
+        val txResult = transactionBuilder()
+                .proposeBlockchainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedConfig), name, container, description)
+                .postAwaitConfirmation(txListener())
                 .apply {
                     when (status) {
                         TransactionStatus.CONFIRMED -> {}

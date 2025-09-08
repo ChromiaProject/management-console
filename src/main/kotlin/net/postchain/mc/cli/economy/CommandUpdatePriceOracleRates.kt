@@ -11,7 +11,10 @@ import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtv.parse.GtvParser
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_PRICE_ORACLE_RATE_PROPOSAL_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.base.printResult
+import net.postchain.mc.compatibility.ApiCompatECV57.proposePriceOracleRateOperation
 
 class CommandUpdatePriceOracleRates : ECBaseCommand(
         name = "update-price-oracle-rates",
@@ -41,12 +44,16 @@ class CommandUpdatePriceOracleRates : ECBaseCommand(
         }
 
         when {
-            else -> {
+            ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
                 economyChainClient.transactionBuilder()
                         .proposePriceOracleRateOperation(tokenRates)
             }
+            else -> {
+                economyChainClient.transactionBuilder()
+                        .proposePriceOracleRateOperation(clientProviderPubkey, tokenRates)
+            }
         }
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Proposal for updating price oracle rates is created and awaits approval.",
                         "Failed to create price oracle rate proposal"

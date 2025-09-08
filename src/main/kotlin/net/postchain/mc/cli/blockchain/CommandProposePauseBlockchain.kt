@@ -17,14 +17,14 @@ class CommandProposePauseBlockchain : DCBaseCommand(
     private val description by proposalDescriptionOption { "Stop blockchain $blockchainRID" }
 
     override fun runDC() {
-        client.transactionBuilder()
+        transactionBuilder()
                 .proposeBlockchainActionOperation(
                         clientProviderPubkey,
                         blockchainRID,
                         BlockchainAction.pause,
                         description
                 )
-                .postAwaitConfirmation()
+                .postAwaitConfirmation(txListener())
                 .printResult(
                         "Blockchain pause proposition was added successfully",
                         "Cannot add proposal for pausing blockchain"

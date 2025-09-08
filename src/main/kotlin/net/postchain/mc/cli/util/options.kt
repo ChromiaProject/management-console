@@ -2,9 +2,15 @@ package net.postchain.mc.cli.util
 
 import com.chromia.build.tools.config.ChromiaConfigLoader
 import com.chromia.build.tools.config.ChromiaConfigWriter
+import com.chromia.build.tools.keystore.ChromiaKeyStore
 import com.chromia.cli.tools.config.OptionalChromiaModelConfigOption
+import com.chromia.cli.tools.config.keyIdOption
+import com.chromia.cli.tools.config.secretOption
+import com.chromia.cli.tools.util.SUPPORTED_TIME_AT_FORMATS
+import com.chromia.cli.tools.util.timeAtConverter
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.groups.single
@@ -18,15 +24,21 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.split
 import com.github.ajalt.clikt.parameters.options.switch
 import com.github.ajalt.clikt.parameters.options.validate
+import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
 import net.postchain.chain0.model.ProviderQuotaType
+import net.postchain.client.config.FailOverConfig
 import net.postchain.client.config.PostchainClientConfig
+import net.postchain.client.core.PostchainClient
+import net.postchain.client.core.PostchainReadClient
+import net.postchain.client.impl.TryNextOnErrorRequestStrategyFactory
 import net.postchain.client.request.Endpoint
 import net.postchain.common.BlockchainRid
-import net.postchain.common.config.getEnvOrBooleanProperty
+import net.postchain.common.PropertiesFileLoader
 import net.postchain.common.config.getEnvOrStringProperty
 import net.postchain.common.hexStringToByteArray
+import net.postchain.crypto.KeyPair
 import net.postchain.crypto.PubKey
 import net.postchain.d1.client.StandardChromiaClient
 import net.postchain.mc.cli.base.CommandBase
@@ -36,6 +48,7 @@ import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.base.URL_LENGTH_MAX
 import java.net.URI
 import java.net.URISyntaxException
+import java.time.Duration
 
 const val CHROMIA_CONFIG = "CHROMIA_CONFIG"
 const val ECDSA_COMPRESSED_KEY_SIZE = 33
@@ -71,15 +84,58 @@ fun OptionTransformContext.validatePubkey(pubKey: PubKey) {
     }
 }
 
+fun CliktCommand.pmcKeyConfigOption() = PmcKeyClientConfigOption { msg -> echo(msg, err = true) }
+
 fun CliktCommand.pmcConfigOption() = PmcClientConfigOption { msg -> echo(msg, err = true) }
 
-class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConfigOption(logger) {
+class PmcKeyClientConfigOption(logger: (String) -> Unit) : PmcClientConfigOption(logger) {
+    val secretFile by secretOption()
+    val keyId by keyIdOption()
+
+    override fun fixClientConfig(clientConfig: PostchainClientConfig): PostchainClientConfig {
+        if (secretFile != null && keyId != null) {
+            throw UsageError("You can only specify one of --secret or --key-id")
+        }
+        if (secretFile != null) {
+            val secretProps = PropertiesFileLoader.load(secretFile!!.absolutePath)
+            if (secretProps.containsKey("pubkey") && secretProps.containsKey("privkey")) {
+                return clientConfig.copy(signers = listOf(KeyPair.of(secretProps.getString("pubkey"), secretProps.getString("privkey"))))
+            } else {
+                throw CliktError("Secret file: ${secretFile!!} does not contain 'pubkey' and/or 'privkey' properties")
+            }
+        }
+        if (keyId != null) {
+            return clientConfig.copy(signers = listOf(ChromiaKeyStore(keyId!!).findKeyPair()
+                    ?: throw CliktError("Key with ID '$keyId' not found")))
+        }
+        return clientConfig
+    }
+
+    val txClient: PostchainClient by lazy {
+        if (lookupNodes)
+            chromiaClient.getDirectoryChainClientForQueryReplica(addNop = true)
+        else
+            chromiaClient.getDirectoryChainClientForForwardingReplica(addNop = true)
+    }
+
+    val providerPubkey by lazy { rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_PROVIDER_PUBKEY", "provider.pubkey")?.let { PubKey(it) } }
+}
+
+val defaultClientConfig = PostchainClientConfig.defaultConfig.copy(
+        failOverConfig = FailOverConfig(attemptsPerEndpoint = 2),
+        connectTimeout = Duration.ofSeconds(10),
+        requestStrategy = TryNextOnErrorRequestStrategyFactory(),
+        compressRequestBodies = true)
+
+open class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConfigOption(logger) {
     private val lookupBrid by option("--lookup-brid", help = "Ignore any 'brid' property in configuration file, always perform lookup")
             .flag()
     val lookupNodes by option("--lookup-nodes", help = "Lookup system cluster signer nodes for sending transactions to")
             .flag("--no-lookup-nodes", default = true, defaultForHelp = "yes")
     val network by option("--network", help = "Target network to make requests to (if chromia.yml is configured)")
-    val rawConfig by lazy { ChromiaConfigLoader(logger).loadProperties(configFile) }
+    val rawConfig by lazy {
+        ChromiaConfigLoader(logger).loadProperties(configFile)
+    }
 
     val chromiaClient by lazy {
         if (network != null) {
@@ -87,17 +143,15 @@ class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConf
             val networkModel = model!!.deployments[network]
                     ?: throw IllegalArgumentException("Network $network not found in configuration")
             rawConfig.setProperty("api.url", networkModel.urls.joinToString(",") { Endpoint.sanitizeUrl(it) })
-            rawConfig.setProperty("brid", networkModel.blockchainRid.toHex())
+            networkModel.blockchainRid?.let { rawConfig.setProperty("brid", it.toHex()) }
         }
         val configuredBrid = if (lookupBrid) null else rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
-        val useRequestCompression = rawConfig
-                .getEnvOrBooleanProperty("POSTCHAIN_CLIENT_COMPRESS_REQUEST_BODIES", "compress.requests", true)
+        rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
 
         if (!rawConfig.containsKey("api.url")) throw CliktError("No api.url specified")
-        rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
-        val postchainClientConfig = PostchainClientConfig.fromConfiguration(rawConfig)
+        val postchainClientConfig = fixClientConfig(PostchainClientConfig.fromConfiguration(rawConfig, defaultClientConfig))
 
-        val chromiaClient = StandardChromiaClient(postchainClientConfig.copy(compressRequestBodies = useRequestCompression))
+        val chromiaClient = StandardChromiaClient(postchainClientConfig)
 
         if (configuredBrid == null) {
             ChromiaConfigWriter.local.setBrid(chromiaClient.directoryChainRid)
@@ -106,14 +160,11 @@ class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaModelConf
         chromiaClient
     }
 
-    val client by lazy {
-        if (lookupNodes)
-            chromiaClient.getDirectoryChainClientForQueryReplica(addNop = true)
-        else
-            chromiaClient.getDirectoryChainClientForForwardingReplica(addNop = true)
-    }
+    open fun fixClientConfig(clientConfig: PostchainClientConfig): PostchainClientConfig = clientConfig
 
-    val providerPubkey by lazy { rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_PROVIDER_PUBKEY", "provider.pubkey") }
+    val client: PostchainReadClient by lazy {
+        chromiaClient.getDirectoryChainClientForQueryReplica(addNop = true)
+    }
 }
 
 fun CliktCommand.nameOption(helpMessage: String) = option("-n", "--name", help = helpMessage)
@@ -217,12 +268,18 @@ fun CliktCommand.proposalDescriptionOption(helpMessage: String = "Proposal descr
 fun CliktCommand.configurationsFileOption() = option("--configurations-file", help = "File to import blockchain configurations from")
         .path(mustExist = true, canBeDir = false, canBeFile = true, mustBeReadable = true)
 
-fun CliktCommand.scheduleAt(vararg names: String = arrayOf("--schedule-at"), helpMsg: String = "Set the time (UTC) to apply this proposal. Supported formats: ${DATE_TIME_FORMATS.keys.joinToString(", ")} and milliseconds since 1970 (unix/epoch time)") = option(names = names, help = helpMsg)
-        .convert { input ->
-            if (input.all { it.isDigit() } && input.length == 13) {
-                input.toLong()
-            } else {
-                parseDateTimeAsEpochMillis(input, DATE_TIME_FORMATS.values.toList())
-                        ?: throw IllegalArgumentException("Invalid time format: $input supported formats: ${DATE_TIME_FORMATS.keys.joinToString(", ")} and milliseconds since 1970 (unix/epoch time)")
-            }
+fun CliktCommand.scheduleAt(vararg names: String = arrayOf("--schedule-at"),
+                            helpMsg: String = "Set the time (UTC) to apply this proposal. $SUPPORTED_TIME_AT_FORMATS") = option(names = names, help = helpMsg)
+        .convert { timeAtConverter(it) }
+
+fun CliktCommand.systemContainerUnitsOption() = option("--system-container-units", help = "Number of container units to reserve for cluster system container").long().default(4)
+fun CliktCommand.containerUnitCpuOption() = option("--cu-cpu", help = "Container unit CPU limit (percent of cpus, 10 == 0.1 cpu(s), 150 == 1.5 cpu(s))").long().default(50)
+fun CliktCommand.containerUnitRamOption() = option("--cu-ram", help = "Container unit RAM limit (MiB)").long().default(2048)
+fun CliktCommand.containerUnitStorageOption() = option("--cu-storage", help = "Container unit storage limit (MiB)").long().default(16384)
+fun CliktCommand.containerUnitIoReadOption() = option("--cu-io-read", help = "Container unit storage I/O read limit (MiB/s)").long().default(25)
+fun CliktCommand.containerUnitIoWriteOption() = option("--cu-io-write", help = "Container unit storage I/O write limit (MiB/s)").long().default(20)
+
+fun CliktCommand.baseComputeRequestsOptions() = option("-bcr", "--base-compute-requests", help = "How many compute requests per week a container gets by default").int()
+        .validate {
+            require(it >= 0) { "base compute requests must not be negative" }
         }

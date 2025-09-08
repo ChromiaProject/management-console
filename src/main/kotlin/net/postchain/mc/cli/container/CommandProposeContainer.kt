@@ -1,7 +1,6 @@
 package net.postchain.mc.cli.container
 
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -10,30 +9,27 @@ import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.direct_container.createContainerFromOperation
 import net.postchain.chain0.direct_container.createContainerFromWithResourceLimitsAndSubnodeImageOperation
 import net.postchain.chain0.direct_container.createContainerFromWithResourceLimitsOperation
-import net.postchain.chain0.direct_container.createContainerFromWithUnitsOperation
 import net.postchain.chain0.direct_container.createContainerOperation
 import net.postchain.chain0.direct_container.createContainerWithResourceLimitsAndSubnodeImageOperation
 import net.postchain.chain0.direct_container.createContainerWithResourceLimitsOperation
-import net.postchain.chain0.direct_container.createContainerWithUnitsOperation
 import net.postchain.chain0.features.hasDirectContainer
 import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.proposal_container.proposeContainerOperation
 import net.postchain.chain0.proposal_container.proposeContainerWithSubnodeImageOperation
-import net.postchain.chain0.version.apiVersion
-import net.postchain.mc.cli.PmcCommand
+import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.VoterSetOrPubkeysOption
 import net.postchain.mc.cli.util.containerUnitsOption
 import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.maxBlockchainsOption
 import net.postchain.mc.cli.util.nameOrGenerateOption
 import net.postchain.mc.cli.util.nullableProposalDescriptionOption
-import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pubkeysOrVotersetOption
+import net.postchain.mc.compatibility.ApiCompatV89.createContainerFromWithUnitsOperationV89
+import net.postchain.mc.compatibility.ApiCompatV89.createContainerWithUnitsOperationV89
 
 
-class CommandProposeContainer : PmcCommand(
+class CommandProposeContainer : DCBaseCommand(
         name = "add",
         help = """
             Propose a new container in an existing cluster 
@@ -41,9 +37,6 @@ class CommandProposeContainer : PmcCommand(
             This also gives authority to deployer voter set to deploy blockchains in it.
         """.trimIndent()
 ) {
-    private val config by pmcConfigOption()
-    private val client get() = config.client
-
     private val name by nameOrGenerateOption("Container name")
 
     private val clusterName by option(
@@ -80,28 +73,26 @@ class CommandProposeContainer : PmcCommand(
     private val direct by option("-d", "--direct", help = "Create directly without proposal")
             .flag("-p", "--proposal", default = true)
 
-    override fun run() {
-        val apiVersion = client.apiVersion()
-
+    override fun runDC() {
         if (direct) {
             if (subnodeImageName != null) {
-                if (apiVersion < 72) {
+                if (dcVersion < 72) {
                     throw CliktError("Cannot assign subnode image when creating container directly, use --proposal")
                 }
             }
             var hasDirectContainer = true
-            if (apiVersion >= 49)
+            if (dcVersion >= 49)
                 hasDirectContainer = client.hasDirectContainer()
             if (hasDirectContainer) {
-                client.transactionBuilder()
+                transactionBuilder()
                         .apply {
                             when {
 
-                                apiVersion >= 72 -> {
+                                dcVersion >= 72 -> {
                                     when (deployerOption) {
                                         is VoterSetOrPubkeysOption.Pubkeys -> {
                                             createContainerWithResourceLimitsAndSubnodeImageOperation(
-                                                    client.pubkey,
+                                                    clientProviderPubkey,
                                                     name,
                                                     clusterName,
                                                     consensusThreshold,
@@ -117,7 +108,7 @@ class CommandProposeContainer : PmcCommand(
 
                                         is VoterSetOrPubkeysOption.VoterSet -> {
                                             createContainerFromWithResourceLimitsAndSubnodeImageOperation(
-                                                    client.pubkey,
+                                                    clientProviderPubkey,
                                                     name,
                                                     clusterName,
                                                     consensusThreshold,
@@ -133,11 +124,11 @@ class CommandProposeContainer : PmcCommand(
                                     }
                                 }
 
-                                apiVersion >= 24 -> {
+                                dcVersion >= 24 -> {
                                     when (deployerOption) {
                                         is VoterSetOrPubkeysOption.Pubkeys -> {
                                             createContainerWithResourceLimitsOperation(
-                                                    client.pubkey,
+                                                    clientProviderPubkey,
                                                     name,
                                                     clusterName,
                                                     consensusThreshold,
@@ -152,7 +143,7 @@ class CommandProposeContainer : PmcCommand(
 
                                         is VoterSetOrPubkeysOption.VoterSet -> {
                                             createContainerFromWithResourceLimitsOperation(
-                                                    client.pubkey,
+                                                    clientProviderPubkey,
                                                     name,
                                                     clusterName,
                                                     consensusThreshold,
@@ -167,11 +158,11 @@ class CommandProposeContainer : PmcCommand(
                                     }
                                 }
 
-                                apiVersion >= 3 -> {
+                                dcVersion >= 3 -> {
                                     when (deployerOption) {
                                         is VoterSetOrPubkeysOption.Pubkeys -> {
-                                            createContainerWithUnitsOperation(
-                                                    client.pubkey,
+                                            createContainerWithUnitsOperationV89(
+                                                    clientProviderPubkey,
                                                     name,
                                                     clusterName,
                                                     consensusThreshold,
@@ -181,8 +172,8 @@ class CommandProposeContainer : PmcCommand(
                                         }
 
                                         is VoterSetOrPubkeysOption.VoterSet -> {
-                                            createContainerFromWithUnitsOperation(
-                                                    client.pubkey,
+                                            createContainerFromWithUnitsOperationV89(
+                                                    clientProviderPubkey,
                                                     name,
                                                     clusterName,
                                                     consensusThreshold,
@@ -197,7 +188,7 @@ class CommandProposeContainer : PmcCommand(
                                     when (deployerOption) {
                                         is VoterSetOrPubkeysOption.Pubkeys -> {
                                             createContainerOperation(
-                                                    client.pubkey,
+                                                    clientProviderPubkey,
                                                     name,
                                                     clusterName,
                                                     consensusThreshold,
@@ -207,7 +198,7 @@ class CommandProposeContainer : PmcCommand(
 
                                         is VoterSetOrPubkeysOption.VoterSet -> {
                                             createContainerFromOperation(
-                                                    client.pubkey,
+                                                    clientProviderPubkey,
                                                     name,
                                                     clusterName,
                                                     consensusThreshold,
@@ -218,7 +209,7 @@ class CommandProposeContainer : PmcCommand(
                                 }
                             }
                         }
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Container $name has been created",
                                 "Failed to create container"
@@ -235,31 +226,31 @@ class CommandProposeContainer : PmcCommand(
             }
             echo("Proposing container. Please note that any specified container limits are ignored. Create a separate proposal to change them from defaults.")
             if (subnodeImageName != null) {
-                if (apiVersion < 57) {
+                if (dcVersion < 57) {
                     throw CliktError("Setting subnode image for container is not supported by network")
                 }
-                client.transactionBuilder().proposeContainerWithSubnodeImageOperation(
-                        client.pubkey,
+                transactionBuilder().proposeContainerWithSubnodeImageOperation(
+                        clientProviderPubkey,
                         clusterName,
                         name,
                         (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
                         subnodeImageName!!,
                         description()
                 )
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Container creation has been proposed",
                                 "Failed to propose container creation"
                         )
             } else {
-                client.transactionBuilder().proposeContainerOperation(
-                        client.pubkey,
+                transactionBuilder().proposeContainerOperation(
+                        clientProviderPubkey,
                         clusterName,
                         name,
                         (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
                         description()
                 )
-                        .postAwaitConfirmation()
+                        .postAwaitConfirmation(txListener())
                         .printResult(
                                 "Container creation has been proposed",
                                 "Failed to propose container creation"
