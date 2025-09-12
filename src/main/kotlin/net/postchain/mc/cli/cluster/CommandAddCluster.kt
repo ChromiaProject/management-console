@@ -23,6 +23,7 @@ import net.postchain.mc.cli.util.containerUnitIoWriteOption
 import net.postchain.mc.cli.util.containerUnitRamOption
 import net.postchain.mc.cli.util.containerUnitStorageOption
 import net.postchain.mc.cli.util.extraStorageOption
+import net.postchain.mc.cli.util.maxNodes
 import net.postchain.mc.cli.util.nameOrGenerateOption
 import net.postchain.mc.cli.util.pubkeysOrVotersetOption
 import net.postchain.mc.cli.util.systemContainerUnitsOption
@@ -35,6 +36,9 @@ import net.postchain.mc.compatibility.ApiCompatV33.createClusterWithClusterDataO
 import net.postchain.mc.compatibility.ApiCompatV87
 import net.postchain.mc.compatibility.ApiCompatV87.createClusterFromWithClusterDataOperationV87
 import net.postchain.mc.compatibility.ApiCompatV87.createClusterWithClusterDataOperationV87
+import net.postchain.mc.compatibility.ApiCompatV97
+import net.postchain.mc.compatibility.ApiCompatV97.createClusterFromWithClusterDataOperationV97
+import net.postchain.mc.compatibility.ApiCompatV97.createClusterWithClusterDataOperationV97
 
 class CommandAddCluster : DCBaseCommand(
         name = "add",
@@ -64,6 +68,8 @@ class CommandAddCluster : DCBaseCommand(
     private val containerUnitIoRead by containerUnitIoReadOption()
     private val containerUnitIoWrite by containerUnitIoWriteOption()
 
+    private val maxNodes by maxNodes()
+
     override fun runDC() {
         val apiVersion = client.apiVersion()
         var hasDirectCluster = true
@@ -73,15 +79,29 @@ class CommandAddCluster : DCBaseCommand(
             transactionBuilder()
                     .apply {
                         when {
-                            apiVersion >= 88 -> {
+                            apiVersion >= 98 -> {
                                 val clusterCreationData = ClusterCreationData(clusterUnits, extraStorage, systemContainerUnits,
-                                        containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite, containerUnitStorage)
+                                        containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite, containerUnitStorage, maxNodes)
                                 when (providerOptions) {
                                     is VoterSetOrPubkeysOption.Pubkeys -> {
                                         createClusterWithClusterDataOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, clusterCreationData)
                                     }
                                     is VoterSetOrPubkeysOption.VoterSet -> {
                                         createClusterFromWithClusterDataOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, clusterCreationData)
+                                    }
+                                }
+                            }
+
+                            apiVersion >= 88 -> {
+                                val clusterCreationData = ApiCompatV97.ClusterCreationDataV97(clusterUnits, extraStorage, systemContainerUnits,
+                                        containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite, containerUnitStorage)
+                                when (providerOptions) {
+                                    is VoterSetOrPubkeysOption.Pubkeys -> {
+                                        createClusterWithClusterDataOperationV97(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, clusterCreationData)
+                                    }
+
+                                    is VoterSetOrPubkeysOption.VoterSet -> {
+                                        createClusterFromWithClusterDataOperationV97(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, clusterCreationData)
                                     }
                                 }
                             }

@@ -13,8 +13,8 @@ import net.postchain.economy.lib.ft4.core.accounts.AuthType
 import net.postchain.economy.lib.ft4.external.accounts.UPDATE_MAIN_AUTH_DESCRIPTOR
 import net.postchain.economy.lib.ft4.external.accounts.getAccountMainAuthDescriptor
 import net.postchain.economy.lib.ft4.external.accounts.updateMainAuthDescriptorOperation
-import net.postchain.economy.lib.hbridge.LINK_EVM_EOA_ACCOUNT
-import net.postchain.economy.lib.hbridge.linkEvmEoaAccountOperation
+import net.postchain.economy.lib.hbridge.core.LINK_EVM_EOA_ACCOUNT
+import net.postchain.economy.lib.hbridge.core.linkEvmEoaAccountOperation
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.GtvNull
 import net.postchain.mc.cli.ECBaseCommand

@@ -16,6 +16,9 @@ import net.postchain.mc.compatibility.ApiCompatV28.createClusterWithClusterQuota
 import net.postchain.mc.compatibility.ApiCompatV87
 import net.postchain.mc.compatibility.ApiCompatV87.createClusterFromWithClusterDataOperationV87
 import net.postchain.mc.compatibility.ApiCompatV87.createClusterWithClusterDataOperationV87
+import net.postchain.mc.compatibility.ApiCompatV97
+import net.postchain.mc.compatibility.ApiCompatV97.createClusterFromWithClusterDataOperationV97
+import net.postchain.mc.compatibility.ApiCompatV97.createClusterWithClusterDataOperationV97
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
@@ -37,8 +40,64 @@ class CommandAddClusterIT {
     }
 
     @Test
-    fun `add cluster - with pubkeys - api v88`(@TempDir dir: Path) {
-        ManagedRestTestApi(dir, dcVersion = 88)
+    fun `add cluster - with pubkeys - api v98`(@TempDir dir: Path) {
+        ManagedRestTestApi(dir, dcVersion = 98)
+                .withDCQuery("has_direct_cluster", gtv(true))
+                .testCommand(CommandAddCluster(),
+                        "--name", "cluster1",
+                        "--pubkeys", DEFAULT_PROVIDER_PUBKEY,
+                        "--governor", "vs1",
+                        "--cluster-units", "2",
+                        "--extra-storage", "100",
+                        "--cu-cpu", "20",
+                        "--cu-ram", "900",
+                        "--cu-storage", "5000",
+                        "--cu-io-read", "10",
+                        "--cu-io-write", "5",
+                        "--system-container-units", "6",
+                        "--max-nodes", "10"
+                ) { result, api ->
+                    assertThat(result.output).contains("Cluster cluster1 added")
+                    api.getDcModel().assertCalledOps {
+                        it.createClusterWithClusterDataOperation(
+                                DEFAULT_PROVIDER_PUBKEY.hexStringToByteArray(),
+                                "cluster1",
+                                "vs1",
+                                listOf(DEFAULT_PROVIDER_PUBKEY.hexStringToByteArray()),
+                                ClusterCreationData(2, 100, 6, 20, 900, 10, 5, 5000, 10)
+                        )
+                    }
+                }
+    }
+
+    @Test
+    fun `add cluster - with voter set - api v98`(@TempDir dir: Path) {
+        ManagedRestTestApi(dir, dcVersion = 98)
+                .withDCQuery("has_direct_cluster", gtv(true))
+                .testCommand(
+                        CommandAddCluster(),
+                        "--name", "cluster1",
+                        "--voter-set", "vs2",
+                        "--governor", "vs1",
+                        "--cluster-units", "2",
+                        "--extra-storage", "100",
+                ) { result, api ->
+                    assertThat(result.output).contains("Cluster cluster1 added")
+                    api.getDcModel().assertCalledOps {
+                        it.createClusterFromWithClusterDataOperation(
+                                DEFAULT_PROVIDER_PUBKEY.hexStringToByteArray(),
+                                "cluster1",
+                                "vs1",
+                                "vs2",
+                                ClusterCreationData(2, 100, 4, 50, 2048, 25, 20, 16384, Long.MAX_VALUE)
+                        )
+                    }
+                }
+    }
+
+    @Test
+    fun `add cluster - with pubkeys - api v97`(@TempDir dir: Path) {
+        ManagedRestTestApi(dir, dcVersion = 97)
                 .withDCQuery("has_direct_cluster", gtv(true))
                 .testCommand(CommandAddCluster(),
                         "--name", "cluster1",
@@ -55,20 +114,20 @@ class CommandAddClusterIT {
                 ) { result, api ->
                     assertThat(result.output).contains("Cluster cluster1 added")
                     api.getDcModel().assertCalledOps {
-                        it.createClusterWithClusterDataOperation(
+                        it.createClusterWithClusterDataOperationV97(
                                 DEFAULT_PROVIDER_PUBKEY.hexStringToByteArray(),
                                 "cluster1",
                                 "vs1",
                                 listOf(DEFAULT_PROVIDER_PUBKEY.hexStringToByteArray()),
-                                ClusterCreationData(2, 100, 6, 20, 900, 10, 5, 5000)
+                                ApiCompatV97.ClusterCreationDataV97(2, 100, 6, 20, 900, 10, 5, 5000)
                         )
                     }
                 }
     }
 
     @Test
-    fun `add cluster - with voter set - api v88`(@TempDir dir: Path) {
-        ManagedRestTestApi(dir, dcVersion = 88)
+    fun `add cluster - with voter set - api v97`(@TempDir dir: Path) {
+        ManagedRestTestApi(dir, dcVersion = 97)
                 .withDCQuery("has_direct_cluster", gtv(true))
                 .testCommand(CommandAddCluster(),
                         "--name", "cluster1",
@@ -79,12 +138,12 @@ class CommandAddClusterIT {
                 ) { result, api ->
                     assertThat(result.output).contains("Cluster cluster1 added")
                     api.getDcModel().assertCalledOps {
-                        it.createClusterFromWithClusterDataOperation(
+                        it.createClusterFromWithClusterDataOperationV97(
                                 DEFAULT_PROVIDER_PUBKEY.hexStringToByteArray(),
                                 "cluster1",
                                 "vs1",
                                 "vs2",
-                                ClusterCreationData(2, 100, 4, 50, 2048, 25, 20, 16384)
+                                ApiCompatV97.ClusterCreationDataV97(2, 100, 4, 50, 2048, 25, 20, 16384)
                         )
                     }
                 }

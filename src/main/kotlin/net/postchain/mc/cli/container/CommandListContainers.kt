@@ -32,7 +32,7 @@ class CommandListContainers : PmcCommand(
             client.apiVersion() <= 3 -> {
                 client.getBlockchainInfoListV3(false).map {
                     BlockchainInfo(
-                            it.rid, it.name, BlockchainState.RUNNING, it.container, it.cluster, null,
+                            it.rid, it.name, BlockchainState.RUNNING, it.container, null, it.cluster, null,
                             null, null, null, null
                     )
                 }.groupBy { it.container }

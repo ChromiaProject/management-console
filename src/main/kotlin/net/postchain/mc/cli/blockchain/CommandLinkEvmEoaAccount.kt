@@ -7,8 +7,8 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.common.toHex
 import net.postchain.economy.lib.ft4.external.accounts.getAccountMainAuthDescriptor
-import net.postchain.economy.lib.hbridge.LINK_EVM_EOA_ACCOUNT
-import net.postchain.economy.lib.hbridge.linkEvmEoaAccountOperation
+import net.postchain.economy.lib.hbridge.core.LINK_EVM_EOA_ACCOUNT
+import net.postchain.economy.lib.hbridge.core.linkEvmEoaAccountOperation
 import net.postchain.gtv.GtvFactory
 import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.accountIdOption

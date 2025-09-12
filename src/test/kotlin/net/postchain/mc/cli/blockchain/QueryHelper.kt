@@ -8,6 +8,7 @@ import net.postchain.chain0.common.queries.GetMovingBlockchainInfoResult
 import net.postchain.chain0.common.queries.GetUnarchivingBlockchainInfoResult
 import net.postchain.chain0.common.queries.NodeData
 import net.postchain.chain0.model.BlockchainState
+import net.postchain.chain0.model.ContainerState
 import net.postchain.chain0.model.ImportingForeignBlockchain
 import net.postchain.common.BlockchainRid
 import net.postchain.common.hexStringToByteArray
@@ -38,6 +39,7 @@ fun buildGetBlockchainInfoResponse(
             "bc01",
             state,
             "container01",
+            ContainerState.RUNNING,
             "cluster01",
             false,
             isForeignImporting,
@@ -100,6 +102,7 @@ fun buildGetBlockchainInfoListResponse(): (query: GtxQuery) -> Gtv {
                     "bc01",
                     BlockchainState.RUNNING,
                     "container01",
+                    ContainerState.RUNNING,
                     "cluster01",
                     false,
                     false,
@@ -112,6 +115,7 @@ fun buildGetBlockchainInfoListResponse(): (query: GtxQuery) -> Gtv {
                     "bc02",
                     BlockchainState.RUNNING,
                     "container02",
+                    ContainerState.RUNNING,
                     "cluster01",
                     false,
                     false,
@@ -126,6 +130,7 @@ fun buildGetBlockchainInfoListResponse(): (query: GtxQuery) -> Gtv {
                     "bc03",
                     BlockchainState.PAUSED,
                     "container03",
+                    ContainerState.RUNNING,
                     "cluster01",
                     false,
                     false,
