@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.createClusterOperation
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_MAX_CLUSTER_NODES_VERSION
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.clusterUnitsOption
@@ -17,9 +18,11 @@ import net.postchain.mc.cli.util.containerUnitRamOption
 import net.postchain.mc.cli.util.containerUnitStorageOption
 import net.postchain.mc.cli.util.entityNameValidator
 import net.postchain.mc.cli.util.extraStorageOption
+import net.postchain.mc.cli.util.maxNodes
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.systemContainerUnitsOption
 import net.postchain.mc.compatibility.ApiCompatECV56.createClusterOperationV56
+import net.postchain.mc.compatibility.ApiCompatECV62.createClusterOperationV62
 
 class CommandAddCluster : ECBaseCommand(
         name = "add-cluster",
@@ -46,11 +49,19 @@ class CommandAddCluster : ECBaseCommand(
     private val containerUnitIoRead by containerUnitIoReadOption()
     private val containerUnitIoWrite by containerUnitIoWriteOption()
 
+    private val maxNodes by maxNodes()
+
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
         economyChainClient.transactionBuilder().let {
             when {
-                ecVersion.version >= ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
+                ecVersion.version >= ECONOMY_CHAIN_MAX_CLUSTER_NODES_VERSION -> {
                     it.createClusterOperation(clientProviderPubkey, name, governorName, voterSet, clusterUnits, extraStorage, tag,
+                            containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite,
+                            containerUnitStorage, systemContainerUnits, maxNodes)
+                }
+
+                ecVersion.version >= ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
+                    it.createClusterOperationV62(clientProviderPubkey, name, governorName, voterSet, clusterUnits, extraStorage, tag,
                             containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite,
                             containerUnitStorage, systemContainerUnits)
                 }

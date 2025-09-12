@@ -279,6 +279,8 @@ fun CliktCommand.containerUnitStorageOption() = option("--cu-storage", help = "C
 fun CliktCommand.containerUnitIoReadOption() = option("--cu-io-read", help = "Container unit storage I/O read limit (MiB/s)").long().default(25)
 fun CliktCommand.containerUnitIoWriteOption() = option("--cu-io-write", help = "Container unit storage I/O write limit (MiB/s)").long().default(20)
 
+fun CliktCommand.maxNodes() = option("-mn", "--max-nodes", help = "Maximum number of nodes in the cluster").long().default(Long.MAX_VALUE)
+
 fun CliktCommand.baseComputeRequestsOptions() = option("-bcr", "--base-compute-requests", help = "How many compute requests per week a container gets by default").int()
         .validate {
             require(it >= 0) { "base compute requests must not be negative" }
