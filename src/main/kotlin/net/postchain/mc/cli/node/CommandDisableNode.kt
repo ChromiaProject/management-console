@@ -17,7 +17,7 @@ class CommandDisableNode : DCBaseCommand(
                 .disableNodeOperation(clientProviderPubkey, key.data)
                 .postAwaitConfirmation(txListener())
                 .printResult(
-                        "Node disabled",
+                        "Node disabled. Please check progress of the removal from cluster(s) with 'pmc node check-cluster-removal-status'.",
                         "Cannot disable node"
                 )
     }

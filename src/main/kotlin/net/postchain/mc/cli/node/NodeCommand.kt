@@ -27,4 +27,5 @@ fun nodeCommands() = NodeCommand().subcommands(
         CommandListContainersForNode(),
         CommandListNodes(),
         CommandPingNode(),
+        CommandCheckClusterRemovalStatus()
 )

@@ -174,12 +174,12 @@ fun buildGetNodeDataResponse(apiUrl: String = DEFAULT_NODE01_API): Gtv {
     ))
 }
 
-fun buildGetLastAnchoredBlockResponse(height: Long): Gtv {
+fun buildGetLastAnchoredBlockResponse(height: Long, timestamp: Long = 0L): Gtv {
     return GtvObjectMapper.toGtvDictionary(AnchorBlock(
             RowId(0),
             BlockchainRid.ZERO_RID.wData,
             height,
-            0L,
+            timestamp,
             BlockchainRid.ZERO_RID.wData,
             ByteArray(0).wrap(),
             ByteArray(0).wrap(),
