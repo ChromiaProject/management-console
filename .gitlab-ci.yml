@@ -164,6 +164,14 @@ gitlab-release:
     name: 'PMC $CI_COMMIT_TAG'
     description: release_notes.md
     tag_name: '$CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: 'Build Artifact (.tar.gz)'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/maven/net/postchain/mc/management-console/${CI_COMMIT_TAG}/management-console-${CI_COMMIT_TAG}-dist.tar.gz'
+          link_type: 'package'
+        - name: 'Build Artifact (.zip)'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/maven/net/postchain/mc/management-console/${CI_COMMIT_TAG}/management-console-${CI_COMMIT_TAG}-dist.zip'
+          link_type: 'package'
 
 dependency-check:
   extends: .maven-dependency-check
