@@ -45,6 +45,7 @@ import net.postchain.chain0.proposal_container.getContainerActionProposal
 import net.postchain.chain0.proposal_container.getContainerProposal
 import net.postchain.chain0.proposal_container.getContainerRemoveProposal
 import net.postchain.chain0.proposal_container.getContainerSubnodeImageProposal
+import net.postchain.chain0.proposal_container.proposal_container_configuration.getContainerConfiguraitonProposal
 import net.postchain.chain0.proposal_container.proposal_container_limits.getContainerLimitsProposal
 import net.postchain.chain0.proposal_provider.getProviderBatchProposal
 import net.postchain.chain0.proposal_provider.getProviderQuotaProposal
@@ -750,6 +751,16 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                 body {
                     row("Container", pc.container)
                     row("Action", pc.action)
+                }
+            }
+        }
+
+        ProposalType.container_configuration -> {
+            val pc = client.getContainerConfiguraitonProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Container", pc.container)
+                    row("Slow DB statement log ms", pc.slowDbStatementLogMs)
                 }
             }
         }

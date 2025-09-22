@@ -21,7 +21,7 @@
         <revision>dev</revision>
         <postchain.version>3.42.4</postchain.version>
         <postchain.client.version>3.37.1</postchain.client.version>
-        <directory.chain.version>1.99.0</directory.chain.version>
+        <directory.chain.version>1.101.0</directory.chain.version>
         <cli.tools.version>0.6.4</cli.tools.version>
         <rell.maven.plugin.version>0.14.9</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
