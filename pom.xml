@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.chromia</groupId>
         <artifactId>chromia-parent</artifactId>
-        <version>0.2.0</version>
+        <version>0.2.1</version>
     </parent>
 
     <groupId>net.postchain.mc</groupId>
@@ -453,7 +453,6 @@
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>12.1.5</version>
                     <configuration>
                         <prettyPrint>true</prettyPrint>
                         <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
