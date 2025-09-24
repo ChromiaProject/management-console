@@ -52,8 +52,8 @@ fun ParameterHolder.blockchainRidOption() =
 fun ParameterHolder.blockchainNameOption() =
         option("-chain", "--blockchain-name", help = "Blockchain name", metavar = "NAME").enum<SystemBlockchain>()
 
-fun CliktCommand.heightOption() = option("-h", "--height", envvar = "POSTCHAIN_HEIGHT").long()
-fun OptionGroup.heightOption() = option("-h", "--height", envvar = "POSTCHAIN_HEIGHT").long()
+fun CliktCommand.heightOption() = option("--height", envvar = "POSTCHAIN_HEIGHT").long()
+fun OptionGroup.heightOption() = option("--height", envvar = "POSTCHAIN_HEIGHT").long()
 
 fun CliktCommand.forceOption() = option("-f", "--force").flag()
         .convert { if (it) AlreadyExistMode.FORCE else AlreadyExistMode.ERROR }
@@ -65,14 +65,14 @@ fun CliktCommand.blockchainConfigOption() = option(
         envvar = "POSTCHAIN_BLOCKCHAIN_CONFIG"
 ).file(mustExist = true, canBeFile = true, canBeDir = false, mustBeReadable = true)
 
-fun CliktCommand.requiredHostOption() = option("-h", "--host", help = "Host", envvar = "POSTCHAIN_HOST")
+fun CliktCommand.requiredHostOption() = option("--host", help = "Host", envvar = "POSTCHAIN_HOST")
         .required()
         .validate(hostValidator())
 
-fun CliktCommand.hostOption() = option("-h", "--host", help = "Host", envvar = "POSTCHAIN_HOST")
+fun CliktCommand.hostOption() = option("--host", help = "Host", envvar = "POSTCHAIN_HOST")
         .validate(hostValidator())
 
-fun CliktCommand.defaultHostOption(default: String) = option("-h", "--host", help = "Host", envvar = "POSTCHAIN_HOST")
+fun CliktCommand.defaultHostOption(default: String) = option("--host", help = "Host", envvar = "POSTCHAIN_HOST")
         .default(default)
         .validate(hostValidator())
 
