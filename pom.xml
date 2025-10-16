@@ -386,6 +386,7 @@
                         <DIST_EXECUTABLE>${project.build.directory}/${project.artifactId}-${project.version}-dist/management-console/bin/pmc
                         </DIST_EXECUTABLE>
                         <PROJECT_VERSION>${project.version}</PROJECT_VERSION>
+                        <PMC_SKIP_VERSION_CHECK>true</PMC_SKIP_VERSION_CHECK>
                     </environmentVariables>
                 </configuration>
                 <executions>
@@ -674,6 +675,7 @@
                             <environmentVariables>
                                 <DIST_EXECUTABLE>${project.build.directory}/${project.artifactId}-${project.version}-dist/management-console/bin/pmc.bat</DIST_EXECUTABLE>
                                 <PROJECT_VERSION>${project.version}</PROJECT_VERSION>
+                                <PMC_SKIP_VERSION_CHECK>true</PMC_SKIP_VERSION_CHECK>
                             </environmentVariables>
                         </configuration>
                         <executions>
