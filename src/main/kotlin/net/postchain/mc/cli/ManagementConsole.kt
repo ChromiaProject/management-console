@@ -19,15 +19,22 @@ import net.postchain.mc.cli.proposal.proposalCommands
 import net.postchain.mc.cli.provider.providerCommands
 import net.postchain.mc.cli.votingupdates.voterSetCommands
 import net.postchain.mc.network.networkCommands
+import net.postchain.mc.cli.base.VersionChecker.checkAndWarnIfOutdated
 
 open class ManagementConsole : CliLauncher(name = "pmc") {
 
     init {
         System.setProperty(SUPPRESS_KEY_STORAGE_DEPRECATION_WARNING_SYSTEM_PROPERTY, "true")
+
+        val currentVersion = this::class.java.`package`.implementationVersion ?: "(unknown)"
         val version = """
-            ${this::class.java.`package`.implementationVersion ?: "(unknown)"}
-            Java version ${System.getProperty("java.version")}            
+            ${currentVersion}
+            Java version ${System.getProperty("java.version")}
         """.trimIndent()
+
+        // do check latest version when pmc execution
+        checkAndWarnIfOutdated(currentVersion)
+
         versionOption(version)
         subcommands(
                 HelpCommand(),
