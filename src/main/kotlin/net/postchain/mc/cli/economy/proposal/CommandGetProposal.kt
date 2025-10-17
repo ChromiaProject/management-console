@@ -28,6 +28,7 @@ import net.postchain.economy.economy_chain.getSystemProviderEconomyConstantsProp
 import net.postchain.economy.economy_chain.getTagProposal
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION
 import net.postchain.mc.cli.base.rowIfNotNull
@@ -42,6 +43,7 @@ import net.postchain.mc.compatibility.ApiCompatECV21.getProposalECV20
 import net.postchain.mc.compatibility.ApiCompatECV21.getProposalVoterInfoECV20
 import net.postchain.mc.compatibility.ApiCompatECV21.getProposalVotingResultsECV20
 import net.postchain.mc.compatibility.ApiCompatECV45.getStakingRequirementConstantsProposalV45
+import net.postchain.mc.compatibility.ApiCompatECV63.getEcononyConstantsProposalECV63
 import net.postchain.token.common_proposal.voter_set_proposal.getVoterSetUpdateProposal
 import java.time.Instant
 import java.util.Date
@@ -199,16 +201,30 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
         }
 
         CommonProposalType.ec_constants_update -> {
-            val economyConstantsProposal = economyChainClient.getEcononyConstantsProposal(proposalId)
-            return pmcTable {
-                body {
-                    rowIfNotNull("Min lease time weeks", economyConstantsProposal.minLeaseTimeWeeks)
-                    rowIfNotNull("Max lease time weeks", economyConstantsProposal.maxLeaseTimeWeeks)
-                    rowIfNotNull("Staking reward rate", economyConstantsProposal.stakingRewardRate)
-                    rowIfNotNull("Staking reward fee share", economyConstantsProposal.stakingRewardFeeShare)
-                    rowIfNotNull("Chromia foundation fee share", economyConstantsProposal.chromiaFoundationFeeShare)
-                    rowIfNotNull("Resource pool margin fee share", economyConstantsProposal.resourcePoolMarginFeeShare)
-                    rowIfNotNull("Dapp provider risk share", economyConstantsProposal.dappProviderRiskShare)
+            if (ecVersion < ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION) {
+                val economyConstantsProposal = economyChainClient.getEcononyConstantsProposalECV63(proposalId)
+                return pmcTable {
+                    body {
+                        rowIfNotNull("Min lease time weeks", economyConstantsProposal.minLeaseTimeWeeks)
+                        rowIfNotNull("Max lease time weeks", economyConstantsProposal.maxLeaseTimeWeeks)
+                        rowIfNotNull("Staking reward rate", economyConstantsProposal.stakingRewardRate)
+                        rowIfNotNull("Staking reward fee share", economyConstantsProposal.stakingRewardFeeShare)
+                        rowIfNotNull("Chromia foundation fee share", economyConstantsProposal.chromiaFoundationFeeShare)
+                        rowIfNotNull("Resource pool margin fee share", economyConstantsProposal.resourcePoolMarginFeeShare)
+                        rowIfNotNull("Dapp provider risk share", economyConstantsProposal.dappProviderRiskShare)
+                    }
+                }
+            } else {
+                val economyConstantsProposal = economyChainClient.getEcononyConstantsProposal(proposalId)
+                return pmcTable {
+                    body {
+                        rowIfNotNull("Min lease time weeks", economyConstantsProposal.minLeaseTimeWeeks)
+                        rowIfNotNull("Max lease time weeks", economyConstantsProposal.maxLeaseTimeWeeks)
+                        rowIfNotNull("Staking reward rate", economyConstantsProposal.stakingRewardRate)
+                        rowIfNotNull("Chromia foundation fee share", economyConstantsProposal.chromiaFoundationFeeShare)
+                        rowIfNotNull("Resource pool margin fee share", economyConstantsProposal.resourcePoolMarginFeeShare)
+                        rowIfNotNull("Dapp provider risk share", economyConstantsProposal.dappProviderRiskShare)
+                    }
                 }
             }
         }
