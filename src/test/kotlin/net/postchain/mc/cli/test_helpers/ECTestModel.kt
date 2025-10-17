@@ -8,8 +8,10 @@ import net.postchain.economy.economy_chain.TagData
 import net.postchain.gtv.GtvArray
 import net.postchain.gtv.GtvFactory
 import net.postchain.gtv.mapper.GtvObjectMapper
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION
 import net.postchain.mc.compatibility.ApiCompatECV45
+import net.postchain.mc.compatibility.ApiCompatECV63
 import java.math.BigDecimal
 
 class ECTestModel(
@@ -46,6 +48,27 @@ class ECTestModel(
                         stakingRequirementDappProviderTotalStakeChr = 4123456,
                         bridgeLeaseAddMinBalanceUsd = BigDecimal("100"),
                 ))
+            } else if (ecVersion < ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION) {
+                GtvObjectMapper.toGtvDictionary(ApiCompatECV63.EconomyConstantsDataECV63(
+                        minLeaseTimeWeeks = 1,
+                        maxLeaseTimeWeeks = 10,
+                        chrPerUsd = "5.1".toBigDecimal(),
+                        totalCostSystemProviders = 800123456,
+                        systemProviderFeeShare = "0.1".toBigDecimal(),
+                        stakingRewardRate = "0.2".toBigDecimal(),
+                        stakingRewardFeeShare = "0.3".toBigDecimal(),
+                        chromiaFoundationFeeShare = "0.4".toBigDecimal(),
+                        resourcePoolMarginFeeShare = "0.5".toBigDecimal(),
+                        systemProviderRiskShare = "0.6".toBigDecimal(),
+                        dappProviderRiskShare = "0.7".toBigDecimal(),
+                        stakingRequirementsEnabled = true,
+                        stakingRequirementStopPayoutDays = 14,
+                        stakingRequirementSystemNodeOwnStakeChr = 1123456,
+                        stakingRequirementSystemNodeTotalStakeChr = 2123456,
+                        stakingRequirementDappNodeOwnStakeChr = 3123456,
+                        stakingRequirementDappNodeTotalStakeChr = 4123456,
+                        bridgeLeaseAddMinBalanceUsd = BigDecimal("100"),
+                ))
             } else {
                 GtvObjectMapper.toGtvDictionary(EconomyConstantsData(
                         minLeaseTimeWeeks = 1,
@@ -54,7 +77,6 @@ class ECTestModel(
                         totalCostSystemProviders = 800123456,
                         systemProviderFeeShare = "0.1".toBigDecimal(),
                         stakingRewardRate = "0.2".toBigDecimal(),
-                        stakingRewardFeeShare = "0.3".toBigDecimal(),
                         chromiaFoundationFeeShare = "0.4".toBigDecimal(),
                         resourcePoolMarginFeeShare = "0.5".toBigDecimal(),
                         systemProviderRiskShare = "0.6".toBigDecimal(),

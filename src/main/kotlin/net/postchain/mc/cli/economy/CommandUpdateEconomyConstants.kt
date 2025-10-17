@@ -6,12 +6,14 @@ import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.updateEconomyConstantsOperation
 import net.postchain.mc.cli.ECBaseCommand
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_SCHEDULED_PROPOSAL_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.scheduleAt
 import net.postchain.mc.compatibility.ApiCompatECV52.updateEconomyConstantsOperationECV52
 import net.postchain.mc.compatibility.ApiCompatECV57.updateEconomyConstantsOperation
+import net.postchain.mc.compatibility.ApiCompatECV63.updateEconomyConstantsOperationECV63
 
 class CommandUpdateEconomyConstants : ECBaseCommand(
     name = "update-constants",
@@ -20,7 +22,7 @@ class CommandUpdateEconomyConstants : ECBaseCommand(
     private val minLeaseTimeWeeks by option("--min-lease-time", help = "Number of weeks as minimum for a lease").long()
     private val maxLeaseTimeWeeks by option("--max-lease-time", help = "Number of weeks as maximum for a lease").long()
     private val stakingRewardRate by option("--staking-reward-rate", help = "Staking reward rate")
-    private val stakingRewardFeeShare by option("--staking-reward-fee-share", help = "Staking reward fee share")
+    private val stakingRewardFeeShare by option("--staking-reward-fee-share", help = "Staking reward fee share (deprecated since EC version $ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION)")
     private val chromiaFoundationFeeShare by option("--chromia-foundation-fee-share", help = "Chromia foundation fee share")
     private val resourcePoolMarginFeeShare by option("--resource-pool-margin-fee-share", help = "Resource pool margin fee share")
     private val dappProviderRiskShare by option("--dapp-provider-risk-share", help = "Dapp provider risk share")
@@ -52,11 +54,18 @@ class CommandUpdateEconomyConstants : ECBaseCommand(
                             stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),
                             resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal(), scheduleAt
                     )
-        } else {
+        } else if (ecVersion.version < ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION) {
             economyChainClient.transactionBuilder()
-                    .updateEconomyConstantsOperation(clientProviderPubkey, minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
+                    .updateEconomyConstantsOperationECV63(clientProviderPubkey, minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
                             stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),
                             resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal(), scheduleAt
+                    )
+        } else {
+            if (stakingRewardFeeShare != null) throw CliktError("staking reward fee share is deprecated on this network")
+            economyChainClient.transactionBuilder()
+                    .updateEconomyConstantsOperation(clientProviderPubkey, minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
+                            chromiaFoundationFeeShare?.toBigDecimal(), resourcePoolMarginFeeShare?.toBigDecimal(),
+                            dappProviderRiskShare?.toBigDecimal(), scheduleAt
                     )
         }
                 .postAwaitConfirmation(txListener())
