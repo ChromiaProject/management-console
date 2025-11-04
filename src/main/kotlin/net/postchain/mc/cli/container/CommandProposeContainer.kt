@@ -5,17 +5,21 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.split
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.direct_container.createContainerFromOperation
+import net.postchain.chain0.direct_container.createContainerFromWithResourceLimitsAndJarExtensionsOperation
 import net.postchain.chain0.direct_container.createContainerFromWithResourceLimitsAndSubnodeImageOperation
 import net.postchain.chain0.direct_container.createContainerFromWithResourceLimitsOperation
 import net.postchain.chain0.direct_container.createContainerOperation
+import net.postchain.chain0.direct_container.createContainerWithResourceLimitsAndJarExtensionsOperation
 import net.postchain.chain0.direct_container.createContainerWithResourceLimitsAndSubnodeImageOperation
 import net.postchain.chain0.direct_container.createContainerWithResourceLimitsOperation
 import net.postchain.chain0.features.hasDirectContainer
 import net.postchain.chain0.model.ContainerResourceLimitType
 import net.postchain.chain0.proposal_container.proposeContainerOperation
 import net.postchain.chain0.proposal_container.proposeContainerWithSubnodeImageOperation
+import net.postchain.chain0.proposal_container.proposeContainerWithSubnodeJarExtensionsOperation
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.VoterSetOrPubkeysOption
@@ -59,6 +63,9 @@ class CommandProposeContainer : DCBaseCommand(
 
     private val subnodeImageName by option("-sin", "--subnode-image-name", help = "Subnode image name")
 
+    private val subnodeJarExtensionNames by option("-sje", "--subnode-jar-extension-names", help = "Comma separated list of subnode JAR extension names")
+            .split(",").default(emptyList())
+
     private val description by nullableProposalDescriptionOption()
 
     private fun description() = description ?: run {
@@ -75,6 +82,11 @@ class CommandProposeContainer : DCBaseCommand(
 
     override fun runDC() {
         if (direct) {
+            if (subnodeJarExtensionNames.isNotEmpty()) {
+                if (dcVersion < 102) {
+                    throw CliktError("Cannot assign subnode JAR extension when creating container directly, use --proposal")
+                }
+            }
             if (subnodeImageName != null) {
                 if (dcVersion < 72) {
                     throw CliktError("Cannot assign subnode image when creating container directly, use --proposal")
@@ -87,6 +99,44 @@ class CommandProposeContainer : DCBaseCommand(
                 transactionBuilder()
                         .apply {
                             when {
+
+                                dcVersion >= 102 -> {
+                                    when (deployerOption) {
+                                        is VoterSetOrPubkeysOption.Pubkeys -> {
+                                            createContainerWithResourceLimitsAndJarExtensionsOperation(
+                                                    clientProviderPubkey,
+                                                    name,
+                                                    clusterName,
+                                                    consensusThreshold,
+                                                    (deployerOption as VoterSetOrPubkeysOption.Pubkeys).pubkeys,
+                                                    mapOf(
+                                                            ContainerResourceLimitType.container_units to containerUnits,
+                                                            ContainerResourceLimitType.max_blockchains to maxBlockchains,
+                                                            ContainerResourceLimitType.extra_storage to extraStorage
+                                                    ),
+                                                    jarExtensions = subnodeJarExtensionNames,
+                                                    subnodeImageName ?: ""
+                                            )
+                                        }
+
+                                        is VoterSetOrPubkeysOption.VoterSet -> {
+                                            createContainerFromWithResourceLimitsAndJarExtensionsOperation(
+                                                    clientProviderPubkey,
+                                                    name,
+                                                    clusterName,
+                                                    consensusThreshold,
+                                                    (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
+                                                    mapOf(
+                                                            ContainerResourceLimitType.container_units to containerUnits,
+                                                            ContainerResourceLimitType.max_blockchains to maxBlockchains,
+                                                            ContainerResourceLimitType.extra_storage to extraStorage
+                                                    ),
+                                                    jarExtensions = subnodeJarExtensionNames,
+                                                    subnodeImageName ?: ""
+                                            )
+                                        }
+                                    }
+                                }
 
                                 dcVersion >= 72 -> {
                                     when (deployerOption) {
@@ -225,7 +275,25 @@ class CommandProposeContainer : DCBaseCommand(
                 throw CliktError("Container proposals does not support specifying public keys as deployer. Specify a voter set instead.")
             }
             echo("Proposing container. Please note that any specified container limits are ignored. Create a separate proposal to change them from defaults.")
-            if (subnodeImageName != null) {
+            if (subnodeJarExtensionNames.isNotEmpty()) {
+                if (dcVersion < 102) {
+                    throw CliktError("Setting subnode JAR extensions for container is not supported by network")
+                }
+                transactionBuilder().proposeContainerWithSubnodeJarExtensionsOperation(
+                        clientProviderPubkey,
+                        clusterName,
+                        name,
+                        (deployerOption as VoterSetOrPubkeysOption.VoterSet).data,
+                        jarExtensions = subnodeJarExtensionNames,
+                        subnodeImageName,
+                        description()
+                )
+                        .postAwaitConfirmation(txListener())
+                        .printResult(
+                                "Container creation has been proposed",
+                                "Failed to propose container creation"
+                        )
+            } else if (subnodeImageName != null) {
                 if (dcVersion < 57) {
                     throw CliktError("Setting subnode image for container is not supported by network")
                 }

@@ -45,7 +45,8 @@ fun buildGetContainerDataResponse(): Gtv {
             "proposed-by-name01",
             false,
             ContainerState.RUNNING,
-            null
+            null,
+            listOf()
     ))
 }
 

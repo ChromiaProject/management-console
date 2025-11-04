@@ -46,9 +46,12 @@ import net.postchain.mc.cli.base.DIGEST_LENGTH_MAX
 import net.postchain.mc.cli.base.METADATA_LENGTH_MAX
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.base.URL_LENGTH_MAX
+import java.io.File
+import java.lang.Exception
 import java.net.URI
 import java.net.URISyntaxException
 import java.time.Duration
+import java.util.jar.JarFile
 
 const val CHROMIA_CONFIG = "CHROMIA_CONFIG"
 const val ECDSA_COMPRESSED_KEY_SIZE = 33
@@ -225,6 +228,24 @@ fun digestValidator(): OptionTransformContext.(String) -> Unit = {
     require(CommandBase.isDigestValid(it)) { "Digest name can only contain letters, numerals, and colon. Maximum allowed length is 100 characters." }
     require(it.length <= DIGEST_LENGTH_MAX) { "Digest is too long, maximum allowed length is $DIGEST_LENGTH_MAX" }
     require(it.isNotEmpty()) { "Digest cannot be empty" }
+}
+
+fun jarFileValidator(): OptionTransformContext.(File) -> Unit = {
+    validateJarFile(it)
+}
+
+fun OptionTransformContext.validateJarFile(file: File) {
+    try {
+        JarFile(file).use { jarFile ->
+            val manifest = jarFile.manifest
+            // Check if it has a manifest and at least one entry
+            require(manifest != null && jarFile.entries().hasMoreElements()) {
+                "File is not a valid JAR file, must have a manifest and at least one entry"
+            }
+        }
+    } catch (e: Exception) {
+        require(false) { "Could not read JAR file: ${e.message}" }
+    }
 }
 
 sealed class VoterSetOrPubkeysOption(val data: String) {

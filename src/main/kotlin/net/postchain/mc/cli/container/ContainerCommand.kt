@@ -17,4 +17,5 @@ fun containerCommands() = ContainerCommand().subcommands(
         CommandProposePauseContainer(),
         CommandResumeContainer(),
         CommandProposeContainerConfiguration(),
+        CommandProposeContainerSubnodeJarExtension()
 )

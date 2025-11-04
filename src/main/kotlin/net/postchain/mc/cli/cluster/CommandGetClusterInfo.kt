@@ -11,6 +11,7 @@ import net.postchain.chain0.common.queries.getClusterNodes
 import net.postchain.chain0.common.queries.getClusterProviders
 import net.postchain.chain0.common.queries.getClusterReplicaNodes
 import net.postchain.chain0.common.queries.getClusterSubnodeImages
+import net.postchain.chain0.common.queries.getClusterSubnodeJarExtensions
 import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainReadClient
 import net.postchain.mc.cli.PmcCommand
@@ -132,6 +133,18 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, 
                 images.map { image ->
                     listOf(image.name, image.url, image.digest)
                 }
+        ))
+    }
+
+    if (apiVersion >= 102) {
+        val extensions = client.getClusterSubnodeJarExtensions(name)
+        if (!terminal.terminalInfo.outputInteractive) {
+            echo(""","subnode_jar_extensions": """, trailingNewline = false)
+        }
+        echo(pmcTable(
+                "subnode JAR extensions",
+                listOf("Name"),
+                extensions.map { listOf(it) }
         ))
     }
 

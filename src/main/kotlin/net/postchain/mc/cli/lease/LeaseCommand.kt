@@ -15,4 +15,5 @@ fun leaseCommands() = LeaseCommand().subcommands(
         CommandCreateContainer(),
         CommandRemoveContainer(),
         CommandListPendingLeaseTickets(),
+        CommandAddSubnodeJarExtensionsToContainer()
 )
