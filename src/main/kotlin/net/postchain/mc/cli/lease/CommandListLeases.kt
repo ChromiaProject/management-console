@@ -35,8 +35,8 @@ class CommandListLeases : ECBaseCommand(
         } else {
             echo(pmcTable(
                     "leases for account ${accountId.toHex()}",
-                    listOf("Cluster", "Container", "Container Units (SCU)", "Extra storage (GiB)", "Expire Time (millis)", "Expired", "Auto Renewal", "Subnode image"),
-                    leases.map { listOf(it.clusterName, it.containerName, it.containerUnits.toString(), it.extraStorageGib.toString(), it.expireTimeMillis.toString(), it.expired.toString(), it.autoRenew.toString(), it.subnodeImageName) },
+                    listOf("Cluster", "Container", "Container Units (SCU)", "Extra storage (GiB)", "Expire Time (millis)", "Expired", "Auto Renewal", "Subnode image", "Subnode JAR extensions"),
+                    leases.map { listOf(it.clusterName, it.containerName, it.containerUnits.toString(), it.extraStorageGib.toString(), it.expireTimeMillis.toString(), it.expired.toString(), it.autoRenew.toString(), it.subnodeImageName, it.subnodeJarExtensionNames.joinToString(", ")) },
                     idColumn = 1 to 64,
                     interactive = interactive
             ))

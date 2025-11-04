@@ -9,6 +9,7 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.split
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.int
 import net.postchain.client.core.PostchainClient
@@ -16,6 +17,7 @@ import net.postchain.common.hexStringToByteArray
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.economy.economy_chain.CREATE_CONTAINER_WITH_SUBNODE_IMAGE
 import net.postchain.economy.economy_chain.TicketState
+import net.postchain.economy.economy_chain.createContainerWithSubnodeImageAndJarExtensionsOperation
 import net.postchain.economy.economy_chain.createContainerWithSubnodeImageOperation
 import net.postchain.economy.economy_chain.getCreateContainerTicketById
 import net.postchain.economy.economy_chain.getCreateContainerTicketByTransaction
@@ -23,6 +25,7 @@ import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.accountIdOption
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMPUTE_REQUESTS
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_JAR_EXTENSIONS
 import net.postchain.mc.cli.optionalEvmAddressOption
 import net.postchain.mc.compatibility.ApiCompatECV59.createContainerWithSubnodeImageOperationV59
 
@@ -54,9 +57,16 @@ class CommandCreateContainer : ECBaseCommand(
 
     val subnodeImageName by option("-sin", "--subnode-image-name", help = "Subnode image name").default("")
 
+    val subnodeJarExtensionNames by option("-sje", "--subnode-jar-extension-names", help = "Comma separated list of subnode JAR extension names")
+            .split(",").default(emptyList())
+
     val autoRenew by option("--auto-renew", help = "Auto renew").flag(default = false)
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
+        if (ecVersion.version < ECONOMY_CHAIN_JAR_EXTENSIONS && subnodeJarExtensionNames.isNotEmpty()) {
+            throw CliktError("This version of Economy chain does not support subnode JAR extensions")
+        }
+
         if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS && extraComputeRequests != null) {
             throw CliktError("This version of Economy chain does not support extra compute requests")
         }
@@ -96,7 +106,7 @@ class CommandCreateContainer : ECBaseCommand(
                         clusterName = clusterName,
                         autoRenew = autoRenew,
                         subnodeImageName = subnodeImageName)
-            } else {
+            } else if (ecVersion.version < ECONOMY_CHAIN_JAR_EXTENSIONS) {
                 it.createContainerWithSubnodeImageOperation(
                         providerPubkey = pubkey.data,
                         containerUnits = scus.toLong(),
@@ -106,6 +116,18 @@ class CommandCreateContainer : ECBaseCommand(
                         autoRenew = autoRenew,
                         subnodeImageName = subnodeImageName,
                         extraComputeRequests = extraComputeRequests?.toLong() ?: 0L)
+            } else {
+                it.createContainerWithSubnodeImageAndJarExtensionsOperation(
+                        providerPubkey = pubkey.data,
+                        containerUnits = scus.toLong(),
+                        durationWeeks = duration.toLong(),
+                        extraStorageGib = extraStorage.toLong(),
+                        clusterName = clusterName,
+                        autoRenew = autoRenew,
+                        subnodeImageName = subnodeImageName,
+                        subnodeJarExtensionNames = subnodeJarExtensionNames,
+                        extraComputeRequests = extraComputeRequests?.toLong() ?: 0L
+                )
             }
         }
                 .postAwaitConfirmation(txListener())

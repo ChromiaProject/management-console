@@ -34,6 +34,7 @@ internal fun CliktCommand.showLeaseInfo(client: PostchainClient, containerName: 
             row("Expired", lease.expired.toString())
             row("Auto Renewal", lease.autoRenew.toString())
             row("Subnode image", lease.subnodeImageName)
+            row("Subnode JAR extensions", lease.subnodeJarExtensionNames.joinToString(", "))
         }
     })
 }

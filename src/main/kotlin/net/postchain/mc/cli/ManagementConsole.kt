@@ -20,6 +20,7 @@ import net.postchain.mc.cli.provider.providerCommands
 import net.postchain.mc.cli.votingupdates.voterSetCommands
 import net.postchain.mc.network.networkCommands
 import net.postchain.mc.cli.base.VersionChecker.checkAndWarnIfOutdated
+import net.postchain.mc.cli.jar_extension.subnodeJarExtensionCommands
 
 open class ManagementConsole : CliLauncher(name = "pmc") {
 
@@ -53,6 +54,7 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
                 economyCommands(),
                 subnodeImageCommands(),
                 leaseCommands(),
+                subnodeJarExtensionCommands()
         )
     }
 

@@ -11,5 +11,6 @@ fun proposalCommands() = ProposalCommand().subcommands(
     CommandGetProposal(),
     CommandListProposals(),
     CommandRevokeProposal(),
-    CommandVote()
+        CommandVote(),
+        CommandDownloadJar()
 )

@@ -66,6 +66,9 @@ fun CliktCommand.showContainerInfo(
             )
             row("System:", info.system.toString())
             info.subnodeImage?.let { row("Subnode image:", it) }
+            if (info.jarExtensions?.isNotEmpty() == true) {
+                row("Subnode JAR extensions:", info.jarExtensions.joinToString(", "))
+            }
             info.state?.let { row("State:", it.toString()) }
         }
     })

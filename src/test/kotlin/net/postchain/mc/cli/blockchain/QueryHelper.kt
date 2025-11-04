@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
-import net.postchain.anchoring.anchoring_chain_common.AnchorBlock
+import com.chromia.directory1.anchoring_chain_common.AnchorBlock
 import net.postchain.chain0.cm_api.CmClusterInfo
 import net.postchain.chain0.cm_api.CmPeerInfo
 import net.postchain.chain0.common.queries.BlockchainInfo

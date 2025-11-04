@@ -45,6 +45,7 @@ import net.postchain.chain0.proposal_container.getContainerActionProposal
 import net.postchain.chain0.proposal_container.getContainerProposal
 import net.postchain.chain0.proposal_container.getContainerRemoveProposal
 import net.postchain.chain0.proposal_container.getContainerSubnodeImageProposal
+import net.postchain.chain0.proposal_container.getContainerSubnodeJarExtensionProposal
 import net.postchain.chain0.proposal_container.proposal_container_configuration.getContainerConfiguraitonProposal
 import net.postchain.chain0.proposal_container.proposal_container_limits.getContainerLimitsProposal
 import net.postchain.chain0.proposal_provider.getProviderBatchProposal
@@ -56,6 +57,11 @@ import net.postchain.chain0.proposal_subnode_image.getRemoveClusterSubnodeImageP
 import net.postchain.chain0.proposal_subnode_image.getSubnodeImageProposal
 import net.postchain.chain0.proposal_subnode_image.getSubnodeImageStateProposal
 import net.postchain.chain0.proposal_subnode_image.getUpdateSubnodeImageProposal
+import net.postchain.chain0.proposal_subnode_jar_extension.getAddClusterSubnodeJarExtensionProposal
+import net.postchain.chain0.proposal_subnode_jar_extension.getRemoveClusterSubnodeJarExtensionProposal
+import net.postchain.chain0.proposal_subnode_jar_extension.getSubnodeJarExtensionProposal
+import net.postchain.chain0.proposal_subnode_jar_extension.getSubnodeJarExtensionStateProposal
+import net.postchain.chain0.proposal_subnode_jar_extension.getUpdateSubnodeJarExtensionProposal
 import net.postchain.chain0.proposal_voter_set.getVoterSetUpdateProposal
 import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainReadClient
@@ -761,6 +767,73 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                 body {
                     row("Container", pc.container)
                     row("Slow DB statement log ms", pc.slowDbStatementLogMs)
+                }
+            }
+        }
+
+        ProposalType.container_subnode_jar_extension -> {
+            val pc = client.getContainerSubnodeJarExtensionProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Container", pc.container)
+                    row("Subnode JAR extension", pc.subnodeJarExtension)
+                }
+            }
+        }
+
+        ProposalType.subnode_jar_extension -> {
+            val pc = client.getSubnodeJarExtensionProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Name", pc.name)
+                    row("JAR", "Run 'pmc proposal download-jar --id $proposalId' to download the full JAR file with hash ${pc.hash.toHex()}")
+                    row("Description", pc.description)
+                    row("Type", pc.subnodeJarExtensionType)
+                    row("GTX modules", pc.gtxModules)
+                    row("Sync extensions", pc.syncExts)
+                }
+            }
+        }
+
+        ProposalType.subnode_jar_extension_state -> {
+            val pc = client.getSubnodeJarExtensionStateProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Name", pc.name)
+                    row("Active", pc.active)
+                }
+            }
+        }
+
+        ProposalType.add_cluster_subnode_jar_extension -> {
+            val pc = client.getAddClusterSubnodeJarExtensionProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Cluster", pc.cluster)
+                    row("Subnode JAR extension", pc.subnodeJarExtension)
+                }
+            }
+        }
+
+        ProposalType.remove_cluster_subnode_jar_extension -> {
+            val pc = client.getRemoveClusterSubnodeJarExtensionProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Cluster", pc.cluster)
+                    row("Subnode JAR extension", pc.subnodeJarExtension)
+                }
+            }
+        }
+
+        ProposalType.update_subnode_jar_extension -> {
+            val pc = client.getUpdateSubnodeJarExtensionProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Name", pc.name)
+                    if (pc.hash != null) row("JAR", "Run 'pmc proposal download-jar --update --id $proposalId' to download the full JAR file with hash ${pc.hash.toHex()}")
+                    rowIfNotNull("Description", pc.description)
+                    rowIfNotNull("GTX modules", pc.gtxModules)
+                    rowIfNotNull("Sync extensions", pc.syncExts)
                 }
             }
         }
