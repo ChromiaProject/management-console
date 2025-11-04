@@ -786,7 +786,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
             return pmcTable {
                 body {
                     row("Name", pc.name)
-                    row("JAR", "Run 'pmc proposal download-jar --id $proposalId' to download the full JAR file with hash ${pc.hash.toHex()}")
+                    row("JAR", "Run 'pmc proposal download-jar --id ${proposalId.id}' to download the full JAR file with hash ${pc.hash.toHex()}")
                     row("Description", pc.description)
                     row("Type", pc.subnodeJarExtensionType)
                     row("GTX modules", pc.gtxModules)
@@ -830,7 +830,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
             return pmcTable {
                 body {
                     row("Name", pc.name)
-                    if (pc.hash != null) row("JAR", "Run 'pmc proposal download-jar --update --id $proposalId' to download the full JAR file with hash ${pc.hash.toHex()}")
+                    if (pc.hash != null) row("JAR", "Run 'pmc proposal download-jar --update --id ${proposalId.id}' to download the full JAR file with hash ${pc.hash.toHex()}")
                     rowIfNotNull("Description", pc.description)
                     rowIfNotNull("GTX modules", pc.gtxModules)
                     rowIfNotNull("Sync extensions", pc.syncExts)
