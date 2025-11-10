@@ -16,6 +16,7 @@ import net.postchain.client.core.PostchainClient
 import net.postchain.common.hexStringToByteArray
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.economy.economy_chain.CREATE_CONTAINER_WITH_SUBNODE_IMAGE
+import net.postchain.economy.economy_chain.CREATE_CONTAINER_WITH_SUBNODE_IMAGE_AND_JAR_EXTENSIONS
 import net.postchain.economy.economy_chain.TicketState
 import net.postchain.economy.economy_chain.createContainerWithSubnodeImageAndJarExtensionsOperation
 import net.postchain.economy.economy_chain.createContainerWithSubnodeImageOperation
@@ -80,18 +81,46 @@ class CommandCreateContainer : ECBaseCommand(
 
         val transactionResult = economyChainClient.transactionBuilder().also {
             evmAddress?.let { evmAddress ->
-                addEvmAuthOperation(
-                        economyChainClient, it,
-                        CREATE_CONTAINER_WITH_SUBNODE_IMAGE, listOf(
-                        gtv(pubkey.data),
-                        gtv(scus.toLong()),
-                        gtv(duration.toLong()),
-                        gtv(extraStorage.toLong()),
-                        gtv(clusterName),
-                        gtv(autoRenew),
-                        gtv(subnodeImageName)
-                ),
-                        evmAddress, accountId, authDescriptorId)
+                if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS) {
+                    val opName = CREATE_CONTAINER_WITH_SUBNODE_IMAGE
+                    val opArgs = listOf(
+                            gtv(pubkey.data),
+                            gtv(scus.toLong()),
+                            gtv(duration.toLong()),
+                            gtv(extraStorage.toLong()),
+                            gtv(clusterName),
+                            gtv(autoRenew),
+                            gtv(subnodeImageName)
+                    )
+                    addEvmAuthOperation(economyChainClient, it, opName, opArgs, evmAddress, accountId, authDescriptorId)
+                } else if (ecVersion.version < ECONOMY_CHAIN_JAR_EXTENSIONS) {
+                    val opName = CREATE_CONTAINER_WITH_SUBNODE_IMAGE
+                    val opArgs = listOf(
+                            gtv(pubkey.data),
+                            gtv(scus.toLong()),
+                            gtv(duration.toLong()),
+                            gtv(extraStorage.toLong()),
+                            gtv(clusterName),
+                            gtv(autoRenew),
+                            gtv(subnodeImageName),
+                            gtv(extraComputeRequests?.toLong() ?: 0L)
+                    )
+                    addEvmAuthOperation(economyChainClient, it, opName, opArgs, evmAddress, accountId, authDescriptorId)
+                } else {
+                    val opName = CREATE_CONTAINER_WITH_SUBNODE_IMAGE_AND_JAR_EXTENSIONS
+                    val opArgs = listOf(
+                            gtv(pubkey.data),
+                            gtv(scus.toLong()),
+                            gtv(duration.toLong()),
+                            gtv(extraStorage.toLong()),
+                            gtv(clusterName),
+                            gtv(autoRenew),
+                            gtv(subnodeImageName),
+                            gtv(subnodeJarExtensionNames.map { extName -> gtv(extName) }),
+                            gtv(extraComputeRequests?.toLong() ?: 0L)
+                    )
+                    addEvmAuthOperation(economyChainClient, it, opName, opArgs, evmAddress, accountId, authDescriptorId)
+                }
                 echo("Signing done, posting transaction...", err = true)
             } ?: run {
                 addFtAuthOperation(it, accountId, authDescriptorId)
