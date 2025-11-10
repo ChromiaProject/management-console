@@ -23,7 +23,7 @@
         <postchain.client.version>3.37.1</postchain.client.version>
         <directory.chain.version>1.101.10</directory.chain.version>
         <cli.tools.version>0.6.4</cli.tools.version>
-        <rell.maven.plugin.version>0.14.9</rell.maven.plugin.version>
+        <rell.maven.plugin.version>0.15.1</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
 
@@ -250,6 +250,7 @@
                         </goals>
                         <configuration>
                             <configFile>${directory.config}</configFile>
+                            <hideLibWarnings>true</hideLibWarnings>
                         </configuration>
                     </execution>
                     <execution>
@@ -266,6 +267,7 @@
                                 <mainModule>direct_container</mainModule>
                             </mainModules>
                             <target>${project.build.directory}/generated-sources/rell-client/directory</target>
+                            <hideLibWarnings>true</hideLibWarnings>
                         </configuration>
                     </execution>
                     <execution>
@@ -278,6 +280,7 @@
                             <packageName>net.postchain.anchoring</packageName>
                             <mainModule>anchoring_chain_cluster</mainModule>
                             <target>${project.build.directory}/generated-sources/rell-client/anchoring</target>
+                            <hideLibWarnings>true</hideLibWarnings>
                         </configuration>
                     </execution>
                     <execution>
@@ -290,6 +293,7 @@
                             <packageName>net.postchain.economy</packageName>
                             <mainModule>economy_chain_test</mainModule>
                             <target>${project.build.directory}/generated-sources/rell-client/economy</target>
+                            <hideLibWarnings>true</hideLibWarnings>
                         </configuration>
                     </execution>
                     <execution>
@@ -302,6 +306,7 @@
                             <packageName>net.postchain.token</packageName>
                             <mainModule>token_chain</mainModule>
                             <target>${project.build.directory}/generated-sources/rell-client/token</target>
+                            <hideLibWarnings>true</hideLibWarnings>
                         </configuration>
                     </execution>
                 </executions>
