@@ -36,7 +36,7 @@ class CommandDownloadJar : DCBaseCommand(
             save!!.writeBytes(rawJar)
             echo("saved to ${save!!.name}")
         } else {
-            echo(rawJar)
+            System.out.use { it.write(rawJar) }
         }
     }
 }
