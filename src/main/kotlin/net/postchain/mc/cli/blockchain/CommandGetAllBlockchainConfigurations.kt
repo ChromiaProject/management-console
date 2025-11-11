@@ -34,10 +34,9 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
 
     private val save by option(help = "Where to save configuration file(s)").file(canBeFile = false, canBeDir = true)
 
-    private val overwrite by option("--overwrite", help = "Overwrite existing files").flag()
+    private val overwrite by option("--overwrite", help = "When saving configurations, overwrite existing files in the target directory").flag()
 
-    private val exportFormat by option("--export-format", help = "Will generate a binary GTV file that can be used for chain import instead of human readable XML files").flag()
-
+    private val exportFormat by option("--export-format", help = "When saving configurations, generate a binary GTV file for chain import instead of human readable XML files").flag()
     private val fromHeight by option("--from-height", help = "Fetch from height").long().default(0)
 
     private val toHeight by option("--to-height", help = "Fetch to height").long()
