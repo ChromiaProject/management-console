@@ -26,7 +26,7 @@ class CommandSetProviderKeyThreshold : DCBaseCommand(
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
                 transactionBuilder()
                         .setProviderKeyThresholdOperationV87(ProviderKeyRole.main, threshold)
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Threshold set",
                                 "Failed to set provider key threshold"
@@ -36,7 +36,7 @@ class CommandSetProviderKeyThreshold : DCBaseCommand(
             else -> {
                 transactionBuilder()
                         .setProviderKeyThresholdOperation(clientProviderPubkey, ProviderKeyRole.main, threshold)
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Threshold set",
                                 "Failed to set provider key threshold"

@@ -1,17 +1,28 @@
 package net.postchain.mc.cli
 
+import com.chromia.build.tools.multisignature.MultiSignatureTxData
+import com.chromia.cli.tools.multisignature.saveTransactionToFile
 import com.chromia.cli.tools.util.timebOptions
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.types.file
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.queries.getProviderByKey
 import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
 import net.postchain.chain0.token_chain_in_directory_chain.getTokenChainRid
+import net.postchain.client.transaction.TransactionBuilder
 import net.postchain.common.BlockchainRid
+import net.postchain.common.hexStringToByteArray
+import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.pmcKeyConfigOption
 import net.postchain.mc.network.Version
 import net.postchain.mc.network.requireApiVersion
+import java.nio.file.Paths
 import java.time.Clock
 
 const val DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION = 65L
@@ -33,6 +44,15 @@ abstract class DCBaseCommand(
 
     protected val timeb by timebOptions(Clock.systemUTC())
 
+    protected val extraSigners by option("--signers-file", help = "Path to file containing public keys of signers, one per line. Leave out this option to send transaction directly.")
+            .file(canBeDir = false, mustExist = true, mustBeReadable = true)
+            .convert { file -> file.readLines().map { PubKey(it.hexStringToByteArray()) }.toSet() }
+            .default(setOf())
+
+    protected val outputFolder by option("--target", help = "Path where transaction file should be saved")
+            .file()
+            .default(Paths.get("").toAbsolutePath().toFile())
+
     // Get provider pubkey from (1) config, (2) by looking up based on signer keys or (3) use default/first signer key
     val clientProviderPubkey by lazy {
         config.providerPubkey?.data
@@ -50,12 +70,15 @@ abstract class DCBaseCommand(
 
     abstract fun runDC()
 
-    fun transactionBuilder() = client.transactionBuilder()
-            .apply {
-                if (timeb != null) {
-                    addTimeBound(0, timeb)
+    fun transactionBuilder(): TransactionBuilder {
+        val remainingSigners = extraSigners.filterNot { signer -> client.config.signers.any { it.pubKey == signer } }
+        return client.transactionBuilder(client.config.signers, remainingSigners)
+                .apply {
+                    if (timeb != null) {
+                        addTimeBound(0, timeb)
+                    }
                 }
-            }
+    }
 
     fun getProviderByClientKeys(): ByteArray? {
         if (dcVersion >= 65) {
@@ -81,5 +104,24 @@ abstract class DCBaseCommand(
 
         SystemBlockchain.system_anchoring_chain -> BlockchainRid(client.cmGetSystemAnchoringChain()
                 ?: throw CliktError("System anchoring chain is not installed"))
+    }
+
+    // Helper to either post and await confirmation or save to file when extra signers are used
+    fun TransactionBuilder.postOrSave() =
+        if (extraSigners.isNotEmpty()) {
+            saveTransaction(this)
+            throw ProgramResult(0)
+        } else {
+            this.postAwaitConfirmation(txListener())
+        }
+
+    fun saveTransaction(transactionBuilder: TransactionBuilder) {
+        val gtx = transactionBuilder.finish().apply {
+            client.config.signers.forEach { sign(it.sigMaker(client.config.cryptoSystem)) }
+        }.buildGtx()
+        gtx.encode()
+        val file = MultiSignatureTxData(gtx.encode(), gtx.calculateTxRid(client.merkleHashCalculator))
+                .saveTransactionToFile(outputFolder, "transaction")
+        echo("Transaction is written as hex to file: ${file.absolutePath}")
     }
 }

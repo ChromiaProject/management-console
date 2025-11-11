@@ -256,7 +256,7 @@ class CommandProposeImportBlockchain : DCBaseCommand(
     private fun proposeImportBlockchain(blockchainRid: BlockchainRid, initialConfigData: ByteArray): TransactionResult {
         return transactionBuilder()
                 .proposeImportBlockchainOperation(clientProviderPubkey, initialConfigData, blockchainRid, name, container, description())
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .also {
                     it.printResult(
                             "Blockchain import has been proposed",

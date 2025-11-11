@@ -41,7 +41,7 @@ class CommandProposeSubnodeJarExtension : DCBaseCommand(
                     proposeSubnodeJarExtensionOperation(clientProviderPubkey, name, jar.readBytes(), type, extensionDescription,
                             gtxModules, syncExts, description, scheduledTime)
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Subnode JAR extension $name proposed",
                         "Cannot propose subnode JAR extension"

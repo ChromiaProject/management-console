@@ -29,7 +29,7 @@ class CommandProposeBlockchainMove : DCBaseCommand(
 
         transactionBuilder()
                 .proposeBlockchainMoveOperation(clientProviderPubkey, blockchainRID, destinationContainer, description)
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Blockchain move proposed",
                         "Cannot propose moving the blockchain"

@@ -22,7 +22,7 @@ class CommandRemoveBlockchainReplica : DCBaseCommand(
                         blockchainRID,
                         key.data
                 )
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Replica removed",
                         "Cannot remove replica node"

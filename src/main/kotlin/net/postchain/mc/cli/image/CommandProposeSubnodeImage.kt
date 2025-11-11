@@ -61,7 +61,7 @@ class CommandProposeSubnodeImage : DCBaseCommand(
                                 baseComputeRequests = baseComputeRequests?.toLong() ?: 0)
                     }
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Subnode image $name proposed",
                         "Cannot propose subnode image"

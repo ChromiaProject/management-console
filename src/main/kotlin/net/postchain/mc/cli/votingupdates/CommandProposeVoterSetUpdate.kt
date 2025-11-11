@@ -50,7 +50,7 @@ class CommandProposeVoterSetUpdate : DCBaseCommand(
                         clientProviderPubkey,
                         voterSet, threshold, governor, newMember, removeMember, description
                 )
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Proposal for voter set $voterSet has been added",
                         "Failed to add proposal"

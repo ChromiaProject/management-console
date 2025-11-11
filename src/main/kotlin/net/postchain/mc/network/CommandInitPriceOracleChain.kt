@@ -31,7 +31,7 @@ class CommandInitPriceOracleChain : DCBaseCommand(
             val compressedPriceOracleChainConfig = BlockchainConfigurationCompressor.compress(client, priceOracleChainConfigData.gtv, dcVersion)
             transactionBuilder()
                     .initPriceOracleChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedPriceOracleChainConfig))
-                    .postAwaitConfirmation(txListener())
+                    .postOrSave()
                     .printResult(
                             "Price oracle chain was created",
                             "Failed to create Price oracle chain",

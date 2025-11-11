@@ -1,6 +1,6 @@
 package net.postchain.mc.cli.blockchain
 
-import com.chromia.directory1.anchoring_chain_common.AnchorBlock
+import com.chromia.directory1.anchoring_chain_common.AnchorBlockData
 import net.postchain.chain0.cm_api.CmClusterInfo
 import net.postchain.chain0.cm_api.CmPeerInfo
 import net.postchain.chain0.common.queries.BlockchainInfo
@@ -174,18 +174,18 @@ fun buildGetNodeDataResponse(apiUrl: String = DEFAULT_NODE01_API): Gtv {
     ))
 }
 
-fun buildGetLastAnchoredBlockResponse(height: Long, timestamp: Long = 0L): Gtv {
-    return GtvObjectMapper.toGtvDictionary(AnchorBlock(
-            RowId(0),
-            BlockchainRid.ZERO_RID.wData,
-            height,
-            timestamp,
-            BlockchainRid.ZERO_RID.wData,
-            ByteArray(0).wrap(),
-            ByteArray(0).wrap(),
-            0L
-    ))
-}
+fun buildGetLastAnchoredBlockResponse(height: Long, timestamp: Long = 0L): Gtv =
+        GtvObjectMapper.toGtvDictionary(AnchorBlockData(
+                BlockchainRid.ZERO_RID.wData,
+                0L,
+                BlockchainRid.ZERO_RID.wData,
+                height,
+                BlockchainRid.ZERO_RID.wData,
+                timestamp,
+                ByteArray(0).wrap(),
+                ByteArray(0).wrap(),
+                RowId(0),
+        ))
 
 fun buildCmGetClusterBlockchainsResponse(): Gtv {
     return gtv(listOf(
@@ -196,4 +196,3 @@ fun buildCmGetClusterBlockchainsResponse(): Gtv {
 fun buildCmGetSystemAnchoringChainResponse(): Gtv {
     return gtv(BlockchainRid.buildRepeat(2).wData)
 }
-

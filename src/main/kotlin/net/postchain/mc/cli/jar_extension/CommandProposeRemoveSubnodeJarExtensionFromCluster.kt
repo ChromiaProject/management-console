@@ -24,7 +24,7 @@ class CommandProposeRemoveSubnodeJarExtensionFromCluster : DCBaseCommand(
                 .apply {
                     proposeRemoveClusterSubnodeJarExtensionOperation(clientProviderPubkey, clusterName, subnodeJarExtensionName, description, scheduledTime)
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Removing $subnodeJarExtensionName from $clusterName proposed",
                         "Cannot propose remove subnode JAR extension from cluster"

@@ -37,7 +37,7 @@ class CommandProposeFinishBlockchainMove : DCBaseCommand(
 
         transactionBuilder()
                 .proposeBlockchainMoveFinishOperation(clientProviderPubkey, blockchainRID, finalHeight, description)
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Finishing the blockchain move has been proposed",
                         "Cannot propose finishing the blockchain move"

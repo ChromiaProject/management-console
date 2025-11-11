@@ -23,7 +23,7 @@ class CommandProposeEnableSubnodeJarExtension : DCBaseCommand(
                 .apply {
                     proposeSubnodeJarExtensionStateOperation(clientProviderPubkey, name, true, description, scheduledTime)
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Subnode JAR extension $name enable proposed",
                         "Cannot propose subnode JAR extension enable"

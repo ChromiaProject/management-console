@@ -26,7 +26,7 @@ class CommandProposeCancelBlockchainMove : DCBaseCommand(
 
         transactionBuilder()
                 .proposeBlockchainMoveCancelOperation(clientProviderPubkey, blockchainRID, description)
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Canceling the blockchain move has been proposed",
                         "Cannot propose canceling the blockchain move"

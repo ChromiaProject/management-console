@@ -38,7 +38,7 @@ class CommandVote : DCBaseCommand(
             proposalIds.forEach { proposalId ->
                 makeVoteOperation(clientProviderPubkey, proposalId, vote)
             }
-        }.postAwaitConfirmation(txListener())
+        }.postOrSave()
                 .printResult(
                         if (proposalIds.size == 1) "Vote added successfully"
                         else "Vote added successfully for ${proposalIds.size} proposals",

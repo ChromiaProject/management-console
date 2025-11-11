@@ -102,7 +102,7 @@ class CommandProposeForcedConfiguration : DCBaseCommand(
                         proposeForcedConfigurationOperationV78(clientProviderPubkey, blockchainRID, compressedConfigurationData, proposalHeight, proposalDescription)
                     }
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Forced configurations was proposed: ${bcConfig.hash}" + (if (dcVersion >=83) "\nA node provider needs to approve this." else ""),
                         "Failed to propose forced configuration"

@@ -21,7 +21,7 @@ class CommandUpdateProvider : DCBaseCommand(
     override fun runDC() {
         transactionBuilder()
                 .updateProviderOperation(clientProviderPubkey, name, url)
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult("Information updated", "Could not update provider data")
     }
 }

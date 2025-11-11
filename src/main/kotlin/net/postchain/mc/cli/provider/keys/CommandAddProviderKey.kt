@@ -20,7 +20,7 @@ class CommandAddProviderKey : DCBaseCommand(
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
                 transactionBuilder()
                         .addProviderKeyOperationV87(ProviderKeyRole.main, pubkey)
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Key added as provider key",
                                 "Failed to add provider key"
@@ -30,7 +30,7 @@ class CommandAddProviderKey : DCBaseCommand(
             else -> {
                 transactionBuilder()
                         .addProviderKeyOperation(clientProviderPubkey, ProviderKeyRole.main, pubkey)
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Key added as provider key",
                                 "Failed to add provider key"

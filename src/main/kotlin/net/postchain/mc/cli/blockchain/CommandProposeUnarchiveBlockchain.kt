@@ -38,7 +38,7 @@ class CommandProposeUnarchiveBlockchain : DCBaseCommand(
                         finalHeight,
                         description
                 )
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Blockchain unarchive proposition was added successfully",
                         "Cannot add proposal for unarchiving blockchain"

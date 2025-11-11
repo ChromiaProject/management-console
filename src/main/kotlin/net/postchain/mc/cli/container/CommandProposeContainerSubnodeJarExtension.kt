@@ -25,7 +25,7 @@ class CommandProposeContainerSubnodeJarExtension : DCBaseCommand(
 
         transactionBuilder()
                 .proposeContainerSubnodeJarExtensionOperation(clientProviderPubkey, containerName, subnodeJarExtensionName, description)
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Container subnode JAR extension proposed",
                         "Failed proposing container subnode JAR extension")
