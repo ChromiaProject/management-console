@@ -15,7 +15,7 @@ class CommandDisableNode : DCBaseCommand(
     override fun runDC() {
         transactionBuilder()
                 .disableNodeOperation(clientProviderPubkey, key.data)
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Node disabled. Please check progress of the removal from cluster(s) with 'pmc node check-cluster-removal-status'.",
                         "Cannot disable node"

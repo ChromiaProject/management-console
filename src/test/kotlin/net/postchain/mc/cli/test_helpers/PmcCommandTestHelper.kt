@@ -44,13 +44,13 @@ fun assertCommandOutputContains(output: String, expected: String) {
 }
 
 fun assertCommandSuccessContains(result: CliktCommandTestResult, expected: String) {
-    assertThat(result.statusCode).isEqualTo(0)
     assertCommandOutputContains(result.output, expected)
+    assertThat(result.statusCode).isEqualTo(0)
 }
 
 fun assertCommandFailureContains(result: CliktCommandTestResult, errorMessage: String) {
-    assertThat(result.statusCode).isGreaterThan(0)
     assertCommandOutputContains(result.stderr, errorMessage)
+    assertThat(result.statusCode).isGreaterThan(0)
 }
 
 fun normalizeCommandOutput(output: String): String {

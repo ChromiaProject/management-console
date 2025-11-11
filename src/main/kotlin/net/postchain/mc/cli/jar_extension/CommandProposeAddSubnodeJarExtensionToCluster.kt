@@ -24,7 +24,7 @@ class CommandProposeAddSubnodeJarExtensionToCluster : DCBaseCommand(
                 .apply {
                     proposeAddClusterSubnodeJarExtensionOperation(clientProviderPubkey, clusterName, subnodeJarExtensionName, description, scheduledTime)
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Adding $subnodeJarExtensionName to $clusterName proposed",
                         "Cannot propose adding subnode JAR extension to cluster"

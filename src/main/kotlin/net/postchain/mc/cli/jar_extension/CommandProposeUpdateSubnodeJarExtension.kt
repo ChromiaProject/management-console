@@ -56,7 +56,7 @@ class CommandProposeUpdateSubnodeJarExtension : DCBaseCommand(
                             scheduledTime,
                     )
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Subnode JAR extension $name update proposed",
                         "Cannot propose subnode JAR extension update",

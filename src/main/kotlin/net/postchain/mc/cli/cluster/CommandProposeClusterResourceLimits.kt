@@ -68,7 +68,7 @@ class CommandProposeClusterResourceLimits : DCBaseCommand(
                         }
                     }
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Cluster limits proposed",
                         "Failed proposing new cluster limits")

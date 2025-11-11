@@ -22,7 +22,7 @@ class CommandAddClusterReplica : DCBaseCommand(
                 .addReplicaNodeToClusterOperation(
                         clientProviderPubkey, nodePubKey.data, name
                 )
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Cluster replica added",
                         "Cannot add cluster replica"

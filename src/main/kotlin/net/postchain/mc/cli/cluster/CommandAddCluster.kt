@@ -168,7 +168,7 @@ class CommandAddCluster : DCBaseCommand(
                             }
                         }
                     }
-                    .postAwaitConfirmation(txListener())
+                    .postOrSave()
                     .printResult(
                             "Cluster $name added",
                             "Could not create cluster"

@@ -66,7 +66,7 @@ class CommandProposeContainerResourceLimits : DCBaseCommand(
 
                 transactionBuilder()
                         .proposeContainerLimitsOperation(clientProviderPubkey, containerName, limits, description)
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Container limits proposed",
                                 "Failed proposing new container limits")
@@ -86,7 +86,7 @@ class CommandProposeContainerResourceLimits : DCBaseCommand(
 
                 transactionBuilder()
                         .proposeContainerLimitsOperationV22(clientProviderPubkey, containerName, limits, description)
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Container limits proposed",
                                 "Failed proposing new container limits")
@@ -110,7 +110,7 @@ class CommandProposeContainerResourceLimits : DCBaseCommand(
 
                 transactionBuilder()
                         .proposeContainerLimitsOperationV2(clientProviderPubkey, containerName, limits, description)
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Container limits proposed",
                                 "Failed proposing new container limits")

@@ -25,7 +25,7 @@ class CommandProposeContainerSubnodeImage : DCBaseCommand(
 
         transactionBuilder()
                 .proposeContainerSubnodeImageOperation(clientProviderPubkey, containerName, subnodeImageName, description)
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Container subnode image proposed",
                         "Failed proposing container subnode image")

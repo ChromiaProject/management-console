@@ -38,7 +38,7 @@ class CommandProposeContainerConfiguration : DCBaseCommand(
                         containerName,
                         ContainerConfigurationData(slowDBStatementLogMs),
                         description
-                ).postAwaitConfirmation(txListener())
+                ).postOrSave()
                 .printResult(
                         "Container configuration proposed",
                         "Failed proposing new container configuration"

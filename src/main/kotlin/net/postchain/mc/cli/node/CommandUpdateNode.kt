@@ -103,7 +103,7 @@ class CommandUpdateNode : DCBaseCommand(
                         removeCapability?.let { updateNodeCapabilityOperationV28(provider, key.data, it, false) }
                     }
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult("Node information was updated", "Node information update failed")
     }
 }

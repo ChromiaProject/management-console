@@ -31,7 +31,7 @@ class CommandInitEvmTransactionSubmitterChain : DCBaseCommand(
             val compressedTransactionSubmitterChainConfig = BlockchainConfigurationCompressor.compress(client, transactionSubmitterChainConfigData.gtv, dcVersion)
             transactionBuilder()
                     .initEvmTransactionSubmitterChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedTransactionSubmitterChainConfig))
-                    .postAwaitConfirmation(txListener())
+                    .postOrSave()
                     .printResult(
                             "EVM transaction submitter chain was created",
                             "Failed to create EVM transaction submitter chain",

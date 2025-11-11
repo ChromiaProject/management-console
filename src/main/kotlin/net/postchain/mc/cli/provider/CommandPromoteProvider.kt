@@ -29,7 +29,7 @@ class CommandPromoteProvider : DCBaseCommand(
                         if (enable) proposeProviderStateOperation(clientProviderPubkey, key.data, enable, description)
                     }
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Promotion of provider has been proposed",
                         "Failed to promote provider"

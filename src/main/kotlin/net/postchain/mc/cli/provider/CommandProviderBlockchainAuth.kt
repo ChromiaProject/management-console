@@ -33,7 +33,7 @@ class CommandProviderBlockchainAuth : DCBaseCommand(
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
                 transactionBuilder()
                         .addProviderBlockchainAuthOperationV87(blockchainRid)
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Blockchain authentication has been enabled",
                                 "Failed to enable blockchain authentication"
@@ -43,7 +43,7 @@ class CommandProviderBlockchainAuth : DCBaseCommand(
             else -> {
                 transactionBuilder()
                         .addProviderBlockchainAuthOperation(clientProviderPubkey, blockchainRid)
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Blockchain authentication has been enabled",
                                 "Failed to enable blockchain authentication"

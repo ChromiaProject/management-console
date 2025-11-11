@@ -97,7 +97,7 @@ class CommandRegisterNode : DCBaseCommand(
                 .apply {
                     if (apiVersion <= 28 && capability.isNotEmpty()) capability.forEach { updateNodeCapabilityOperationV28(clientProviderPubkey, key.data, it, true) }
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Node registered",
                         "Failed to register node"

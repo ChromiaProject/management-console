@@ -32,7 +32,7 @@ class CommandInitEconomyChain : DCBaseCommand(
             val compressedEconomyChainConfig = BlockchainConfigurationCompressor.compress(client, economyChainConfigData.gtv, dcVersion)
             transactionBuilder()
                     .initEconomyChainOperation(clientProviderPubkey, GtvEncoder.encodeGtv(compressedEconomyChainConfig))
-                    .postAwaitConfirmation(txListener())
+                    .postOrSave()
                     .printResult(
                             "Economy chain was created",
                             "Failed to create Economy chain",

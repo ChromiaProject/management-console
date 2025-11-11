@@ -121,7 +121,7 @@ class CommandRegisterProvider : DCBaseCommand(
                     .proposeProvidersOperation(
                             clientProviderPubkey, batchOptions!!.provider, providerTier.toTier(), providerTier.isSystem(), enable, description()
                     )
-                    .postAwaitConfirmation(txListener())
+                    .postOrSave()
                     .printResult(
                             "Provider batch has been proposed",
                             "Failed to propose provider batch"
@@ -134,7 +134,7 @@ class CommandRegisterProvider : DCBaseCommand(
                         if (providerTier.shouldEnable(enable)) proposeProviderStateOperation(clientProviderPubkey, pubkey!!.data, enable, description())
                         if (providerTier == ProviderType.SYSTEM_PROVIDER) proposeProviderIsSystemOperation(clientProviderPubkey, pubkey!!.data, true, description())
                     }
-                    .postAwaitConfirmation(txListener())
+                    .postOrSave()
                     .printResult(
                             "Provider has been added${enable.let { if (it) " and proposed for enabling" else "" }}",
                             "Failed to add provider"

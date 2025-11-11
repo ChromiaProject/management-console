@@ -34,7 +34,7 @@ class CommandProposeAddSubnodeImageToCluster : DCBaseCommand(
                         proposeAddClusterSubnodeImageOperation(clientProviderPubkey, clusterName, subnodeImageName, description, scheduledTime)
                     }
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Adding $subnodeImageName to $clusterName proposed",
                         "Cannot propose adding subnode image to cluster"

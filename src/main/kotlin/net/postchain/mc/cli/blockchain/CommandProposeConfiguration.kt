@@ -101,7 +101,7 @@ class CommandProposeConfiguration : DCBaseCommand(
                         }
                     }
                 }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Configuration was proposed: ${bcConfig.hash}",
                         "Failed to propose configuration"
