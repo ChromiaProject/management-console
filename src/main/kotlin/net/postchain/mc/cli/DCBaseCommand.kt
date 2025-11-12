@@ -5,8 +5,8 @@ import com.chromia.cli.tools.multisignature.saveTransactionToFile
 import com.chromia.cli.tools.util.timebOptions
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.ProgramResult
+import com.github.ajalt.clikt.parameters.groups.default
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
@@ -16,8 +16,6 @@ import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
 import net.postchain.chain0.token_chain_in_directory_chain.getTokenChainRid
 import net.postchain.client.transaction.TransactionBuilder
 import net.postchain.common.BlockchainRid
-import net.postchain.common.hexStringToByteArray
-import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.pmcKeyConfigOption
 import net.postchain.mc.network.Version
@@ -44,10 +42,7 @@ abstract class DCBaseCommand(
 
     protected val timeb by timebOptions(Clock.systemUTC())
 
-    protected val extraSigners by option("--signers-file", help = "Path to file containing public keys of signers, one per line. Leave out this option to send transaction directly.")
-            .file(canBeDir = false, mustExist = true, mustBeReadable = true)
-            .convert { file -> file.readLines().map { PubKey(it.hexStringToByteArray()) }.toSet() }
-            .default(setOf())
+    protected val extraSigners by signersOption().default(setOf())
 
     protected val outputFolder by option("--target", help = "Path where transaction file should be saved")
             .file()
@@ -108,12 +103,12 @@ abstract class DCBaseCommand(
 
     // Helper to either post and await confirmation or save to file when extra signers are used
     fun TransactionBuilder.postOrSave() =
-        if (extraSigners.isNotEmpty()) {
-            saveTransaction(this)
-            throw ProgramResult(0)
-        } else {
-            this.postAwaitConfirmation(txListener())
-        }
+            if (extraSigners.isNotEmpty()) {
+                saveTransaction(this)
+                throw ProgramResult(0)
+            } else {
+                this.postAwaitConfirmation(txListener())
+            }
 
     fun saveTransaction(transactionBuilder: TransactionBuilder) {
         val gtx = transactionBuilder.finish().apply {
