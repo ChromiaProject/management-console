@@ -74,7 +74,7 @@ class CommandProposeRemoveForcedConfiguration : DCBaseCommand(
                         .proposeRemoveForcedConfigurationOperation(clientProviderPubkey, blockchainRID, height, description)
                         .postOrSave()
                         .printResult(
-                                "Created proposal to remove forced configuration on blockchain RID $blockchainRID at height $height",
+                                "Created proposal to remove forced configuration on blockchain RID $blockchainRID at height $height" + (if (dcVersion >= 104) "\nA node provider needs to approve this." else ""),
                                 "Cannot create proposal"
                         )
             }

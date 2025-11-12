@@ -30,6 +30,7 @@ import net.postchain.chain0.proposal_blockchain.getConfigurationProposalV64
 import net.postchain.chain0.proposal_blockchain.getForcedConfigurationProposalV64
 import net.postchain.chain0.proposal_blockchain.getProposedForcedConfiguration
 import net.postchain.chain0.proposal_blockchain.getRemoveForcedConfigurationProposal
+import net.postchain.chain0.proposal_blockchain.getRestoreOriginalConfigurationProposal
 import net.postchain.chain0.proposal_blockchain_import.getBlockchainImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getConfigurationImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getFinishBlockchainImportProposal
@@ -836,6 +837,14 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                     rowIfNotNull("Sync extensions", pc.syncExts)
                 }
             }
+        }
+
+        ProposalType.restore_original_configuration -> {
+            val p = client.getRestoreOriginalConfigurationProposal(proposalId) ?: return ""
+            val currentConfig = p.currentConfiguration?.let { (decodeGtv(it.data) as GtvDictionary) }
+                    ?: GtvDictionary.build(emptyMap())
+            val originalConfig = decodeGtv(p.originalConfiguration.data) as GtvDictionary
+            "Proposed restoration of original configuration for blockchain ${p.blockchainRid.toHex()} at height ${p.height}:\n\n${GtvDiffFinder.diff(currentConfig, originalConfig).diff}${if (p.originalSigners != null) "\n\nRestored signers: ${p.originalSigners}" else ""}"
         }
     }
 }
