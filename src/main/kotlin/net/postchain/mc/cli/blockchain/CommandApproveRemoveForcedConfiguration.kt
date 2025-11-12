@@ -1,9 +1,14 @@
 package net.postchain.mc.cli.blockchain
 
+import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.chain0.proposal_blockchain.approveRemoveForcedConfigurationOperation
+import net.postchain.chain0.proposal_blockchain.getRemoveForcedConfigurationStage2Proposal
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
+import net.postchain.mc.cli.blockchain.CommandProposeRemoveForcedConfiguration.Companion.DISABLE_CHECKS_LONG_OPTION_NAME
 import net.postchain.mc.cli.blockchainRidOption
 
 class CommandApproveRemoveForcedConfiguration : DCBaseCommand(
@@ -20,8 +25,14 @@ class CommandApproveRemoveForcedConfiguration : DCBaseCommand(
         requiresVersion = 104
 ) {
     private val blockchainRID by blockchainRidOption().required()
+    private val disableChecks by option("-dc", DISABLE_CHECKS_LONG_OPTION_NAME, help = "Disable verification checks and ignore warnings").flag(default = false)
 
     override fun runDC() {
+        if (!disableChecks) {
+            val p = client.getRemoveForcedConfigurationStage2Proposal(blockchainRID)
+                    ?: throw CliktError("No forced configuration removal proposal for blockchain $blockchainRID")
+            validateRemoveForcedConfiguration(blockchainRID, p.height)
+        }
         transactionBuilder()
                 .approveRemoveForcedConfigurationOperation(clientProviderPubkey, blockchainRID)
                 .postAwaitConfirmation(txListener())

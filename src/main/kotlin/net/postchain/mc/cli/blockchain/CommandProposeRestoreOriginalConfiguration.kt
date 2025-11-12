@@ -12,17 +12,19 @@ import net.postchain.base.extension.CONFIG_HASH_EXTRA_HEADER
 import net.postchain.base.gtv.BlockHeaderData
 import net.postchain.chain0.nm_api.nmGetBlockchainConfigurationInfo
 import net.postchain.chain0.proposal_blockchain.proposeRestoreOriginalConfigurationOperation
+import net.postchain.common.BlockchainRid
 import net.postchain.common.hexStringToByteArray
 import net.postchain.common.wrap
+import net.postchain.gtv.Gtv
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
+import net.postchain.mc.cli.blockchain.CommandProposeRestoreOriginalConfiguration.Companion.DISABLE_CHECKS_LONG_OPTION_NAME
 import net.postchain.mc.cli.blockchainRidOption
 import net.postchain.mc.cli.heightOption
 import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.proposalDescriptionOption
-
 
 class CommandProposeRestoreOriginalConfiguration : DCBaseCommand(
         name = "restore-original-configuration",
@@ -56,31 +58,9 @@ class CommandProposeRestoreOriginalConfiguration : DCBaseCommand(
 
         val proposedConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
         val proposedSigners = signers?.map { it.hexStringToByteArray() }
-        val cacClient = config.chromiaClient.getClusterAnchoringClient(blockchainRID)
-        val anchoredBlock = cacClient.getAnchoredBlockAtHeight(blockchainRID, height)
-        if (anchoredBlock == null) {
-            if (!disableChecks) {
-                throw CliktError("Warning: Block at height $height is not yet anchored or built. Please ensure the configuration will not be in use when the proposal is approved. Run command again with $DISABLE_CHECKS_LONG_OPTION_NAME to ignore this warning.")
-            }
-        } else {
-            val chainConfigInfo = client.nmGetBlockchainConfigurationInfo(blockchainRID, height)!!
-            val anchoredHeaderData = GtvDecoder.decodeGtv(anchoredBlock.blockHeader.data)
-            val anchoredConfigHash = BlockHeaderData.fromGtv(anchoredHeaderData)
-                    .getExtra()[CONFIG_HASH_EXTRA_HEADER]!!.asByteArray()
 
-            if (chainConfigInfo.configHash.data.contentEquals(anchoredConfigHash)) {
-                throw CliktError("The configuration on height $height is valid and in use by chain $blockchainRID according to cluster anchoring chain ${cacClient.config.blockchainRid}")
-            } else {
-                echo("The configuration on height $height is confirmed not in use.")
-
-                val configMap = proposedConfig.gtv.asDict().toMutableMap()
-                configMap["signers"] = gtv((proposedSigners?.map { it.wrap() }
-                        ?: chainConfigInfo.signers).map { gtv(it) })
-                val proposedConfigHash = BlockchainConfigurationData.merkleHash(gtv(configMap))
-                if (!proposedConfigHash.contentEquals(anchoredConfigHash)) {
-                    throw CliktError("The configuration on height $height in use by chain $blockchainRID does not match proposed configuration, according to cluster anchoring chain ${cacClient.config.blockchainRid}")
-                }
-            }
+        if (!disableChecks) {
+            validateRestoreOriginalConfiguration(blockchainRID, height, proposedConfig.gtv, proposedSigners)
         }
         transactionBuilder()
                 .proposeRestoreOriginalConfigurationOperation(clientProviderPubkey, blockchainRID, height, proposedConfig.data, proposedSigners, description)
@@ -89,5 +69,32 @@ class CommandProposeRestoreOriginalConfiguration : DCBaseCommand(
                         "Created proposal to restore configuration on blockchain RID $blockchainRID at height $height\nA node provider needs to approve this.",
                         "Cannot create proposal"
                 )
+    }
+}
+
+fun DCBaseCommand.validateRestoreOriginalConfiguration(blockchainRID: BlockchainRid, height: Long, proposedConfig: Gtv, proposedSigners: List<ByteArray>?) {
+    val cacClient = config.chromiaClient.getClusterAnchoringClient(blockchainRID)
+    val anchoredBlock = cacClient.getAnchoredBlockAtHeight(blockchainRID, height)
+    if (anchoredBlock == null) {
+        throw CliktError("Warning: Block at height $height is not yet anchored or built. Please ensure the configuration will not be in use when the proposal is approved. Run command again with $DISABLE_CHECKS_LONG_OPTION_NAME to ignore this warning.")
+    } else {
+        val chainConfigInfo = client.nmGetBlockchainConfigurationInfo(blockchainRID, height)!!
+        val anchoredHeaderData = GtvDecoder.decodeGtv(anchoredBlock.blockHeader.data)
+        val anchoredConfigHash = BlockHeaderData.fromGtv(anchoredHeaderData)
+                .getExtra()[CONFIG_HASH_EXTRA_HEADER]!!.asByteArray()
+
+        if (chainConfigInfo.configHash.data.contentEquals(anchoredConfigHash)) {
+            throw CliktError("The configuration on height $height is valid and in use by chain $blockchainRID according to cluster anchoring chain ${cacClient.config.blockchainRid}")
+        } else {
+            echo("The configuration on height $height is confirmed not in use.")
+
+            val configMap = proposedConfig.asDict().toMutableMap()
+            configMap["signers"] = gtv((proposedSigners?.map { it.wrap() }
+                    ?: chainConfigInfo.signers).map { gtv(it) })
+            val proposedConfigHash = BlockchainConfigurationData.merkleHash(gtv(configMap))
+            if (!proposedConfigHash.contentEquals(anchoredConfigHash)) {
+                throw CliktError("The configuration on height $height in use by chain $blockchainRID does not match proposed configuration, according to cluster anchoring chain ${cacClient.config.blockchainRid}")
+            }
+        }
     }
 }
