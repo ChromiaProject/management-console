@@ -5,12 +5,15 @@ import com.github.ajalt.clikt.core.ParameterHolder
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
+import com.github.ajalt.clikt.parameters.groups.single
 import com.github.ajalt.clikt.parameters.options.OptionTransformContext
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.unique
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.enum
 import com.github.ajalt.clikt.parameters.types.file
@@ -20,6 +23,7 @@ import com.github.ajalt.mordant.terminal.ConversionResult
 import com.github.ajalt.mordant.terminal.prompt
 import net.postchain.common.BlockchainRid
 import net.postchain.common.hexStringToByteArray
+import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.HOST_NAME_LENGTH_MAX
 import java.time.Instant
 import java.time.LocalDate
@@ -36,8 +40,8 @@ enum class SystemBlockchain {
 }
 
 sealed interface BlockchainOption {
-    data class Rid(val rid: BlockchainRid): BlockchainOption
-    data class Name(val name: SystemBlockchain): BlockchainOption
+    data class Rid(val rid: BlockchainRid) : BlockchainOption
+    data class Name(val name: SystemBlockchain) : BlockchainOption
 }
 
 fun ParameterHolder.blockchainOption() = mutuallyExclusiveOptions(
@@ -121,3 +125,15 @@ fun ParameterHolder.accountIdOption(help: String = "Account id") = option("--acc
             it.hexStringToByteArray()
         }
         .validate { require(it.isNotEmpty()) { "Account id must not be empty" } }
+
+fun ParameterHolder.signersOption(name: String = "Signers, leave out this option to send transaction directly") = mutuallyExclusiveOptions(
+        option("--signer", help = "Public keys of signer (can be repeated)")
+                .convert { PubKey(it.hexStringToByteArray()) }
+                .multiple().unique(),
+        option("--signers", help = "Comma separated list of keys of signers")
+                .convert { s -> s.split(",").map { PubKey(it.hexStringToByteArray()) }.toSet() },
+        option("--signers-file", help = "Path to file containing public keys of signers, one per line")
+                .file(canBeDir = false, mustExist = true, mustBeReadable = true)
+                .convert { file -> file.readLines().map { PubKey(it.hexStringToByteArray()) }.toSet() },
+        name = name,
+).single()

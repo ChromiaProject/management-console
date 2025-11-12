@@ -155,7 +155,66 @@ class CommandProposeBlockchainIT {
     }
 
     @Test
-    fun `successful save transaction to file`(@TempDir dir: Path) {
+    fun `save transaction to file with signer options`(@TempDir dir: Path) {
+        val cityConfig = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
+        ManagedRestTestApi(dir)
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
+                .withDCQuery("find_blockchain_rid", gtv(DEFAULT_DAPP_RID))
+                .testCommand(
+                        CommandProposeBlockchain(),
+                        "-c", "container01",
+                        "-n", "name01",
+                        "--blockchain-config", cityConfig.absolutePath.toString(),
+                        "--signer", "03694B937C7059C4CE28327BBD4E98E2BC8E7D34715A699391F019A6B17320000A",
+                        "--signer", "02B45DF3AF9FDBBAE931D9492842E332E76B5D07F23893033AA27C87623B574134",
+                        "--target", dir.absolutePathString(),
+                ) { result, api ->
+                    assertCommandSuccessContains(result, "Transaction is written as hex to file: ")
+                    val savedTransactionData = dir.listDirectoryEntries("transaction_*").single().readText()
+                    val savedTransaction = MultiSignatureTxData.decode(savedTransactionData)
+                    val gtx = Gtx.decode(savedTransaction.transaction)
+                    assertThat(gtx.gtxBody.blockchainRid).isEqualTo(DEFAULT_BRID_DIRECTORY_CHAIN)
+                    assertThat(gtx.gtxBody.signers.map { it.toHex() }).containsExactlyInAnyOrder(
+                            DEFAULT_PROVIDER01_PUBKEY,
+                            "03694B937C7059C4CE28327BBD4E98E2BC8E7D34715A699391F019A6B17320000A",
+                            "02B45DF3AF9FDBBAE931D9492842E332E76B5D07F23893033AA27C87623B574134",
+                    )
+
+                    assertThat(api.getDcModel().capturedOps).isEmpty()
+                }
+    }
+
+    @Test
+    fun `save transaction to file with signers option`(@TempDir dir: Path) {
+        val cityConfig = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
+        ManagedRestTestApi(dir)
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
+                .withDCQuery("find_blockchain_rid", gtv(DEFAULT_DAPP_RID))
+                .testCommand(
+                        CommandProposeBlockchain(),
+                        "-c", "container01",
+                        "-n", "name01",
+                        "--blockchain-config", cityConfig.absolutePath.toString(),
+                        "--signers", "03694B937C7059C4CE28327BBD4E98E2BC8E7D34715A699391F019A6B17320000A,02B45DF3AF9FDBBAE931D9492842E332E76B5D07F23893033AA27C87623B574134",
+                        "--target", dir.absolutePathString(),
+                ) { result, api ->
+                    assertCommandSuccessContains(result, "Transaction is written as hex to file: ")
+                    val savedTransactionData = dir.listDirectoryEntries("transaction_*").single().readText()
+                    val savedTransaction = MultiSignatureTxData.decode(savedTransactionData)
+                    val gtx = Gtx.decode(savedTransaction.transaction)
+                    assertThat(gtx.gtxBody.blockchainRid).isEqualTo(DEFAULT_BRID_DIRECTORY_CHAIN)
+                    assertThat(gtx.gtxBody.signers.map { it.toHex() }).containsExactlyInAnyOrder(
+                            DEFAULT_PROVIDER01_PUBKEY,
+                            "03694B937C7059C4CE28327BBD4E98E2BC8E7D34715A699391F019A6B17320000A",
+                            "02B45DF3AF9FDBBAE931D9492842E332E76B5D07F23893033AA27C87623B574134",
+                    )
+
+                    assertThat(api.getDcModel().capturedOps).isEmpty()
+                }
+    }
+
+    @Test
+    fun `save transaction to file with signers file`(@TempDir dir: Path) {
         val cityConfig = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
         val signers = writeResourceFileToTempDir(dir, "/signers")
         ManagedRestTestApi(dir)
