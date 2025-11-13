@@ -2,15 +2,25 @@ package net.postchain.mc.cli.test_helpers
 
 import assertk.assertThat
 import assertk.assertions.contains
+import assertk.assertions.containsExactlyInAnyOrder
+import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
 import assertk.assertions.isTrue
 import com.chromia.build.tools.config.SUPPRESS_KEY_STORAGE_DEPRECATION_WARNING_SYSTEM_PROPERTY
+import com.chromia.build.tools.multisignature.MultiSignatureTxData
+import com.chromia.cli.test
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.parse
 import com.github.ajalt.clikt.testing.CliktCommandTestResult
 import com.github.ajalt.clikt.testing.test
+import com.github.ajalt.mordant.input.InputEvent
+import net.postchain.common.toHex
+import net.postchain.gtx.Gtx
 import java.io.File
 import java.nio.file.Path
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.readText
 
 
 /**
@@ -22,6 +32,17 @@ fun testPmcCommand(dir: Path, command: CliktCommand, vararg args: String): Clikt
             "--config", dir.resolve(".chromia/config").toAbsolutePath().toString()
     )
     return command.test(*parametersWithConfig.toTypedArray())
+}
+
+/**
+ * Run an interactive command and pass the dynamically created .chromia/config file as parameter.
+ */
+fun testInteractivePmcCommand(dir: Path, command: CliktCommand, inputEvents: List<InputEvent> = listOf(), vararg args: String): CliktCommandTestResult {
+    System.setProperty(SUPPRESS_KEY_STORAGE_DEPRECATION_WARNING_SYSTEM_PROPERTY, "true")
+    val parametersWithConfig = args.toMutableList() + listOf(
+            "--config", dir.resolve(".chromia/config").toAbsolutePath().toString()
+    )
+    return command.test(inputEvents = inputEvents, argv = parametersWithConfig, inputInteractive = true, outputInteractive = true) { command.parse(it) }
 }
 
 fun assertLineValue(content: String, name: String, value: String) {
@@ -53,10 +74,30 @@ fun assertCommandFailureContains(result: CliktCommandTestResult, errorMessage: S
     assertThat(result.statusCode).isGreaterThan(0)
 }
 
+fun assertSavedTransaction(result: CliktCommandTestResult, dir: Path, signatures: List<String>, additionalSigners: List<String>) {
+    assertCommandSuccessContains(result, "Transaction is written as hex to file: ")
+    assertCommandSuccessContains(result, "Requires additional signatures by: $additionalSigners")
+    val savedTransactionData = dir.listDirectoryEntries("transaction_*").single().readText()
+    val savedTransaction = MultiSignatureTxData.decode(savedTransactionData)
+    val gtx = Gtx.decode(savedTransaction.transaction)
+    assertThat(gtx.gtxBody.blockchainRid).isEqualTo(DEFAULT_BRID_DIRECTORY_CHAIN)
+    assertThat(gtx.gtxBody.signers.map { it.toHex() }).containsExactlyInAnyOrder(*(signatures + additionalSigners).toTypedArray())
+    assertThat(gtx.signatures.filterNot { it.isEmpty() }).hasSize(signatures.size)
+}
+
 fun normalizeCommandOutput(output: String): String {
     return output
             .trim()
             .replace(Regex(" {2,}"), "")
+}
+
+fun writeToTempDir(dir: Path, name: String, content: String): File {
+    val file = File(dir.toFile(), name)
+    with(file) {
+        parentFile.mkdirs()
+        file.writeText(content)
+    }
+    return file
 }
 
 fun writeResourceFileToTempDir(dir: Path, resource: String): File {

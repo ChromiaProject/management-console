@@ -3,6 +3,7 @@ package net.postchain.mc.cli.test_helpers
 import com.chromia.build.tools.restapi.TestModel
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.testing.CliktCommandTestResult
+import com.github.ajalt.mordant.input.InputEvent
 import net.postchain.api.rest.controller.RestApi
 import net.postchain.common.BlockchainRid
 import net.postchain.common.exception.ProgrammerMistake
@@ -95,6 +96,17 @@ open class ManagedRestTestApi(
     open fun testCommand(command: CliktCommand, vararg args: String, function: (CliktCommandTestResult, ManagedRestTestApi) -> Unit) {
         test {
             val result = testPmcCommand(dir, command, *args)
+            function(result, this)
+        }
+    }
+
+    /**
+     * Once the test REST Api is started, run the interactive command with arguments. This command is not run in a separate process.
+     */
+    open fun testInteractiveCommand(command: CliktCommand, inputEvents: List<InputEvent>, vararg args: String,
+                                    function: (CliktCommandTestResult, ManagedRestTestApi) -> Unit) {
+        test {
+            val result = testInteractivePmcCommand(dir, command, inputEvents, *args)
             function(result, this)
         }
     }

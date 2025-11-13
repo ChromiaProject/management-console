@@ -24,6 +24,8 @@ class D1TestModel(
         withQuery("cm_get_system_anchoring_chain", gtv(sacBcRid.wData))
         if (providerByKey != null) {
             withQuery("get_provider_by_key", gtv(providerByKey.hexStringToByteArray()))
+            withQuery("get_provider_keys_and_threshold",
+                    gtv(mapOf("keys" to gtv(listOf(gtv(providerByKey.hexStringToByteArray()))), "threshold" to gtv(1))))
         }
     }
 

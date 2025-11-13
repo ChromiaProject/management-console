@@ -10,7 +10,6 @@ import com.chromia.cli.tools.util.SUPPORTED_TIME_AT_FORMATS
 import com.chromia.cli.tools.util.timeAtConverter
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.groups.single
@@ -19,6 +18,7 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.split
@@ -47,7 +47,6 @@ import net.postchain.mc.cli.base.METADATA_LENGTH_MAX
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.base.URL_LENGTH_MAX
 import java.io.File
-import java.lang.Exception
 import java.net.URI
 import java.net.URISyntaxException
 import java.time.Duration
@@ -92,26 +91,28 @@ fun CliktCommand.pmcKeyConfigOption() = PmcKeyClientConfigOption { msg -> echo(m
 fun CliktCommand.pmcConfigOption() = PmcClientConfigOption { msg -> echo(msg, err = true) }
 
 class PmcKeyClientConfigOption(logger: (String) -> Unit) : PmcClientConfigOption(logger) {
-    val secretFile by secretOption()
-    val keyId by keyIdOption()
+    val secretFiles by secretOption().multiple()
+    val keyIds by keyIdOption().multiple()
 
     override fun fixClientConfig(clientConfig: PostchainClientConfig): PostchainClientConfig {
-        if (secretFile != null && keyId != null) {
-            throw UsageError("You can only specify one of --secret or --key-id")
-        }
-        if (secretFile != null) {
-            val secretProps = PropertiesFileLoader.load(secretFile!!.absolutePath)
-            if (secretProps.containsKey("pubkey") && secretProps.containsKey("privkey")) {
-                return clientConfig.copy(signers = listOf(KeyPair.of(secretProps.getString("pubkey"), secretProps.getString("privkey"))))
-            } else {
-                throw CliktError("Secret file: ${secretFile!!} does not contain 'pubkey' and/or 'privkey' properties")
+        val keyPairs = buildList {
+            for (secretFile in secretFiles) {
+                val secretProps = PropertiesFileLoader.load(secretFile.absolutePath)
+                if (secretProps.containsKey("pubkey") && secretProps.containsKey("privkey")) {
+                    add(KeyPair.of(secretProps.getString("pubkey"), secretProps.getString("privkey")))
+                } else {
+                    throw CliktError("Secret file: $secretFile does not contain 'pubkey' and/or 'privkey' properties")
+                }
+            }
+            for (keyId in keyIds) {
+                add(ChromiaKeyStore(keyId).findKeyPair()
+                        ?: throw CliktError("Key with ID '$keyId' not found"))
             }
         }
-        if (keyId != null) {
-            return clientConfig.copy(signers = listOf(ChromiaKeyStore(keyId!!).findKeyPair()
-                    ?: throw CliktError("Key with ID '$keyId' not found")))
-        }
-        return clientConfig
+        return if (keyPairs.isNotEmpty())
+            clientConfig.copy(signers = keyPairs)
+        else
+            clientConfig
     }
 
     val txClient: PostchainClient by lazy {

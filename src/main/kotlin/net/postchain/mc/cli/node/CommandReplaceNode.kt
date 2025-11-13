@@ -57,7 +57,7 @@ class CommandReplaceNode : DCBaseCommand(
             echo("Territory is not supported in API version $dcVersion and will be ignored")
         }
 
-        transactionBuilder()
+        transactionBuilder(listOf(old, new))
                 .apply {
                     if (keepOldNodeAsReplica) {
                         if (dcVersion < 73) {
