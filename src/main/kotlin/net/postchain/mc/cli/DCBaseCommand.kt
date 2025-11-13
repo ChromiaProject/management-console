@@ -5,17 +5,21 @@ import com.chromia.cli.tools.multisignature.saveTransactionToFile
 import com.chromia.cli.tools.util.timebOptions
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.ProgramResult
-import com.github.ajalt.clikt.parameters.groups.default
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
+import com.github.ajalt.mordant.input.interactiveMultiSelectList
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.queries.getProviderByKey
+import net.postchain.chain0.common.queries.getProviderKeysAndThreshold
 import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
 import net.postchain.chain0.token_chain_in_directory_chain.getTokenChainRid
 import net.postchain.client.transaction.TransactionBuilder
 import net.postchain.common.BlockchainRid
+import net.postchain.common.toHex
+import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.pubkey
 import net.postchain.mc.cli.util.pmcKeyConfigOption
 import net.postchain.mc.network.Version
@@ -42,7 +46,7 @@ abstract class DCBaseCommand(
 
     protected val timeb by timebOptions(Clock.systemUTC())
 
-    protected val extraSigners by signersOption().default(setOf())
+    protected val extraSigners by signersOption()
 
     protected val outputFolder by option("--target", help = "Path where transaction file should be saved")
             .file()
@@ -63,11 +67,15 @@ abstract class DCBaseCommand(
         runDC()
     }
 
+    lateinit var remainingSigners: List<PubKey>
+
     abstract fun runDC()
 
-    fun transactionBuilder(): TransactionBuilder {
-        val remainingSigners = extraSigners.filterNot { signer -> client.config.signers.any { it.pubKey == signer } }
-        return client.transactionBuilder(client.config.signers, remainingSigners)
+    fun transactionBuilder(additionalRequiredSignatures: List<PubKey> = listOf()): TransactionBuilder {
+        val initialSigners = client.config.signers
+        remainingSigners = ((extraSigners ?: fetchRemainingSignersFromDC()) + additionalRequiredSignatures)
+                .filterNot { signer -> initialSigners.any { it.pubKey == signer } }
+        return client.transactionBuilder(initialSigners, remainingSigners)
                 .apply {
                     if (timeb != null) {
                         addTimeBound(0, timeb)
@@ -75,8 +83,41 @@ abstract class DCBaseCommand(
                 }
     }
 
+    fun fetchRemainingSignersFromDC(): List<PubKey> = if (dcVersion >= DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION) {
+        val (keys, threshold) = client.getProviderKeysAndThreshold(PubKey(clientProviderPubkey))
+        val eligibleKeys = keys.map { PubKey(it) }
+        val possessedKeys = client.config.signers.map { it.pubKey }.toSet()
+        val validKeys = eligibleKeys.intersect(possessedKeys)
+        val missingKeys = eligibleKeys.subtract(possessedKeys)
+        if (validKeys.size < threshold) {
+            if (threshold < eligibleKeys.size) {
+                if (terminal.terminalInfo.interactive) {
+                    val neededAdditionalKeys = (threshold - possessedKeys.size).toInt()
+                    val selectedKeys = terminal.interactiveMultiSelectList {
+                        title("Select $neededAdditionalKeys additional keys to sign transaction with")
+                        entries(missingKeys.map { it.data.toHex() })
+                        limit(neededAdditionalKeys)
+                    }?.map { PubKey(it) } ?: listOf()
+                    if (selectedKeys.size < neededAdditionalKeys) {
+                        throw CliktError("You need to select $neededAdditionalKeys keys, only ${selectedKeys.size} was selected")
+                    } else {
+                        selectedKeys
+                    }
+                } else {
+                    throw CliktError("Transaction needs to be signed by $threshold keys of $eligibleKeys, please specify which keys to use with --signers option")
+                }
+            } else {
+                missingKeys.toList()
+            }
+        } else {
+            listOf()
+        }
+    } else {
+        listOf()
+    }
+
     fun getProviderByClientKeys(): ByteArray? {
-        if (dcVersion >= 65) {
+        if (dcVersion >= DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION) {
             config.config.signers.forEach {
                 client.getProviderByKey(it.pubKey)?.let { provider ->
                     return provider
@@ -103,7 +144,7 @@ abstract class DCBaseCommand(
 
     // Helper to either post and await confirmation or save to file when extra signers are used
     fun TransactionBuilder.postOrSave() =
-            if (extraSigners.isNotEmpty()) {
+            if (remainingSigners.isNotEmpty()) {
                 saveTransaction(this)
                 throw ProgramResult(0)
             } else {
@@ -118,5 +159,6 @@ abstract class DCBaseCommand(
         val file = MultiSignatureTxData(gtx.encode(), gtx.calculateTxRid(client.merkleHashCalculator))
                 .saveTransactionToFile(outputFolder, "transaction")
         echo("Transaction is written as hex to file: ${file.absolutePath}")
+        echo("Requires additional signatures by: $remainingSigners")
     }
 }

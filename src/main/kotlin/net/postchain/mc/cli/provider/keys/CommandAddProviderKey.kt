@@ -18,21 +18,21 @@ class CommandAddProviderKey : DCBaseCommand(
     override fun runDC() {
         when {
             dcVersion < DIRECTORY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER -> {
-                transactionBuilder()
+                transactionBuilder(listOf(pubkey))
                         .addProviderKeyOperationV87(ProviderKeyRole.main, pubkey)
                         .postOrSave()
                         .printResult(
-                                "Key added as provider key",
+                                "Key $pubkey added as provider key",
                                 "Failed to add provider key"
                         )
             }
 
             else -> {
-                transactionBuilder()
+                transactionBuilder(listOf(pubkey))
                         .addProviderKeyOperation(clientProviderPubkey, ProviderKeyRole.main, pubkey)
                         .postOrSave()
                         .printResult(
-                                "Key added as provider key",
+                                "Key $pubkey added as provider key",
                                 "Failed to add provider key"
                         )
             }

@@ -2,6 +2,7 @@ package net.postchain.mc.cli.test_helpers
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNotEmpty
 import assertk.fail
 import net.postchain.api.rest.BlockHeight
 import net.postchain.api.rest.controller.Model
@@ -15,7 +16,7 @@ import net.postchain.common.BlockchainRid
 import net.postchain.common.tx.TransactionStatus
 import net.postchain.gtv.Gtv
 import net.postchain.gtv.GtvDecoder
-import net.postchain.gtv.GtvFactory
+import net.postchain.gtx.Gtx
 import net.postchain.gtx.GtxQuery
 import java.util.LinkedList
 import java.util.Queue
@@ -31,6 +32,7 @@ open class RestTestModel(
         var height: Long = 0
 ) : Model by model {
 
+    var lastTransaction: Gtx? = null
     val capturedOps: MutableMap<String, MutableList<List<Gtv>>> = mutableMapOf()
 
     open fun withQuery(query: String, vararg arg: Gtv): RestTestModel {
@@ -60,18 +62,17 @@ open class RestTestModel(
     }
 
     override fun postTransaction(tx: ByteArray) {
-        val txGtv = GtvFactory.decodeGtv(tx)
-        for (op in txGtv.asArray()) {
-            if (op.asArray().size > 1) {
-                for (op1 in op[1].asArray()) {
-                    val name = op1[0].asString()
-                    val parameters = op1[1].asArray().toList()
-                    capturedOps.compute(name) { _, list ->
-                        val newList = list ?: mutableListOf()
-                        newList.add(parameters)
-                        newList
-                    }
-                }
+        val gtx = Gtx.decode(tx)
+        assertThat(gtx.gtxBody.signers.size).isEqualTo(gtx.signatures.size)
+        for (signature in gtx.signatures) {
+            assertThat(signature).isNotEmpty()
+        }
+        lastTransaction = gtx
+        for (op in gtx.gtxBody.operations) {
+            capturedOps.compute(op.opName) { _, list ->
+                val newList = list ?: mutableListOf()
+                newList.add(op.args.toList())
+                newList
             }
         }
     }
@@ -103,7 +104,7 @@ open class RestTestModel(
         GtvDecoder.decodeGtv(txData).asArray()
                 .filter { it.asArray().size > 1 }
                 .forEach { tx ->
-                    tx.asArray().drop(1).forEach() { ops ->
+                    tx.asArray().drop(1).forEach { ops ->
                         ops.asArray().forEach { op ->
                             val name = op[0].asString()
                             val parameters = op[1].asArray().toList()
