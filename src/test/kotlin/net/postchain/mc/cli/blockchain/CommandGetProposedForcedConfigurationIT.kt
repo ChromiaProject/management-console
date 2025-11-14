@@ -24,6 +24,7 @@ class CommandGetProposedForcedConfigurationIT {
                         currentConfiguration = GtvEncoder.encodeGtv(gtv(mapOf("foo" to gtv(17)))).wrap(),
                         proposedHeight = 23,
                         proposedConfiguration = GtvEncoder.encodeGtv(gtv(mapOf("foo" to gtv(23)))).wrap(),
+                        resumeChain = false
                 )))
                 .testCommand(
                         CommandGetProposedForcedConfiguration(),
