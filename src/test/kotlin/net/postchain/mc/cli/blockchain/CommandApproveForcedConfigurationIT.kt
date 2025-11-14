@@ -26,6 +26,7 @@ class CommandApproveForcedConfigurationIT {
                         currentConfiguration = GtvEncoder.encodeGtv(gtv(mapOf("foo" to gtv(17)))).wrap(),
                         proposedHeight = 567,
                         proposedConfiguration = GtvEncoder.encodeGtv(gtv(mapOf("foo" to gtv(23)))).wrap(),
+                        resumeChain = false
                 )))
                 .withECModel { it.height = 567 }
                 .testCommand(
