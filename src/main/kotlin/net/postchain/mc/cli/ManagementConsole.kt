@@ -6,21 +6,22 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.options.versionOption
 import net.postchain.mc.cli.anchoring.clusterAnchoringCommands
+import net.postchain.mc.cli.base.VersionChecker.checkAndWarnIfOutdated
 import net.postchain.mc.cli.blockchain.blockchainCommands
 import net.postchain.mc.cli.cluster.clusterCommands
 import net.postchain.mc.cli.config.CommandConfig
 import net.postchain.mc.cli.container.containerCommands
 import net.postchain.mc.cli.economy.economyCommands
 import net.postchain.mc.cli.image.subnodeImageCommands
+import net.postchain.mc.cli.jar_extension.subnodeJarExtensionCommands
 import net.postchain.mc.cli.keys.CommandKeygen
 import net.postchain.mc.cli.lease.leaseCommands
 import net.postchain.mc.cli.node.nodeCommands
 import net.postchain.mc.cli.proposal.proposalCommands
 import net.postchain.mc.cli.provider.providerCommands
+import net.postchain.mc.cli.transaction.transactionCommands
 import net.postchain.mc.cli.votingupdates.voterSetCommands
 import net.postchain.mc.network.networkCommands
-import net.postchain.mc.cli.base.VersionChecker.checkAndWarnIfOutdated
-import net.postchain.mc.cli.jar_extension.subnodeJarExtensionCommands
 
 open class ManagementConsole : CliLauncher(name = "pmc") {
 
@@ -54,7 +55,8 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
                 economyCommands(),
                 subnodeImageCommands(),
                 leaseCommands(),
-                subnodeJarExtensionCommands()
+                subnodeJarExtensionCommands(),
+                transactionCommands(),
         )
     }
 

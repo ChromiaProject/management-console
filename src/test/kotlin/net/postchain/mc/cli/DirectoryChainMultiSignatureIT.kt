@@ -51,6 +51,25 @@ class DirectoryChainMultiSignatureIT {
     }
 
     @Test
+    fun `save always`(@TempDir dir: Path) {
+        val cityConfig = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
+        ManagedRestTestApi(dir)
+                .addDcEmptyListQueries("get_compressed_configuration_parts")
+                .withDCQuery("find_blockchain_rid", gtv(DEFAULT_DAPP_RID))
+                .testCommand(
+                        CommandProposeBlockchain(),
+                        "-c", "container01",
+                        "-n", "name01",
+                        "--blockchain-config", cityConfig.absolutePath.toString(),
+                        "--save-tx",
+                        "--target", dir.absolutePathString(),
+                ) { result, api ->
+                    assertSavedTransaction(result, dir, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf())
+                    assertThat(api.getDcModel().capturedOps).isEmpty()
+                }
+    }
+
+    @Test
     fun `save transaction to file with signer options`(@TempDir dir: Path) {
         val cityConfig = writeResourceFileToTempDir(dir, "/simple_dapp_config.xml")
         ManagedRestTestApi(dir)
