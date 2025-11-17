@@ -66,6 +66,9 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
         return mapOf(
                 "init" to listOf("network", "initialize"),
                 "initialize" to listOf("network", "initialize"),
+
+                "tx" to listOf("transaction"),
+
                 "blockchains" to listOf("blockchain", "list"),
                 "bcs" to listOf("blockchain", "list"),
                 "votersets" to listOf("voterset", "list"),
@@ -76,6 +79,7 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
                 "nodes" to listOf("node", "list"),
                 "subnode-images" to listOf("subnode-image", "list"),
                 "leases" to listOf("lease", "list"),
+                "subnode-jar-extensions" to listOf("subnode-jar-extension", "list"),
         )
     }
 }
