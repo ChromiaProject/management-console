@@ -19,24 +19,19 @@ class CommandChangeClusterTag : ECBaseCommand(
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
         when {
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .changeClusterTagOperation(clusterName, tagName)
-                        .postAwaitConfirmation(txListener())
-                        .printResult(
-                                "Proposal created for changing tag of cluster $clusterName to $tagName",
-                                "Failed to change tag of cluster"
-                        )
             }
 
             else -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .changeClusterTagOperation(clientProviderPubkey, clusterName, tagName)
-                        .postAwaitConfirmation(txListener())
-                        .printResult(
-                                "Proposal created for changing tag of cluster $clusterName to $tagName",
-                                "Failed to change tag of cluster"
-                        )
             }
         }
+                .postOrSave()
+                .printResult(
+                        "Proposal created for changing tag of cluster $clusterName to $tagName",
+                        "Failed to change tag of cluster"
+                )
     }
 }

@@ -45,11 +45,11 @@ class CommandVote : ECBaseCommand(
 
         when {
             ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> {
-                economyChainClient.transactionBuilder().apply {
+                transactionBuilder().apply {
                     proposalIds.forEach { proposalId ->
                         makeVoteOperationECV20(clientProviderPubkey, RowId(proposalId), vote)
                     }
-                }.postAwaitConfirmation(txListener())
+                }.postOrSave()
                         .printResult(
                                 if (proposalIds.size == 1) "Vote added successfully"
                                 else "Vote added successfully for ${proposalIds.size} proposals",
@@ -57,11 +57,11 @@ class CommandVote : ECBaseCommand(
                         )
             }
             ecVersion.version < ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION -> {
-                economyChainClient.transactionBuilder().apply {
+                transactionBuilder().apply {
                     proposalIds.forEach { proposalId ->
                         makeCommonVoteOperation(PubKey(clientProviderPubkey), RowId(proposalId), vote)
                     }
-                }.postAwaitConfirmation(txListener())
+                }.postOrSave()
                         .printResult(
                                 if (proposalIds.size == 1) "Vote added successfully"
                                 else "Vote added successfully for ${proposalIds.size} proposals",
@@ -69,11 +69,11 @@ class CommandVote : ECBaseCommand(
                         )
             }
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                economyChainClient.transactionBuilder().apply {
+                transactionBuilder().apply {
                     proposalIds.forEach { proposalId ->
                         makeCommonVoteV65Operation(RowId(proposalId), vote)
                     }
-                }.postAwaitConfirmation(txListener())
+                }.postOrSave()
                         .printResult(
                                 if (proposalIds.size == 1) "Vote added successfully"
                                 else "Vote added successfully for ${proposalIds.size} proposals",
@@ -81,11 +81,11 @@ class CommandVote : ECBaseCommand(
                         )
             }
             else -> {
-                economyChainClient.transactionBuilder().apply {
+                transactionBuilder().apply {
                     proposalIds.forEach { proposalId ->
                         makeCommonVoteOperation(clientProviderPubkey, RowId(proposalId), vote)
                     }
-                }.postAwaitConfirmation(txListener())
+                }.postOrSave()
                         .printResult(
                                 if (proposalIds.size == 1) "Vote added successfully"
                                 else "Vote added successfully for ${proposalIds.size} proposals",

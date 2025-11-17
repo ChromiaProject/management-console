@@ -45,15 +45,15 @@ class CommandUpdatePriceOracleRates : ECBaseCommand(
 
         when {
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .proposePriceOracleRateOperation(tokenRates)
             }
             else -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .proposePriceOracleRateOperation(clientProviderPubkey, tokenRates)
             }
         }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Proposal for updating price oracle rates is created and awaits approval.",
                         "Failed to create price oracle rate proposal"

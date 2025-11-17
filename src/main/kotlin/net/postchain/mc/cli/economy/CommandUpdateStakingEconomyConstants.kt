@@ -48,7 +48,7 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
 
         when {
             ecVersion.version < ECONOMY_CHAIN_EC_CONSTANTS_AS_PROPOSALS_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .updateStakingRequirementsEconomyConstantsOperationECV28(
                                 stakingRequirementsEnabled,
                                 stakingRequirementsStopPayoutDays,
@@ -59,7 +59,7 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                         )
             }
             ecVersion.version < ECONOMY_CHAIN_SCHEDULED_PROPOSAL_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .proposeStakingRequirementConstantsOperationECV52(
                                 stakingRequirementsEnabled,
                                 stakingRequirementsStopPayoutDays,
@@ -70,7 +70,7 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                         )
             }
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .proposeStakingRequirementConstantsOperation(
                                 stakingRequirementsEnabled,
                                 stakingRequirementsStopPayoutDays,
@@ -82,7 +82,7 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                         )
             }
             else -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .proposeStakingRequirementConstantsOperation(
                                 clientProviderPubkey,
                                 stakingRequirementsEnabled,
@@ -95,7 +95,7 @@ class CommandUpdateStakingEconomyConstants : ECBaseCommand(
                         )
             }
         }
-        .postAwaitConfirmation(txListener())
+        .postOrSave()
         .printResult(
                 "Proposal for updating staking economy constants is created and awaits approval.",
                 "Failed to create staking economy constants update proposal"

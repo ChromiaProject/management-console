@@ -25,36 +25,36 @@ class CommandRevokeProposal : ECBaseCommand(
 
         when {
             ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .revokeProposalOperationECV20(clientProviderPubkey, RowId(idx))
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Proposal revoked successfully",
                                 "Cannot revoke proposal"
                         )
             }
             ecVersion.version < ECONOMY_CHAIN_PROVIDER_MULTI_KEY_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .revokeCommonProposalOperation(PubKey(clientProviderPubkey), RowId(idx))
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Proposal revoked successfully",
                                 "Cannot revoke proposal"
                         )
             }
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .revokeCommonProposalV65Operation(RowId(idx))
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Proposal revoked successfully",
                                 "Cannot revoke proposal"
                         )
             }
             else -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .revokeCommonProposalOperation(clientProviderPubkey, RowId(idx))
-                        .postAwaitConfirmation(txListener())
+                        .postOrSave()
                         .printResult(
                                 "Proposal revoked successfully",
                                 "Cannot revoke proposal"

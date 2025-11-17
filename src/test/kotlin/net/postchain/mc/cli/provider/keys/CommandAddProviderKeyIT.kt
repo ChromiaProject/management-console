@@ -7,6 +7,7 @@ import net.postchain.common.hexStringToByteArray
 import net.postchain.common.toHex
 import net.postchain.mc.cli.test_helpers.ADDITIONAL_PRIVKEY_1
 import net.postchain.mc.cli.test_helpers.ADDITIONAL_PUBKEY_1
+import net.postchain.mc.cli.test_helpers.DEFAULT_BRID_DIRECTORY_CHAIN
 import net.postchain.mc.cli.test_helpers.DEFAULT_PROVIDER01_PUBKEY
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.assertCommandSuccessContains
@@ -52,7 +53,7 @@ class CommandAddProviderKeyIT {
                         "--pubkey", ADDITIONAL_PUBKEY_1,
                         "--target", dir.absolutePathString(),
                 ) { result, _ ->
-                    assertSavedTransaction(result, dir, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_1))
+                    assertSavedTransaction(result, dir, DEFAULT_BRID_DIRECTORY_CHAIN, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_1))
                 }
     }
 }

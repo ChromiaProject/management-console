@@ -52,26 +52,26 @@ class CommandAddCluster : ECBaseCommand(
     private val maxNodes by maxNodes()
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
-        economyChainClient.transactionBuilder().let {
-            when {
-                ecVersion.version >= ECONOMY_CHAIN_MAX_CLUSTER_NODES_VERSION -> {
-                    it.createClusterOperation(clientProviderPubkey, name, governorName, voterSet, clusterUnits, extraStorage, tag,
-                            containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite,
-                            containerUnitStorage, systemContainerUnits, maxNodes)
-                }
+        when {
+            ecVersion.version >= ECONOMY_CHAIN_MAX_CLUSTER_NODES_VERSION -> {
+                transactionBuilder().createClusterOperation(
+                        clientProviderPubkey, name, governorName, voterSet, clusterUnits, extraStorage, tag,
+                        containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite,
+                        containerUnitStorage, systemContainerUnits, maxNodes)
+            }
 
-                ecVersion.version >= ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                    it.createClusterOperationV62(clientProviderPubkey, name, governorName, voterSet, clusterUnits, extraStorage, tag,
-                            containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite,
-                            containerUnitStorage, systemContainerUnits)
-                }
+            ecVersion.version >= ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
+                transactionBuilder().createClusterOperationV62(
+                        clientProviderPubkey, name, governorName, voterSet, clusterUnits, extraStorage, tag,
+                        containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite,
+                        containerUnitStorage, systemContainerUnits)
+            }
 
-                else -> {
-                    it.createClusterOperationV56(name, governorName, voterSet, clusterUnits, extraStorage, tag)
-                }
+            else -> {
+                transactionBuilder().createClusterOperationV56(name, governorName, voterSet, clusterUnits, extraStorage, tag)
             }
         }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Proposal for creating cluster $name is created and awaits approval. You can check economy proposal or $CLUSTER_CREATION_STATUS_COMMAND command to see the status",
                         "Failed to create cluster proposal"

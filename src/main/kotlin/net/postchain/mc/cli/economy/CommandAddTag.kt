@@ -50,21 +50,21 @@ class CommandAddTag : ECBaseCommand(
                     throw CliktError("This version of Economy chain only support price in dollar (no minor/decimal units)")
                 }
 
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .createTagOperationV57(name, scuPrice.toLong(), extraStoragePrice.toLong())
             }
 
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .createTagOperationV57(name, scuPrice.times(UNITS_PER_USD.toBigDecimal()).toLong(), extraStoragePrice.times(UNITS_PER_USD.toBigDecimal()).toLong())
             }
 
             else -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .createTagOperation(clientProviderPubkey, name, scuPrice.times(UNITS_PER_USD.toBigDecimal()).toLong(), extraStoragePrice.times(UNITS_PER_USD.toBigDecimal()).toLong())
             }
         }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Proposal for creating tag $name is created",
                         "Failed to create tag"

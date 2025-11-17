@@ -43,32 +43,32 @@ class CommandUpdateEconomyConstants : ECBaseCommand(
         }
 
         if (ecVersion.version < ECONOMY_CHAIN_SCHEDULED_PROPOSAL_VERSION) {
-            economyChainClient.transactionBuilder()
+            transactionBuilder()
                     .updateEconomyConstantsOperationECV52(minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
                             stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),
                             resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal()
                     )
         } else if (ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION) {
-            economyChainClient.transactionBuilder()
+            transactionBuilder()
                     .updateEconomyConstantsOperation(minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
                             stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),
                             resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal(), scheduleAt
                     )
         } else if (ecVersion.version < ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION) {
-            economyChainClient.transactionBuilder()
+            transactionBuilder()
                     .updateEconomyConstantsOperationECV63(clientProviderPubkey, minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
                             stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),
                             resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal(), scheduleAt
                     )
         } else {
             if (stakingRewardFeeShare != null) throw CliktError("staking reward fee share is deprecated on this network")
-            economyChainClient.transactionBuilder()
+            transactionBuilder()
                     .updateEconomyConstantsOperation(clientProviderPubkey, minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
                             chromiaFoundationFeeShare?.toBigDecimal(), resourcePoolMarginFeeShare?.toBigDecimal(),
                             dappProviderRiskShare?.toBigDecimal(), scheduleAt
                     )
         }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Proposal for updating economy constants is created and awaits approval.",
                         "Failed to create economy constants update proposal"

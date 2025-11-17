@@ -20,7 +20,6 @@ import net.postchain.mc.cli.util.pmcKeyConfigOption
 class CommandSendTransaction : PmcCommand(name = "send", help = "Send a transaction") {
 
     val config by pmcKeyConfigOption()
-    val client get() = config.txClient
 
     val transactionStream by argument(name = "file", help = "transaction file, or - for STDIN")
             .inputStream()
@@ -56,6 +55,11 @@ class CommandSendTransaction : PmcCommand(name = "send", help = "Send a transact
                 throw CliktError("Transaction needs to be signed by $stillMissingSigners before it can be sent")
             }
         }
+
+        val client = if (config.lookupNodes)
+            config.chromiaClient.getSystemChainClient(gtx.gtxBody.blockchainRid, addNop = false)
+        else
+            config.chromiaClient.getSystemChainClientForForwardingReplica(gtx.gtxBody.blockchainRid, addNop = false)
 
         client.postTransactionAwaitConfirmation(gtx, txListener()).printResult(
                 "Transaction sent successfully",
