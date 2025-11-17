@@ -141,7 +141,11 @@ open class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaMode
         ChromiaConfigLoader(logger).loadProperties(configFile)
     }
 
-    val chromiaClient by lazy {
+    val configuredBrid by lazy {
+        if (lookupBrid) null else rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
+    }
+
+    val clientConfig by lazy {
         if (network != null) {
             requireNotNull(model) { "chromia.yml not found" }
             val networkModel = model!!.deployments[network]
@@ -149,22 +153,21 @@ open class PmcClientConfigOption(logger: (String) -> Unit) : OptionalChromiaMode
             rawConfig.setProperty("api.url", networkModel.urls.joinToString(",") { Endpoint.sanitizeUrl(it) })
             networkModel.blockchainRid?.let { rawConfig.setProperty("brid", it.toHex()) }
         }
-        val configuredBrid = if (lookupBrid) null else rawConfig.getEnvOrStringProperty("POSTCHAIN_CLIENT_BLOCKCHAIN_RID", "brid")
         rawConfig.setProperty("brid", configuredBrid ?: BlockchainRid.ZERO_RID.toHex())
 
         if (!rawConfig.containsKey("api.url")) throw CliktError("No api.url specified")
-        val postchainClientConfig = fixClientConfig(PostchainClientConfig.fromConfiguration(rawConfig, defaultClientConfig))
-
-        val chromiaClient = StandardChromiaClient(postchainClientConfig)
-
-        if (configuredBrid == null) {
-            ChromiaConfigWriter.local.setBrid(chromiaClient.directoryChainRid)
-        }
-
-        chromiaClient
+        fixClientConfig(PostchainClientConfig.fromConfiguration(rawConfig, defaultClientConfig))
     }
 
     open fun fixClientConfig(clientConfig: PostchainClientConfig): PostchainClientConfig = clientConfig
+
+    val chromiaClient by lazy {
+        val chromiaClient = StandardChromiaClient(clientConfig)
+        if (configuredBrid == null) {
+            ChromiaConfigWriter.local.setBrid(chromiaClient.directoryChainRid)
+        }
+        chromiaClient
+    }
 
     val client: PostchainReadClient by lazy {
         chromiaClient.getDirectoryChainClientForQueryReplica(addNop = true)

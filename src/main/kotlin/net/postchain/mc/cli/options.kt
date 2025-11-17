@@ -25,6 +25,7 @@ import net.postchain.common.BlockchainRid
 import net.postchain.common.hexStringToByteArray
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.HOST_NAME_LENGTH_MAX
+import java.nio.file.Paths
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -137,3 +138,7 @@ fun ParameterHolder.signersOption(name: String = "Signers, leave out this option
                 .convert { file -> file.readLines().map { PubKey(it.hexStringToByteArray()) }.toSet() },
         name = name,
 ).single()
+
+fun ParameterHolder.outputFolderOption() = option("--target", help = "Path where transaction file should be saved")
+        .file()
+        .default(Paths.get("").toAbsolutePath().toFile())

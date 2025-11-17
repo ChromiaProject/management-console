@@ -15,13 +15,14 @@ import com.github.ajalt.clikt.core.parse
 import com.github.ajalt.clikt.testing.CliktCommandTestResult
 import com.github.ajalt.clikt.testing.test
 import com.github.ajalt.mordant.input.InputEvent
+import net.postchain.common.BlockchainRid
 import net.postchain.common.toHex
 import net.postchain.gtx.Gtx
+import org.opentest4j.AssertionFailedError
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.readText
-
 
 /**
  * Run a command and pass the dynamically created .chromia/config file as parameter.
@@ -74,15 +75,21 @@ fun assertCommandFailureContains(result: CliktCommandTestResult, errorMessage: S
     assertThat(result.statusCode).isGreaterThan(0)
 }
 
-fun assertSavedTransaction(result: CliktCommandTestResult, dir: Path, signatures: List<String>, additionalSigners: List<String>) {
-    assertCommandSuccessContains(result, "Transaction is written as hex to file: ")
-    assertCommandSuccessContains(result, "Requires additional signatures by: $additionalSigners")
-    val savedTransactionData = dir.listDirectoryEntries("transaction_*").single().readText()
+fun assertSavedTransaction(result: CliktCommandTestResult, dir: Path, initialSigners: List<String>, additionalSigners: List<String>) {
+    assertCommandSuccessContains(result, "is written as hex to file: ")
+    if (additionalSigners.isNotEmpty()) {
+        assertCommandSuccessContains(result, "Requires additional signatures by: $additionalSigners")
+    } else {
+        assertCommandSuccessContains(result, "Is fully signed and ready to be sent")
+    }
+    val transactionFiles = dir.listDirectoryEntries("transaction_*")
+    if (transactionFiles.size != 1) throw AssertionFailedError(result.output)
+    val savedTransactionData = transactionFiles.single().readText()
     val savedTransaction = MultiSignatureTxData.decode(savedTransactionData)
     val gtx = Gtx.decode(savedTransaction.transaction)
     assertThat(gtx.gtxBody.blockchainRid).isEqualTo(DEFAULT_BRID_DIRECTORY_CHAIN)
-    assertThat(gtx.gtxBody.signers.map { it.toHex() }).containsExactlyInAnyOrder(*(signatures + additionalSigners).toTypedArray())
-    assertThat(gtx.signatures.filterNot { it.isEmpty() }).hasSize(signatures.size)
+    assertThat(gtx.gtxBody.signers.map { it.toHex() }).containsExactlyInAnyOrder(*(initialSigners + additionalSigners).toTypedArray())
+    assertThat(gtx.signatures.filterNot { it.isEmpty() }).hasSize(initialSigners.size)
 }
 
 fun normalizeCommandOutput(output: String): String {
@@ -109,6 +116,22 @@ fun writeResourceFileToTempDir(dir: Path, resource: String): File {
                 input.copyTo(output)
             }
         }
+    }
+    return file
+}
+
+fun writeChromiaConfig(dir: Path, apiUrl: String, providerPubKey: String?, keyId: String?, pubKey: String, privKey: String, dcBcRid: BlockchainRid): File {
+    val file = File(dir.toFile(), ".chromia/config")
+    with(file) {
+        parentFile.mkdirs()
+        writeText("""
+                    api.url = $apiUrl
+                    ${if (providerPubKey != null) "provider.pubkey=$providerPubKey" else ""}
+                    ${if (keyId != null) "key.id=$keyId" else ""}
+                    pubkey=$pubKey
+                    privkey=$privKey
+                    brid=$dcBcRid
+                    """.trimIndent())
     }
     return file
 }

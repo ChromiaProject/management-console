@@ -9,7 +9,6 @@ import net.postchain.common.BlockchainRid
 import net.postchain.common.exception.ProgrammerMistake
 import net.postchain.gtv.Gtv
 import net.postchain.gtx.GtxQuery
-import java.io.File
 import java.nio.file.Path
 
 /**
@@ -61,17 +60,7 @@ open class ManagedRestTestApi(
             if (dcModel is D1TestModel) {
                 dcModel.setBlockchainApiUrlsByQuery(apiUrl)
             }
-            with(File(dir.toFile(), ".chromia/config")) {
-                parentFile.mkdirs()
-                writeText("""
-                    api.url = $apiUrl
-                    ${if (providerPubKey != null) "provider.pubkey=$providerPubKey" else ""}
-                    ${if (keyId != null) "key.id=$keyId" else ""}
-                    pubkey=$pubKey
-                    privkey=$privKey
-                    brid=$dcBcRid
-                    """.trimIndent())
-            }
+            writeChromiaConfig(dir, apiUrl, providerPubKey, keyId, pubKey, privKey, dcBcRid)
 
             if (::afterServerBeforeTestStep.isInitialized) {
                 afterServerBeforeTestStep(this)
