@@ -6,22 +6,25 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.client.core.PostchainClient
+import net.postchain.crypto.PubKey
 import net.postchain.economy.economy_chain.updateProviderStakingRewardsShareOperation
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.cli.util.pubkeyOption
+import net.postchain.mc.cli.util.pubkeyValidator
 import java.math.BigDecimal
 
 class CommandUpdateProviderStakingRewardShare : ECBaseCommand(
         name = "update-provider-staking-reward-share",
         help = """
             Update staking reward share for a node provider.
-            
-            Transaction must be signed by provider account key.
         """.trimIndent(),
         requiresECVersion = 61,
 ) {
-    private val providerPubkey by pubkeyOption("Provider public key")
+    private val providerPubkey by option("-pk", "--pubkey", help = "Provider public key (deprecated)",
+            metavar = "PUBKEY", envvar = "POSTCHAIN_PUBKEY", hidden = true)
+            .convert { PubKey(it) }
+            .validate(pubkeyValidator())
+
     private val stakingRewardShare by option("--staking-reward-share", help = "Staking reward share (0-100 %)")
             .convert { BigDecimal(it) / BigDecimal(100) }
             .required()
@@ -31,10 +34,10 @@ class CommandUpdateProviderStakingRewardShare : ECBaseCommand(
             }
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
-        economyChainClient
-                .transactionBuilder()
-                .updateProviderStakingRewardsShareOperation(providerPubkey.data, stakingRewardShare)
-                .postAwaitConfirmation(txListener())
+        transactionBuilder()
+                .updateProviderStakingRewardsShareOperation(providerPubkey?.data
+                        ?: clientProviderPubkey, stakingRewardShare)
+                .postOrSave()
                 .printResult(
                         "Staking reward share scheduled to be updated",
                         "Failed to update staking reward share"
