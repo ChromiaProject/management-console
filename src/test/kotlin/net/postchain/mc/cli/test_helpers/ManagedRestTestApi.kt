@@ -24,6 +24,8 @@ open class ManagedRestTestApi(
         val privKey: String = DEFAULT_PROVIDER_PRIVKEY,
         val providerPubKey: String? = null,
         val keyId: String? = null,
+        val extraPubKey: String? = null,
+        val extraPrivKey: String? = null,
 ) {
 
     companion object {
@@ -53,14 +55,17 @@ open class ManagedRestTestApi(
      * Starts server, attach models, creates client config and call runTests. Shutdown everything after runTests.
      */
     open fun test(runTests: (ManagedRestTestApi) -> Unit) {
-        RestApi(0, "", gracefulShutdown = false).use {
-            apiUrl = "http://localhost:${it.server.port()}"
-            models.forEach { (rid, model) -> it.attachModel(rid, model) }
+        RestApi(0, "", gracefulShutdown = false).use { api ->
+            apiUrl = "http://localhost:${api.server.port()}"
+            models.forEach { (rid, model) -> api.attachModel(rid, model) }
             val dcModel = models[dcBcRid]
             if (dcModel is D1TestModel) {
                 dcModel.setBlockchainApiUrlsByQuery(apiUrl)
             }
-            writeChromiaConfig(dir, apiUrl, providerPubKey, keyId, pubKey, privKey, dcBcRid)
+            writeChromiaConfig(dir, apiUrl, providerPubKey, keyId,
+                    "$pubKey${extraPubKey?.let { ",$it" } ?: ""}",
+                    "$privKey${extraPrivKey?.let { ",$it" } ?: ""}",
+                    dcBcRid)
 
             if (::afterServerBeforeTestStep.isInitialized) {
                 afterServerBeforeTestStep(this)

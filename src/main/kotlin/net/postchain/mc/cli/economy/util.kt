@@ -4,6 +4,8 @@ import com.github.ajalt.clikt.core.CliktError
 import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.BlockchainRid
+import net.postchain.economy.lib.ft4.core.accounts.AuthType
+import net.postchain.gtv.Gtv
 import net.postchain.mc.cli.base.DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION
 import net.postchain.mc.cli.util.PmcClientConfigOption
@@ -47,3 +49,11 @@ fun formatCurrency(value: Long?, units: Int, ecVersion: Long): String {
 
 fun doEcSupportMinorUnits(ecVersion: Long) =
         ecVersion >= ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION
+
+fun extractSignersFromAuthDescriptor(authType: AuthType, args: Gtv): List<ByteArray> = when (authType) {
+    AuthType.S ->
+        listOf(args.asArray()[1].asByteArray())
+
+    AuthType.M ->
+        args.asArray()[2].asArray().map { it.asByteArray() }
+}
