@@ -40,10 +40,23 @@ class CommandListProposals : DCBaseCommand(
     override fun runDC() {
         when {
             dcVersion >= 7 -> {
-                val proposals = if (all) {
-                    client.getProposalsRange(from, to, pending).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
-                } else {
-                    client.getRelevantProposals(from, to, pending, clientProviderPubkey).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
+                val proposals = try {
+                    if (all) {
+                        client.getProposalsRange(from, to, pending).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
+                    } else {
+                        client.getRelevantProposals(from, to, pending, clientProviderPubkey).map { ProposalInfo(it.rowid, it.proposalType, it.state) }
+                    }
+                } catch (e: IllegalArgumentException) {
+                    if (e.message?.contains("invalid value") == true && e.message?.contains("for enum class") == true) {
+                        val unknownType = extractUnknownEnumValue(e.message)
+                        echo("ERROR: The directory chain is using a newer proposal type that is not supported by this version of the management console.", err = true)
+                        if (unknownType != null) {
+                            echo("Unknown proposal type: $unknownType", err = true)
+                        }
+                        echo("Please upgrade to the latest version of the management console to view all proposals.", err = true)
+                        return
+                    }
+                    throw e
                 }
 
                 val votes = client.getProviderVotes(from, to, clientProviderPubkey)
@@ -97,4 +110,10 @@ class CommandListProposals : DCBaseCommand(
     }
 
     private data class ProposalInfo(val rowId: RowId, val proposalType: ProposalType, val state: ProposalState)
+
+    private fun extractUnknownEnumValue(message: String?): String? {
+        if (message == null) return null
+        val regex = """invalid value (\S+) for enum class""".toRegex()
+        return regex.find(message)?.groupValues?.getOrNull(1)
+    }
 }
