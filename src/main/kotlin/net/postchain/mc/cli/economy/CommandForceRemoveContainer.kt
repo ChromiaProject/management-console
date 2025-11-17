@@ -22,24 +22,19 @@ class CommandForceRemoveContainer : ECBaseCommand(
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
         when {
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .forceRemoveContainerOperation(name)
-                        .postAwaitConfirmation(txListener())
-                        .printResult(
-                                "Container $name will be removed",
-                                "Failed to remove container"
-                        )
             }
 
             else -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .forceRemoveContainerOperation(clientProviderPubkey, name)
-                        .postAwaitConfirmation(txListener())
-                        .printResult(
-                                "Container $name will be removed",
-                                "Failed to remove container"
-                        )
             }
         }
+                .postOrSave()
+                .printResult(
+                        "Container $name will be removed",
+                        "Failed to remove container"
+                )
     }
 }

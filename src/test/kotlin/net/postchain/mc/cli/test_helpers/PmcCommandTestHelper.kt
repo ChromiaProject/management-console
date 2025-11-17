@@ -75,7 +75,7 @@ fun assertCommandFailureContains(result: CliktCommandTestResult, errorMessage: S
     assertThat(result.statusCode).isGreaterThan(0)
 }
 
-fun assertSavedTransaction(result: CliktCommandTestResult, dir: Path, initialSigners: List<String>, additionalSigners: List<String>) {
+fun assertSavedTransaction(result: CliktCommandTestResult, dir: Path, blockchainRid: BlockchainRid, initialSigners: List<String>, additionalSigners: List<String>) {
     assertCommandSuccessContains(result, "is written as hex to file: ")
     if (additionalSigners.isNotEmpty()) {
         assertCommandSuccessContains(result, "Requires additional signatures by: $additionalSigners")
@@ -87,7 +87,7 @@ fun assertSavedTransaction(result: CliktCommandTestResult, dir: Path, initialSig
     val savedTransactionData = transactionFiles.single().readText()
     val savedTransaction = MultiSignatureTxData.decode(savedTransactionData)
     val gtx = Gtx.decode(savedTransaction.transaction)
-    assertThat(gtx.gtxBody.blockchainRid).isEqualTo(DEFAULT_BRID_DIRECTORY_CHAIN)
+    assertThat(gtx.gtxBody.blockchainRid).isEqualTo(blockchainRid)
     assertThat(gtx.gtxBody.signers.map { it.toHex() }).containsExactlyInAnyOrder(*(initialSigners + additionalSigners).toTypedArray())
     assertThat(gtx.signatures.filterNot { it.isEmpty() }).hasSize(initialSigners.size)
 }

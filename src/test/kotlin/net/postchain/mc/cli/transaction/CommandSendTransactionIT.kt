@@ -4,7 +4,6 @@ import assertk.assertThat
 import assertk.assertions.isEmpty
 import assertk.assertions.isTrue
 import com.chromia.build.tools.multisignature.MultiSignatureTxData
-import net.postchain.common.BlockchainRid
 import net.postchain.common.hexStringToByteArray
 import net.postchain.common.toHex
 import net.postchain.crypto.KeyPair
@@ -22,6 +21,8 @@ import net.postchain.mc.cli.test_helpers.ADDITIONAL_PRIVKEY_1
 import net.postchain.mc.cli.test_helpers.ADDITIONAL_PRIVKEY_2
 import net.postchain.mc.cli.test_helpers.ADDITIONAL_PUBKEY_1
 import net.postchain.mc.cli.test_helpers.ADDITIONAL_PUBKEY_2
+import net.postchain.mc.cli.test_helpers.DEFAULT_BRID_DIRECTORY_CHAIN
+import net.postchain.mc.cli.test_helpers.DEFAULT_BRID_ECONOMY_CHAIN
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.assertCommandFailureContains
 import net.postchain.mc.cli.test_helpers.assertCommandSuccessContains
@@ -33,8 +34,8 @@ import java.nio.file.Path
 class CommandSendTransactionIT {
 
     @Test
-    fun `send fully signed transaction succeeds`(@TempDir dir: Path) {
-        val blockchainRid = BlockchainRid.buildRepeat(1)
+    fun `send fully signed transaction to directory chain succeeds`(@TempDir dir: Path) {
+        val blockchainRid = DEFAULT_BRID_DIRECTORY_CHAIN
         val gtxBody = GtxBody(blockchainRid, listOf(GtxOp("my_op", gtv(17))), listOf(
                 ADDITIONAL_PUBKEY_1.hexStringToByteArray(),
                 ADDITIONAL_PUBKEY_2.hexStringToByteArray(),
@@ -55,12 +56,40 @@ class CommandSendTransactionIT {
                     assertThat(api.getDcModel().opWasCalled("my_op") {
                         it[0].asInteger() == 17L
                     }).isTrue()
+                    assertThat(api.getEcModel().capturedOps).isEmpty()
+                }
+    }
+
+    @Test
+    fun `send fully signed transaction to economy chain succeeds`(@TempDir dir: Path) {
+        val blockchainRid = DEFAULT_BRID_ECONOMY_CHAIN
+        val gtxBody = GtxBody(blockchainRid, listOf(GtxOp("my_op", gtv(17))), listOf(
+                ADDITIONAL_PUBKEY_1.hexStringToByteArray(),
+                ADDITIONAL_PUBKEY_2.hexStringToByteArray(),
+        ))
+        val cryptoSystem = Secp256K1CryptoSystem()
+        val signBuilder = GtxSignatureBuilder(gtxBody, gtxBody.calculateTxRid(GtvMerkleHashCalculatorV2(::sha256Digest)),
+                cryptoSystem, check = false)
+        signBuilder.sign(cryptoSystem.buildSigMaker(KeyPair(PubKey(ADDITIONAL_PUBKEY_1), PrivKey(ADDITIONAL_PRIVKEY_1))))
+        signBuilder.sign(cryptoSystem.buildSigMaker(KeyPair(PubKey(ADDITIONAL_PUBKEY_2), PrivKey(ADDITIONAL_PRIVKEY_2))))
+        val savedTx = MultiSignatureTxData(signBuilder.buildGtx().encode(), signBuilder.txRid)
+        val savedTxFile = writeToTempDir(dir, "saved.tx", savedTx.encode())
+        ManagedRestTestApi(dir)
+                .testCommand(
+                        CommandSendTransaction(),
+                        savedTxFile.absolutePath.toString(),
+                ) { result, api ->
+                    assertCommandSuccessContains(result, "Transaction sent successfully")
+                    assertThat(api.getEcModel().opWasCalled("my_op") {
+                        it[0].asInteger() == 17L
+                    }).isTrue()
+                    assertThat(api.getDcModel().capturedOps).isEmpty()
                 }
     }
 
     @Test
     fun `send partially signed transaction succeeds if needed signatures are provided`(@TempDir dir: Path) {
-        val blockchainRid = BlockchainRid.buildRepeat(1)
+        val blockchainRid = DEFAULT_BRID_DIRECTORY_CHAIN
         val gtxBody = GtxBody(blockchainRid, listOf(GtxOp("my_op", gtv(17))), listOf(
                 ADDITIONAL_PUBKEY_1.hexStringToByteArray(),
                 ADDITIONAL_PUBKEY_2.hexStringToByteArray(),
@@ -92,7 +121,7 @@ class CommandSendTransactionIT {
 
     @Test
     fun `signature for wrong transaction fails`(@TempDir dir: Path) {
-        val blockchainRid = BlockchainRid.buildRepeat(1)
+        val blockchainRid = DEFAULT_BRID_DIRECTORY_CHAIN
         val gtxBody = GtxBody(blockchainRid, listOf(GtxOp("my_op", gtv(17))), listOf(
                 ADDITIONAL_PUBKEY_1.hexStringToByteArray(),
                 ADDITIONAL_PUBKEY_2.hexStringToByteArray(),
@@ -123,7 +152,7 @@ class CommandSendTransactionIT {
 
     @Test
     fun `send not fully signed transaction fails`(@TempDir dir: Path) {
-        val blockchainRid = BlockchainRid.buildRepeat(1)
+        val blockchainRid = DEFAULT_BRID_DIRECTORY_CHAIN
         val gtxBody = GtxBody(blockchainRid, listOf(GtxOp("my_op", gtv(17))), listOf(
                 ADDITIONAL_PUBKEY_1.hexStringToByteArray(),
                 ADDITIONAL_PUBKEY_2.hexStringToByteArray(),

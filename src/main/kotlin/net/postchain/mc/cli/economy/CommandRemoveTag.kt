@@ -18,25 +18,20 @@ class CommandRemoveTag  : ECBaseCommand(
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
         when {
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .removeTagOperation(name)
-                        .postAwaitConfirmation(txListener())
-                        .printResult(
-                                "Proposal for removing tag $name is created",
-                                "Failed to remove tag"
-                        )
             }
 
             else -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .removeTagOperation(clientProviderPubkey, name)
-                        .postAwaitConfirmation(txListener())
-                        .printResult(
-                                "Proposal for removing tag $name is created",
-                                "Failed to remove tag"
-                        )
             }
 
         }
+                .postOrSave()
+                .printResult(
+                        "Proposal for removing tag $name is created",
+                        "Failed to remove tag"
+                )
     }
 }

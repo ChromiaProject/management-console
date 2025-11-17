@@ -1,5 +1,6 @@
 package net.postchain.mc.cli
 
+import com.chromia.cli.tools.util.signersOption
 import com.chromia.cli.tools.util.timebOptions
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.ProgramResult
@@ -65,7 +66,7 @@ abstract class DCBaseCommand(
 
     abstract fun runDC()
 
-    fun transactionBuilder(additionalRequiredSignatures: List<PubKey> = listOf()): TransactionBuilder {
+    open fun transactionBuilder(additionalRequiredSignatures: List<PubKey> = listOf()): TransactionBuilder {
         val initialSigners = client.config.signers
         remainingSigners = ((extraSigners ?: fetchRemainingSignersFromDC()) + additionalRequiredSignatures)
                 .filterNot { signer -> initialSigners.any { it.pubKey == signer } }

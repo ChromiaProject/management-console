@@ -29,7 +29,7 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
 
         when {
             ecVersion.version < ECONOMY_CHAIN_EC_CONSTANTS_AS_PROPOSALS_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .updateSystemProviderEconomyConstantsOperationECV28(
                                 totalCostSystemProviders?.toLong(),
                                 systemProviderFeeShare?.toBigDecimal(),
@@ -37,7 +37,7 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
                         )
             }
             ecVersion.version < ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .proposeSystemProviderEconomyConstantsOperation(
                                 totalCostSystemProviders?.toLong(),
                                 systemProviderFeeShare?.toBigDecimal(),
@@ -45,7 +45,7 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
                         )
             }
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .proposeSystemProviderEconomyConstantsOperation(
                                 totalCostSystemProviders?.toLong()?.times(UNITS_PER_USD),
                                 systemProviderFeeShare?.toBigDecimal(),
@@ -53,7 +53,7 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
                         )
             }
             else -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .proposeSystemProviderEconomyConstantsOperation(
                                 clientProviderPubkey,
                                 totalCostSystemProviders?.toLong()?.times(UNITS_PER_USD),
@@ -62,7 +62,7 @@ class CommandUpdateSystemProviderEconomyConstants : ECBaseCommand(
                         )
             }
         }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Proposal for updating system provider economy constants is created and awaits approval.",
                         "Failed to create system provider economy constants update proposal"

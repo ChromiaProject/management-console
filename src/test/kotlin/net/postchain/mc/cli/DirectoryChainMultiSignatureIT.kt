@@ -9,6 +9,7 @@ import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.blockchain.CommandProposeBlockchain
 import net.postchain.mc.cli.test_helpers.ADDITIONAL_PUBKEY_1
 import net.postchain.mc.cli.test_helpers.ADDITIONAL_PUBKEY_2
+import net.postchain.mc.cli.test_helpers.DEFAULT_BRID_DIRECTORY_CHAIN
 import net.postchain.mc.cli.test_helpers.DEFAULT_DAPP_RID
 import net.postchain.mc.cli.test_helpers.DEFAULT_PROVIDER01_PUBKEY
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
@@ -64,7 +65,7 @@ class DirectoryChainMultiSignatureIT {
                         "--save-tx",
                         "--target", dir.absolutePathString(),
                 ) { result, api ->
-                    assertSavedTransaction(result, dir, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf())
+                    assertSavedTransaction(result, dir, DEFAULT_BRID_DIRECTORY_CHAIN, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf())
                     assertThat(api.getDcModel().capturedOps).isEmpty()
                 }
     }
@@ -84,7 +85,7 @@ class DirectoryChainMultiSignatureIT {
                         "--signer", ADDITIONAL_PUBKEY_2,
                         "--target", dir.absolutePathString(),
                 ) { result, api ->
-                    assertSavedTransaction(result, dir, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_1, ADDITIONAL_PUBKEY_2))
+                    assertSavedTransaction(result, dir, DEFAULT_BRID_DIRECTORY_CHAIN, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_1, ADDITIONAL_PUBKEY_2))
                     assertThat(api.getDcModel().capturedOps).isEmpty()
                 }
     }
@@ -103,7 +104,7 @@ class DirectoryChainMultiSignatureIT {
                         "--signers", "$ADDITIONAL_PUBKEY_1,$ADDITIONAL_PUBKEY_2",
                         "--target", dir.absolutePathString(),
                 ) { result, api ->
-                    assertSavedTransaction(result, dir, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_1, ADDITIONAL_PUBKEY_2))
+                    assertSavedTransaction(result, dir, DEFAULT_BRID_DIRECTORY_CHAIN, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_1, ADDITIONAL_PUBKEY_2))
                     assertThat(api.getDcModel().capturedOps).isEmpty()
                 }
     }
@@ -123,7 +124,7 @@ class DirectoryChainMultiSignatureIT {
                         "--signers-file", signers.absolutePath.toString(),
                         "--target", dir.absolutePathString(),
                 ) { result, api ->
-                    assertSavedTransaction(result, dir, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_1, ADDITIONAL_PUBKEY_2))
+                    assertSavedTransaction(result, dir, DEFAULT_BRID_DIRECTORY_CHAIN, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_1, ADDITIONAL_PUBKEY_2))
                     assertThat(api.getDcModel().capturedOps).isEmpty()
                 }
     }
@@ -147,7 +148,7 @@ class DirectoryChainMultiSignatureIT {
                         "--blockchain-config", cityConfig.absolutePath.toString(),
                         "--target", dir.absolutePathString(),
                 ) { result, api ->
-                    assertSavedTransaction(result, dir, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_1, ADDITIONAL_PUBKEY_2))
+                    assertSavedTransaction(result, dir, DEFAULT_BRID_DIRECTORY_CHAIN, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_1, ADDITIONAL_PUBKEY_2))
                     assertThat(api.getDcModel().capturedOps).isEmpty()
                 }
     }
@@ -201,7 +202,7 @@ class DirectoryChainMultiSignatureIT {
                         "--blockchain-config", cityConfig.absolutePath.toString(),
                         "--target", dir.absolutePathString(),
                 ) { result, api ->
-                    assertSavedTransaction(result, dir, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_2))
+                    assertSavedTransaction(result, dir, DEFAULT_BRID_DIRECTORY_CHAIN, listOf(DEFAULT_PROVIDER01_PUBKEY), listOf(ADDITIONAL_PUBKEY_2))
                     assertThat(api.getDcModel().capturedOps).isEmpty()
                 }
     }

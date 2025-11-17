@@ -50,16 +50,16 @@ class CommandUpdateTag : ECBaseCommand(
                     throw CliktError("This version of Economy chain only support price in dollar (no minor/decimal units)")
                 }
 
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .updateTagOperationV57(name, scuPrice?.toLong(), extraStoragePrice?.toLong())
             }
 
             ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .updateTagOperationV57(name, scuPrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong(), extraStoragePrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong())
             }
             else -> {
-                economyChainClient.transactionBuilder()
+                transactionBuilder()
                         .updateTagOperation(
                                 clientProviderPubkey, name,
                                 scuPrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong(),
@@ -67,7 +67,7 @@ class CommandUpdateTag : ECBaseCommand(
                         )
             }
         }
-                .postAwaitConfirmation(txListener())
+                .postOrSave()
                 .printResult(
                         "Proposal for updating tag $name is created",
                         "Failed to update tag"
