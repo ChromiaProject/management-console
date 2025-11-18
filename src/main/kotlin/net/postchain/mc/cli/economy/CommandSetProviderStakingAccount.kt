@@ -11,8 +11,10 @@ import net.postchain.client.core.PostchainClient
 import net.postchain.common.toHex
 import net.postchain.crypto.PubKey
 import net.postchain.economy.economy_chain.SET_PROVIDER_STAKING_ACCOUNT_FT4
+import net.postchain.economy.economy_chain.getProviderStakingAccount
 import net.postchain.economy.economy_chain.setProviderStakingAccountFt4Operation
 import net.postchain.economy.economy_chain.setProviderStakingAccountOperation
+import net.postchain.economy.lib.ft4.external.accounts.getAccountMainAuthDescriptor
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.merkle.GtvMerkleHashCalculatorV2
 import net.postchain.gtv.merkleHash
@@ -20,7 +22,7 @@ import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.accountIdOption
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.optionalEvmAddressOption
-import net.postchain.mc.cli.util.pubkeyOption
+import net.postchain.mc.cli.util.ECDSA_COMPRESSED_KEY_SIZE
 import net.postchain.mc.cli.util.pubkeyValidator
 import org.apache.commons.codec.digest.DigestUtils.sha256
 
@@ -33,7 +35,10 @@ class CommandSetProviderStakingAccount : ECBaseCommand(
         """.trimIndent(),
         requiresECVersion = 40,
 ) {
-    private val providerPubkey by pubkeyOption("Provider public key")
+    private val providerPubkey by option("-pk", "--pubkey", help = "Provider public key (deprecated)",
+            metavar = "PUBKEY", envvar = "POSTCHAIN_PUBKEY", hidden = true)
+            .convert { PubKey(it) }
+            .validate(pubkeyValidator())
     private val accountPubkey by option("--account-pk", help = "Public key of new staking account")
             .convert { PubKey(it) }
             .validate(pubkeyValidator())
@@ -47,29 +52,37 @@ class CommandSetProviderStakingAccount : ECBaseCommand(
 
         val hashCalculator = GtvMerkleHashCalculatorV2(::sha256)
 
+        val oldAccountSigners = if (ecVersion.version >= 66) {
+            val accountId = economyChainClient.getProviderStakingAccount(providerPubkey ?: PubKey(clientProviderPubkey))
+            val authDescriptor = economyChainClient.getAccountMainAuthDescriptor(accountId)
+            extractSignersFromAuthDescriptor(authDescriptor.authType, authDescriptor.args)
+                    .filter { it.size >= ECDSA_COMPRESSED_KEY_SIZE } // do not include EVM signers
+                    .map { PubKey(it) }
+        } else listOf()
+
         if (ecVersion.version >= 55 && evmAddress != null) {
             val (accountId, authDescriptorId) =
                     findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption, evmAddress!!, SET_PROVIDER_STAKING_ACCOUNT_FT4, null)
 
-            economyChainClient.transactionBuilder().also {
+            transactionBuilder(additionalRequiredSignatures = oldAccountSigners).also {
                 addEvmAuthOperation(
                         economyChainClient, it,
                         SET_PROVIDER_STAKING_ACCOUNT_FT4,
-                        listOf(gtv(providerPubkey.data)),
+                        listOf(gtv(providerPubkey?.data ?: clientProviderPubkey)),
                         evmAddress!!, accountId, authDescriptorId)
                 echo("Signing done, posting transaction...", err = true)
             }
-                    .setProviderStakingAccountFt4Operation(providerPubkey.data)
-                    .postAwaitConfirmation(txListener())
+                    .setProviderStakingAccountFt4Operation(providerPubkey?.data ?: clientProviderPubkey)
+                    .postOrSave()
                     .printResult(
                             "Staking account set to ${accountId.toHex()}",
                             "Failed to set staking account"
                     )
         } else if (accountPubkey != null) {
-            economyChainClient
-                    .transactionBuilder()
-                    .setProviderStakingAccountOperation(providerPubkey.data, accountPubkey!!.data)
-                    .postAwaitConfirmation(txListener())
+            transactionBuilder(additionalRequiredSignatures = listOf(accountPubkey!!) + oldAccountSigners)
+                    .setProviderStakingAccountOperation(providerPubkey?.data
+                            ?: clientProviderPubkey, accountPubkey!!.data)
+                    .postOrSave()
                     .printResult(
                             "Staking account set to ${gtv(accountPubkey!!.data).merkleHash(hashCalculator).toHex()}",
                             "Failed to set staking account"
