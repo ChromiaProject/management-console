@@ -29,7 +29,7 @@ fun blockchainCommands() = BlockchainCommand().subcommands(
         CommandProposeForcedConfiguration(),
         CommandGetProposedForcedConfiguration(),
         CommandApproveForcedConfiguration(),
-        CommandProposeRemoveForcedConfiguration(),
+        CommandRestoreBlockchainConfiguration(),
         CommandProposePauseBlockchain(),
         CommandProposeResumeBlockchain(),
         CommandProposeDeleteBlockchain(),
