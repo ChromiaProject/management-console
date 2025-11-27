@@ -29,7 +29,6 @@ import net.postchain.chain0.proposal_blockchain.getConfigurationProposalAtV64
 import net.postchain.chain0.proposal_blockchain.getConfigurationProposalV64
 import net.postchain.chain0.proposal_blockchain.getForcedConfigurationProposalV64
 import net.postchain.chain0.proposal_blockchain.getProposedForcedConfiguration
-import net.postchain.chain0.proposal_blockchain.getRemoveForcedConfigurationProposal
 import net.postchain.chain0.proposal_blockchain_import.getBlockchainImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getConfigurationImportProposal
 import net.postchain.chain0.proposal_blockchain_import.getFinishBlockchainImportProposal
@@ -742,13 +741,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
         }
 
         ProposalType.remove_forced_configuration -> {
-            val pc = client.getRemoveForcedConfigurationProposal(proposalId) ?: return ""
-            return pmcTable {
-                body {
-                    row("Blockchain RID", pc.blockchainRid.toHex())
-                    row("Height", pc.height)
-                }
-            }
+            echo("This is a remove forced configuration proposal which is deprecated and no longer supported by PMC")
         }
 
         ProposalType.container_action -> {
