@@ -1,19 +1,18 @@
 package net.postchain.mc.cli.economy
 
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.parameters.options.convert
-import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
-import com.github.ajalt.clikt.parameters.options.validate
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.updateTagOperation
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
+import net.postchain.mc.cli.base.ECONOMY_CHAIN_TAG_COMPUTE_REQUEST_PRICE_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.nameOption
+import net.postchain.mc.cli.util.optionalPriceOption
 import net.postchain.mc.compatibility.ApiCompatECV57.updateTagOperationV57
-import java.math.BigDecimal
+import net.postchain.mc.compatibility.ApiCompatECV66.updateTagOperationECV66
 
 class CommandUpdateTag : ECBaseCommand(
         name = "update-tag",
@@ -21,26 +20,18 @@ class CommandUpdateTag : ECBaseCommand(
 ) {
     private val name by nameOption("Name of the tag").required()
 
-    private val scuPrice by option("-scup", "--scu-price", help = "Updated SCU price in USD per day")
-            .convert { BigDecimal(it) }
-            .validate {
-                if (it <= BigDecimal.ZERO) {
-                    throw CliktError("Tag must have a positive SCU price")
-                }
-            }
-
-    private val extraStoragePrice by option("-esp", "--extra-storage-price", help = "Updated extra storage price in USD per day")
-            .convert { BigDecimal(it) }
-            .validate {
-                if (it <= BigDecimal.ZERO) {
-                    throw CliktError("Tag must have a positive extra storage price")
-                }
-            }
+    private val scuPrice by optionalPriceOption("-scup", "--scu-price", help = "SCU price in USD per day.")
+    private val extraStoragePrice by optionalPriceOption("-esp", "--extra-storage-price", help = "Extra storage price in USD per day.")
+    private val extraComputeRequestPrice by optionalPriceOption("-ecrp", "--extra-compute-request-price", help = "Extra compute request price in USD.")
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
-        if (scuPrice == null && extraStoragePrice == null) {
-            throw CliktError("Must specify either updated SCU price or extra storage price")
+        if (listOfNotNull(scuPrice, extraStoragePrice, extraComputeRequestPrice).isEmpty()) {
+            throw CliktError("Must specify either SCU price, extra storage price or extra compute request price")
+        }
+
+        if (extraComputeRequestPrice != null && ecVersion.version < ECONOMY_CHAIN_TAG_COMPUTE_REQUEST_PRICE_VERSION) {
+            throw CliktError("This version of Economy chain does not support extra compute request price on tags")
         }
 
         when {
@@ -58,12 +49,23 @@ class CommandUpdateTag : ECBaseCommand(
                 transactionBuilder()
                         .updateTagOperationV57(name, scuPrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong(), extraStoragePrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong())
             }
+
+            ecVersion.version < ECONOMY_CHAIN_TAG_COMPUTE_REQUEST_PRICE_VERSION -> {
+                transactionBuilder()
+                        .updateTagOperationECV66(
+                                clientProviderPubkey, name,
+                                scuPrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong(),
+                                extraStoragePrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong(),
+                        )
+            }
+
             else -> {
                 transactionBuilder()
                         .updateTagOperation(
                                 clientProviderPubkey, name,
                                 scuPrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong(),
                                 extraStoragePrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong(),
+                                extraComputeRequestPrice?.times(UNITS_PER_USD.toBigDecimal())?.toLong(),
                         )
             }
         }
