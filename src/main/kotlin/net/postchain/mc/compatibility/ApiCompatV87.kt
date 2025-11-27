@@ -6,7 +6,6 @@ import net.postchain.chain0.common.operations.REVOKE_PROVIDER_KEY
 import net.postchain.chain0.common.operations.SET_PROVIDER_KEY_THRESHOLD
 import net.postchain.chain0.direct_cluster.CREATE_CLUSTER_FROM_WITH_CLUSTER_DATA
 import net.postchain.chain0.direct_cluster.CREATE_CLUSTER_WITH_CLUSTER_DATA
-import net.postchain.chain0.proposal_blockchain.PROPOSE_REMOVE_FORCED_CONFIGURATION
 import net.postchain.chain0.provider_auth.model.ProviderKeyRole
 import net.postchain.client.transaction.TransactionBuilder
 import net.postchain.common.BlockchainRid
@@ -47,14 +46,6 @@ object ApiCompatV87 {
                     gtv(governorVoterSet),
                     gtv(providerVoterSet),
                     GtvObjectMapper.toGtvArray(clusterCreationData))
-
-    @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "proposal_blockchain:propose_remove_forced_configuration")
-    fun TransactionBuilder.proposeRemoveForcedConfigurationOperationV87(blockchainRid: BlockchainRid,
-                                                                        height: Long,
-                                                                        description: String) =
-            addOperation(PROPOSE_REMOVE_FORCED_CONFIGURATION, gtv(blockchainRid),
-                    gtv(height),
-                    gtv(description))
 
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "blockchain_auth:add_provider_blockchain_auth")
     fun TransactionBuilder.addProviderBlockchainAuthOperationV87(blockchainRid: BlockchainRid) =
