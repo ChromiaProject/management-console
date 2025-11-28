@@ -1,5 +1,7 @@
 package net.postchain.mc.cli.blockchain
 
+import assertk.assertThat
+import assertk.assertions.isEqualTo
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import net.postchain.common.BlockchainRid
@@ -20,7 +22,7 @@ class CommandGetBlockchainInfoIT {
     @Test
     fun basics(@TempDir dir: Path) {
         ManagedRestTestApi(dir, dcVersion = 63)
-                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(configDelay = 100000))
+                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(configDelay = 100000, name = "bc01"))
                 .withDCQuery("get_container_data", buildGetContainerDataResponse())
                 .withDCQuery("get_blockchain_replicas", buildGetBlockchainReplicasResponse())
                 .withCACQuery("get_last_anchored_block", buildGetLastAnchoredBlockResponse(112230))
@@ -34,6 +36,7 @@ class CommandGetBlockchainInfoIT {
                 .testCommand(CommandGetBlockchainInfo(),
                         "-brid", DEFAULT_BRID_DIRECTORY_CHAIN.toHex(),
                 ) { result, _ ->
+                    assertThat(result.statusCode).isEqualTo(0)
                     Gson().fromJson(result.stdout, JsonElement::class.java)
 
                     assertLineValue(result.stdout, "Name", "bc01")
@@ -56,7 +59,7 @@ class CommandGetBlockchainInfoIT {
     @Test
     fun moving(@TempDir dir: Path) {
         ManagedRestTestApi(dir, dcVersion = 33)
-                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(isMoving = true))
+                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(isMoving = true, name = "bc01"))
                 .withDCQuery("get_container_data", buildGetContainerDataResponse())
                 .withDCQuery("get_blockchain_replicas", buildGetBlockchainReplicasResponse())
                 .withDCQuery("get_moving_blockchain_info", buildGetMovingBlockchainInfoResponse())
@@ -71,6 +74,7 @@ class CommandGetBlockchainInfoIT {
                 .testCommand(CommandGetBlockchainInfo(),
                         "-brid", DEFAULT_BRID_DIRECTORY_CHAIN.toHex(),
                 ) { result, _ ->
+                    assertThat(result.statusCode).isEqualTo(0)
                     Gson().fromJson(result.stdout, JsonElement::class.java)
 
                     assertLineValue(result.stdout, "Source_container", "container01")
@@ -82,7 +86,7 @@ class CommandGetBlockchainInfoIT {
     @Test
     fun `foreign importing`(@TempDir dir: Path) {
         ManagedRestTestApi(dir, dcVersion = 33)
-                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(isForeignImporting = true))
+                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(isForeignImporting = true, name = "bc01"))
                 .withDCQuery("get_container_data", buildGetContainerDataResponse())
                 .withDCQuery("get_blockchain_replicas", buildGetBlockchainReplicasResponse())
                 .withDCQuery("get_importing_foreign_blockchain_info", buildGetImportingForeignBlockchainInfoResponse())
@@ -97,6 +101,7 @@ class CommandGetBlockchainInfoIT {
                 .testCommand(CommandGetBlockchainInfo(),
                         "-brid", DEFAULT_BRID_DIRECTORY_CHAIN.toHex(),
                 ) { result, _ ->
+                    assertThat(result.statusCode).isEqualTo(0)
                     Gson().fromJson(result.stdout, JsonElement::class.java)
 
                     assertLineValue(result.stdout, "Node_pubkey", DEFAULT_NODE01_PUBKEY.toHex())
@@ -111,7 +116,7 @@ class CommandGetBlockchainInfoIT {
     @Test
     fun unarchiving(@TempDir dir: Path) {
         ManagedRestTestApi(dir, dcVersion = 33)
-                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(isUnarchiving = true))
+                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(isUnarchiving = true, name = "bc01"))
                 .withDCQuery("get_container_data", buildGetContainerDataResponse())
                 .withDCQuery("get_blockchain_replicas", buildGetBlockchainReplicasResponse())
                 .withDCQuery("get_unarchiving_blockchain_info", buildGetUnarchivingBlockchainInfo())
@@ -126,11 +131,37 @@ class CommandGetBlockchainInfoIT {
                 .testCommand(CommandGetBlockchainInfo(),
                         "-brid", DEFAULT_BRID_DIRECTORY_CHAIN.toHex(),
                 ) { result, _ ->
+                    assertThat(result.statusCode).isEqualTo(0)
                     Gson().fromJson(result.stdout, JsonElement::class.java)
 
                     assertLineValue(result.stdout, "Source_container", "container01")
                     assertLineValue(result.stdout, "Destination_container", "container02")
                     assertLineValue(result.stdout, "Final_height", "15000")
+                }
+    }
+
+    @Test
+    fun `by name`(@TempDir dir: Path) {
+        ManagedRestTestApi(dir, dcVersion = 63)
+                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(configDelay = 100000, rid = DEFAULT_BRID_DIRECTORY_CHAIN, name = "directory_chain"))
+                .withDCQuery("get_container_data", buildGetContainerDataResponse())
+                .withDCQuery("get_blockchain_replicas", buildGetBlockchainReplicasResponse())
+                .withCACQuery("get_last_anchored_block", buildGetLastAnchoredBlockResponse(112230))
+                .afterServerBeforeTest {
+                    it.withDCQuery("cm_get_cluster_info", buildCmGetClusterInfoResponse(it.apiUrl, it.cacBcRid))
+                    it.withDCQuery("get_node_data", buildGetNodeDataResponse(it.apiUrl))
+                }
+                .withDCModel {
+                    it.height = 112233
+                }
+                .testCommand(CommandGetBlockchainInfo(),
+                        "-chain", "directory_chain",
+                ) { result, _ ->
+                    assertThat(result.statusCode).isEqualTo(0)
+                    Gson().fromJson(result.stdout, JsonElement::class.java)
+
+                    assertLineValue(result.stdout, "Name", "directory_chain")
+                    assertLineValue(result.stdout, "RID", DEFAULT_BRID_DIRECTORY_CHAIN.toHex())
                 }
     }
 }

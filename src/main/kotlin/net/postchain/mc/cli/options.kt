@@ -1,6 +1,7 @@
 package net.postchain.mc.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.ParameterHolder
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
@@ -18,6 +19,11 @@ import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.mordant.terminal.ConversionResult
 import com.github.ajalt.mordant.terminal.prompt
+import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
+import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
+import net.postchain.chain0.token_chain_in_directory_chain.getTokenChainRid
+import net.postchain.client.config.PostchainClientConfig
+import net.postchain.client.core.PostchainReadClient
 import net.postchain.common.BlockchainRid
 import net.postchain.common.hexStringToByteArray
 import net.postchain.mc.cli.base.HOST_NAME_LENGTH_MAX
@@ -33,7 +39,7 @@ fun CliktCommand.includeInactiveOption(helpMessage: String) = option(
 ).flag()
 
 enum class SystemBlockchain {
-    chain0, economy_chain, token_chain, system_anchoring_chain;
+    chain0, economy_chain, token_chain, system_anchoring_chain, directory_chain, system_anchoring;
 }
 
 sealed interface BlockchainOption {
@@ -126,3 +132,23 @@ fun ParameterHolder.accountIdOption(help: String = "Account id") = option("--acc
 fun ParameterHolder.outputFolderOption() = option("--target", help = "Path where transaction file should be saved")
         .file()
         .default(Paths.get("").toAbsolutePath().toFile())
+
+fun resolveBlockchain(dcClientConfig: PostchainClientConfig, dcClient: PostchainReadClient, blockchainOption: BlockchainOption): BlockchainRid = when (blockchainOption) {
+    is BlockchainOption.Name -> resolveSystemBlockchain(dcClientConfig, dcClient, blockchainOption.name)
+    is BlockchainOption.Rid -> blockchainOption.rid
+}
+
+fun resolveSystemBlockchain(dcClientConfig: PostchainClientConfig, dcClient: PostchainReadClient, systemBlockchain: SystemBlockchain): BlockchainRid = when (systemBlockchain) {
+    SystemBlockchain.chain0, SystemBlockchain.directory_chain -> dcClientConfig.blockchainRid
+    SystemBlockchain.economy_chain -> BlockchainRid(dcClient.getEconomyChainRid()
+            ?: throw CliktError("Economy chain is not installed"))
+
+    SystemBlockchain.token_chain -> {
+        val brid = dcClient.getTokenChainRid()
+        if (brid.isEmpty()) throw CliktError("Token chain is not installed")
+        BlockchainRid(brid)
+    }
+
+    SystemBlockchain.system_anchoring_chain, SystemBlockchain.system_anchoring -> BlockchainRid(dcClient.cmGetSystemAnchoringChain()
+            ?: throw CliktError("System anchoring chain is not installed"))
+}

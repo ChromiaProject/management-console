@@ -9,13 +9,9 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.input.interactiveMultiSelectList
-import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.queries.getProviderByKey
 import net.postchain.chain0.common.queries.getProviderKeysAndThreshold
-import net.postchain.chain0.economy_chain_in_directory_chain.getEconomyChainRid
-import net.postchain.chain0.token_chain_in_directory_chain.getTokenChainRid
 import net.postchain.client.transaction.TransactionBuilder
-import net.postchain.common.BlockchainRid
 import net.postchain.common.toHex
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.base.pubkey
@@ -120,21 +116,6 @@ abstract class DCBaseCommand(
             }
         }
         return null
-    }
-
-    fun resolveBlockchainRid(systemBlockchain: SystemBlockchain): BlockchainRid = when (systemBlockchain) {
-        SystemBlockchain.chain0 -> client.config.blockchainRid
-        SystemBlockchain.economy_chain -> BlockchainRid(client.getEconomyChainRid()
-                ?: throw CliktError("Economy chain is not installed"))
-
-        SystemBlockchain.token_chain -> {
-            val brid = client.getTokenChainRid()
-            if (brid.isEmpty()) throw CliktError("Token chain is not installed")
-            BlockchainRid(brid)
-        }
-
-        SystemBlockchain.system_anchoring_chain -> BlockchainRid(client.cmGetSystemAnchoringChain()
-                ?: throw CliktError("System anchoring chain is not installed"))
     }
 
     // Helper to either post and await confirmation or save to file when extra signers are used

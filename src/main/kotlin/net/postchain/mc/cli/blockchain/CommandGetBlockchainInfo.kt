@@ -6,7 +6,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.mordant.rendering.TextAlign
 import net.postchain.chain0.cm_api.CmPeerInfo
 import net.postchain.chain0.cm_api.cmGetClusterInfo
@@ -27,7 +27,8 @@ import net.postchain.common.wrap
 import net.postchain.crypto.PubKey
 import net.postchain.d1.client.ChromiaClient
 import net.postchain.mc.cli.PmcCommand
-import net.postchain.mc.cli.blockchainRidOption
+import net.postchain.mc.cli.blockchainOption
+import net.postchain.mc.cli.resolveBlockchain
 import net.postchain.mc.cli.util.BlockHeightClient
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
@@ -40,12 +41,13 @@ class CommandGetBlockchainInfo : PmcCommand(
 ) {
     private val config by pmcConfigOption()
 
-    private val blockchainRID by blockchainRidOption().required()
+    private val blockchain by blockchainOption().required()
 
     override fun run() {
         val client = config.client
         val apiVersion = client.apiVersion()
         if (apiVersion >= 17) {
+            val blockchainRID = resolveBlockchain(config.clientConfig, client, blockchain)
             showBlockchainInfo(client, config.chromiaClient, apiVersion, blockchainRID)
         } else {
             throw CliktError("blockchain info requires directory chain version 17, found version $apiVersion")

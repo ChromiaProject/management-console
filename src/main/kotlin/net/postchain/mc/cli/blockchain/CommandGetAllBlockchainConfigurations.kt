@@ -2,10 +2,10 @@ package net.postchain.mc.cli.blockchain
 
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.common.queries.getBlockchainInfo
@@ -17,7 +17,8 @@ import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.GtvNull
 import net.postchain.gtv.gtvml.GtvMLEncoder
 import net.postchain.mc.cli.PmcCommand
-import net.postchain.mc.cli.blockchainRidOption
+import net.postchain.mc.cli.blockchainOption
+import net.postchain.mc.cli.resolveBlockchain
 import net.postchain.mc.cli.util.pmcConfigOption
 import java.io.BufferedOutputStream
 import java.io.File
@@ -30,7 +31,7 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
 ) {
     private val config by pmcConfigOption()
 
-    private val blockchainRID by blockchainRidOption().required()
+    private val blockchain by blockchainOption().required()
 
     private val save by option(help = "Where to save configuration file(s)").file(canBeFile = false, canBeDir = true)
 
@@ -42,6 +43,7 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
     private val toHeight by option("--to-height", help = "Fetch to height").long()
 
     override fun run() {
+        val blockchainRID = resolveBlockchain(config.clientConfig, config.client, blockchain)
         if (config.client.getBlockchainInfo(blockchainRID.data) == null) {
             throw CliktError("Unknown blockchain: $blockchainRID")
         }
