@@ -76,12 +76,6 @@ import net.postchain.mc.cli.proposal.util.proposalIndexOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.votingupdates.formatThreshold
-import net.postchain.mc.compatibility.ApiCompatV22.getClusterLimitsProposalV22
-import net.postchain.mc.compatibility.ApiCompatV22.getContainerLimitsProposalV22
-import net.postchain.mc.compatibility.ApiCompatV22.getContainerProposalV22
-import net.postchain.mc.compatibility.ApiCompatV33.getFinishBlockchainImportProposalV33
-import net.postchain.mc.compatibility.ApiCompatV33.getForeignBlockchainBlocksImportProposalV33
-import net.postchain.mc.compatibility.ApiCompatV6.getProposalV6
 import net.postchain.mc.compatibility.ApiCompatV95.getSubnodeImageProposalV95
 import net.postchain.mc.compatibility.ApiCompatV95.getUpdateSubnodeImageProposalV95
 import net.postchain.mc.gtv.diff.GtvDiffFinder
@@ -105,52 +99,32 @@ class CommandGetProposal : PmcCommand(
 
 fun CliktCommand.showProposalInfo(client: PostchainReadClient, id: RowId?) {
     val apiVersion = client.apiVersion()
-    when {
-        apiVersion >= 7 -> {
-            val proposal = client.getProposal(id) ?: return echo("Proposal $id not found")
-            val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
+    val proposal = client.getProposal(id) ?: return echo("Proposal $id not found")
+    val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
 
-            echo(pmcTable {
-                body {
-                    printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name, proposal.txRid)
-                    row("State", proposal.state.toString())
-                    proposal.applyAt?.let {
-                        row("Apply at", "${Date.from(Instant.ofEpochMilli(it))}")
-                    }
-                    proposal.scheduledAt?.let {
-                        row("Scheduled at", "${Date.from(Instant.ofEpochMilli(it))}")
-                    }
-                    if (apiVersion >= 67 && proposal.voterSetName != null) {
-                        row("Voter set", proposal.voterSetName)
-                    }
-                    printVotingInfo(client, proposal, apiVersion)
-                    row("Description", proposal.description)
-                }
-            })
-
-            if (proposal.state == ProposalState.PENDING) {
-                if (terminal.terminalInfo.outputInteractive) echo("Proposal details")
-                echo(formatPendingProposal(apiVersion, client, proposal.id, proposal.type))
-            } else if (apiVersion >= 26 && proposal.state == ProposalState.APPROVED && proposal.type == ProposalType.configuration) {
-                printApprovedConfigurationStatus(apiVersion, client, proposal)
+    echo(pmcTable {
+        body {
+            printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name, proposal.txRid)
+            row("State", proposal.state.toString())
+            proposal.applyAt?.let {
+                row("Apply at", "${Date.from(Instant.ofEpochMilli(it))}")
             }
+            proposal.scheduledAt?.let {
+                row("Scheduled at", "${Date.from(Instant.ofEpochMilli(it))}")
+            }
+            if (apiVersion >= 67 && proposal.voterSetName != null) {
+                row("Voter set", proposal.voterSetName)
+            }
+            printVotingInfo(client, proposal, apiVersion)
+            row("Description", proposal.description)
         }
+    })
 
-        else -> {
-            val proposal = client.getProposalV6(id) ?: return echo("Proposal $id not found")
-            val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
-
-            echo(pmcTable {
-                body {
-                    printProposalHeader(proposal.id, proposal.type, proposal.timestamp, proposedBy.pubkey, proposedBy.name, null)
-                    printVotingResults(client.getProposalVotingResults(proposal.id))
-                    row("Description", proposal.description)
-                }
-            })
-
-            if (terminal.terminalInfo.outputInteractive) echo("Proposal details")
-            echo(formatPendingProposal(apiVersion, client, proposal.id, proposal.type))
-        }
+    if (proposal.state == ProposalState.PENDING) {
+        if (terminal.terminalInfo.outputInteractive) echo("Proposal details")
+        echo(formatPendingProposal(apiVersion, client, proposal.id, proposal.type))
+    } else if (apiVersion >= 26 && proposal.state == ProposalState.APPROVED && proposal.type == ProposalType.configuration) {
+        printApprovedConfigurationStatus(apiVersion, client, proposal)
     }
 }
 
@@ -344,53 +318,24 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
         }
 
         ProposalType.container_limits -> {
-            when {
-                apiVersion >= 24 -> {
-                    val pcl = client.getContainerLimitsProposal(proposalId) ?: return ""
-                    return pmcTable {
-                        body {
-                            row("Container", pcl.container)
-                            row("Container Units", pcl.containerUnits.toString())
-                            row("Max blockchains", pcl.maxBlockchains.toString())
-                            row("Extra Storage", pcl.extraStorage.toString())
-                        }
-                    }
-                }
-
-                else -> {
-                    val pcl = client.getContainerLimitsProposalV22(proposalId) ?: return ""
-                    return pmcTable {
-                        body {
-                            row("Container", pcl.container)
-                            row("Container Units", pcl.containerUnits.toString())
-                            row("Max blockchains", pcl.maxBlockchains.toString())
-                        }
-                    }
+            val pcl = client.getContainerLimitsProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Container", pcl.container)
+                    row("Container Units", pcl.containerUnits.toString())
+                    row("Max blockchains", pcl.maxBlockchains.toString())
+                    row("Extra Storage", pcl.extraStorage.toString())
                 }
             }
         }
 
         ProposalType.cluster_limits -> {
-            when {
-                apiVersion >= 24 -> {
-                    val pcl = client.getClusterLimitsProposal(proposalId) ?: return ""
-                    return pmcTable {
-                        body {
-                            row("Cluster", pcl.cluster)
-                            row("Cluster Units", pcl.clusterUnits.toString())
-                            row("Extra Storage", pcl.extraStorage.toString())
-                        }
-                    }
-                }
-
-                else -> {
-                    val pcl = client.getClusterLimitsProposalV22(proposalId) ?: return ""
-                    return pmcTable {
-                        body {
-                            row("Cluster", pcl.cluster)
-                            row("Cluster Units", pcl.clusterUnits.toString())
-                        }
-                    }
+            val pcl = client.getClusterLimitsProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Cluster", pcl.cluster)
+                    row("Cluster Units", pcl.clusterUnits.toString())
+                    row("Extra Storage", pcl.extraStorage.toString())
                 }
             }
         }
@@ -450,41 +395,14 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
         }
 
         ProposalType.container -> {
-            when {
-                apiVersion >= 57 -> {
-                    val pc = client.getContainerProposal(proposalId) ?: return ""
-                    return pmcTable {
-                        body {
-                            row("Container", pc.container)
-                            row("Container Units", pc.containerUnits.toString())
-                            row("Max blockchains", pc.maxBlockchains.toString())
-                            row("Extra Storage", pc.extraStorage.toString())
-                            row("Subnode image", pc.subnodeImageName)
-                        }
-                    }
-                }
-
-                apiVersion >= 24 -> {
-                    val pc = client.getContainerProposal(proposalId) ?: return ""
-                    return pmcTable {
-                        body {
-                            row("Container", pc.container)
-                            row("Container Units", pc.containerUnits.toString())
-                            row("Max blockchains", pc.maxBlockchains.toString())
-                            row("Extra Storage", pc.extraStorage.toString())
-                        }
-                    }
-                }
-
-                else -> {
-                    val pc = client.getContainerProposalV22(proposalId) ?: return ""
-                    return pmcTable {
-                        body {
-                            row("Container", pc.container)
-                            row("Container Units", pc.containerUnits.toString())
-                            row("Max blockchains", pc.maxBlockchains.toString())
-                        }
-                    }
+            val pc = client.getContainerProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Container", pc.container)
+                    row("Container Units", pc.containerUnits.toString())
+                    row("Max blockchains", pc.maxBlockchains.toString())
+                    row("Extra Storage", pc.extraStorage.toString())
+                    row("Subnode image", pc.subnodeImageName)
                 }
             }
         }
@@ -540,28 +458,12 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
         }
 
         ProposalType.finish_blockchain_import -> {
-            when {
-                apiVersion >= 33 -> {
-                    val proposal = client.getFinishBlockchainImportProposal(proposalId) ?: return ""
-                    return pmcTable {
-                        body {
-                            row("Blockchain RID", proposal.blockchainRid)
-                            row("Final height", proposal.finalHeight)
-                        }
-                    }
+            val proposal = client.getFinishBlockchainImportProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Final height", proposal.finalHeight)
                 }
-
-                apiVersion >= 19 -> {
-                    val proposal = client.getFinishBlockchainImportProposalV33(proposalId) ?: return ""
-                    return pmcTable {
-                        body {
-                            row("Blockchain RID", proposal.blockchainRid)
-                            row("Finish at height", proposal.finishAtHeight)
-                        }
-                    }
-                }
-
-                else -> return ""
             }
         }
 
@@ -588,28 +490,12 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
         }
 
         ProposalType.foreign_blockchain_blocks_import -> {
-            when {
-                apiVersion >= 33 -> {
-                    val proposal = client.getForeignBlockchainBlocksImportProposal(proposalId) ?: return ""
-                    return pmcTable {
-                        body {
-                            row("Blockchain RID", proposal.blockchainRid)
-                            row("Final height", proposal.finalHeight)
-                        }
-                    }
+            val proposal = client.getForeignBlockchainBlocksImportProposal(proposalId) ?: return ""
+            return pmcTable {
+                body {
+                    row("Blockchain RID", proposal.blockchainRid)
+                    row("Final height", proposal.finalHeight)
                 }
-
-                apiVersion >= 19 -> {
-                    val proposal = client.getForeignBlockchainBlocksImportProposalV33(proposalId) ?: return ""
-                    return pmcTable {
-                        body {
-                            row("Blockchain RID", proposal.blockchainRid)
-                            row("Up to height", proposal.upToHeight)
-                        }
-                    }
-                }
-
-                else -> return ""
             }
         }
 

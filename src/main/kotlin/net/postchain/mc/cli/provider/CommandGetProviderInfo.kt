@@ -6,13 +6,11 @@ import net.postchain.chain0.common.queries.getNodesByProvider
 import net.postchain.chain0.common.queries.getProviderClusters
 import net.postchain.chain0.common.queries.getProviderData
 import net.postchain.chain0.common.queries.getProviderPoints
-import net.postchain.chain0.version.apiVersion
 import net.postchain.client.core.PostchainReadClient
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.util.optionalPubkeyOption
 import net.postchain.mc.cli.util.pmcTable
-import net.postchain.mc.compatibility.ApiCompatV47.getProviderData47
 
 class CommandGetProviderInfo : DCBaseCommand(
         name = "info",
@@ -33,11 +31,7 @@ fun CliktCommand.showProviderInfo(client: PostchainReadClient, pubkey: PubKey) {
     val nodesByProvider = client.getNodesByProvider(pubkey)
     echo(pmcTable {
         body {
-            if (client.apiVersion() < 47L) {
-                fillProviderData47(client, pubkey)
-            } else {
-                fillProviderData(client, pubkey)
-            }
+            fillProviderData(client, pubkey)
             row("Action points:", actionPoints.toString())
             row("Belongs to cluster(s)", providerClusters.joinToString(","))
             nodesByProvider.forEachIndexed { index, node ->
@@ -45,16 +39,6 @@ fun CliktCommand.showProviderInfo(client: PostchainReadClient, pubkey: PubKey) {
             }
         }
     })
-}
-
-internal fun SectionBuilder.fillProviderData47(client: PostchainReadClient, pubkey: PubKey) {
-    val providerData = client.getProviderData47(pubkey)
-    row("Provider:", providerData.name)
-    row("Url:", providerData.url)
-    row("Pubkey:", providerData.pubkey.toHex())
-    row("System:", providerData.system.toString())
-    row("Tier:", providerData.tier.toString())
-    row("Active:", providerData.active.toString())
 }
 
 internal fun SectionBuilder.fillProviderData(client: PostchainReadClient, pubkey: PubKey) {

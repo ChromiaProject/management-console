@@ -5,14 +5,11 @@ import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import net.postchain.chain0.direct_cluster.createClusterFromWithClusterDataOperation
 import net.postchain.chain0.direct_cluster.createClusterWithClusterDataOperation
-import net.postchain.chain0.direct_cluster.createClusterWithUnitsOperation
 import net.postchain.chain0.model.ClusterCreationData
 import net.postchain.common.hexStringToByteArray
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi.Companion.DEFAULT_PROVIDER_PUBKEY
-import net.postchain.mc.compatibility.ApiCompatV28
-import net.postchain.mc.compatibility.ApiCompatV28.createClusterWithClusterQuotaDataOperationV28
 import net.postchain.mc.compatibility.ApiCompatV87
 import net.postchain.mc.compatibility.ApiCompatV87.createClusterFromWithClusterDataOperationV87
 import net.postchain.mc.compatibility.ApiCompatV87.createClusterWithClusterDataOperationV87
@@ -192,53 +189,6 @@ class CommandAddClusterIT {
                                 "vs1",
                                 "vs2",
                                 ApiCompatV87.ClusterCreationDataV87(2, 100)
-                        )
-                    }
-                }
-    }
-
-    @Test
-    fun `add cluster - with pubkeys - api v24-33`(@TempDir dir: Path) {
-        ManagedRestTestApi(dir, dcVersion = 24)
-                .withDCQuery("has_direct_cluster", gtv(true))
-                .testCommand(CommandAddCluster(),
-                        "--name", "cluster1",
-                        "--pubkeys", DEFAULT_PROVIDER_PUBKEY,
-                        "--governor", "vs1",
-                        "--cluster-units", "2",
-                        "--extra-storage", "100",
-                ) { result, api ->
-                    assertThat(result.output).contains("Cluster cluster1 added")
-                    api.getDcModel().assertCalledOps {
-                        it.createClusterWithClusterQuotaDataOperationV28(
-                                DEFAULT_PROVIDER_PUBKEY.hexStringToByteArray(),
-                                "cluster1",
-                                "vs1",
-                                listOf(DEFAULT_PROVIDER_PUBKEY.hexStringToByteArray()),
-                                ApiCompatV28.ClusterQuotaDataV28(2, 100)
-                        )
-                    }
-                }
-    }
-
-    @Test
-    fun `add cluster - with pubkeys - api v3-23`(@TempDir dir: Path) {
-        ManagedRestTestApi(dir, dcVersion = 3)
-                .withDCQuery("has_direct_cluster", gtv(true))
-                .testCommand(CommandAddCluster(),
-                        "--name", "cluster1",
-                        "--pubkeys", DEFAULT_PROVIDER_PUBKEY,
-                        "--governor", "vs1",
-                        "--cluster-units", "2",
-                ) { result, api ->
-                    assertThat(result.output).contains("Cluster cluster1 added")
-                    api.getDcModel().assertCalledOps {
-                        it.createClusterWithUnitsOperation(
-                                DEFAULT_PROVIDER_PUBKEY.hexStringToByteArray(),
-                                "cluster1",
-                                "vs1",
-                                listOf(DEFAULT_PROVIDER_PUBKEY.hexStringToByteArray()),
-                                2
                         )
                     }
                 }

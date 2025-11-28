@@ -3,18 +3,14 @@ package net.postchain.mc.cli.container
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.mordant.input.interactiveSelectList
-import net.postchain.chain0.common.queries.BlockchainInfo
 import net.postchain.chain0.common.queries.getBlockchainInfoList
 import net.postchain.chain0.common.queries.getContainers
-import net.postchain.chain0.model.BlockchainState
-import net.postchain.chain0.version.apiVersion
 import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
-import net.postchain.mc.compatibility.ApiCompatV3.getBlockchainInfoListV3
 
 class CommandListContainers : PmcCommand(
         name = "list",
@@ -28,18 +24,7 @@ class CommandListContainers : PmcCommand(
 
     override fun run() {
         val containers = client.getContainers()
-        val bcs = when {
-            client.apiVersion() <= 3 -> {
-                client.getBlockchainInfoListV3(false).map {
-                    BlockchainInfo(
-                            it.rid, it.name, BlockchainState.RUNNING, it.container, null, it.cluster, null,
-                            null, null, null, null
-                    )
-                }.groupBy { it.container }
-            }
-
-            else -> client.getBlockchainInfoList(false).groupBy { it.container }
-        }
+        val bcs = client.getBlockchainInfoList(false).groupBy { it.container }
         if (interactive && containers.isNotEmpty() && containers.size < terminal.size.height) {
             terminal.interactiveSelectList(containers.map {
                 "${it.name} - ${bcs[it.name]?.joinToString(", ") { bc -> bc.name } ?: ""}"

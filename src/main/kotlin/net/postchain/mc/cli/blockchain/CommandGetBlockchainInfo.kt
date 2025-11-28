@@ -32,7 +32,6 @@ import net.postchain.mc.cli.util.BlockHeightClient
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.util.prettyTable
-import net.postchain.mc.compatibility.ApiCompatV33.getImportingForeignBlockchainInfoV33
 
 class CommandGetBlockchainInfo : PmcCommand(
         name = "info",
@@ -104,38 +103,18 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromi
         if (!terminal.terminalInfo.outputInteractive) {
             echo(""","moving": """, trailingNewline = false)
         }
-        when {
-            apiVersion >= 33 -> {
-                client.getImportingForeignBlockchainInfo(blockchainRid)?.let { info ->
-                    echo(pmcTable {
-                        captionTop("Importing foreign blockchain info:", TextAlign.LEFT)
-                        body {
-                            row("Node pubkey", info.pubkey)
-                            row("Node host", info.host)
-                            row("Node port", info.port)
-                            row("Node api-url", info.apiUrl)
-                            row("Foreign management chain RID", info.chain0Rid)
-                            row("Final height", info.finalHeight)
-                        }
-                    })
+        client.getImportingForeignBlockchainInfo(blockchainRid)?.let { info ->
+            echo(pmcTable {
+                captionTop("Importing foreign blockchain info:", TextAlign.LEFT)
+                body {
+                    row("Node pubkey", info.pubkey)
+                    row("Node host", info.host)
+                    row("Node port", info.port)
+                    row("Node api-url", info.apiUrl)
+                    row("Foreign management chain RID", info.chain0Rid)
+                    row("Final height", info.finalHeight)
                 }
-            }
-
-            else -> {
-                client.getImportingForeignBlockchainInfoV33(blockchainRid)?.let { info ->
-                    echo(pmcTable {
-                        captionTop("Importing foreign blockchain info:", TextAlign.LEFT)
-                        body {
-                            row("Node pubkey", info.pubkey)
-                            row("Node host", info.host)
-                            row("Node port", info.port)
-                            row("Node api-url", info.apiUrl)
-                            row("Foreign management chain RID", info.chain0Rid)
-                            row("Up to height", info.upToHeight)
-                        }
-                    })
-                }
-            }
+            })
         }
     }
 
