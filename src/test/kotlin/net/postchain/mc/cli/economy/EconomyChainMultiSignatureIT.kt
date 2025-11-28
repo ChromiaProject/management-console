@@ -33,7 +33,7 @@ class EconomyChainMultiSignatureIT {
                         "--target", dir.absolutePathString(),
                 ) { result, api ->
                     assertCommandSuccessContains(result, "Proposal for creating tag t1 is created")
-                    api.getEcModel().assertSingleOp("create_tag", listOf(gtv(DEFAULT_PROVIDER01_PUBKEY.hexStringToByteArray()), gtv("t1"), gtv(1234000), gtv(5123456)))
+                    api.getEcModel().assertSingleOp("create_tag", listOf(gtv(DEFAULT_PROVIDER01_PUBKEY.hexStringToByteArray()), gtv("t1"), gtv(1234000), gtv(5123456), gtv(0)))
                 }
     }
 

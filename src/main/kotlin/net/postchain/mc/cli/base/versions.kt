@@ -22,6 +22,7 @@ const val ECONOMY_CHAIN_COMPUTE_REQUESTS = 60L
 const val ECONOMY_CHAIN_MAX_CLUSTER_NODES_VERSION = 63L
 const val ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION = 64L
 const val ECONOMY_CHAIN_JAR_EXTENSIONS = 65L
+const val ECONOMY_CHAIN_TAG_COMPUTE_REQUEST_PRICE_VERSION = 67L
 
 /**
  * Checks for the latest version of pmc from GitLab container registry
@@ -34,14 +35,14 @@ object VersionChecker {
 
     fun fetchLatestVersion(): String? {
         return try {
-            val client = java.net.http.HttpClient.newBuilder()
-                .connectTimeout(java.time.Duration.ofSeconds(TIMEOUT_SECONDS))
+            val client = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
                 .build()
 
             // First, get the total number of pages
             val tagsUrl = "$GITLAB_API_URL/projects/$PMC_PROJECT_ID/registry/repositories/$PMC_REPO_ID/tags"
             val headRequest = HttpRequest.newBuilder()
-                .uri(java.net.URI.create(tagsUrl))
+                .uri(URI.create(tagsUrl))
                 .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
                 .method("HEAD", HttpRequest.BodyPublishers.noBody())
                 .build()
@@ -74,7 +75,7 @@ object VersionChecker {
             } else {
                 null
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Silently fail on any network/parsing errors
             null
         }
@@ -97,7 +98,7 @@ object VersionChecker {
             }
 
             return 0
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // If parsing fails, assume outdated
             return -1
         }
@@ -120,7 +121,7 @@ object VersionChecker {
                     "[WARN] You are using version $currentVersion, the latest version is $latestVersion"
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Silently ignore errors
         }
     }

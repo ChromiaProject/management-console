@@ -47,6 +47,7 @@ import net.postchain.mc.cli.base.METADATA_LENGTH_MAX
 import net.postchain.mc.cli.base.NAME_LENGTH_MAX
 import net.postchain.mc.cli.base.URL_LENGTH_MAX
 import java.io.File
+import java.math.BigDecimal
 import java.net.URI
 import java.net.URISyntaxException
 import java.time.Duration
@@ -309,4 +310,21 @@ fun CliktCommand.maxNodes() = option("-mn", "--max-nodes", help = "Maximum numbe
 fun CliktCommand.baseComputeRequestsOptions() = option("-bcr", "--base-compute-requests", help = "How many compute requests per week a container gets by default").int()
         .validate {
             require(it >= 0) { "base compute requests must not be negative" }
+        }
+
+fun CliktCommand.priceOption(vararg names: String, help: String) = option(*names, help = help)
+        .convert { BigDecimal(it) }
+        .required()
+        .validate {
+            if (it <= BigDecimal.ZERO) {
+                throw CliktError("${this.names} must have a positive value")
+            }
+        }
+
+fun CliktCommand.optionalPriceOption(vararg names: String, help: String) = option(*names, help = help)
+        .convert { BigDecimal(it) }
+        .validate {
+            if (it <= BigDecimal.ZERO) {
+                throw CliktError("${this.names} must have a positive value")
+            }
         }
