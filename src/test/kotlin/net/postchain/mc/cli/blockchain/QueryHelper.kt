@@ -33,10 +33,12 @@ fun buildGetBlockchainInfoResponse(
         isUnarchiving: Boolean = false,
         configDelay: Long? = null,
         state: BlockchainState = BlockchainState.RUNNING,
+        rid: BlockchainRid = BlockchainRid.ZERO_RID,
+        name: String = "bc01",
 ): GtvDictionary {
     return GtvObjectMapper.toGtvDictionary(BlockchainInfo(
-            BlockchainRid.ZERO_RID.wData,
-            "bc01",
+            rid.wData,
+            name,
             state,
             "container01",
             ContainerState.RUNNING,

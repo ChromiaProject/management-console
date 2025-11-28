@@ -10,12 +10,12 @@ import net.postchain.chain0.proposal_blockchain.proposeConfigurationOperation
 import net.postchain.gtv.GtvEncoder
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.AlreadyExistMode
-import net.postchain.mc.cli.BlockchainOption
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.blockchainOption
 import net.postchain.mc.cli.forceOption
 import net.postchain.mc.cli.heightOption
+import net.postchain.mc.cli.resolveBlockchain
 import net.postchain.mc.cli.util.BlockchainConfig
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.scheduleAt
@@ -48,16 +48,11 @@ class CommandProposeConfiguration : DCBaseCommand(
         val bcConfig = BlockchainConfig.readFromFile(blockchainConfigFile)
         val compressedConfigurationData = GtvEncoder.encodeGtv(BlockchainConfigurationCompressor.compress(client, bcConfig.gtv, dcVersion))
 
-        val blockchainRID = when (val bc = blockchain) {
-            is BlockchainOption.Name -> resolveBlockchainRid(bc.name)
-            is BlockchainOption.Rid -> bc.rid
-        }
+        val blockchainRID = resolveBlockchain(client.config, client, blockchain)
 
-        val proposalDescription = if (description.isEmpty()) {
+        val proposalDescription = description.ifEmpty {
             if (height == null) "Update of blockchain configuration for $blockchainRID"
             else "Update of blockchain configuration for $blockchainRID at height $height with force: $force"
-        } else {
-            description
         }
 
         transactionBuilder()
