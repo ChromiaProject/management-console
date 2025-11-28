@@ -7,12 +7,8 @@ import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.updateEconomyConstantsOperation
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_SCHEDULED_PROPOSAL_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.scheduleAt
-import net.postchain.mc.compatibility.ApiCompatECV52.updateEconomyConstantsOperationECV52
-import net.postchain.mc.compatibility.ApiCompatECV57.updateEconomyConstantsOperation
 import net.postchain.mc.compatibility.ApiCompatECV63.updateEconomyConstantsOperationECV63
 
 class CommandUpdateEconomyConstants : ECBaseCommand(
@@ -42,19 +38,7 @@ class CommandUpdateEconomyConstants : ECBaseCommand(
             throw CliktError("No variable provided")
         }
 
-        if (ecVersion.version < ECONOMY_CHAIN_SCHEDULED_PROPOSAL_VERSION) {
-            transactionBuilder()
-                    .updateEconomyConstantsOperationECV52(minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
-                            stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),
-                            resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal()
-                    )
-        } else if (ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION) {
-            transactionBuilder()
-                    .updateEconomyConstantsOperation(minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
-                            stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),
-                            resourcePoolMarginFeeShare?.toBigDecimal(), dappProviderRiskShare?.toBigDecimal(), scheduleAt
-                    )
-        } else if (ecVersion.version < ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION) {
+        if (ecVersion.version < ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION) {
             transactionBuilder()
                     .updateEconomyConstantsOperationECV63(clientProviderPubkey, minLeaseTimeWeeks, maxLeaseTimeWeeks, stakingRewardRate?.toBigDecimal(),
                             stakingRewardFeeShare?.toBigDecimal(), chromiaFoundationFeeShare?.toBigDecimal(),

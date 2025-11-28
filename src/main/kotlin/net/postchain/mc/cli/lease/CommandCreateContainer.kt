@@ -25,10 +25,8 @@ import net.postchain.economy.economy_chain.getCreateContainerTicketByTransaction
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.accountIdOption
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMPUTE_REQUESTS
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_JAR_EXTENSIONS
 import net.postchain.mc.cli.optionalEvmAddressOption
-import net.postchain.mc.compatibility.ApiCompatECV59.createContainerWithSubnodeImageOperationV59
 
 class CommandCreateContainer : ECBaseCommand(
         name = "create-container",
@@ -68,10 +66,6 @@ class CommandCreateContainer : ECBaseCommand(
             throw CliktError("This version of Economy chain does not support subnode JAR extensions")
         }
 
-        if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS && extraComputeRequests != null) {
-            throw CliktError("This version of Economy chain does not support extra compute requests")
-        }
-
         val (accountId, authDescriptorId) =
                 findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption,
                         evmAddress ?: client.config.signers.first().pubKey.data,
@@ -81,19 +75,7 @@ class CommandCreateContainer : ECBaseCommand(
 
         val transactionResult = economyChainClient.transactionBuilder().also {
             evmAddress?.let { evmAddress ->
-                if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS) {
-                    val opName = CREATE_CONTAINER_WITH_SUBNODE_IMAGE
-                    val opArgs = listOf(
-                            gtv(pubkey.data),
-                            gtv(scus.toLong()),
-                            gtv(duration.toLong()),
-                            gtv(extraStorage.toLong()),
-                            gtv(clusterName),
-                            gtv(autoRenew),
-                            gtv(subnodeImageName)
-                    )
-                    addEvmAuthOperation(economyChainClient, it, opName, opArgs, evmAddress, accountId, authDescriptorId)
-                } else if (ecVersion.version < ECONOMY_CHAIN_JAR_EXTENSIONS) {
+                if (ecVersion.version < ECONOMY_CHAIN_JAR_EXTENSIONS) {
                     val opName = CREATE_CONTAINER_WITH_SUBNODE_IMAGE
                     val opArgs = listOf(
                             gtv(pubkey.data),
@@ -126,16 +108,7 @@ class CommandCreateContainer : ECBaseCommand(
                 addFtAuthOperation(it, accountId, authDescriptorId)
             }
         }.let {
-            if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS) {
-                it.createContainerWithSubnodeImageOperationV59(
-                        providerPubkey = pubkey.data,
-                        containerUnits = scus.toLong(),
-                        durationWeeks = duration.toLong(),
-                        extraStorageGib = extraStorage.toLong(),
-                        clusterName = clusterName,
-                        autoRenew = autoRenew,
-                        subnodeImageName = subnodeImageName)
-            } else if (ecVersion.version < ECONOMY_CHAIN_JAR_EXTENSIONS) {
+            if (ecVersion.version < ECONOMY_CHAIN_JAR_EXTENSIONS) {
                 it.createContainerWithSubnodeImageOperation(
                         providerPubkey = pubkey.data,
                         containerUnits = scus.toLong(),

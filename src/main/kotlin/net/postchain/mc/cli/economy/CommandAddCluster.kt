@@ -8,7 +8,6 @@ import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain.createClusterOperation
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_MAX_CLUSTER_NODES_VERSION
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.clusterUnitsOption
 import net.postchain.mc.cli.util.containerUnitCpuOption
@@ -21,7 +20,6 @@ import net.postchain.mc.cli.util.extraStorageOption
 import net.postchain.mc.cli.util.maxNodes
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.systemContainerUnitsOption
-import net.postchain.mc.compatibility.ApiCompatECV56.createClusterOperationV56
 import net.postchain.mc.compatibility.ApiCompatECV62.createClusterOperationV62
 
 class CommandAddCluster : ECBaseCommand(
@@ -60,15 +58,11 @@ class CommandAddCluster : ECBaseCommand(
                         containerUnitStorage, systemContainerUnits, maxNodes)
             }
 
-            ecVersion.version >= ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
+            else -> {
                 transactionBuilder().createClusterOperationV62(
                         clientProviderPubkey, name, governorName, voterSet, clusterUnits, extraStorage, tag,
                         containerUnitCpu, containerUnitRam, containerUnitIoRead, containerUnitIoWrite,
                         containerUnitStorage, systemContainerUnits)
-            }
-
-            else -> {
-                transactionBuilder().createClusterOperationV56(name, governorName, voterSet, clusterUnits, extraStorage, tag)
             }
         }
                 .postOrSave()

@@ -4,7 +4,6 @@ import net.postchain.common.types.WrappedByteArray
 import net.postchain.economy.economy_chain.PendingClusterData
 import net.postchain.economy.economy_chain.PendingClusterStatus
 import net.postchain.gtv.mapper.GtvObjectMapper
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.economy.addEcGetCommonProposal
 import net.postchain.mc.cli.economy.addEcGetCommonProposalVotingResult
 import net.postchain.mc.cli.provider.addDcGetProviderData
@@ -18,7 +17,7 @@ class CommandGetProposalIT {
 
     @Test
     fun `cluster info - container units`(@TempDir dir: Path) {
-        ManagedRestTestApi(dir, ecVersion = ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION)
+        ManagedRestTestApi(dir)
                 .addEcGetCommonProposal()
                 .addEcGetCommonProposalVotingResult()
                 .withECQuery("get_cluster_create_proposal", GtvObjectMapper.toGtvDictionary(PendingClusterData(

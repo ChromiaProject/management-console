@@ -7,19 +7,14 @@ import com.github.ajalt.mordant.input.interactiveSelectList
 import net.postchain.client.core.PostchainClient
 import net.postchain.common.types.RowId
 import net.postchain.crypto.PubKey
-import net.postchain.economy.common_proposal.GetCommonPubkeyVotesResult
 import net.postchain.economy.common_proposal.getCommonProposalsRange
 import net.postchain.economy.common_proposal.getCommonPubkeyVotes
 import net.postchain.economy.common_proposal.getRelevantCommonProposals
 import net.postchain.mc.cli.ECBaseCommand
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
 import net.postchain.mc.cli.dateToTimestampOption
 import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcTable
-import net.postchain.mc.compatibility.ApiCompatECV21.getProposalsRangeECV20
-import net.postchain.mc.compatibility.ApiCompatECV21.getProviderVotesECV20
-import net.postchain.mc.compatibility.ApiCompatECV21.getRelevantProposalsECV20
 
 class CommandListProposals : ECBaseCommand(
         name = "list",
@@ -37,26 +32,14 @@ class CommandListProposals : ECBaseCommand(
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
 
         val proposals = if (all) {
-            when {
-                ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProposalsRangeECV20(from, to, pending)
-                        .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
-                else -> economyChainClient.getCommonProposalsRange(from, to, pending)
-                        .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
-            }
+            economyChainClient.getCommonProposalsRange(from, to, pending)
+                    .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
         } else {
-            when {
-                ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getRelevantProposalsECV20(from, to, pending, clientProviderPubkey)
-                        .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
-                else -> economyChainClient.getRelevantCommonProposals(from, to, pending, clientProviderPubkey)
-                        .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
-            }
+            economyChainClient.getRelevantCommonProposals(from, to, pending, clientProviderPubkey)
+                    .map { ProposalInfo(it.rowid, it.proposalType.name, it.state.name) }
         }
 
-        val votes = when {
-            ecVersion.version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProviderVotesECV20(from, to, clientProviderPubkey)
-                    .map { GetCommonPubkeyVotesResult(it.proposal, it.vote) }
-            else -> economyChainClient.getCommonPubkeyVotes(from, to, PubKey(clientProviderPubkey))
-        }
+        val votes = economyChainClient.getCommonPubkeyVotes(from, to, PubKey(clientProviderPubkey))
 
         if (interactive && proposals.isNotEmpty() && proposals.size < terminal.size.height) {
             terminal.interactiveSelectList(proposals.map {
