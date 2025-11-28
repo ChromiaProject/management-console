@@ -7,7 +7,6 @@ import net.postchain.common.BlockchainRid
 import net.postchain.economy.lib.ft4.core.accounts.AuthType
 import net.postchain.gtv.Gtv
 import net.postchain.mc.cli.base.DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION
 import net.postchain.mc.cli.util.PmcClientConfigOption
 import net.postchain.mc.network.Version
 
@@ -30,25 +29,18 @@ fun getEconomyChainClient(config: PmcClientConfigOption): PostchainClient {
         config.chromiaClient.getSystemChainClientForForwardingReplica(BlockchainRid(economyChainBrid), addNop = true)
 }
 
-fun formatUsd(chr: Long?, ecVersion: Long): String = formatCurrency(chr, UNITS_PER_USD, ecVersion)
+fun formatUsd(chr: Long?): String = formatCurrency(chr, UNITS_PER_USD)
 
-fun formatChr(chr: Long?, ecVersion: Long): String = formatCurrency(chr, UNITS_PER_CHR, ecVersion)
+fun formatChr(chr: Long?): String = formatCurrency(chr, UNITS_PER_CHR)
 
-fun formatCurrency(value: Long?, units: Int, ecVersion: Long): String {
+fun formatCurrency(value: Long?, units: Int): String {
 
     if (value == null) {
         return ""
     }
 
-    if (doEcSupportMinorUnits(ecVersion)) {
-        return value.toBigDecimal().divide(units.toBigDecimal()).toString()
-    }
-
-    return value.toString()
+    return value.toBigDecimal().divide(units.toBigDecimal()).toString()
 }
-
-fun doEcSupportMinorUnits(ecVersion: Long) =
-        ecVersion >= ECONOMY_CHAIN_EC_STAKING_REQ_AND_USD_MINOR_UNITS_VERSION
 
 fun extractSignersFromAuthDescriptor(authType: AuthType, args: Gtv): List<ByteArray> = when (authType) {
     AuthType.S ->

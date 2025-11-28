@@ -3,9 +3,7 @@ package net.postchain.mc.cli.economy
 import com.github.ajalt.clikt.parameters.options.required
 import net.postchain.client.core.PostchainClient
 import net.postchain.economy.economy_chain_remove_container.forceRemoveContainerOperation
-import net.postchain.mc.compatibility.ApiCompatECV57.forceRemoveContainerOperation
 import net.postchain.mc.cli.ECBaseCommand
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.base.printResult
 import net.postchain.mc.cli.util.nameOption
 
@@ -20,17 +18,8 @@ class CommandForceRemoveContainer : ECBaseCommand(
     private val name by nameOption("Name of container to remove").required()
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
-        when {
-            ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                transactionBuilder()
-                        .forceRemoveContainerOperation(name)
-            }
-
-            else -> {
-                transactionBuilder()
-                        .forceRemoveContainerOperation(clientProviderPubkey, name)
-            }
-        }
+        transactionBuilder()
+                .forceRemoveContainerOperation(clientProviderPubkey, name)
                 .postOrSave()
                 .printResult(
                         "Container $name will be removed",

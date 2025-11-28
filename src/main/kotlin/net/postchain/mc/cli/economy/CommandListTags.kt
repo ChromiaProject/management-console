@@ -22,8 +22,8 @@ class CommandListTags : ECBaseCommand(
                         .map {
                             listOf(
                                     it.name,
-                                    formatUsd(it.scuPrice, ecVersion.version),
-                                    formatUsd(it.extraStoragePrice, ecVersion.version),
+                                    formatUsd(it.scuPrice),
+                                    formatUsd(it.extraStoragePrice),
                             )
                         }
             }
@@ -32,9 +32,9 @@ class CommandListTags : ECBaseCommand(
                         .map {
                             listOf(
                                     it.name,
-                                    formatUsd(it.scuPrice, ecVersion.version),
-                                    formatUsd(it.extraStoragePrice, ecVersion.version),
-                                    formatUsd(it.extraComputeRequestPrice, ecVersion.version),
+                                    formatUsd(it.scuPrice),
+                                    formatUsd(it.extraStoragePrice),
+                                    formatUsd(it.extraComputeRequestPrice),
                             )
                         }
             }

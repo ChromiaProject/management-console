@@ -22,9 +22,7 @@ import net.postchain.economy.economy_chain.upgradeContainerOperation
 import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.mc.cli.ECBaseCommand
 import net.postchain.mc.cli.accountIdOption
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMPUTE_REQUESTS
 import net.postchain.mc.cli.optionalEvmAddressOption
-import net.postchain.mc.compatibility.ApiCompatECV59.upgradeContainerOperationV59
 
 class CommandUpgradeContainer : ECBaseCommand(
         name = "upgrade-container",
@@ -55,10 +53,6 @@ class CommandUpgradeContainer : ECBaseCommand(
     val clusterName by option("-cn", "--cluster-name", help = "Name of the cluster").required()
 
     override fun runEC(client: PostchainClient, economyChainClient: PostchainClient) {
-        if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS && extraComputeRequests != null) {
-            throw CliktError("This version of Economy chain does not support extra compute requests")
-        }
-
         val (accountId, authDescriptorId) =
                 findFtAccountIdWithAuthDescriptorId(economyChainClient, accountIdOption,
                         evmAddress ?: client.config.signers.first().pubKey.data,
@@ -66,42 +60,25 @@ class CommandUpgradeContainer : ECBaseCommand(
 
         val transactionResult = economyChainClient.transactionBuilder().also {
             evmAddress?.let { evmAddress ->
-                addEvmAuthOperation(
-                        economyChainClient, it,
-                        UPGRADE_CONTAINER, listOf(
+                addEvmAuthOperation(economyChainClient, it, UPGRADE_CONTAINER, listOf(
                         gtv(containerName),
                         gtv(scus.toLong()),
                         gtv(extraStorage.toLong()),
                         gtv(clusterName),
                         gtv(duration.toLong()),
-                ),
-                        evmAddress, accountId, authDescriptorId)
+                ), evmAddress, accountId, authDescriptorId)
                 echo("Signing done, posting transaction...")
             } ?: run {
                 addFtAuthOperation(it, accountId, authDescriptorId)
             }
-
-        }.let {
-                    if (ecVersion.version < ECONOMY_CHAIN_COMPUTE_REQUESTS) {
-                        it.upgradeContainerOperationV59(
-                                containerName = containerName,
-                                upgradedContainerUnits = scus.toLong(),
-                                upgradedExtraStorageGib = extraStorage.toLong(),
-                                upgradedClusterName = clusterName,
-                                upgradedDurationWeeks = duration.toLong(),
-                        )
-                    } else {
-                        it.upgradeContainerOperation(
-                                containerName = containerName,
-                                upgradedContainerUnits = scus.toLong(),
-                                upgradedExtraStorageGib = extraStorage.toLong(),
-                                upgradedClusterName = clusterName,
-                                upgradedDurationWeeks = duration.toLong(),
-                                upgradedExtraComputeRequests = extraComputeRequests?.toLong() ?: 0L,
-                        )
-                    }
-                }
-                .postAwaitConfirmation(txListener())
+        }.upgradeContainerOperation(
+                containerName = containerName,
+                upgradedContainerUnits = scus.toLong(),
+                upgradedExtraStorageGib = extraStorage.toLong(),
+                upgradedClusterName = clusterName,
+                upgradedDurationWeeks = duration.toLong(),
+                upgradedExtraComputeRequests = extraComputeRequests?.toLong() ?: 0L,
+        ).postAwaitConfirmation(txListener())
         when (transactionResult.status) {
             TransactionStatus.CONFIRMED -> {
                 val ticket = economyChainClient.getUpgradeContainerTicketByTransaction(transactionResult.txRid.rid.hexStringToByteArray())
@@ -116,10 +93,12 @@ class CommandUpgradeContainer : ECBaseCommand(
                                     echo("Container ${newTicket.containerName} upgraded successfully")
                                     return
                                 }
+
                                 TicketState.FAILURE -> {
                                     echo("Container upgrade failed: ${newTicket.errorMessage}")
                                     return
                                 }
+
                                 TicketState.PENDING -> {}
                             }
                         }

@@ -11,10 +11,7 @@ import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.gtv.parse.GtvParser
 import net.postchain.mc.cli.ECBaseCommand
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_PRICE_ORACLE_RATE_PROPOSAL_VERSION
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
 import net.postchain.mc.cli.base.printResult
-import net.postchain.mc.compatibility.ApiCompatECV57.proposePriceOracleRateOperation
 
 class CommandUpdatePriceOracleRates : ECBaseCommand(
         name = "update-price-oracle-rates",
@@ -26,14 +23,13 @@ class CommandUpdatePriceOracleRates : ECBaseCommand(
             pmc economy update-price-oracle-rates --token-rates '["symbol": "CHR", "name": "Chromia", "price": "12.34"]' --token-rates '["symbol": "tCHR", "name": "Test Chromia", "price": "34.56"]'
             ```
     """.trimIndent(),
-        requiresECVersion = ECONOMY_CHAIN_PRICE_ORACLE_RATE_PROPOSAL_VERSION,
 ) {
 
     private val tokenRates by option(
             help = "GTV formatted token with rate and possible name. Each proposal can contain multiple token updates.",
     ).convert {
         val pi = GtvParser.parse(it).asDict().toMutableMap()
-        
+
         GtvObjectMapper.fromGtv(gtv(pi), PendingPriceOracleRateData::class)
     }.multiple(required = true)
 
@@ -43,16 +39,8 @@ class CommandUpdatePriceOracleRates : ECBaseCommand(
             throw CliktError("No tokens provided")
         }
 
-        when {
-            ecVersion.version < ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION -> {
-                transactionBuilder()
-                        .proposePriceOracleRateOperation(tokenRates)
-            }
-            else -> {
-                transactionBuilder()
-                        .proposePriceOracleRateOperation(clientProviderPubkey, tokenRates)
-            }
-        }
+        transactionBuilder()
+                .proposePriceOracleRateOperation(clientProviderPubkey, tokenRates)
                 .postOrSave()
                 .printResult(
                         "Proposal for updating price oracle rates is created and awaits approval.",

@@ -12,9 +12,7 @@ import net.postchain.crypto.PubKey
 import net.postchain.economy.common_proposal.CommonProposalData
 import net.postchain.economy.common_proposal.CommonProposalState
 import net.postchain.economy.common_proposal.CommonProposalType
-import net.postchain.economy.common_proposal.CommonProposalVoter
 import net.postchain.economy.common_proposal.CommonProposalVotingResults
-import net.postchain.economy.common_proposal.CommonVotingResult
 import net.postchain.economy.common_proposal.getCommonProposal
 import net.postchain.economy.common_proposal.getCommonProposalVoterInfo
 import net.postchain.economy.common_proposal.getCommonProposalVotingResults
@@ -27,22 +25,13 @@ import net.postchain.economy.economy_chain.getStakingRequirementConstantsProposa
 import net.postchain.economy.economy_chain.getSystemProviderEconomyConstantsProposal
 import net.postchain.economy.economy_chain.getTagProposal
 import net.postchain.mc.cli.ECBaseCommand
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION
 import net.postchain.mc.cli.base.ECONOMY_CHAIN_DYNAMIC_STAKING_REWARD_SHARE_VERSION
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION
-import net.postchain.mc.cli.base.ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION
 import net.postchain.mc.cli.base.rowIfNotNull
-import net.postchain.mc.cli.economy.doEcSupportMinorUnits
 import net.postchain.mc.cli.economy.formatChr
 import net.postchain.mc.cli.economy.formatUsd
 import net.postchain.mc.cli.proposal.util.proposalIndexOption
 import net.postchain.mc.cli.util.pmcTable
 import net.postchain.mc.cli.votingupdates.formatThreshold
-import net.postchain.mc.compatibility.ApiCompatECV21.EcProposalTypeECV20
-import net.postchain.mc.compatibility.ApiCompatECV21.getProposalECV20
-import net.postchain.mc.compatibility.ApiCompatECV21.getProposalVoterInfoECV20
-import net.postchain.mc.compatibility.ApiCompatECV21.getProposalVotingResultsECV20
-import net.postchain.mc.compatibility.ApiCompatECV45.getStakingRequirementConstantsProposalV45
 import net.postchain.mc.compatibility.ApiCompatECV63.getEcononyConstantsProposalECV63
 import net.postchain.token.common_proposal.voter_set_proposal.getVoterSetUpdateProposal
 import java.time.Instant
@@ -62,15 +51,7 @@ class CommandGetProposal : ECBaseCommand(
 
 fun CliktCommand.showECProposalInfo(client: PostchainClient, economyChainClient: PostchainClient, id: RowId?, ecVersion: Long) {
 
-    val proposal = when {
-        ecVersion < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProposalECV20(id).let {
-            if (it != null)
-                CommonProposalData(it.id, it.timestamp, mapType(it.type), it.proposedBy, it.description, CommonProposalState.valueOf(it.state.name), null, null)
-            else
-                null
-        }
-        else -> economyChainClient.getCommonProposal(id)
-    } ?: return echo("Proposal $id not found")
+    val proposal = economyChainClient.getCommonProposal(id) ?: return echo("Proposal $id not found")
     val proposedBy = client.getProviderData(PubKey(proposal.proposedBy))
 
     echo(pmcTable {
@@ -83,7 +64,7 @@ fun CliktCommand.showECProposalInfo(client: PostchainClient, economyChainClient:
             proposal.scheduledAt?.let {
                 row("Scheduled at", "${Date.from(Instant.ofEpochMilli(it))}")
             }
-            printECVotingInfo(economyChainClient, proposal, ecVersion)
+            printECVotingInfo(economyChainClient, proposal)
             row("Description", proposal.description)
         }
     })
@@ -94,33 +75,12 @@ fun CliktCommand.showECProposalInfo(client: PostchainClient, economyChainClient:
     }
 }
 
-fun mapType(type: EcProposalTypeECV20): CommonProposalType {
-
-    return when (type) {
-        EcProposalTypeECV20.cluster_create -> CommonProposalType.ec_cluster_create
-        EcProposalTypeECV20.cluster_change_tag -> CommonProposalType.ec_cluster_change_tag
-        EcProposalTypeECV20.tag_create -> CommonProposalType.ec_tag_create
-        EcProposalTypeECV20.tag_update -> CommonProposalType.ec_tag_update
-        EcProposalTypeECV20.tag_remove -> CommonProposalType.ec_tag_remove
-        EcProposalTypeECV20.economy_constants_update -> CommonProposalType.ec_constants_update
-    }
-}
-
-private fun SectionBuilder.printECVotingInfo(economyChainClient: PostchainClient, proposal: CommonProposalData, version: Long) {
+private fun SectionBuilder.printECVotingInfo(economyChainClient: PostchainClient, proposal: CommonProposalData) {
     if (proposal.state == CommonProposalState.PENDING) {
-        val votingResults = when {
-            version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProposalVotingResultsECV20(proposal.id).let {
-                CommonProposalVotingResults(it.positiveVotes, it.negativeVotes, it.maxVotes, it.threshold, CommonVotingResult.valueOf(it.votingResult.name))
-            }
-            else -> economyChainClient.getCommonProposalVotingResults(proposal.id)
-        }
+        val votingResults = economyChainClient.getCommonProposalVotingResults(proposal.id)
         printECVotingResults(votingResults)
     } else {
-        val votingInfo = when {
-            version < ECONOMY_CHAIN_COMMON_PROPOSAL_VERSION -> economyChainClient.getProposalVoterInfoECV20(proposal.id)
-                    .map { CommonProposalVoter(it.provider, it.vote, null, null) }
-            else -> economyChainClient.getCommonProposalVoterInfo(proposal.id)
-        }
+        val votingInfo = economyChainClient.getCommonProposalVoterInfo(proposal.id)
         row("Pubkeys that accepted", votingInfo.filter { it.vote }.joinToString { formatProvider(it.pubkey, "") })
         row("Pubkeys that rejected", votingInfo.filterNot { it.vote }.joinToString { formatProvider(it.pubkey, "") })
     }
@@ -148,17 +108,15 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
         CommonProposalType.ec_tag_create, CommonProposalType.ec_tag_update, CommonProposalType.ec_tag_remove -> {
 
             val tagCreateProposal = economyChainClient.getTagProposal(proposalId)
-            val ecSupportMinorUnits = doEcSupportMinorUnits(ecVersion)
-            val currencyPrecision = if (!ecSupportMinorUnits) " (only major units)" else ""
 
             return pmcTable {
                 body {
                     row("Name", tagCreateProposal.name)
                     if (tagCreateProposal.scuPrice != -1L) {
-                        row("SCU price USD$currencyPrecision", formatUsd(tagCreateProposal.scuPrice, ecVersion))
+                        row("SCU price USD", formatUsd(tagCreateProposal.scuPrice))
                     }
                     if (tagCreateProposal.extraStoragePrice != -1L) {
-                        row("Extra storage price USD$currencyPrecision", formatUsd(tagCreateProposal.extraStoragePrice, ecVersion))
+                        row("Extra storage price USD", formatUsd(tagCreateProposal.extraStoragePrice))
                     }
                 }
             }
@@ -175,15 +133,13 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
                     row("Voter set", clusterCreateProposal.voterSetName)
                     row("Cluster units", clusterCreateProposal.clusterUnits)
                     row("Extra storage", clusterCreateProposal.extraStorage)
-                    if (ecVersion >= ECONOMY_CHAIN_REQUIRE_PROVIDER_IDENTIFIER_AND_DYNAMIC_CU_VERSION) {
-                        row("Container unit - CPU", clusterCreateProposal.containerUnitCpu)
-                        row("Container unit - RAM", clusterCreateProposal.containerUnitRam)
-                        row("Container unit - storage", clusterCreateProposal.containerUnitStorage)
-                        row("Container unit - I/O read", clusterCreateProposal.containerUnitIoRead)
-                        row("Container unit - I/O write", clusterCreateProposal.containerUnitIoWrite)
-                        row("System container units", clusterCreateProposal.systemContainerUnits)
-                        row("Status", clusterCreateProposal.status.name)
-                    }
+                    row("Container unit - CPU", clusterCreateProposal.containerUnitCpu)
+                    row("Container unit - RAM", clusterCreateProposal.containerUnitRam)
+                    row("Container unit - storage", clusterCreateProposal.containerUnitStorage)
+                    row("Container unit - I/O read", clusterCreateProposal.containerUnitIoRead)
+                    row("Container unit - I/O write", clusterCreateProposal.containerUnitIoWrite)
+                    row("System container units", clusterCreateProposal.systemContainerUnits)
+                    row("Status", clusterCreateProposal.status.name)
                 }
             }
         }
@@ -258,7 +214,7 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
             val proposalDetails = economyChainClient.getSystemProviderEconomyConstantsProposal(proposalId)
             return pmcTable {
                 body {
-                    proposalDetails.totalCostSystemProviders?.let { row("Total cost system provider in USD", formatUsd(it, ecVersion)) }
+                    proposalDetails.totalCostSystemProviders?.let { row("Total cost system provider in USD", formatUsd(it)) }
                     rowIfNotNull("System provider fee share", proposalDetails.systemProviderFeeShare)
                     rowIfNotNull("System provider risk share", proposalDetails.systemProviderRiskShare)
                 }
@@ -266,29 +222,15 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
         }
 
         CommonProposalType.ec_staking_requirement_constants_update -> {
-            if (ecVersion < ECONOMY_CHAIN_STAKING_REQ_NODE_BASED_VERSION) {
-                val proposalDetails = economyChainClient.getStakingRequirementConstantsProposalV45(proposalId)
-                return pmcTable {
-                    body {
-                        proposalDetails.enabled?.let { row("Staking requirements enabled", it) }
-                        proposalDetails.stopPayoutDays?.let { row("Stop payout days", it) }
-                        proposalDetails.systemProviderOwnStakeChr?.let { row("Requirement - system provider own staking in CHR", formatChr(it, ecVersion)) }
-                        proposalDetails.systemProviderTotalStakeChr?.let { row("Requirement - system provider total staking in CHR", formatChr(it, ecVersion)) }
-                        proposalDetails.dappProviderOwnStakeChr?.let { row("Requirement - dapp provider own staking in CHR", formatChr(it, ecVersion)) }
-                        proposalDetails.dappProviderTotalStakeChr?.let { row("Requirement - dapp provider total staking in CHR", formatChr(it, ecVersion)) }
-                    }
-                }
-            } else {
-                val proposalDetails = economyChainClient.getStakingRequirementConstantsProposal(proposalId)
-                return pmcTable {
-                    body {
-                        proposalDetails.enabled?.let { row("Staking requirements enabled", it) }
-                        proposalDetails.stopPayoutDays?.let { row("Stop payout days", it) }
-                        proposalDetails.systemNodeOwnStakeChr?.let { row("Requirement - system node own staking in CHR", formatChr(it, ecVersion)) }
-                        proposalDetails.systemNodeTotalStakeChr?.let { row("Requirement - system node total staking in CHR", formatChr(it, ecVersion)) }
-                        proposalDetails.dappNodeOwnStakeChr?.let { row("Requirement - dapp node own staking in CHR", formatChr(it, ecVersion)) }
-                        proposalDetails.dappNodeTotalStakeChr?.let { row("Requirement - dapp node total staking in CHR", formatChr(it, ecVersion)) }
-                    }
+            val proposalDetails = economyChainClient.getStakingRequirementConstantsProposal(proposalId)
+            return pmcTable {
+                body {
+                    proposalDetails.enabled?.let { row("Staking requirements enabled", it) }
+                    proposalDetails.stopPayoutDays?.let { row("Stop payout days", it) }
+                    proposalDetails.systemNodeOwnStakeChr?.let { row("Requirement - system node own staking in CHR", formatChr(it)) }
+                    proposalDetails.systemNodeTotalStakeChr?.let { row("Requirement - system node total staking in CHR", formatChr(it)) }
+                    proposalDetails.dappNodeOwnStakeChr?.let { row("Requirement - dapp node own staking in CHR", formatChr(it)) }
+                    proposalDetails.dappNodeTotalStakeChr?.let { row("Requirement - dapp node total staking in CHR", formatChr(it)) }
                 }
             }
         }
