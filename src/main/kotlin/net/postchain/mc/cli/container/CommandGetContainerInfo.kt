@@ -19,8 +19,6 @@ import net.postchain.mc.cli.base.CLUSTER_ANCHORING_CHAIN_RESOURCE_USAGE_VERSION
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
-import net.postchain.mc.compatibility.ApiCompatV2
-import net.postchain.mc.compatibility.ApiCompatV3.getContainerBlockchainV3
 import java.time.Instant
 import java.util.Date
 
@@ -82,11 +80,11 @@ fun CliktCommand.showContainerInfo(
             listOf("Resource type", "Value"),
             limits.map {
                 listOf(it.key, when (it.key) {
-                    ApiCompatV2.ContainerResourceLimitType.cpu.name -> "${it.value} %"
-                    ApiCompatV2.ContainerResourceLimitType.ram.name -> "${it.value} MiB"
-                    ApiCompatV2.ContainerResourceLimitType.storage.name -> "${it.value} MiB"
-                    ApiCompatV2.ContainerResourceLimitType.io_read.name -> "${it.value} MiB/s"
-                    ApiCompatV2.ContainerResourceLimitType.io_write.name -> "${it.value} MiB/s"
+                    ContainerResourceLimitType.cpu.name -> "${it.value} %"
+                    ContainerResourceLimitType.ram.name -> "${it.value} MiB"
+                    ContainerResourceLimitType.storage.name -> "${it.value} MiB"
+                    ContainerResourceLimitType.io_read.name -> "${it.value} MiB/s"
+                    ContainerResourceLimitType.io_write.name -> "${it.value} MiB/s"
                     else -> it.value.toString()
                 })
             }
@@ -119,38 +117,28 @@ fun CliktCommand.showContainerInfo(
         }
     }
 
-    val apiVersion = client.apiVersion()
-    when {
-        apiVersion >= 4 -> {
-            val blockchains = client.getContainerBlockchain(name)
-            if (!terminal.terminalInfo.outputInteractive) {
-                echo(""","blockchains": """, trailingNewline = false)
-            }
-            echo(pmcTable(
-                    "blockchains",
-                    listOf("Name", "Rid", "System", "State"),
-                    blockchains.map {
-                        listOf(it.name, it.rid.toHex(), it.system.toString(), it.state.toString())
-                    }
-            ))
-        }
-
-        else -> {
-            val blockchains = client.getContainerBlockchainV3(name)
-            if (!terminal.terminalInfo.outputInteractive) {
-                echo(""","blockchains": """, trailingNewline = false)
-            }
-            echo(pmcTable(
-                    "blockchains",
-                    listOf("Name", "Rid", "System", "Active"),
-                    blockchains.map {
-                        listOf(it.name, it.rid.toHex(), it.system.toString(), it.active.toString())
-                    }
-            ))
-        }
+    val blockchains = client.getContainerBlockchain(name)
+    if (!terminal.terminalInfo.outputInteractive) {
+        echo(""","blockchains": """, trailingNewline = false)
     }
+    echo(pmcTable(
+            "blockchains",
+            listOf("Name", "Rid", "System", "State"),
+            blockchains.map {
+                listOf(it.name, it.rid.toHex(), it.system.toString(), it.state.toString())
+            }
+    ))
 
     if (!terminal.terminalInfo.outputInteractive) {
         echo("}")
     }
+}
+
+enum class ContainerResourceLimitType {
+    max_blockchains,
+    cpu,
+    ram,
+    storage,
+    io_read,
+    io_write
 }

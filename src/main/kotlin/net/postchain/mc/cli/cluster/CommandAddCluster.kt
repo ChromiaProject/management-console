@@ -4,12 +4,8 @@ import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
-import net.postchain.chain0.direct_cluster.createClusterFromOperation
 import net.postchain.chain0.direct_cluster.createClusterFromWithClusterDataOperation
-import net.postchain.chain0.direct_cluster.createClusterFromWithUnitsOperation
-import net.postchain.chain0.direct_cluster.createClusterOperation
 import net.postchain.chain0.direct_cluster.createClusterWithClusterDataOperation
-import net.postchain.chain0.direct_cluster.createClusterWithUnitsOperation
 import net.postchain.chain0.features.hasDirectCluster
 import net.postchain.chain0.model.ClusterCreationData
 import net.postchain.chain0.version.apiVersion
@@ -27,12 +23,6 @@ import net.postchain.mc.cli.util.maxNodes
 import net.postchain.mc.cli.util.nameOrGenerateOption
 import net.postchain.mc.cli.util.pubkeysOrVotersetOption
 import net.postchain.mc.cli.util.systemContainerUnitsOption
-import net.postchain.mc.compatibility.ApiCompatV28.ClusterQuotaDataV28
-import net.postchain.mc.compatibility.ApiCompatV28.createClusterFromWithClusterQuotaDataDataOperationV28
-import net.postchain.mc.compatibility.ApiCompatV28.createClusterWithClusterQuotaDataOperationV28
-import net.postchain.mc.compatibility.ApiCompatV33
-import net.postchain.mc.compatibility.ApiCompatV33.createClusterFromWithClusterDataOperationV33
-import net.postchain.mc.compatibility.ApiCompatV33.createClusterWithClusterDataOperationV33
 import net.postchain.mc.compatibility.ApiCompatV87
 import net.postchain.mc.compatibility.ApiCompatV87.createClusterFromWithClusterDataOperationV87
 import net.postchain.mc.compatibility.ApiCompatV87.createClusterWithClusterDataOperationV87
@@ -53,8 +43,6 @@ class CommandAddCluster : DCBaseCommand(
     private val clusterUnits by clusterUnitsOption().default(1)
 
     private val extraStorage by extraStorageOption().default(0)
-
-    private val clusterClass by option("-clcl", "--cluster-class", help = "Cluster Class tag (for API v29-32)").default("")
 
     private val governorName by option(
             "-g", "--governor",
@@ -106,7 +94,7 @@ class CommandAddCluster : DCBaseCommand(
                                 }
                             }
 
-                            apiVersion >= 34 -> {
+                            else -> {
                                 val clusterCreationData = ApiCompatV87.ClusterCreationDataV87(clusterUnits, extraStorage)
                                 when (providerOptions) {
                                     is VoterSetOrPubkeysOption.Pubkeys -> {
@@ -115,54 +103,6 @@ class CommandAddCluster : DCBaseCommand(
 
                                     is VoterSetOrPubkeysOption.VoterSet -> {
                                         createClusterFromWithClusterDataOperationV87(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, clusterCreationData)
-                                    }
-                                }
-                            }
-
-                            apiVersion >= 29 -> {
-                                when (providerOptions) {
-                                    is VoterSetOrPubkeysOption.Pubkeys -> {
-                                        createClusterWithClusterDataOperationV33(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, ApiCompatV33.ClusterCreationDataV33(clusterUnits, extraStorage, clusterClass))
-                                    }
-
-                                    is VoterSetOrPubkeysOption.VoterSet -> {
-                                        createClusterFromWithClusterDataOperationV33(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, ApiCompatV33.ClusterCreationDataV33(clusterUnits, extraStorage, clusterClass))
-                                    }
-                                }
-                            }
-
-                            apiVersion >= 24 -> {
-                                when (providerOptions) {
-                                    is VoterSetOrPubkeysOption.Pubkeys -> {
-                                        createClusterWithClusterQuotaDataOperationV28(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, ClusterQuotaDataV28(clusterUnits, extraStorage))
-                                    }
-
-                                    is VoterSetOrPubkeysOption.VoterSet -> {
-                                        createClusterFromWithClusterQuotaDataDataOperationV28(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, ClusterQuotaDataV28(clusterUnits, extraStorage))
-                                    }
-                                }
-                            }
-
-                            apiVersion >= 3 -> {
-                                when (providerOptions) {
-                                    is VoterSetOrPubkeysOption.Pubkeys -> {
-                                        createClusterWithUnitsOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys, clusterUnits)
-                                    }
-
-                                    is VoterSetOrPubkeysOption.VoterSet -> {
-                                        createClusterFromWithUnitsOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data, clusterUnits)
-                                    }
-                                }
-                            }
-
-                            else -> {
-                                when (providerOptions) {
-                                    is VoterSetOrPubkeysOption.Pubkeys -> {
-                                        createClusterOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.Pubkeys).pubkeys)
-                                    }
-
-                                    is VoterSetOrPubkeysOption.VoterSet -> {
-                                        createClusterFromOperation(clientProviderPubkey, name, governorName, (providerOptions as VoterSetOrPubkeysOption.VoterSet).data)
                                     }
                                 }
                             }

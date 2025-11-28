@@ -15,7 +15,6 @@ import net.postchain.mc.cli.interactiveOption
 import net.postchain.mc.cli.promptForIndex
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
-import net.postchain.mc.compatibility.ApiCompatV3.getBlockchainInfoListV3
 
 class CommandListBlockchains : PmcCommand(
         name = "list",
@@ -35,41 +34,27 @@ class CommandListBlockchains : PmcCommand(
             throw CliktError("--interactive requires directory chain version 17, found version $apiVersion")
         }
 
-        when {
-            apiVersion >= 4 -> {
-                val blockchains = client.getBlockchainInfoList(includeInactive)
-                if (interactive && blockchains.isNotEmpty() && blockchains.size < terminal.size.height) {
-                    terminal.interactiveSelectList(blockchains.map {
-                        "${it.rid.toHex()} - ${it.name}"
-                    }, "Select blockchain")?.let {
-                        showBlockchainInfo(client, config.chromiaClient, apiVersion, BlockchainRid(it.take(RID_LENGTH).hexStringToByteArray()))
-                    }
-                } else {
-                    echo(pmcTable(
-                            "blockchains",
-                            headers,
-                            blockchains.map {
-                                listOf(it.name, it.rid.toHex(), it.state.toString(), it.container ?: "N/A", it.cluster
-                                        ?: "N/A")
-                            },
-                            1 to RID_LENGTH,
-                            interactive))
-                    if (interactive && blockchains.isNotEmpty()) {
-                        promptForIndex(blockchains)?.let {
-                            showBlockchainInfo(client, config.chromiaClient, apiVersion, BlockchainRid(blockchains[it].rid))
-                        }
-                    }
-                }
+        val blockchains = client.getBlockchainInfoList(includeInactive)
+        if (interactive && blockchains.isNotEmpty() && blockchains.size < terminal.size.height) {
+            terminal.interactiveSelectList(blockchains.map {
+                "${it.rid.toHex()} - ${it.name}"
+            }, "Select blockchain")?.let {
+                showBlockchainInfo(client, config.chromiaClient, apiVersion, BlockchainRid(it.take(RID_LENGTH).hexStringToByteArray()))
             }
-
-            else -> {
-                val blockchains = client.getBlockchainInfoListV3(includeInactive)
-                echo(pmcTable(
-                        "blockchains",
-                        listOf("Name", "Rid", "Active", "Container", "Cluster"),
-                        blockchains.map { listOf(it.name, it.rid.toHex(), it.active.toString(), it.container, it.cluster) },
-                        1 to RID_LENGTH
-                ))
+        } else {
+            echo(pmcTable(
+                    "blockchains",
+                    headers,
+                    blockchains.map {
+                        listOf(it.name, it.rid.toHex(), it.state.toString(), it.container ?: "N/A", it.cluster
+                                ?: "N/A")
+                    },
+                    1 to RID_LENGTH,
+                    interactive))
+            if (interactive && blockchains.isNotEmpty()) {
+                promptForIndex(blockchains)?.let {
+                    showBlockchainInfo(client, config.chromiaClient, apiVersion, BlockchainRid(blockchains[it].rid))
+                }
             }
         }
     }

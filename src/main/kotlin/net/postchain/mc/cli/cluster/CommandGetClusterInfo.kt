@@ -18,9 +18,6 @@ import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
-import net.postchain.mc.compatibility.ApiCompatV28.getClusterDataV28
-import net.postchain.mc.compatibility.ApiCompatV33.getClusterDataV33
-import net.postchain.mc.compatibility.ApiCompatV56.getClusterDataV56
 
 class CommandGetClusterInfo : PmcCommand(
         name = "info",
@@ -43,67 +40,19 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, 
         echo("{")
         echo(""""basic": """, trailingNewline = false)
     }
-    when {
-        apiVersion >= 57 -> {
-            val info = client.getClusterData(name)
-            echo(pmcTable {
-                body {
-                    row("Name:", info.name)
-                    row("Governor:", info.governor)
-                    row("Is Operational:", info.isOperational.toString())
-                    info.numberOfNodes?.let { row("Number of nodes:", it.toString()) }
-                    info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
-                    info.extraStorage?.let { row("Extra Storage:", it.toString()) }
-                    info.containerUnitsAvailable?.let { row("Container Units available:", it.toString()) }
-                    info.extraStorageAvailable?.let { row("Extra Storage available:", it.toString()) }
-                }
-            })
+    val info = client.getClusterData(name)
+    echo(pmcTable {
+        body {
+            row("Name:", info.name)
+            row("Governor:", info.governor)
+            row("Is Operational:", info.isOperational.toString())
+            info.numberOfNodes?.let { row("Number of nodes:", it.toString()) }
+            info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
+            info.extraStorage?.let { row("Extra Storage:", it.toString()) }
+            info.containerUnitsAvailable?.let { row("Container Units available:", it.toString()) }
+            info.extraStorageAvailable?.let { row("Extra Storage available:", it.toString()) }
         }
-
-        apiVersion >= 34 -> {
-            val info = client.getClusterDataV56(name)
-            echo(pmcTable {
-                body {
-                    row("Name:", info.name)
-                    row("Governor:", info.governor)
-                    row("Is Operational:", info.isOperational.toString())
-                    info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
-                    info.extraStorage?.let { row("Extra Storage:", it.toString()) }
-                    info.containerUnitsAvailable?.let { row("Container Units available:", it.toString()) }
-                    info.extraStorageAvailable?.let { row("Extra Storage available:", it.toString()) }
-                }
-            })
-        }
-
-        apiVersion >= 29 -> {
-            val info = client.getClusterDataV33(name)
-            echo(pmcTable {
-                body {
-                    row("Name:", info.name)
-                    row("Governor:", info.governor)
-                    row("Is Operational:", info.isOperational.toString())
-                    info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
-                    info.extraStorage?.let { row("Extra Storage:", it.toString()) }
-                    info.containerUnitsAvailable?.let { row("Container Units available:", it.toString()) }
-                    info.extraStorageAvailable?.let { row("Extra Storage available:", it.toString()) }
-                    info.clusterClass?.let { row("Cluster class:", it) }
-                }
-            })
-        }
-
-        else -> {
-            val info = client.getClusterDataV28(name)
-            echo(pmcTable {
-                body {
-                    row("Name:", info.name)
-                    row("Governor:", info.governor)
-                    row("Is Operational:", info.isOperational.toString())
-                    info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
-                    info.extraStorage?.let { row("Extra Storage:", it.toString()) }
-                }
-            })
-        }
-    }
+    })
 
     if (apiVersion >= 88) {
         val clusterUnit = client.getClusterContainerUnitLimits(name)
