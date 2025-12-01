@@ -74,7 +74,7 @@ abstract class DCBaseCommand(
                 }
     }
 
-    fun fetchRemainingSignersFromDC(): List<PubKey> = if (dcVersion >= DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION) {
+    fun fetchRemainingSignersFromDC(): List<PubKey> = if (dcVersion >= DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_AND_THRESHOLD_VERSION) {
         val (keys, threshold) = client.getProviderKeysAndThreshold(PubKey(clientProviderPubkey))
         val eligibleKeys = keys.map { PubKey(it) }
         val possessedKeys = client.config.signers.map { it.pubKey }.toSet()

@@ -18,6 +18,7 @@ import net.postchain.gtx.Gtx
 import java.io.File
 
 const val DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_VERSION = 65L
+const val DIRECTORY_CHAIN_PROVIDER_MULTI_KEY_AND_THRESHOLD_VERSION = 103L
 
 fun CoreCliktCommand.saveTransaction(outputFolder: File, txRid: Hash, gtx: Gtx) {
     val missingSigners = (gtx.gtxBody.signers zip gtx.signatures).filter { it.second.isEmpty() }.map { PubKey(it.first) }
