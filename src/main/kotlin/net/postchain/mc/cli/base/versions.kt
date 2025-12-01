@@ -1,8 +1,10 @@
 package net.postchain.mc.cli.base
 
 import com.google.gson.JsonParser
-import java.net.http.*
 import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.time.Duration
 
 const val DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION = 30L // The version of directory chain introducing economy chain
@@ -19,45 +21,27 @@ const val ECONOMY_CHAIN_TAG_COMPUTE_REQUEST_PRICE_VERSION = 67L
  */
 object VersionChecker {
     private const val PMC_PROJECT_ID = "46346037"
-    private const val PMC_REPO_ID = "4241243"
     private const val GITLAB_API_URL = "https://gitlab.com/api/v4"
     private const val TIMEOUT_SECONDS = 3L
 
     fun fetchLatestVersion(): String? {
         return try {
             val client = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                .build()
+                    .connectTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
+                    .build()
 
-            // First, get the total number of pages
-            val tagsUrl = "$GITLAB_API_URL/projects/$PMC_PROJECT_ID/registry/repositories/$PMC_REPO_ID/tags"
-            val headRequest = HttpRequest.newBuilder()
-                .uri(URI.create(tagsUrl))
-                .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                .method("HEAD", HttpRequest.BodyPublishers.noBody())
-                .build()
-
-            val headResponse = client.send(headRequest, HttpResponse.BodyHandlers.discarding())
-            val lastPage = headResponse.headers()
-                .firstValue("x-total-pages")
-                .orElse("1")
-
-            // Fetch the last page of tags
-            val lastPageUrl = "$tagsUrl?page=$lastPage"
             val request = HttpRequest.newBuilder()
-                .uri(URI.create(lastPageUrl))
-                .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                .GET()
-                .build()
+                    .uri(URI.create("${GITLAB_API_URL}/projects/${PMC_PROJECT_ID}/repository/tags"))
+                    .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
+                    .GET()
+                    .build()
 
             val response = client.send(request, HttpResponse.BodyHandlers.ofString())
 
             if (response.statusCode() == 200) {
-                // Parse JSON and get the second-to-last tag name
+                // Parse JSON and get the first tag name
                 val jsonArray = JsonParser.parseString(response.body()).asJsonArray
-                if (jsonArray.size() >= 2) {
-                    jsonArray[jsonArray.size() - 2].asJsonObject.get("name")?.asString
-                } else if (jsonArray.size() == 1) {
+                if (jsonArray.size() >= 1) {
                     jsonArray[0].asJsonObject.get("name")?.asString
                 } else {
                     null
@@ -108,7 +92,7 @@ object VersionChecker {
             val latestVersion = fetchLatestVersion()
             if (latestVersion != null && compareVersions(currentVersion, latestVersion) < 0) {
                 System.err.println(
-                    "[WARN] You are using version $currentVersion, the latest version is $latestVersion"
+                        "[WARN] You are using version $currentVersion, the latest version is $latestVersion"
                 )
             }
         } catch (_: Exception) {
