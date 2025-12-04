@@ -1,11 +1,19 @@
 package net.postchain.mc.cli.base
 
+import com.chromia.build.tools.config.chromiaHome
 import com.google.gson.JsonParser
+import org.apache.commons.lang3.time.DateUtils.MILLIS_PER_DAY
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
+import kotlin.io.path.createDirectories
+import kotlin.io.path.div
+import kotlin.io.path.getLastModifiedTime
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 
 const val DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION = 30L // The version of directory chain introducing economy chain
 
@@ -89,7 +97,26 @@ object VersionChecker {
                 return
             }
 
-            val latestVersion = fetchLatestVersion()
+            val versionFile = chromiaHome / "pmc-version"
+
+            val savedVersion = if (versionFile.isRegularFile()
+                    && versionFile.getLastModifiedTime().toMillis() > (System.currentTimeMillis() - MILLIS_PER_DAY)) {
+                versionFile.readText().trim()
+            } else {
+                null
+            }
+
+            val latestVersion = if (savedVersion.isNullOrEmpty()) {
+                val fetchedVersion = fetchLatestVersion()
+                if (!fetchedVersion.isNullOrEmpty()) {
+                    chromiaHome.createDirectories()
+                    versionFile.writeText(fetchedVersion)
+                }
+                fetchedVersion
+            } else {
+                savedVersion
+            }
+
             if (latestVersion != null && compareVersions(currentVersion, latestVersion) < 0) {
                 System.err.println(
                         "[WARN] You are using version $currentVersion, the latest version is $latestVersion"
