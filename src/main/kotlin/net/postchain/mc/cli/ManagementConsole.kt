@@ -30,11 +30,11 @@ open class ManagementConsole : CliLauncher(name = "pmc") {
 
         val currentVersion = this::class.java.`package`.implementationVersion ?: "(unknown)"
         val version = """
-            ${currentVersion}
+            $currentVersion
             Java version ${System.getProperty("java.version")}
         """.trimIndent()
 
-        // do check latest version when pmc execution
+        // do check the latest version when pmc execution
         checkAndWarnIfOutdated(currentVersion)
 
         versionOption(version)
