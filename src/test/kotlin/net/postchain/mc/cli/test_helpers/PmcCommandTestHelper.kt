@@ -1,12 +1,12 @@
 package net.postchain.mc.cli.test_helpers
 
 import assertk.assertThat
+import assertk.assertions.any
 import assertk.assertions.contains
 import assertk.assertions.containsExactlyInAnyOrder
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
-import assertk.assertions.isTrue
 import com.chromia.build.tools.config.SUPPRESS_KEY_STORAGE_DEPRECATION_WARNING_SYSTEM_PROPERTY
 import com.chromia.build.tools.multisignature.MultiSignatureTxData
 import com.chromia.cli.test
@@ -52,9 +52,14 @@ fun assertLineValue(content: String, name: String, value: String) {
 
 fun assertLineValue(lines: List<String>, name: String, value: String) {
     assertThat(lines
-            .filter { it.contains("\"$name\":") }
-            .any { it.contains(value) }
-    ).isTrue()
+            .filter { it.contains("\"$name\":") },
+            name).any { it.contains(value) }
+}
+
+fun assertCommandSuccess(result: CliktCommandTestResult) {
+    if (result.statusCode != 0) {
+        assertThat(result.stderr).isEqualTo("")
+    }
 }
 
 fun assertCommandOutput(output: String, expected: String) {
