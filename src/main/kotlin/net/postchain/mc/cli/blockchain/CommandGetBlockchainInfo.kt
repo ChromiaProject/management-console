@@ -5,13 +5,17 @@ import com.chromia.cli.tools.formatter.defaultTable
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.terminal
+import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.groups.required
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextAlign
 import net.postchain.chain0.cm_api.CmPeerInfo
 import net.postchain.chain0.cm_api.cmGetClusterInfo
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
+import net.postchain.chain0.common.queries.BlockchainInfo
 import net.postchain.chain0.common.queries.getBlockchainInfo
+import net.postchain.chain0.common.queries.getBlockchainInfoByName
 import net.postchain.chain0.common.queries.getBlockchainReplicas
 import net.postchain.chain0.common.queries.getContainerData
 import net.postchain.chain0.common.queries.getImportingForeignBlockchainInfo
@@ -27,8 +31,9 @@ import net.postchain.common.wrap
 import net.postchain.crypto.PubKey
 import net.postchain.d1.client.ChromiaClient
 import net.postchain.mc.cli.PmcCommand
-import net.postchain.mc.cli.blockchainOption
-import net.postchain.mc.cli.resolveBlockchain
+import net.postchain.mc.cli.SystemBlockchain
+import net.postchain.mc.cli.blockchainRidOption
+import net.postchain.mc.cli.resolveSystemBlockchain
 import net.postchain.mc.cli.util.BlockHeightClient
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
@@ -40,23 +45,52 @@ class CommandGetBlockchainInfo : PmcCommand(
 ) {
     private val config by pmcConfigOption()
 
-    private val blockchain by blockchainOption().required()
+    private val blockchain by mutuallyExclusiveOptions(
+            blockchainRidOption(),
+            option("-chain", "--blockchain-name", help = "Blockchain name", metavar = "NAME"),
+    ).required()
 
     override fun run() {
         val client = config.client
         val apiVersion = client.apiVersion()
         if (apiVersion >= 17) {
-            val blockchainRID = resolveBlockchain(config.clientConfig, client, blockchain)
-            showBlockchainInfo(client, config.chromiaClient, apiVersion, blockchainRID)
+            val blockchainInfo = when (val bc = blockchain) {
+                is BlockchainRid -> client.getBlockchainInfo(bc.data)
+                        ?: throw CliktError("Blockchain with rid $bc not found")
+
+                is String ->
+                    getSystemBlockchainOrNull(bc)?.let {
+                        client.getBlockchainInfo(resolveSystemBlockchain(config.clientConfig, client, it).data)
+                                ?: throw CliktError("Blockchain with rid $bc not found")
+                    } ?: if (apiVersion >= 107)
+                        client.getBlockchainInfoByName(bc) ?: throw CliktError("Blockchain with name $bc not found")
+                    else
+                        throw CliktError("blockchain info by name requires directory chain version 107, found version $apiVersion")
+
+                else -> throw CliktError("Unknown error")
+            }
+            showBlockchainInfo(client, config.chromiaClient, apiVersion, blockchainInfo)
         } else {
             throw CliktError("blockchain info requires directory chain version 17, found version $apiVersion")
         }
+    }
+
+    private fun getSystemBlockchainOrNull(bc: String): SystemBlockchain? = try {
+        SystemBlockchain.valueOf(bc)
+    } catch (_: IllegalArgumentException) {
+        null
     }
 }
 
 internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromiaClient: ChromiaClient, apiVersion: Long, blockchainRid: BlockchainRid) {
     val blockchainInfo = client.getBlockchainInfo(blockchainRid.data)
             ?: throw CliktError("Blockchain with rid $blockchainRid not found")
+
+    showBlockchainInfo(client, chromiaClient, apiVersion, blockchainInfo)
+}
+
+internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromiaClient: ChromiaClient, apiVersion: Long, blockchainInfo: BlockchainInfo) {
+    val blockchainRid = BlockchainRid(blockchainInfo.rid)
 
     if (!terminal.terminalInfo.outputInteractive) {
         echo("{")
