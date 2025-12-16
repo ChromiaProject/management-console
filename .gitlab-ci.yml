@@ -9,9 +9,6 @@ include:
       - templates/container-dependency-scanning.yml
 
 .setup:
-  # Necessary to be able to launch PostgreSQL in Docker manually. PostgreSQL is
-  # launched in Docker manually (and not as a service, here) because then we can
-  # use a tmpfs (in-memory disk) for the data, making it faster.
   services:
     - name: docker:23.0.4-dind
       alias: docker
