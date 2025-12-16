@@ -9,13 +9,6 @@ include:
       - templates/container-dependency-scanning.yml
 
 .setup:
-  # Necessary to be able to launch PostgreSQL in Docker manually. PostgreSQL is
-  # launched in Docker manually (and not as a service, here) because then we can
-  # use a tmpfs (in-memory disk) for the data, making it faster.
-  services:
-    - name: docker:23.0.4-dind
-      alias: docker
-      command: [ "--tls=false" , "--experimental" ]
   artifacts:
     when: on_failure
     paths:
@@ -169,10 +162,6 @@ variables:
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true -s .gitlab-settings.xml -U"
   MAVEN_CLI_NVD_OPTS: "-DpnpmAuditAnalyzerEnabled=false -DnvdDatafeedUrl=https://nvd-data-feeds.chromia.dev/nvdcve-{0}.json.gz"
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_TLS_CERTDIR: ""
-  DOCKER_DRIVER: overlay2
-  DOCKER_CLI_EXPERIMENTAL: enabled
 
 # Cache downloaded dependencies and plugins between builds.
 # To keep cache across branches add 'key: "$CI_JOB_NAME"'
