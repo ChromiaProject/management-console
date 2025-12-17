@@ -61,6 +61,16 @@ open class RestTestModel(
         } ?: throw IllegalArgumentException("Query not found: ${query.name}")
     }
 
+    override fun queryWithHeight(query: GtxQuery): Pair<Gtv, Long> {
+        val queries = dynamicQueries[query.name]
+        return queries?.peek()?.let {
+            if (queries.size > 1) {
+                queries.poll()
+            }
+            it(query) to height
+        } ?: throw IllegalArgumentException("Query not found: ${query.name}")
+    }
+
     override fun postTransaction(tx: ByteArray) {
         val gtx = Gtx.decode(tx)
         assertThat(gtx.gtxBody.signers.size).isEqualTo(gtx.signatures.size)
