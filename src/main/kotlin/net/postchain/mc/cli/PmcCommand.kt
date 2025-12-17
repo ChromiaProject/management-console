@@ -17,6 +17,11 @@ abstract class PmcCommand(
         private val help: String? = null,
         override val printHelpOnEmptyArgs: Boolean = false
 ): CliktCommand(name) {
+
+    companion object {
+        const val NEL = "\u0085" // For manual line breaks in help messages
+    }
+
     override fun help(context: Context): String = help ?: ""
 
     fun txListener() = TxEventListener {

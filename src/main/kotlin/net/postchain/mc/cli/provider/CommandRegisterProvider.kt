@@ -59,25 +59,17 @@ class CommandRegisterProvider : DCBaseCommand(
         help = """
             Register new provider with given pubkey
             
-            There are three tiers of providers:
-            ```
-            - Dapp Provider:           Basic provider, can deploy dapps and add nodes that replicates blockchains (replica) (default)
-            - Node Provider:           Can add block builder nodes
-            - System Provider:         System level permissions and can add node to the system cluster
-            ```
+            There are three tiers of providers:$NEL
+            - Dapp Provider: Basic provider, can deploy dapps and add nodes that replicates blockchains (replica) (default)$NEL
+            - Node Provider: Can add block builder nodes$NEL
+            - System Provider: System level permissions and can add node to the system cluster
             
-            Examples:
-            ```
-            (1): pmc provider register -dp --enable --pubkey aa...
-            ```
-            ```
-            (2): pmc provider register --batch -dp --enable --provider '["pubkey": x"aa...", "name": "foo", "url": "http://foo/api"]' --provider '["pubkey": x"bb...", "name": "bar"]'
-            ```
-            ```
-            (3): pmc provider register --batch -dp --enable, where providers will be load from `providers.properties` file:
-                    provider=["pubkey": x"aa...", "name": "foo", "url": "http://foo/api"];["pubkey": x"bb...", "name": "bar", "url": "http://bar/api"]
+            Examples:$NEL
+            (1): pmc provider register -dp --enable --pubkey aa...$NEL
+            (2): pmc provider register --batch -dp --enable --provider '["pubkey": x"aa...", "name": "foo", "url": "http://foo/api"]' --provider '["pubkey": x"bb...", "name": "bar"]'$NEL
+            (3): pmc provider register --batch -dp --enable, where providers will be load from `providers.properties` file:$NEL
+                    provider=["pubkey": x"aa...", "name": "foo", "url": "http://foo/api"];["pubkey": x"bb...", "name": "bar", "url": "http://bar/api"]$NEL
                     provider=["pubkey": x"cc...", "url": "http://foobar/api"]
-            ```
     """.trimIndent()
 ) {
     init {

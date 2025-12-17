@@ -18,10 +18,8 @@ class CommandUpdatePriceOracleRates : ECBaseCommand(
         help = """
             Create a proposal to update price oracle token prices. Multiple tokens can be added/updated in each proposal.
             
-            Example:
-            ```
+            Example:$NEL
             pmc economy update-price-oracle-rates --token-rates '["symbol": "CHR", "name": "Chromia", "price": "12.34"]' --token-rates '["symbol": "tCHR", "name": "Test Chromia", "price": "34.56"]'
-            ```
     """.trimIndent(),
 ) {
 
