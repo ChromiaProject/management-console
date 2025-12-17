@@ -70,8 +70,8 @@ The `compatibility/` package contains versioned API compatibility classes (`ApiC
 
 Configuration is hierarchical with three levels (in order of precedence):
 1. Environment variable: `CHROMIA_CONFIG`
-2. Local config: `.pmc/config`
-3. Global config: `~/.pmc/config`
+2. Local config: `.chromia/config`
+3. Global config: `~/.chromia/config`
 
 Key configuration properties:
 - `api.url`: Node API URL (can be comma-delimited list)

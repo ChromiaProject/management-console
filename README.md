@@ -20,8 +20,8 @@ $ mvn package -Pdocker-push // Also builds a multi-arch docker image and pushes 
 Configuration of `pmc` can be done one three levels:
 
 ```shell
-~/.pmc/config # global configuration file
-.pmc/config   # local configuration file
+~/.chromia/config # global configuration file
+.chromia/config   # local configuration file
 env CHROMIA_CONFIG # overriding file
 ```
 
