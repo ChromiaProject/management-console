@@ -19,7 +19,7 @@ class CommandDownloadJar : DCBaseCommand(
 ) {
     private val id by proposalIndexOption().convert { RowId(it) }.required()
 
-    private val save by option(help = "Where to save JAR file").file(canBeFile = true, canBeDir = false)
+    private val save by option(help = "Where to save JAR file").file(canBeFile = true, canBeDir = false).required()
 
     private val update by option("--update", help = "Use this flag if proposal is to update the extension").flag()
 
@@ -31,12 +31,8 @@ class CommandDownloadJar : DCBaseCommand(
         }
         if (rawJar == null) throw CliktError("No JAR file present for proposal with id $id")
 
-        if (save != null) {
-            save!!.parentFile?.mkdirs()
-            save!!.writeBytes(rawJar)
-            echo("saved to ${save!!.name}")
-        } else {
-            System.out.use { it.write(rawJar) }
-        }
+        save.parentFile?.mkdirs()
+        save.writeBytes(rawJar)
+        echo("saved to ${save.name}")
     }
 }

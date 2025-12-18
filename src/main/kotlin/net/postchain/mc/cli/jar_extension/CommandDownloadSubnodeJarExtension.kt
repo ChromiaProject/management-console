@@ -14,17 +14,13 @@ class CommandDownloadSubnodeJarExtension : DCBaseCommand(
 ) {
     private val name by nameOption("Subnode JAR extension name").required()
 
-    private val save by option(help = "Where to save JAR file").file(canBeFile = true, canBeDir = false)
+    private val save by option(help = "Where to save JAR file").file(canBeFile = true, canBeDir = false).required()
 
     override fun runDC() {
         val rawJar = client.nmGetJarExtension(name)
 
-        if (save != null) {
-            save!!.parentFile?.mkdirs()
-            save!!.writeBytes(rawJar)
-            echo("saved to ${save!!.name}")
-        } else {
-            System.out.use { it.write(rawJar) }
-        }
+        save.parentFile?.mkdirs()
+        save.writeBytes(rawJar)
+        echo("saved to ${save.name}")
     }
 }
