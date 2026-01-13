@@ -31,6 +31,7 @@ fun CliktCommand.showSubnodeJarExtensionInfo(client: PostchainClient, name: Stri
             row("GTX modules:", info.gtxModules)
             row("Sync extensions:", info.syncExts)
             row("Active:", info.active)
+            info.nativeFunctions?.let { row("Rell native functions:", it) }
         }
     })
 

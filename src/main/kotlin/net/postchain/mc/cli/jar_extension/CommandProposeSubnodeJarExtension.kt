@@ -16,6 +16,7 @@ import net.postchain.mc.cli.util.metadataTextValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.scheduleAt
+import net.postchain.mc.compatibility.ApiCompatV107.proposeSubnodeJarExtensionOperationV107
 
 class CommandProposeSubnodeJarExtension : DCBaseCommand(
         name = "add",
@@ -33,13 +34,20 @@ class CommandProposeSubnodeJarExtension : DCBaseCommand(
     private val syncExts by option("-sync", "--sync-exts", help = "Synchronization infrastructure extensions exposed by this subnode JAR extension (comma separated list of FQCNs)")
             .default("").validate(metadataTextValidator())
     private val scheduledTime by scheduleAt()
+    private val nativeFunctions by option("-nf", "--native-funcs", help = "Rell native function implementations exposed by this subnode JAR extension (comma separated list of FQCNs)")
+            .default("").validate(metadataTextValidator())
     private val description by proposalDescriptionOption { "Register new subnode JAR extension $name" }
 
     override fun runDC() {
         transactionBuilder()
                 .apply {
-                    proposeSubnodeJarExtensionOperation(clientProviderPubkey, name, jar.readBytes(), type, extensionDescription,
-                            gtxModules, syncExts, description, scheduledTime)
+                    if (dcVersion < 108) {
+                        proposeSubnodeJarExtensionOperationV107(clientProviderPubkey, name, jar.readBytes(), type, extensionDescription,
+                                gtxModules, syncExts, description, scheduledTime)
+                    } else {
+                        proposeSubnodeJarExtensionOperation(clientProviderPubkey, name, jar.readBytes(), type, extensionDescription,
+                                gtxModules, syncExts, description, scheduledTime, nativeFunctions)
+                    }
                 }
                 .postOrSave()
                 .printResult(

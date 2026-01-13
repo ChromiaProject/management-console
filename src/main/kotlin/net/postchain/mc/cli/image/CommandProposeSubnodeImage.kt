@@ -17,6 +17,7 @@ import net.postchain.mc.cli.util.metadataTextValidator
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.proposalDescriptionOption
 import net.postchain.mc.cli.util.scheduleAt
+import net.postchain.mc.compatibility.ApiCompatV107.proposeSubnodeImageOperationV107
 import net.postchain.mc.compatibility.ApiCompatV85.proposeSubnodeImageOperationV85
 import net.postchain.mc.compatibility.ApiCompatV91.proposeSubnodeImageOperationV91
 
@@ -37,6 +38,8 @@ class CommandProposeSubnodeImage : DCBaseCommand(
             .default("").validate(metadataTextValidator())
     private val scheduledTime by scheduleAt()
     private val baseComputeRequests by baseComputeRequestsOptions()
+    private val nativeFunctions by option("-nf", "--native-funcs", help = "Rell native function implementations exposed by this subnode image (comma separated list of FQCNs)")
+            .default("").validate(metadataTextValidator())
     private val description by proposalDescriptionOption { "Register new subnode image $name with URL $url and digest $digest" }
 
     override fun runDC() {
@@ -55,10 +58,13 @@ class CommandProposeSubnodeImage : DCBaseCommand(
                     } else if (dcVersion < 92) {
                         proposeSubnodeImageOperationV91(clientProviderPubkey, name, url, digest, type, imageDescription,
                                 gtxModules, syncExts, description, scheduledTime)
+                    } else if (dcVersion < 108) {
+                        proposeSubnodeImageOperationV107(clientProviderPubkey, name, url, digest, type, imageDescription,
+                                gtxModules, syncExts, description, scheduledTime, baseComputeRequests?.toLong() ?: 0)
                     } else {
                         proposeSubnodeImageOperation(clientProviderPubkey, name, url, digest, type, imageDescription,
                                 gtxModules, syncExts, description, scheduledTime,
-                                baseComputeRequests = baseComputeRequests?.toLong() ?: 0)
+                                baseComputeRequests = baseComputeRequests?.toLong() ?: 0, nativeFunctions)
                     }
                 }
                 .postOrSave()
