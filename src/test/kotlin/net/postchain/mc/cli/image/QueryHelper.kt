@@ -22,6 +22,7 @@ fun buildGetSubnodeImagesResponse(
             "gtx_modules01",
             "sync_ext01",
             baseComputeRequests = 0,
+            "native_func01"
     )).map(GtvObjectMapper::toGtvDictionary))
 }
 
@@ -39,5 +40,6 @@ fun buildGetSubnodeImageResponse(
             "gtx_modules01",
             "sync_ext01",
             baseComputeRequests = 0,
+            "native_func01"
     ))
 }

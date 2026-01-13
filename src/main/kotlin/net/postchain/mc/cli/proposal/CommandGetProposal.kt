@@ -565,6 +565,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                         row("GTX modules", pc.gtxModules)
                         row("Sync extensions", pc.syncExts)
                         row("Base compute requests", pc.baseComputeRequests)
+                        pc.nativeFunctions?.let { row("Rell native functions", it) }
                     }
                 }
             }
@@ -670,6 +671,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                     row("Type", pc.subnodeJarExtensionType)
                     row("GTX modules", pc.gtxModules)
                     row("Sync extensions", pc.syncExts)
+                    pc.nativeFunctions?.let { row("Rell native functions", it) }
                 }
             }
         }

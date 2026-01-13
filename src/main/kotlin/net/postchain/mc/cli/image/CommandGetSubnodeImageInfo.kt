@@ -36,6 +36,7 @@ fun CliktCommand.showSubnodeImageInfo(dcVersion: Long, client: PostchainReadClie
                 image.gtxModules,
                 image.syncExts,
                 image.baseComputeRequests,
+                null
         )
     } else {
         client.getSubnodeImage(name)
@@ -52,6 +53,7 @@ fun CliktCommand.showSubnodeImageInfo(dcVersion: Long, client: PostchainReadClie
             row("Sync extensions:", info.syncExts)
             row("Active:", info.active)
             row("Base compute requests:", info.baseComputeRequests)
+            info.nativeFunctions?.let { row("Rell native functions:", it) }
         }
     })
 }
