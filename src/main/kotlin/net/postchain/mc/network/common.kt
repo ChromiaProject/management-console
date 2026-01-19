@@ -12,7 +12,7 @@ import net.postchain.mc.cli.base.printResult
 import net.postchain.token.token_chain.initTokenChainOperation
 import java.lang.Thread.sleep
 
-fun initEconomyChain(client: PostchainClient, chromiaClient: ChromiaClient) {
+fun initEconomyChain(client: PostchainClient, chromiaClient: ChromiaClient, printOnSuccess: Boolean = false) {
     val economyChainRid = client.getEconomyChainRid()
     if (economyChainRid != null) {
         val economyChainClient = chromiaClient.getSystemChainClient(BlockchainRid(economyChainRid), addNop = true)
@@ -28,7 +28,7 @@ fun initEconomyChain(client: PostchainClient, chromiaClient: ChromiaClient) {
                 .printResult(
                         "Economy chain was initiated",
                         "Failed to initiate economy chain",
-                        printOnSuccess = false
+                        printOnSuccess = printOnSuccess
                 )
     } else {
         throw CliktError("""Economy chain not yet available, please run "pmc network initialize-economy-chain" after a while""")

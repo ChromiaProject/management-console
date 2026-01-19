@@ -24,7 +24,7 @@ class CommandInitEconomyChain : DCBaseCommand(
 
     override fun runDC() {
         if (dcVersion < DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION) {
-            CliktError("Economy chain requires directory chain version $DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION, found version $dcVersion")
+            throw CliktError("Economy chain requires directory chain version $DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION, found version $dcVersion")
         }
 
         economyChainConfig?.let {
