@@ -90,7 +90,7 @@ class CommandInit : PmcCommand(
 
         val tokenChainConfigData = tokenChainConfig?.let { readAndCompressConfigurationFromFile(client, it, version) }
         if (version < 75 && tokenChainConfigData != null) {
-            CliktError("Token chain requires directory chain version 75, found version $version")
+            throw CliktError("Token chain requires directory chain version 75, found version $version")
         }
 
         client.transactionBuilder()
@@ -114,7 +114,7 @@ class CommandInit : PmcCommand(
             val chromiaClient = StandardChromiaClient(client.config)
             val dcClient = chromiaClient.getDirectoryChainClient()
             if (economyChainConfigData != null) {
-                initEconomyChain(dcClient, chromiaClient)
+                initEconomyChain(dcClient, chromiaClient, printOnSuccess = tokenChainConfigData != null)
             }
             if (tokenChainConfigData != null) {
                 initTokenChain(dcClient, chromiaClient)
