@@ -73,7 +73,7 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
         }
 
         val stopHeight = toHeight
-        try {
+        exportConfigFile.use { exportConfigFile ->
             exportConfigFile?.write(GtvEncoder.encodeGtv(gtv(blockchainRID.data)))
             while (true) {
                 if (save != null) {
@@ -98,8 +98,6 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
                 heights.add(nextHeight)
             }
             exportConfigFile?.write(GtvEncoder.encodeGtv(GtvNull))
-        } finally {
-            exportConfigFile?.close()
         }
 
         if (heights.isEmpty()) {

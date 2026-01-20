@@ -3,8 +3,6 @@ package net.postchain.mc.gtv.diff
 import com.github.difflib.DiffUtils
 import com.github.difflib.patch.Chunk
 import com.github.difflib.patch.DeltaType
-import com.github.difflib.text.DiffRow
-import com.github.difflib.text.DiffRowGenerator
 
 object StringDiffFinder {
 
