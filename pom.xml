@@ -311,6 +311,11 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
+                <configuration>
+                    <args>
+                        <arg>-Xannotation-default-target=first-only</arg> <!-- Needed to avoid warnings in the generated Rell client in Kotlin 2.2+ -->
+                    </args>
+                </configuration>
                 <executions>
                     <execution>
                         <id>compile</id>
@@ -480,6 +485,7 @@
                         <artifactId>kotlin-maven-plugin</artifactId>
                         <configuration>
                             <args>
+                                <arg>-Xannotation-default-target=first-only</arg> <!-- Needed to avoid warnings in the generated Rell client in Kotlin 2.2+ -->
                                 <arg>-Werror</arg>
                             </args>
                         </configuration>
