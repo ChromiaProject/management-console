@@ -9,7 +9,6 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
 import com.chromia.build.tools.config.SUPPRESS_KEY_STORAGE_DEPRECATION_WARNING_SYSTEM_PROPERTY
 import com.chromia.build.tools.multisignature.MultiSignatureTxData
-import com.chromia.cli.test
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.parse
 import com.github.ajalt.clikt.testing.CliktCommandTestResult
