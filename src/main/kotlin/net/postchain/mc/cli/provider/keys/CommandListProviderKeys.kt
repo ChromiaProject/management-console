@@ -33,12 +33,12 @@ class CommandListProviderKeys : DCBaseCommand(
             val providerKeys = client.getProviderKeys(it)
             providerKeys.keys.forEach { role ->
                 role.keys.forEach { key ->
-                    table.add(listOf(
+                    table.add(listOfNotNull(
                             if (multipleProviders) providerKeys.providerPubkey.toHex() else null,
                             role.role.name,
                             role.threshold.toString(),
                             key.data.toHex()
-                    ).filterNotNull())
+                    ))
                 }
             }
         }

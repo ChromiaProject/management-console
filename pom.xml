@@ -30,7 +30,7 @@
         <main-class>net.postchain.mc.Directory1Kt</main-class>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <kotlin.version>2.0.0</kotlin.version>
+        <kotlin.version>2.3.0</kotlin.version>
         <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
         <kotlin.code.style>obsolete</kotlin.code.style> <!-- Kotlin obsolete IntelliJ IDEA codestyle -->
 
@@ -311,6 +311,11 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
+                <configuration>
+                    <args>
+                        <arg>-Xannotation-default-target=first-only</arg> <!-- Needed to avoid warnings in the generated Rell client in Kotlin 2.2+ -->
+                    </args>
+                </configuration>
                 <executions>
                     <execution>
                         <id>compile</id>
@@ -480,6 +485,7 @@
                         <artifactId>kotlin-maven-plugin</artifactId>
                         <configuration>
                             <args>
+                                <arg>-Xannotation-default-target=first-only</arg> <!-- Needed to avoid warnings in the generated Rell client in Kotlin 2.2+ -->
                                 <arg>-Werror</arg>
                             </args>
                         </configuration>

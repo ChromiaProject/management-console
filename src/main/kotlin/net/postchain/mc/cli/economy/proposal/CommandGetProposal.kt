@@ -190,10 +190,10 @@ private fun CliktCommand.formatECPendingProposal(economyChainClient: PostchainCl
             return pmcTable {
                 body {
                     rowIfNotNull("Threshold", proposalDetails.threshold)
-                    if (proposalDetails.addMember != null && proposalDetails.addMember.isNotEmpty()) {
+                    if (!proposalDetails.addMember.isNullOrEmpty()) {
                         row("Add member(s)", proposalDetails.addMember.joinToString(", "))
                     }
-                    if (proposalDetails.removeMember != null && proposalDetails.removeMember.isNotEmpty()) {
+                    if (!proposalDetails.removeMember.isNullOrEmpty()) {
                         row("Remove member(s)", proposalDetails.removeMember.joinToString(", "))
                     }
                 }

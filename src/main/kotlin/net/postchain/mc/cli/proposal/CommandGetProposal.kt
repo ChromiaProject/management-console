@@ -252,7 +252,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.voter_set_update -> {
             val vsu = client.getVoterSetUpdateProposal(proposalId.id) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Voter set", vsu.voterSet)
                     row("Governor update", vsu.governor ?: "")
@@ -265,7 +265,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.cluster_provider -> {
             val cpc = client.getClusterProviderProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Cluster", cpc.cluster)
                     row("Provider", cpc.provider.toHex())
@@ -276,7 +276,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.provider_is_system -> {
             val pis = client.getSystemProviderProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Provider", pis.provider.toHex())
                     row("Add/Remove", if (pis.add) "Add" else "remove")
@@ -286,7 +286,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.provider_quota -> {
             val ppq = client.getProviderQuotaProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Provider tier", ppq.tier.name)
                     row("Quota type", ppq.quotaType.name)
@@ -314,12 +314,12 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                     }
             )
 
-            return providers
+            providers
         }
 
         ProposalType.container_limits -> {
             val pcl = client.getContainerLimitsProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Container", pcl.container)
                     row("Container Units", pcl.containerUnits.toString())
@@ -331,7 +331,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.cluster_limits -> {
             val pcl = client.getClusterLimitsProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Cluster", pcl.cluster)
                     row("Cluster Units", pcl.clusterUnits.toString())
@@ -342,12 +342,12 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.cluster_remove -> {
             val cluster = client.getClusterRemoveProposal(proposalId) ?: return ""
-            return "Cluster to remove: $cluster"
+            "Cluster to remove: $cluster"
         }
 
         ProposalType.provider_state -> {
             val pps = client.getProviderStateProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Provider", pps.provider.toHex())
                     row("Provider name", pps.providerName)
@@ -358,7 +358,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.blockchain_action -> {
             val pba = client.getBlockchainActionProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Blockchain RID", pba.blockchain.toHex())
                     row("Blockchain name", pba.blockchainName)
@@ -378,7 +378,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.blockchain_rename -> {
             val details = client.getBlockchainRenameProposal(proposalId)
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Blockchain RID", details.blockchainRid.toHex())
                     row("Current name", details.currentName)
@@ -396,7 +396,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.container -> {
             val pc = client.getContainerProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Container", pc.container)
                     row("Container Units", pc.containerUnits.toString())
@@ -409,7 +409,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.container_subnode_image -> {
             val pc = client.getContainerSubnodeImageProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Container", pc.container)
                     row("Subnode image", pc.subnodeImage)
@@ -419,14 +419,14 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.container_remove -> {
             val container = client.getContainerRemoveProposal(proposalId) ?: return ""
-            return "Container to remove: $container"
+            "Container to remove: $container"
         }
 
         ProposalType.blockchain_import -> {
             when {
                 apiVersion >= 19 -> {
                     val proposal = client.getBlockchainImportProposal(proposalId) ?: return ""
-                    return pmcTable {
+                    pmcTable {
                         body {
                             row("Blockchain RID", proposal.blockchainRid)
                             row("Blockchain Name", proposal.name)
@@ -436,7 +436,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                     }
                 }
 
-                else -> return ""
+                else -> ""
             }
         }
 
@@ -444,7 +444,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
             when {
                 apiVersion >= 19 -> {
                     val proposal = client.getConfigurationImportProposal(proposalId) ?: return ""
-                    return pmcTable {
+                    pmcTable {
                         body {
                             row("Blockchain RID", proposal.blockchainRid)
                             row("Height", proposal.height)
@@ -453,13 +453,13 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                     }
                 }
 
-                else -> return ""
+                else -> ""
             }
         }
 
         ProposalType.finish_blockchain_import -> {
             val proposal = client.getFinishBlockchainImportProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Blockchain RID", proposal.blockchainRid)
                     row("Final height", proposal.finalHeight)
@@ -471,7 +471,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
             when {
                 apiVersion >= 19 -> {
                     val proposal = client.getForeignBlockchainImportProposal(proposalId) ?: return ""
-                    return pmcTable {
+                    pmcTable {
                         body {
                             row("Foreign node", proposal.foreignNode)
                             row("Host", proposal.host)
@@ -485,13 +485,13 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                     }
                 }
 
-                else -> return ""
+                else -> ""
             }
         }
 
         ProposalType.foreign_blockchain_blocks_import -> {
             val proposal = client.getForeignBlockchainBlocksImportProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Blockchain RID", proposal.blockchainRid)
                     row("Final height", proposal.finalHeight)
@@ -503,7 +503,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
             when {
                 apiVersion >= 33 -> {
                     val proposal = client.getBlockchainMoveProposal(proposalId) ?: return ""
-                    return pmcTable {
+                    pmcTable {
                         body {
                             row("Blockchain RID", proposal.blockchainRid)
                             row("Blockchain name", proposal.blockchainName)
@@ -513,21 +513,21 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                     }
                 }
 
-                else -> return ""
+                else -> ""
             }
         }
 
         ProposalType.blockchain_move_cancel -> {
 //            val proposal = client.getBlockchainMoveCancelProposal(proposalId) ?: return ""
 //            return "$proposal"
-            return "Not yet implemented"
+            "Not yet implemented"
         }
 
         ProposalType.blockchain_move_finish -> {
             when {
                 apiVersion >= 33 -> {
                     val proposal = client.getBlockchainMoveFinishProposal(proposalId) ?: return ""
-                    return pmcTable {
+                    pmcTable {
                         body {
                             row("Blockchain RID", proposal.blockchainRid)
                             row("Blockchain name", proposal.blockchainName)
@@ -538,14 +538,14 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                     }
                 }
 
-                else -> return ""
+                else -> ""
             }
         }
 
         ProposalType.subnode_image -> {
             if (apiVersion < 96) {
                 val pc = client.getSubnodeImageProposalV95(proposalId) ?: return ""
-                return pmcTable {
+                pmcTable {
                     body {
                         row("Name", pc.name)
                         row("URL", pc.url)
@@ -555,7 +555,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                 }
             } else {
                 val pc = client.getSubnodeImageProposal(proposalId) ?: return ""
-                return pmcTable {
+                pmcTable {
                     body {
                         row("Name", pc.name)
                         row("URL", pc.url)
@@ -573,7 +573,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.subnode_image_state -> {
             val pc = client.getSubnodeImageStateProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Name", pc.name)
                     row("Active", pc.active)
@@ -584,7 +584,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
         ProposalType.update_subnode_image -> {
             if (apiVersion < 96) {
                 val pc = client.getUpdateSubnodeImageProposalV95(proposalId) ?: return ""
-                return pmcTable {
+                pmcTable {
                     body {
                         row("Name", pc.name)
                         row("URL", pc.url)
@@ -593,7 +593,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
                 }
             } else {
                 val pc = client.getUpdateSubnodeImageProposal(proposalId) ?: return ""
-                return pmcTable {
+                pmcTable {
                     body {
                         row("Name", pc.name)
                         rowIfNotNull("URL", pc.url)
@@ -609,7 +609,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.add_cluster_subnode_image -> {
             val pc = client.getAddClusterSubnodeImageProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Cluster", pc.cluster)
                     row("Subnode image", pc.subnodeImage)
@@ -619,7 +619,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.remove_cluster_subnode_image -> {
             val pc = client.getRemoveClusterSubnodeImageProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Cluster", pc.cluster)
                     row("Subnode image", pc.subnodeImage)
@@ -633,7 +633,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.container_action -> {
             val pc = client.getContainerActionProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Container", pc.container)
                     row("Action", pc.action)
@@ -643,7 +643,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.container_configuration -> {
             val pc = client.getContainerConfiguraitonProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Container", pc.container)
                     row("Slow DB statement log ms", pc.slowDbStatementLogMs)
@@ -653,7 +653,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.container_subnode_jar_extension -> {
             val pc = client.getContainerSubnodeJarExtensionProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Container", pc.container)
                     row("Subnode JAR extension", pc.subnodeJarExtension)
@@ -663,7 +663,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.subnode_jar_extension -> {
             val pc = client.getSubnodeJarExtensionProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Name", pc.name)
                     row("JAR", "Run 'pmc proposal download-jar --id ${proposalId.id}' to download the full JAR file with hash ${pc.hash.toHex()}")
@@ -678,7 +678,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.subnode_jar_extension_state -> {
             val pc = client.getSubnodeJarExtensionStateProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Name", pc.name)
                     row("Active", pc.active)
@@ -688,7 +688,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.add_cluster_subnode_jar_extension -> {
             val pc = client.getAddClusterSubnodeJarExtensionProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Cluster", pc.cluster)
                     row("Subnode JAR extension", pc.subnodeJarExtension)
@@ -698,7 +698,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.remove_cluster_subnode_jar_extension -> {
             val pc = client.getRemoveClusterSubnodeJarExtensionProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Cluster", pc.cluster)
                     row("Subnode JAR extension", pc.subnodeJarExtension)
@@ -708,7 +708,7 @@ private fun CliktCommand.formatPendingProposal(apiVersion: Long, client: Postcha
 
         ProposalType.update_subnode_jar_extension -> {
             val pc = client.getUpdateSubnodeJarExtensionProposal(proposalId) ?: return ""
-            return pmcTable {
+            pmcTable {
                 body {
                     row("Name", pc.name)
                     if (pc.hash != null) row("JAR", "Run 'pmc proposal download-jar --update --id ${proposalId.id}' to download the full JAR file with hash ${pc.hash.toHex()}")

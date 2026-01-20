@@ -41,10 +41,10 @@ class CommandAddSubnodeJarExtensionsToContainer : ECBaseCommand(
                         evmAddress ?: client.config.signers.first().pubKey.data,
                         ADD_SUBNODE_JAR_EXTENSIONS_TO_CONTAINER, null)
 
-        val transactionResult = economyChainClient.transactionBuilder().also {
+        val transactionResult = economyChainClient.transactionBuilder().also { txBuilder ->
             evmAddress?.let { evmAddress ->
                 addEvmAuthOperation(
-                        economyChainClient, it,
+                        economyChainClient, txBuilder,
                         ADD_SUBNODE_JAR_EXTENSIONS_TO_CONTAINER, listOf(
                         gtv(containerName),
                         gtv(subnodeJarExtensionNames.map { gtv(it) })
@@ -52,7 +52,7 @@ class CommandAddSubnodeJarExtensionsToContainer : ECBaseCommand(
                         evmAddress, accountId, authDescriptorId)
                 echo("Signing done, posting transaction...", err = true)
             } ?: run {
-                addFtAuthOperation(it, accountId, authDescriptorId)
+                addFtAuthOperation(txBuilder, accountId, authDescriptorId)
             }
         }
                 .addSubnodeJarExtensionsToContainerOperation(containerName, subnodeJarExtensionNames)
