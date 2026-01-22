@@ -31,10 +31,10 @@ object ApiCompatV95 {
 
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "")
     data class GetSubnodeImageProposalResultV95(
-            @Name("name") val name: String,
-            @Name("url") val url: String,
-            @Name("digest") val digest: String,
-            @Name("subnode_image_type") val subnodeImageType: SubnodeImageType
+            @param:Name("name") val name: String,
+            @param:Name("url") val url: String,
+            @param:Name("digest") val digest: String,
+            @param:Name("subnode_image_type") val subnodeImageType: SubnodeImageType
     )
 
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "proposal_subnode_image:get_subnode_image_proposal")
@@ -43,9 +43,9 @@ object ApiCompatV95 {
 
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "")
     data class GetUpdateSubnodeImageProposalResultV95(
-            @Name("name") val name: String,
-            @Name("url") val url: String,
-            @Name("digest") val digest: String
+            @param:Name("name") val name: String,
+            @param:Name("url") val url: String,
+            @param:Name("digest") val digest: String
     )
 
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "proposal_subnode_image:get_update_subnode_image_proposal")

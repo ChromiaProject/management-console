@@ -23,7 +23,7 @@
         <postchain.client.version>3.37.1</postchain.client.version>
         <directory.chain.version>1.109.0</directory.chain.version>
         <cli.tools.version>0.9.0</cli.tools.version>
-        <rell.maven.plugin.version>0.16.1</rell.maven.plugin.version>
+        <rell.maven.plugin.version>0.16.5</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
 
@@ -316,11 +316,6 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
-                <configuration>
-                    <args>
-                        <arg>-Xannotation-default-target=first-only</arg> <!-- Needed to avoid warnings in the generated Rell client in Kotlin 2.2+ -->
-                    </args>
-                </configuration>
                 <executions>
                     <execution>
                         <id>compile</id>
@@ -490,7 +485,6 @@
                         <artifactId>kotlin-maven-plugin</artifactId>
                         <configuration>
                             <args>
-                                <arg>-Xannotation-default-target=first-only</arg> <!-- Needed to avoid warnings in the generated Rell client in Kotlin 2.2+ -->
                                 <arg>-Werror</arg>
                             </args>
                         </configuration>

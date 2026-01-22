@@ -20,8 +20,8 @@ object ApiCompatV75 {
 
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "")
     data class GetClustersResult(
-            @Name("name") val name: String,
-            @Name("governor") val governor: String,
-            @Name("operational") val operational: Boolean
+            @param:Name("name") val name: String,
+            @param:Name("governor") val governor: String,
+            @param:Name("operational") val operational: Boolean
     )
 }
