@@ -58,16 +58,16 @@ object ApiCompatV91 {
      */
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "common.queries:subnode_image_data")
     data class SubnodeImageDataV91(
-            @Name("name") val name: String,
-            @Name("url") val url: String,
-            @Name("digest") val digest: String,
-            @Name("subnode_image_type") val subnodeImageType: SubnodeImageType,
-            @Name("owner") val owner: WrappedByteArray,
-            @Name("active") val active: Boolean,
-            @Name("description") val description: String,
-            @Name("gtx_modules") val gtxModules: String,
-            @Name("sync_exts") val syncExts: String,
-            @Name("base_compute_requests") @DefaultValue(defaultLong = 0) val baseComputeRequests: Long,
+            @param:Name("name") val name: String,
+            @param:Name("url") val url: String,
+            @param:Name("digest") val digest: String,
+            @param:Name("subnode_image_type") val subnodeImageType: SubnodeImageType,
+            @param:Name("owner") val owner: WrappedByteArray,
+            @param:Name("active") val active: Boolean,
+            @param:Name("description") val description: String,
+            @param:Name("gtx_modules") val gtxModules: String,
+            @param:Name("sync_exts") val syncExts: String,
+            @param:Name("base_compute_requests") @param:DefaultValue(defaultLong = 0) val baseComputeRequests: Long,
     )
 
     /**

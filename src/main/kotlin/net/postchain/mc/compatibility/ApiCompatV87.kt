@@ -19,8 +19,8 @@ object ApiCompatV87 {
 
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "model:cluster_creation_data")
     data class ClusterCreationDataV87(
-            @Name("cluster_units") val clusterUnits: Long,
-            @Name("extra_storage") val extraStorage: Long
+            @param:Name("cluster_units") val clusterUnits: Long,
+            @param:Name("extra_storage") val extraStorage: Long
     )
 
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "direct_cluster:create_cluster_with_cluster_data")

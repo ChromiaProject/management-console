@@ -47,9 +47,9 @@ object ApiCompatECV66 {
      */
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "economy_chain:tag_data")
     data class TagDataECV66(
-            @Name("name") val name: String,
-            @Name("scu_price") val scuPrice: Long,
-            @Name("extra_storage_price") val extraStoragePrice: Long
+            @param:Name("name") val name: String,
+            @param:Name("scu_price") val scuPrice: Long,
+            @param:Name("extra_storage_price") val extraStoragePrice: Long
     )
 
     const val GET_TAGS = "get_tags"

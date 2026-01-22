@@ -44,24 +44,24 @@ object ApiCompatECV63 {
      */
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "economy_chain:economy_constants_data")
     data class EconomyConstantsDataECV63(
-            @Name("min_lease_time_weeks") val minLeaseTimeWeeks: Long,
-            @Name("max_lease_time_weeks") val maxLeaseTimeWeeks: Long,
-            @Name("chr_per_usd") val chrPerUsd: BigDecimal,
-            @Name("total_cost_system_providers") val totalCostSystemProviders: Long,
-            @Name("system_provider_fee_share") val systemProviderFeeShare: BigDecimal,
-            @Name("staking_reward_rate") val stakingRewardRate: BigDecimal,
-            @Name("staking_reward_fee_share") val stakingRewardFeeShare: BigDecimal,
-            @Name("chromia_foundation_fee_share") val chromiaFoundationFeeShare: BigDecimal,
-            @Name("resource_pool_margin_fee_share") val resourcePoolMarginFeeShare: BigDecimal,
-            @Name("system_provider_risk_share") val systemProviderRiskShare: BigDecimal,
-            @Name("dapp_provider_risk_share") val dappProviderRiskShare: BigDecimal,
-            @Name("staking_requirements_enabled") val stakingRequirementsEnabled: Boolean,
-            @Name("staking_requirement_stop_payout_days") val stakingRequirementStopPayoutDays: Long,
-            @Name("staking_requirement_system_node_own_stake_chr") val stakingRequirementSystemNodeOwnStakeChr: Long,
-            @Name("staking_requirement_system_node_total_stake_chr") val stakingRequirementSystemNodeTotalStakeChr: Long,
-            @Name("staking_requirement_dapp_node_own_stake_chr") val stakingRequirementDappNodeOwnStakeChr: Long,
-            @Name("staking_requirement_dapp_node_total_stake_chr") val stakingRequirementDappNodeTotalStakeChr: Long,
-            @Name("bridge_lease_add_min_balance_usd") val bridgeLeaseAddMinBalanceUsd: BigDecimal
+            @param:Name("min_lease_time_weeks") val minLeaseTimeWeeks: Long,
+            @param:Name("max_lease_time_weeks") val maxLeaseTimeWeeks: Long,
+            @param:Name("chr_per_usd") val chrPerUsd: BigDecimal,
+            @param:Name("total_cost_system_providers") val totalCostSystemProviders: Long,
+            @param:Name("system_provider_fee_share") val systemProviderFeeShare: BigDecimal,
+            @param:Name("staking_reward_rate") val stakingRewardRate: BigDecimal,
+            @param:Name("staking_reward_fee_share") val stakingRewardFeeShare: BigDecimal,
+            @param:Name("chromia_foundation_fee_share") val chromiaFoundationFeeShare: BigDecimal,
+            @param:Name("resource_pool_margin_fee_share") val resourcePoolMarginFeeShare: BigDecimal,
+            @param:Name("system_provider_risk_share") val systemProviderRiskShare: BigDecimal,
+            @param:Name("dapp_provider_risk_share") val dappProviderRiskShare: BigDecimal,
+            @param:Name("staking_requirements_enabled") val stakingRequirementsEnabled: Boolean,
+            @param:Name("staking_requirement_stop_payout_days") val stakingRequirementStopPayoutDays: Long,
+            @param:Name("staking_requirement_system_node_own_stake_chr") val stakingRequirementSystemNodeOwnStakeChr: Long,
+            @param:Name("staking_requirement_system_node_total_stake_chr") val stakingRequirementSystemNodeTotalStakeChr: Long,
+            @param:Name("staking_requirement_dapp_node_own_stake_chr") val stakingRequirementDappNodeOwnStakeChr: Long,
+            @param:Name("staking_requirement_dapp_node_total_stake_chr") val stakingRequirementDappNodeTotalStakeChr: Long,
+            @param:Name("bridge_lease_add_min_balance_usd") val bridgeLeaseAddMinBalanceUsd: BigDecimal
     )
 
     const val GET_ECONOMY_CONSTANTS = "get_economy_constants"
@@ -81,13 +81,13 @@ object ApiCompatECV63 {
      */
     @Generated("net.postchain.rell.codegen.CodeGenerator", comments = "economy_chain:pending_economy_constants_data")
     data class PendingEconomyConstantsDataECV63(
-            @Name("min_lease_time_weeks") @Nullable val minLeaseTimeWeeks: Long?,
-            @Name("max_lease_time_weeks") @Nullable val maxLeaseTimeWeeks: Long?,
-            @Name("staking_reward_rate") @Nullable val stakingRewardRate: BigDecimal?,
-            @Name("staking_reward_fee_share") @Nullable val stakingRewardFeeShare: BigDecimal?,
-            @Name("chromia_foundation_fee_share") @Nullable val chromiaFoundationFeeShare: BigDecimal?,
-            @Name("resource_pool_margin_fee_share") @Nullable val resourcePoolMarginFeeShare: BigDecimal?,
-            @Name("dapp_provider_risk_share") @Nullable val dappProviderRiskShare: BigDecimal?
+            @param:Name("min_lease_time_weeks") @param:Nullable val minLeaseTimeWeeks: Long?,
+            @param:Name("max_lease_time_weeks") @param:Nullable val maxLeaseTimeWeeks: Long?,
+            @param:Name("staking_reward_rate") @param:Nullable val stakingRewardRate: BigDecimal?,
+            @param:Name("staking_reward_fee_share") @param:Nullable val stakingRewardFeeShare: BigDecimal?,
+            @param:Name("chromia_foundation_fee_share") @param:Nullable val chromiaFoundationFeeShare: BigDecimal?,
+            @param:Name("resource_pool_margin_fee_share") @param:Nullable val resourcePoolMarginFeeShare: BigDecimal?,
+            @param:Name("dapp_provider_risk_share") @param:Nullable val dappProviderRiskShare: BigDecimal?
     )
 
     const val GET_ECONONY_CONSTANTS_PROPOSAL = "get_econony_constants_proposal"
