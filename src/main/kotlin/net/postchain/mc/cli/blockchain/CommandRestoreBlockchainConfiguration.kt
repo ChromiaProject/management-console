@@ -47,13 +47,19 @@ class CommandRestoreBlockchainConfiguration : DCBaseCommand(
     private val signerList by option("-bcs", "--blockchain-signers", help = "Optional comma separated list of public keys of signers if they are necessary to replace")
             .split(",")
 
+    private val clusterName by option(
+            "-c", "--cluster",
+            help = "In case the blockchain has been removed you need to manually supply which cluster it was running in at the given height"
+    )
+
     override fun runDC() {
         val signers = signerList?.map { it.hexStringToByteArray() }
         val blockchainConfig = if (blockchainConfigFile != null)
             GtvEncoder.encodeGtv(BlockchainConfigurationCompressor.compress(client, BlockchainConfig.readFromFile(blockchainConfigFile!!).gtv, dcVersion))
         else null
 
-        val cacClient = config.chromiaClient.getClusterAnchoringClient(blockchainRid)
+        val cacClient = clusterName?.let { config.chromiaClient.getClusterAnchoringClient(it) }
+                ?: config.chromiaClient.getClusterAnchoringClient(blockchainRid)
         val anchoredBlock = cacClient.getAnchoredBlockAtHeight(blockchainRid, height)
                 ?: throw CliktError("No anchored block at height $height for blockchain $blockchainRid")
         val anchoringTxWithOpIndex = cacClient.getAnchoringTransactionForBlockRid(blockchainRid, anchoredBlock.blockRid.data)!!
