@@ -6,11 +6,13 @@ import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.common.queries.getBlockchainInfo
 import net.postchain.chain0.nm_api.nmFindNextConfigurationHeight
 import net.postchain.chain0.nm_api.nmGetBlockchainConfiguration
+import net.postchain.common.BlockchainRid
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.GtvEncoder
 import net.postchain.gtv.GtvFactory.gtv
@@ -23,7 +25,6 @@ import net.postchain.mc.cli.util.pmcConfigOption
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.io.OutputStream
 
 class CommandGetAllBlockchainConfigurations : PmcCommand(
         name = "get-all-configurations",
@@ -34,13 +35,15 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
     private val blockchain by blockchainOption().required()
 
     private val save by option(help = "Where to save configuration file(s)").file(canBeFile = false, canBeDir = true)
-
     private val overwrite by option("--overwrite", help = "When saving configurations, overwrite existing files in the target directory").flag()
-
     private val exportFormat by option("--export-format", help = "When saving configurations, generate a binary GTV file for chain import instead of human readable XML files").flag()
-    private val fromHeight by option("--from-height", help = "Fetch from height").long().default(0)
 
-    private val toHeight by option("--to-height", help = "Fetch to height").long()
+    private val fromHeight by option("--from-height", help = "Fetch from height").long().default(0).validate {
+        require(it >= 0) { "--from-height must be non-negative" }
+    }
+    private val toHeight by option("--to-height", help = "Fetch to height").long().default(Long.MAX_VALUE).validate {
+        require(it >= 0) { "--to-height must be non-negative" }
+    }
 
     override fun run() {
         val blockchainRID = resolveBlockchain(config.clientConfig, config.client, blockchain)
@@ -48,62 +51,88 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
             throw CliktError("Unknown blockchain: $blockchainRID")
         }
 
-        val heights = if (fromHeight == 0L) {
-            mutableListOf(0L)
-        } else {
-            var startHeight = 0L
-            while (startHeight != fromHeight) {
-                val nextHeight = config.client.nmFindNextConfigurationHeight(blockchainRID, startHeight)
-                if (nextHeight == null || nextHeight > fromHeight) break
-                startHeight = nextHeight
-            }
-            mutableListOf(startHeight)
+        if (toHeight < fromHeight) {
+            throw CliktError("--to-height must be greater than or equal to --from-height")
         }
 
-        var exportConfigFile: OutputStream? = null
+        val heights = findAllConfigurationHeights(blockchainRID)
+
         if (save != null) {
-            save?.mkdirs()
-            if (!overwrite && save?.list()?.isNotEmpty() == true) {
-                throw CliktError("Directory is not empty: $save")
+            downloadAndSaveConfigurations(blockchainRID, heights)
+            if (heights.isEmpty()) {
+                echo("No configurations downloaded")
+            } else {
+                echo("Configurations at heights downloaded:\n${heights.joinToString("\n")}")
             }
-            if (exportFormat) {
-                echo("Generating configuration export file with name: '$blockchainRID.configs'", err = true)
-                exportConfigFile = BufferedOutputStream(FileOutputStream(File(save?.path, "$blockchainRID.configs")))
+        } else {
+            if (heights.isEmpty()) {
+                echo("No configurations found")
+            } else {
+                echo("Configurations at heights found:\n${heights.joinToString("\n")}")
             }
         }
+    }
 
-        val stopHeight = toHeight
-        exportConfigFile.use { exportConfigFile ->
-            exportConfigFile?.write(GtvEncoder.encodeGtv(gtv(blockchainRID.data)))
-            while (true) {
-                if (save != null) {
-                    val height = heights.last()
-                    val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, height)
-                    if (bcConfig == null) {
-                        echo("Blockchain configuration at height $height is absent", err = true)
-                        heights.removeLast()
-                        return
-                    }
+    private fun findAllConfigurationHeights(blockchainRID: BlockchainRid): List<Long> {
+        val heights = mutableListOf<Long>()
 
-                    if (exportConfigFile != null) {
-                        exportConfigFile.write(GtvEncoder.encodeGtv(gtv(gtv(height), gtv(bcConfig))))
-                    } else {
-                        val xmlGtv = GtvMLEncoder.encodeXMLGtv(GtvDecoder.decodeGtv(bcConfig))
-                        File(save?.path, "${heights.last()}.conf.xml").writeText(xmlGtv)
-                    }
+        var current = fromHeight - 1L
+        while (true) {
+            val next = config.client.nmFindNextConfigurationHeight(blockchainRID, current) ?: break
+            when {
+                next == toHeight -> {
+                    heights.add(next)
+                    break
                 }
 
-                val nextHeight = config.client.nmFindNextConfigurationHeight(blockchainRID, heights.last()) ?: break
-                if (stopHeight != null && nextHeight > stopHeight) break
-                heights.add(nextHeight)
+                next > toHeight -> {
+                    break
+                }
+
+                else -> {
+                    heights.add(next)
+                    current = next
+                }
             }
-            exportConfigFile?.write(GtvEncoder.encodeGtv(GtvNull))
         }
 
-        if (heights.isEmpty()) {
-            echo("No configurations ${if (save != null) "downloaded" else "found"}")
+        return heights
+    }
+
+    private fun downloadAndSaveConfigurations(blockchainRID: BlockchainRid, heights: List<Long>) {
+        save?.mkdirs()
+        if (!overwrite && save?.list()?.isNotEmpty() == true) {
+            throw CliktError("Directory is not empty: $save")
+        }
+
+        if (exportFormat) {
+            saveConfigurationsAsBinary(blockchainRID, heights)
         } else {
-            echo("Configurations at heights ${if (save != null) "downloaded" else "found"}:\n${heights.joinToString("\n")}")
+            saveConfigurationsAsXml(blockchainRID, heights)
+        }
+    }
+
+    private fun saveConfigurationsAsBinary(blockchainRID: BlockchainRid, heights: List<Long>) {
+        echo("Generating configuration export file with name: '$blockchainRID.configs'", err = true)
+        BufferedOutputStream(FileOutputStream(File(save?.path, "$blockchainRID.configs"))).use { output ->
+            output.write(GtvEncoder.encodeGtv(gtv(blockchainRID.data)))
+
+            for (height in heights) {
+                val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, height)
+                        ?: throw CliktError("Blockchain configuration at height $height is absent")
+                output.write(GtvEncoder.encodeGtv(gtv(gtv(height), gtv(bcConfig))))
+            }
+
+            output.write(GtvEncoder.encodeGtv(GtvNull))
+        }
+    }
+
+    private fun saveConfigurationsAsXml(blockchainRID: BlockchainRid, heights: List<Long>) {
+        for (height in heights) {
+            val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, height)
+                    ?: throw CliktError("Blockchain configuration at height $height is absent")
+            val xmlGtv = GtvMLEncoder.encodeXMLGtv(GtvDecoder.decodeGtv(bcConfig))
+            File(save?.path, "$height.conf.xml").writeText(xmlGtv)
         }
     }
 }
