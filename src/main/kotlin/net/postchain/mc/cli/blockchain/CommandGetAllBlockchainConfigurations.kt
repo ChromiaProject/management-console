@@ -79,21 +79,10 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
         var current = fromHeight - 1L
         while (true) {
             val next = config.client.nmFindNextConfigurationHeight(blockchainRID, current) ?: break
-            when {
-                next == toHeight -> {
-                    heights.add(next)
-                    break
-                }
-
-                next > toHeight -> {
-                    break
-                }
-
-                else -> {
-                    heights.add(next)
-                    current = next
-                }
-            }
+            if (next > toHeight) break
+            heights.add(next)
+            if (next == toHeight) break
+            current = next
         }
 
         return heights
