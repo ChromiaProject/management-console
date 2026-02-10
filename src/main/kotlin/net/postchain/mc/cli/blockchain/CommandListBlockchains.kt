@@ -3,6 +3,7 @@ package net.postchain.mc.cli.blockchain
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.input.interactiveSelectList
 import net.postchain.chain0.common.queries.getBlockchainInfoList
 import net.postchain.chain0.version.apiVersion
@@ -25,6 +26,9 @@ class CommandListBlockchains : PmcCommand(
 
     private val includeInactive by includeInactiveOption("Include paused/removed blockchains")
 
+    private val cluster by option("--cluster", help = "Filter blockchains by cluster name")
+    private val container by option("--container", help = "Filter blockchains by container name (partial match)")
+
     private val headers = listOf("Name", "Rid", "State", "Container", "Cluster")
 
     override fun run() {
@@ -34,7 +38,14 @@ class CommandListBlockchains : PmcCommand(
             throw CliktError("--interactive requires directory chain version 17, found version $apiVersion")
         }
 
-        val blockchains = client.getBlockchainInfoList(includeInactive)
+        val allBlockchains = client.getBlockchainInfoList(includeInactive)
+
+        // Apply filters
+        val blockchains = allBlockchains.filter { blockchain ->
+            (cluster == null || blockchain.cluster == cluster) &&
+                    (container == null || blockchain.container?.contains(container.toString()) == true)
+        }
+
         if (interactive && blockchains.isNotEmpty() && blockchains.size < terminal.size.height) {
             terminal.interactiveSelectList(blockchains.map {
                 "${it.rid.toHex()} - ${it.name}"

@@ -133,7 +133,7 @@ fun buildGetBlockchainInfoListResponse(): (query: GtxQuery) -> Gtv {
                     BlockchainState.PAUSED,
                     "container03",
                     ContainerState.RUNNING,
-                    "cluster01",
+                    "cluster03",
                     false,
                     false,
                     false,
