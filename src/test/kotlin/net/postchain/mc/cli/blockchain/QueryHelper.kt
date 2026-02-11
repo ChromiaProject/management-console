@@ -198,3 +198,22 @@ fun buildCmGetClusterBlockchainsResponse(): Gtv {
 fun buildCmGetSystemAnchoringChainResponse(): Gtv {
     return gtv(BlockchainRid.buildRepeat(2).wData)
 }
+
+fun buildNmGetBlockchainConfigurationResponse(): Gtv {
+    return gtv(net.postchain.gtv.GtvEncoder.encodeGtv(gtv(mapOf("test" to gtv("config")))))
+}
+
+fun buildNmGetBlockchainConfigurationInfoResponse(): (query: GtxQuery) -> Gtv {
+    return { query ->
+        val height = query.args["height"]!!.asInteger()
+        val baseConfig = net.postchain.gtv.GtvEncoder.encodeGtv(gtv(mapOf("test" to gtv("config"))))
+        val signers = listOf("1234".hexStringToByteArray().wrap())
+        val configHash = BlockchainRid.buildRepeat(height.toByte()).data
+
+        gtv(mapOf(
+                "base_config" to gtv(baseConfig),
+                "signers" to gtv(signers.map { gtv(it) }),
+                "config_hash" to gtv(configHash)
+        ))
+    }
+}

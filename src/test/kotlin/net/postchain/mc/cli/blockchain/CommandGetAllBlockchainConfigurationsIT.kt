@@ -2,6 +2,7 @@ package net.postchain.mc.cli.blockchain
 
 import assertk.assertThat
 import assertk.assertions.contains
+import assertk.assertions.exists
 import assertk.assertions.isEqualTo
 import net.postchain.chain0.model.BlockchainState
 import net.postchain.common.BlockchainRid
@@ -9,6 +10,7 @@ import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
+import kotlin.io.path.listDirectoryEntries
 
 class CommandGetAllBlockchainConfigurationsIT {
 
@@ -262,6 +264,62 @@ class CommandGetAllBlockchainConfigurationsIT {
                 ) { result, _ ->
                     assertThat(result.statusCode).isEqualTo(1)
                     assertThat(result.stderr).contains("--to-height must be greater than or equal to --from-height")
+                }
+    }
+
+    @Test
+    fun `save configurations as XML files`(@TempDir dir: Path) {
+        val outputDir = dir.resolve("configs")
+        val configHeights = listOf(0, 100, 200)
+        val expectedConfigHashes = configHeights.map { BlockchainRid.buildRepeat(it.toByte()) }
+        println(expectedConfigHashes)
+        ManagedRestTestApi(dir, dcVersion = 72)
+                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(state = BlockchainState.RUNNING))
+                .withDCQuery("nm_find_next_configuration_height", buildNmFindNextConfigurationHeightResponse(configHeights))
+                .withDCQuery("nm_get_blockchain_configuration_info", buildNmGetBlockchainConfigurationInfoResponse())
+                .testCommand(
+                        CommandGetAllBlockchainConfigurations(),
+                        "--blockchain-rid", BlockchainRid.ZERO_RID.toHex(),
+                        "--save", outputDir.toAbsolutePath().toString()
+                ) { result, _ ->
+                    assertThat(result.stdout.trim()).contains("Configurations at heights downloaded:")
+                    assertThat(result.stdout.trim()).contains("0")
+                    assertThat(result.stdout.trim()).contains("100")
+                    assertThat(result.stdout.trim()).contains("200")
+
+                    // Verify files exist
+                    assertThat(outputDir).exists()
+                    val files = outputDir.listDirectoryEntries()
+                    assertThat(files.size).isEqualTo(3)
+                    assertThat(outputDir.resolve("0.${expectedConfigHashes[0]}.xml")).exists()
+                    assertThat(outputDir.resolve("100.${expectedConfigHashes[1]}.xml")).exists()
+                    assertThat(outputDir.resolve("200.${expectedConfigHashes[2]}.xml")).exists()
+                }
+    }
+
+    @Test
+    fun `save configurations as binary file`(@TempDir dir: Path) {
+        val outputDir = dir.resolve("configs")
+        val configHeights = listOf(0, 100)
+        ManagedRestTestApi(dir, dcVersion = 72)
+                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(state = BlockchainState.RUNNING))
+                .withDCQuery("nm_find_next_configuration_height", buildNmFindNextConfigurationHeightResponse(configHeights))
+                .withDCQuery("nm_get_blockchain_configuration", buildNmGetBlockchainConfigurationResponse())
+                .testCommand(
+                        CommandGetAllBlockchainConfigurations(),
+                        "--blockchain-rid", BlockchainRid.ZERO_RID.toHex(),
+                        "--save", outputDir.toAbsolutePath().toString(),
+                        "--export-format"
+                ) { result, _ ->
+                    assertThat(result.stdout.trim()).contains("Configurations at heights downloaded:")
+                    assertThat(result.stdout.trim()).contains("0")
+                    assertThat(result.stdout.trim()).contains("100")
+
+                    // Verify binary file exists
+                    assertThat(outputDir).exists()
+                    val files = outputDir.listDirectoryEntries()
+                    assertThat(files.size).isEqualTo(1)
+                    assertThat(outputDir.resolve("${BlockchainRid.ZERO_RID}.configs")).exists()
                 }
     }
 }

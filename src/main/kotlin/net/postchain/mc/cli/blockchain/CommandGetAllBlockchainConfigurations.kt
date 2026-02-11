@@ -12,6 +12,7 @@ import com.github.ajalt.clikt.parameters.types.long
 import net.postchain.chain0.common.queries.getBlockchainInfo
 import net.postchain.chain0.nm_api.nmFindNextConfigurationHeight
 import net.postchain.chain0.nm_api.nmGetBlockchainConfiguration
+import net.postchain.chain0.nm_api.nmGetBlockchainConfigurationInfo
 import net.postchain.common.BlockchainRid
 import net.postchain.gtv.GtvDecoder
 import net.postchain.gtv.GtvEncoder
@@ -28,7 +29,7 @@ import java.io.FileOutputStream
 
 class CommandGetAllBlockchainConfigurations : PmcCommand(
         name = "get-all-configurations",
-        help = "List all blockchain configuration heights or download and save all configurations to the specified directory"
+        help = "List configuration heights or download configurations to directory (saved with config hashes)"
 ) {
     private val config by pmcConfigOption()
 
@@ -118,10 +119,16 @@ class CommandGetAllBlockchainConfigurations : PmcCommand(
 
     private fun saveConfigurationsAsXml(blockchainRID: BlockchainRid, heights: List<Long>) {
         for (height in heights) {
-            val bcConfig = config.client.nmGetBlockchainConfiguration(blockchainRID, height)
+            val bcConfigInfo = config.client.nmGetBlockchainConfigurationInfo(blockchainRID, height)
                     ?: throw CliktError("Blockchain configuration at height $height is absent")
-            val xmlGtv = GtvMLEncoder.encodeXMLGtv(GtvDecoder.decodeGtv(bcConfig))
-            File(save?.path, "$height.conf.xml").writeText(xmlGtv)
+
+            // Make a full config
+            val dict = GtvDecoder.decodeGtv(bcConfigInfo.baseConfig.data).asDict().toMutableMap()
+            dict["signers"] = gtv(bcConfigInfo.signers.map { gtv(it) })
+
+            // Convert GTV to XML and write to a file
+            val xmlGtv = GtvMLEncoder.encodeXMLGtv(gtv(dict))
+            File(save?.path, "$height.${bcConfigInfo.configHash}.xml").writeText(xmlGtv)
         }
     }
 }
