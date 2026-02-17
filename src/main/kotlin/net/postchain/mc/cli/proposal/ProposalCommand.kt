@@ -8,9 +8,10 @@ class ProposalCommand : PmcCommand(help = "Interact with existing proposals") {
 }
 
 fun proposalCommands() = ProposalCommand().subcommands(
-    CommandGetProposal(),
-    CommandListProposals(),
-    CommandRevokeProposal(),
+        CommandGetProposal(),
+        CommandListProposals(),
+        CommandRevokeProposal(),
         CommandVote(),
+        CommandRetractVote(),
         CommandDownloadJar()
 )
