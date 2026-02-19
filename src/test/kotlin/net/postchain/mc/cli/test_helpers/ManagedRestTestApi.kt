@@ -105,6 +105,17 @@ open class ManagedRestTestApi(
         }
     }
 
+    /**
+     * Once the test REST Api is started, run the interactive command with stdin input. This command is not run in a separate process.
+     */
+    open fun testInteractiveCommand(command: CliktCommand, stdin: String, vararg args: String,
+                                    function: (CliktCommandTestResult, ManagedRestTestApi) -> Unit) {
+        test {
+            val result = testInteractivePmcCommand(dir, command, stdin, *args)
+            function(result, this)
+        }
+    }
+
     fun getModel(blockchainRid: BlockchainRid): RestTestModel {
         return models[blockchainRid] ?: throw ProgrammerMistake("Blockahin $blockchainRid not found")
     }

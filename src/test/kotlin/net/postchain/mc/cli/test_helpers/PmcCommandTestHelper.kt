@@ -45,6 +45,17 @@ fun testInteractivePmcCommand(dir: Path, command: CliktCommand, inputEvents: Lis
     return command.test(inputEvents = inputEvents, argv = parametersWithConfig, inputInteractive = true, outputInteractive = true) { command.parse(it) }
 }
 
+/**
+ * Run an interactive command with stdin input and pass the dynamically created .chromia/config file as parameter.
+ */
+fun testInteractivePmcCommand(dir: Path, command: CliktCommand, stdin: String, vararg args: String): CliktCommandTestResult {
+    System.setProperty(SUPPRESS_KEY_STORAGE_DEPRECATION_WARNING_SYSTEM_PROPERTY, "true")
+    val parametersWithConfig = args.toMutableList() + listOf(
+            "--config", dir.resolve(".chromia/config").toAbsolutePath().toString()
+    )
+    return command.test(stdin = stdin, argv = parametersWithConfig, inputInteractive = true, outputInteractive = true) { command.parse(it) }
+}
+
 fun assertLineValue(content: String, name: String, value: String) {
     assertLineValue(content.lines(), name, value)
 }

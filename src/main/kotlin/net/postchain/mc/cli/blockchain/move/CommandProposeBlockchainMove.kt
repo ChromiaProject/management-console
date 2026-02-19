@@ -1,7 +1,12 @@
 package net.postchain.mc.cli.blockchain.move
 
+import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.mordant.terminal.prompt
+import net.postchain.chain0.common.queries.getBlockchainInfo
+import net.postchain.chain0.model.BlockchainState
 import net.postchain.chain0.proposal_blockchain_move.proposeBlockchainMoveOperation
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.base.printResult
@@ -25,7 +30,16 @@ class CommandProposeBlockchainMove : DCBaseCommand(
     private val description by proposalDescriptionOption { "Move blockchain $blockchainRID to the container $destinationContainer" }
 
     override fun runDC() {
-        echo("Blockchain $blockchainRID will start moving to container $destinationContainer as soon as the proposal is approved")
+        if (terminal.terminalInfo.inputInteractive) {
+            val blockchainInfo = client.getBlockchainInfo(blockchainRID.data) ?: throw CliktError("Blockchain not found")
+            if (blockchainInfo.state == BlockchainState.PAUSED) {
+                val answer = terminal.prompt("WARNING: Blockchain is ${BlockchainState.PAUSED}. Move may take time and blockchain cannot be resumed until the move is finished. Continue? (y/N)")
+                if (answer == null || !answer.startsWith("Y", ignoreCase = true))
+                    throw CliktError("Canceled")
+            }
+        }
+
+        echo("Blockchain $blockchainRID will begin moving to container $destinationContainer once the proposal is approved")
 
         transactionBuilder()
                 .proposeBlockchainMoveOperation(clientProviderPubkey, blockchainRID, destinationContainer, description)
