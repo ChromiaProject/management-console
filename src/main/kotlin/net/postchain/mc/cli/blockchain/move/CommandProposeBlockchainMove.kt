@@ -2,6 +2,7 @@ package net.postchain.mc.cli.blockchain.move
 
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.terminal
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.mordant.terminal.prompt
@@ -29,8 +30,10 @@ class CommandProposeBlockchainMove : DCBaseCommand(
 
     private val description by proposalDescriptionOption { "Move blockchain $blockchainRID to the container $destinationContainer" }
 
+    private val yes by option("-y", "--yes", help = "Skip confirmation prompt for paused blockchains").flag()
+
     override fun runDC() {
-        if (terminal.terminalInfo.inputInteractive) {
+        if (terminal.terminalInfo.inputInteractive && !yes) {
             val blockchainInfo = client.getBlockchainInfo(blockchainRID.data) ?: throw CliktError("Blockchain not found")
             if (blockchainInfo.state == BlockchainState.PAUSED) {
                 val answer = terminal.prompt("WARNING: Blockchain is ${BlockchainState.PAUSED}. Move may take time and blockchain cannot be resumed until the move is finished. Continue? (y/N)")
