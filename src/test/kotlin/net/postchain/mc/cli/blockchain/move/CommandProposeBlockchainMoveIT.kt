@@ -142,4 +142,27 @@ class CommandProposeBlockchainMoveIT {
                     assertCommandFailureContains(result, "Blockchain not found")
                 }
     }
+
+    @Test
+    fun `yes flag skips confirmation for paused blockchain`(@TempDir dir: Path) {
+        ManagedRestTestApi(dir)
+                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(
+                        state = BlockchainState.PAUSED,
+                        rid = testBcRid
+                ))
+                .testCommand(
+                        CommandProposeBlockchainMove(),
+                        "-brid", testBcRid.toHex(),
+                        "-dc", "container02",
+                        "--yes"
+                ) { result, api ->
+                    assertCommandSuccessContains(result, "Blockchain move proposed")
+
+                    assertThat(api.getDcModel().opWasCalled("propose_blockchain_move") {
+                        it[0].asByteArray().contentEquals(api.pubKey.hexStringToByteArray()) &&
+                                it[1].asByteArray().contentEquals(testBcRid.data) &&
+                                it[2].asString() == "container02"
+                    }).isTrue()
+                }
+    }
 }
