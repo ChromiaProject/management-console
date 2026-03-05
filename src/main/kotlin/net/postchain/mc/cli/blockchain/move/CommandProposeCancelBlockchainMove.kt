@@ -11,8 +11,10 @@ class CommandProposeCancelBlockchainMove : DCBaseCommand(
         name = "cancel-move",
         help = """
             Propose canceling the blockchain move
-            
-            Change will be applied after voting within the deployer voter set 
+
+            When approved, the destination cluster replica nodes added at move-start are removed.
+            The blockchain remains in the source container throughout and is unaffected.
+            Change will be applied after voting within the deployer voter set
             of the cluster that the original container belongs to.
         """.trimIndent(),
         requiresVersion = 81

@@ -15,8 +15,10 @@ class CommandProposeFinishBlockchainMove : DCBaseCommand(
         help = """
             Propose finishing the blockchain move
 
-            Change will be applied after voting within the deployer voter set 
-            of the cluster that the original container belongs to.
+            When approved, the blockchain switches from the source container to the destination
+            container. Source nodes are temporarily kept as replicas until the new signer
+            configuration takes effect. Change will be applied after voting within the deployer
+            voter set of the cluster that the original container belongs to.
 
             Note: as soon as the blockchain move is finalized, it will no longer be possible to cancel it.
 
