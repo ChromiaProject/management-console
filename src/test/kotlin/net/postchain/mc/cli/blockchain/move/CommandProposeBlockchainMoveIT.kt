@@ -46,14 +46,15 @@ class CommandProposeBlockchainMoveIT {
                         "-brid", testBcRid.toHex(),
                         "-dc", "container02"
                 ) { result, api ->
-                    assertCommandSuccessContains(result, "Blockchain ${testBcRid.toHex()} will begin moving to container container02 once the proposal is approved")
+                    assertCommandSuccessContains(result, "Destination cluster nodes will begin syncing blockchain ${testBcRid.toHex()} to container container02 once the proposal is approved")
                     assertCommandSuccessContains(result, "Blockchain move proposed")
 
                     assertThat(api.getDcModel().opWasCalled("propose_blockchain_move") {
                         it[0].asByteArray().contentEquals(api.pubKey.hexStringToByteArray()) &&
                                 it[1].asByteArray().contentEquals(testBcRid.data) &&
                                 it[2].asString() == "container02" &&
-                                it[3].asString() == "Move blockchain ${testBcRid.toHex()} to the container container02"
+                                it[3].asString() == "Move blockchain ${testBcRid.toHex()} to the container container02" &&
+                                it[4].asBoolean()
                     }).isTrue()
                 }
     }
@@ -77,7 +78,8 @@ class CommandProposeBlockchainMoveIT {
                         it[0].asByteArray().contentEquals(api.pubKey.hexStringToByteArray()) &&
                                 it[1].asByteArray().contentEquals(testBcRid.data) &&
                                 it[2].asString() == "container02" &&
-                                it[3].asString() == "Custom move description"
+                                it[3].asString() == "Custom move description" &&
+                                it[4].asBoolean()
                     }).isTrue()
                 }
     }
@@ -102,7 +104,8 @@ class CommandProposeBlockchainMoveIT {
                     assertThat(api.getDcModel().opWasCalled("propose_blockchain_move") {
                         it[0].asByteArray().contentEquals(api.pubKey.hexStringToByteArray()) &&
                                 it[1].asByteArray().contentEquals(testBcRid.data) &&
-                                it[2].asString() == "container02"
+                                it[2].asString() == "container02" &&
+                                it[4].asBoolean()
                     }).isTrue()
                 }
     }
@@ -161,7 +164,32 @@ class CommandProposeBlockchainMoveIT {
                     assertThat(api.getDcModel().opWasCalled("propose_blockchain_move") {
                         it[0].asByteArray().contentEquals(api.pubKey.hexStringToByteArray()) &&
                                 it[1].asByteArray().contentEquals(testBcRid.data) &&
-                                it[2].asString() == "container02"
+                                it[2].asString() == "container02" &&
+                                it[4].asBoolean()
+                    }).isTrue()
+                }
+    }
+
+    @Test
+    fun `no-keep-src-replica flag passes false for keepSrcReplica`(@TempDir dir: Path) {
+        ManagedRestTestApi(dir)
+                .withDCQuery("get_blockchain_info", buildGetBlockchainInfoResponse(
+                        state = BlockchainState.RUNNING,
+                        rid = testBcRid
+                ))
+                .testCommand(
+                        CommandProposeBlockchainMove(),
+                        "-brid", testBcRid.toHex(),
+                        "-dc", "container02",
+                        "--no-keep-src-replica"
+                ) { result, api ->
+                    assertCommandSuccessContains(result, "Blockchain move proposed")
+
+                    assertThat(api.getDcModel().opWasCalled("propose_blockchain_move") {
+                        it[0].asByteArray().contentEquals(api.pubKey.hexStringToByteArray()) &&
+                                it[1].asByteArray().contentEquals(testBcRid.data) &&
+                                it[2].asString() == "container02" &&
+                                !it[4].asBoolean()
                     }).isTrue()
                 }
     }

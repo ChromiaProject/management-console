@@ -59,7 +59,7 @@ class CommandListDelayedConfigurations : PmcCommand(
                                         it.proposalType.name,
                                         it.proposalState.name,
                                         it.delay?.toString() ?: "N/A",
-                                        if (it.applyAt != null) "${Date.from(Instant.ofEpochMilli(it.applyAt))}" else "N/A")
+                                        it.applyAt?.let { t -> "${Date.from(Instant.ofEpochMilli(t))}" } ?: "N/A")
                             },
                             1 to RID_LENGTH,
                             interactive))
