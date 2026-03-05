@@ -120,17 +120,23 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromi
             if (!terminal.terminalInfo.outputInteractive) {
                 echo(""","moving": """, trailingNewline = false)
             }
+
+            val sourceContainerData = client.getContainerData(info.sourceContainer)
+            val destinationContainerData = client.getContainerData(info.destinationContainer)
+
             echo(pmcTable {
                 captionTop("Moving blockchain info:", TextAlign.LEFT)
                 body {
+                    row("Source cluster", sourceContainerData.cluster)
                     row("Source container", info.sourceContainer)
+                    row("Destination cluster", destinationContainerData.cluster)
                     row("Destination container", info.destinationContainer)
                     row("Final height", info.finalHeight)
                 }
             })
 
-            showHeightsOnClusterNodes(client, chromiaClient, movingInfo.sourceContainer, blockchainRid, "Heights on source nodes:", isMoving)
-            showHeightsOnClusterNodes(client, chromiaClient, movingInfo.destinationContainer, blockchainRid, "Heights on destination nodes:", isMoving)
+            showHeightsOnClusterNodes(client, chromiaClient, sourceContainerData.cluster, movingInfo.sourceContainer, blockchainRid, "Heights on source nodes:", true)
+            showHeightsOnClusterNodes(client, chromiaClient, destinationContainerData.cluster, movingInfo.destinationContainer, blockchainRid, "Heights on destination nodes:", true)
         }
     }
 
@@ -173,7 +179,8 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromi
 
     // Heights on nodes including anchored height
     if (blockchainInfo.container != null && !isMoving) {
-        showHeightsOnClusterNodes(client, chromiaClient, blockchainInfo.container, blockchainRid, "Heights on nodes:", isMoving)
+        val cluster = client.getContainerData(blockchainInfo.container).cluster
+        showHeightsOnClusterNodes(client, chromiaClient, cluster, blockchainInfo.container, blockchainRid, "Heights on nodes:", false)
     }
 
     // Heights on replicas
@@ -218,8 +225,7 @@ internal fun CliktCommand.showBlockchainInfo(client: PostchainReadClient, chromi
     }
 }
 
-internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainReadClient, chromiaClient: ChromiaClient, container: String, blockchainRid: BlockchainRid, caption: String, isMoving: Boolean) {
-    val cluster = client.getContainerData(container).cluster
+internal fun CliktCommand.showHeightsOnClusterNodes(client: PostchainReadClient, chromiaClient: ChromiaClient, cluster: String, container: String, blockchainRid: BlockchainRid, caption: String, isMoving: Boolean) {
     val clusterInfo = client.cmGetClusterInfo(cluster)
     val clusterEndpoints = clusterInfo.peers.map { Endpoint.sanitizeUrl(it.apiUrl) }.let { EndpointPool.default(it) }
     val anchoringChain = when (blockchainRid.wData) {

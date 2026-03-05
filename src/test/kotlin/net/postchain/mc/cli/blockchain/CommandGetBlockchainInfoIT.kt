@@ -80,6 +80,8 @@ class CommandGetBlockchainInfoIT {
 
                     assertLineValue(result.stdout, "Source_container", "container01")
                     assertLineValue(result.stdout, "Destination_container", "container02")
+                    assertLineValue(result.stdout, "Source_cluster", "cluster01")
+                    assertLineValue(result.stdout, "Destination_cluster", "cluster01")
                     assertLineValue(result.stdout, "Final_height", "15000")
                 }
     }
