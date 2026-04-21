@@ -14,10 +14,12 @@ class D1TestModel(
         dcVersion: Long = 1,
         sacBcRid: BlockchainRid,
         providerByKey: String? = null,
+        cmApiVersion: Long = 2,
 ) : RestTestModel(chainIID, model) {
 
     init {
         withQuery("api_version", gtv(dcVersion))
+        withQuery("cm_api_version", gtv(cmApiVersion))
         withQuery("get_economy_chain_rid", gtv(ecBcRid))
         withQuery("get_summary", GtvObjectMapper.toGtvDictionary(GetSummaryResult(12, 1, 2, 5, 10, 230)))
         withQuery("get_relevant_proposals", gtv(listOf()))

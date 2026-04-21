@@ -19,11 +19,11 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.49.3</postchain.version>
-        <postchain.client.version>3.37.1</postchain.client.version>
-        <directory.chain.version>1.110.0</directory.chain.version>
-        <cli.tools.version>0.9.0</cli.tools.version>
-        <rell.maven.plugin.version>1.0.0</rell.maven.plugin.version>
+        <postchain.version>3.49.4</postchain.version>
+        <postchain.client.version>3.39.3</postchain.client.version>
+        <directory.chain.version>1.110.2</directory.chain.version>
+        <cli.tools.version>0.11.3</cli.tools.version>
+        <rell.maven.plugin.version>1.2.1</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
 
@@ -246,6 +246,10 @@
                 <configuration>
                     <source>${directory.source}</source>
                     <hideLibWarnings>true</hideLibWarnings>
+                    <postchainClientConfig>
+                        <failover.attempts>2</failover.attempts>
+                        <connect.timeout>10000</connect.timeout>
+                    </postchainClientConfig>
                 </configuration>
                 <executions>
                     <execution>
@@ -415,7 +419,7 @@
                     <configuration>
                         <allowInsecureRegistries>false</allowInsecureRegistries>
                         <from>
-                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java21:1.0.15@sha256:374fd1e257e1ee1ba705fa55e0e9adeb46ea804121faeb9721d8f26ad8c9f21b</image>
+                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java21:1.0.16@sha256:2a71ca0a24d3bd55b952266fe2054fa44797246779031d65695e28ce40699039</image>
                         </from>
                         <to>
                             <image>${image.name}</image>
