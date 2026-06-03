@@ -19,9 +19,9 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.49.9</postchain.version>
+        <postchain.version>3.49.13</postchain.version>
         <postchain.client.version>3.39.3</postchain.client.version>
-        <directory.chain.version>1.110.2</directory.chain.version>
+        <directory.chain.version>1.110.5</directory.chain.version>
         <cli.tools.version>0.11.3</cli.tools.version>
         <rell.maven.plugin.version>1.2.1</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
