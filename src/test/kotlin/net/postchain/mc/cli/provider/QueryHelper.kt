@@ -10,6 +10,7 @@ import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.mc.cli.test_helpers.DEFAULT_PROVIDER01_PUBKEY
 import net.postchain.mc.cli.test_helpers.DEFAULT_PROVIDER02_PUBKEY
+import net.postchain.mc.cli.test_helpers.DEFAULT_PROVIDER03_PUBKEY
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 
 fun buildGetAllProvidersResponse(): GtvArray {
@@ -29,6 +30,35 @@ fun buildGetAllProvidersResponse(): GtvArray {
                     true,
                     ProviderTier.NODE_PROVIDER,
                     true
+            )
+    ).map(GtvObjectMapper::toGtvDictionary))
+}
+
+fun buildMixedGetAllProvidersResponse(): GtvArray {
+    return gtv(listOf(
+            Provider(
+                    DEFAULT_PROVIDER01_PUBKEY.hexStringToByteArray().wrap(),
+                    "provider01",
+                    "http://provider01:7740",
+                    true,
+                    ProviderTier.NODE_PROVIDER,
+                    true
+            ),
+            Provider(
+                    DEFAULT_PROVIDER02_PUBKEY.hexStringToByteArray().wrap(),
+                    "provider02",
+                    "http://provider02:7740",
+                    true,
+                    ProviderTier.NODE_PROVIDER,
+                    false
+            ),
+            Provider(
+                    DEFAULT_PROVIDER03_PUBKEY.hexStringToByteArray().wrap(),
+                    "provider03",
+                    "http://provider03:7740",
+                    true,
+                    ProviderTier.DAPP_PROVIDER,
+                    false
             )
     ).map(GtvObjectMapper::toGtvDictionary))
 }
