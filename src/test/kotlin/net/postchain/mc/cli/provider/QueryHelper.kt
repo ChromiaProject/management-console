@@ -33,6 +33,37 @@ fun buildGetAllProvidersResponse(): GtvArray {
     ).map(GtvObjectMapper::toGtvDictionary))
 }
 
+const val PROVIDER03_PUBKEY = "021111111111111111111111111111111111111111111111111111111111111111"
+
+fun buildMixedGetAllProvidersResponse(): GtvArray {
+    return gtv(listOf(
+            Provider(
+                    DEFAULT_PROVIDER01_PUBKEY.hexStringToByteArray().wrap(),
+                    "provider01",
+                    "http://provider01:7740",
+                    true,
+                    ProviderTier.NODE_PROVIDER,
+                    true
+            ),
+            Provider(
+                    DEFAULT_PROVIDER02_PUBKEY.hexStringToByteArray().wrap(),
+                    "provider02",
+                    "http://provider02:7740",
+                    true,
+                    ProviderTier.NODE_PROVIDER,
+                    false
+            ),
+            Provider(
+                    PROVIDER03_PUBKEY.hexStringToByteArray().wrap(),
+                    "provider03",
+                    "http://provider03:7740",
+                    true,
+                    ProviderTier.DAPP_PROVIDER,
+                    false
+            )
+    ).map(GtvObjectMapper::toGtvDictionary))
+}
+
 fun ManagedRestTestApi.addDcGetProviderData(): ManagedRestTestApi {
     withDCQuery("get_provider_data", GtvObjectMapper.toGtvDictionary(Provider(
             WrappedByteArray(34),
