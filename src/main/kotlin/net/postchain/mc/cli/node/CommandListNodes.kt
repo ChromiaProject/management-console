@@ -3,9 +3,10 @@ package net.postchain.mc.cli.node
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.switch
 import com.github.ajalt.mordant.input.interactiveSelectList
+import net.postchain.chain0.common.queries.GetAllNodesResult
 import net.postchain.chain0.common.queries.getAllNodes
+import net.postchain.chain0.common.queries.getClusterNodes
 import net.postchain.common.hexStringToByteArray
 import net.postchain.crypto.PubKey
 import net.postchain.mc.cli.PmcCommand
@@ -17,21 +18,18 @@ import net.postchain.mc.cli.util.pmcTable
 
 class CommandListNodes : PmcCommand(
         name = "list",
-        help = "List all nodes, optionally filtered by provider system flag",
+        help = "List all nodes, optionally filtered by cluster",
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client
     private val interactive by interactiveOption()
-    private val system by option(help = "Only list nodes of system or non-system providers").switch(
-            "--system" to true,
-            "--non-system" to false
-    )
+    private val cluster by option("--cluster", help = "Only list nodes belonging to the given cluster", metavar = "CLUSTER_NAME")
 
     private val headers = listOf("Pubkey", "Host", "Port", "REST API", "Territory", "Active", "Provided by")
 
     override fun run() {
         val nodes = client.getAllNodes(includeInactive = true)
-                .filter { system == null || it.provider.system == system }
+                .filter(clusterFilter())
         if (interactive && nodes.isNotEmpty() && nodes.size < terminal.size.height) {
             terminal.interactiveSelectList(nodes.map {
                 "${it.info.pubkey.toHex()} - ${it.info.host}"
@@ -61,5 +59,10 @@ class CommandListNodes : PmcCommand(
                 }
             }
         }
+    }
+
+    private fun clusterFilter(): (GetAllNodesResult) -> Boolean {
+        val clusterNodePubkeys = cluster?.let { name -> client.getClusterNodes(name).map { it.pubkey }.toSet() }
+        return { clusterNodePubkeys == null || it.info.pubkey in clusterNodePubkeys }
     }
 }

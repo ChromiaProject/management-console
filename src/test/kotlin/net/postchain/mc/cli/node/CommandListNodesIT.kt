@@ -3,6 +3,7 @@ package net.postchain.mc.cli.node
 import assertk.assertThat
 import assertk.assertions.doesNotContain
 import net.postchain.chain0.common.queries.GetAllNodesResult
+import net.postchain.chain0.common.queries.GetClusterNodesResult
 import net.postchain.chain0.common.queries.NodeInfo
 import net.postchain.chain0.model.Provider
 import net.postchain.chain0.model.ProviderTier
@@ -32,66 +33,64 @@ class CommandListNodesIT {
     }
 
     @Test
-    fun `list nodes - filter by system provider`(@TempDir dir: Path) {
+    fun `list nodes - filter by cluster`(@TempDir dir: Path) {
         ManagedRestTestApi(dir, dcVersion = 47)
                 .withDCQuery("get_all_nodes", buildGetAllNodesResponse())
-                .testCommand(CommandListNodes(), "--system") { result, _ ->
+                .withDCQuery("get_cluster_nodes", buildGetClusterNodesResponse(DEFAULT_PROVIDER01_PUBKEY, "node01"))
+                .testCommand(CommandListNodes(), "--cluster", "cluster01") { result, _ ->
                     assertLineValue(result.stdout, "Host", "node01")
-                    assertLineValue(result.stdout, "Provided_by", DEFAULT_PROVIDER01_PUBKEY)
                     assertThat(result.stdout).doesNotContain("node02")
                 }
     }
 
     @Test
-    fun `list nodes - filter by non-system provider`(@TempDir dir: Path) {
+    fun `list nodes - filter by cluster without nodes lists nothing`(@TempDir dir: Path) {
         ManagedRestTestApi(dir, dcVersion = 47)
                 .withDCQuery("get_all_nodes", buildGetAllNodesResponse())
-                .testCommand(CommandListNodes(), "--non-system") { result, _ ->
-                    assertLineValue(result.stdout, "Host", "node02")
-                    assertLineValue(result.stdout, "Provided_by", DEFAULT_PROVIDER02_PUBKEY)
+                .withDCQuery("get_cluster_nodes", gtv(listOf()))
+                .testCommand(CommandListNodes(), "--cluster", "cluster01") { result, _ ->
                     assertThat(result.stdout).doesNotContain("node01")
+                    assertThat(result.stdout).doesNotContain("node02")
                 }
     }
 
     private fun buildGetAllNodesResponse(): GtvArray {
         return gtv(listOf(
-                GetAllNodesResult(
-                        NodeInfo(
-                                DEFAULT_PROVIDER01_PUBKEY.hexStringToByteArray().wrap(),
-                                "node01",
-                                9870,
-                                "http://node01:7740",
-                                null
-                        ),
-                        true,
-                        0,
-                        Provider(
-                                DEFAULT_PROVIDER01_PUBKEY.hexStringToByteArray().wrap(),
-                                "provider01",
-                                "http://provider01:7740",
-                                true,
-                                ProviderTier.NODE_PROVIDER,
-                                true
-                        )
+                buildNode(DEFAULT_PROVIDER01_PUBKEY, "node01", "provider01"),
+                buildNode(DEFAULT_PROVIDER02_PUBKEY, "node02", "provider02")
+        ).map(GtvObjectMapper::toGtvDictionary))
+    }
+
+    private fun buildNode(pubkey: String, host: String, providerName: String): GetAllNodesResult {
+        return GetAllNodesResult(
+                NodeInfo(
+                        pubkey.hexStringToByteArray().wrap(),
+                        host,
+                        9870,
+                        "http://$host:7740",
+                        null
                 ),
-                GetAllNodesResult(
-                        NodeInfo(
-                                DEFAULT_PROVIDER02_PUBKEY.hexStringToByteArray().wrap(),
-                                "node02",
-                                9870,
-                                "http://node02:7740",
-                                null
-                        ),
+                true,
+                0,
+                Provider(
+                        pubkey.hexStringToByteArray().wrap(),
+                        providerName,
+                        "http://$providerName:7740",
                         true,
-                        0,
-                        Provider(
-                                DEFAULT_PROVIDER02_PUBKEY.hexStringToByteArray().wrap(),
-                                "provider02",
-                                "http://provider02:7740",
-                                true,
-                                ProviderTier.NODE_PROVIDER,
-                                false
-                        )
+                        ProviderTier.NODE_PROVIDER,
+                        true
+                )
+        )
+    }
+
+    private fun buildGetClusterNodesResponse(pubkey: String, host: String): GtvArray {
+        return gtv(listOf(
+                GetClusterNodesResult(
+                        pubkey.hexStringToByteArray().wrap(),
+                        host,
+                        9870,
+                        "http://$host:7740",
+                        true
                 )
         ).map(GtvObjectMapper::toGtvDictionary))
     }
