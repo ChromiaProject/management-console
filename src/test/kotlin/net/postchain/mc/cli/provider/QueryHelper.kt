@@ -10,6 +10,7 @@ import net.postchain.gtv.GtvFactory.gtv
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.mc.cli.test_helpers.DEFAULT_PROVIDER01_PUBKEY
 import net.postchain.mc.cli.test_helpers.DEFAULT_PROVIDER02_PUBKEY
+import net.postchain.mc.cli.test_helpers.DEFAULT_PROVIDER03_PUBKEY
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 
 fun buildGetAllProvidersResponse(): GtvArray {
@@ -33,8 +34,6 @@ fun buildGetAllProvidersResponse(): GtvArray {
     ).map(GtvObjectMapper::toGtvDictionary))
 }
 
-const val PROVIDER03_PUBKEY = "021111111111111111111111111111111111111111111111111111111111111111"
-
 fun buildMixedGetAllProvidersResponse(): GtvArray {
     return gtv(listOf(
             Provider(
@@ -54,7 +53,7 @@ fun buildMixedGetAllProvidersResponse(): GtvArray {
                     false
             ),
             Provider(
-                    PROVIDER03_PUBKEY.hexStringToByteArray().wrap(),
+                    DEFAULT_PROVIDER03_PUBKEY.hexStringToByteArray().wrap(),
                     "provider03",
                     "http://provider03:7740",
                     true,
