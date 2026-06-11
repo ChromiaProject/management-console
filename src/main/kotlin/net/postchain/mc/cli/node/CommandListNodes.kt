@@ -2,6 +2,8 @@ package net.postchain.mc.cli.node
 
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.switch
 import com.github.ajalt.mordant.input.interactiveSelectList
 import net.postchain.chain0.common.queries.getAllNodes
 import net.postchain.common.hexStringToByteArray
@@ -15,16 +17,21 @@ import net.postchain.mc.cli.util.pmcTable
 
 class CommandListNodes : PmcCommand(
         name = "list",
-        help = "List all nodes",
+        help = "List all nodes, optionally filtered by provider system flag",
 ) {
     private val config by pmcConfigOption()
     private val client get() = config.client
     private val interactive by interactiveOption()
+    private val system by option(help = "Only list nodes of system or non-system providers").switch(
+            "--system" to true,
+            "--non-system" to false
+    )
 
     private val headers = listOf("Pubkey", "Host", "Port", "REST API", "Territory", "Active", "Provided by")
 
     override fun run() {
         val nodes = client.getAllNodes(includeInactive = true)
+                .filter { system == null || it.provider.system == system }
         if (interactive && nodes.isNotEmpty() && nodes.size < terminal.size.height) {
             terminal.interactiveSelectList(nodes.map {
                 "${it.info.pubkey.toHex()} - ${it.info.host}"
