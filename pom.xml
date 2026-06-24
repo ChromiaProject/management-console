@@ -118,6 +118,11 @@
             <artifactId>chromia-cli-tools</artifactId>
             <version>${cli.tools.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.chromia.cli.tools</groupId>
+            <artifactId>chromia-build-tools</artifactId>
+            <version>${cli.tools.version}</version>
+        </dependency>
 
         <!-- logging -->
         <dependency>
