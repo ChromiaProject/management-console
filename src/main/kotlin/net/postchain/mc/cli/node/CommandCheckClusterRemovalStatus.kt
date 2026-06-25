@@ -9,9 +9,11 @@ import net.postchain.chain0.cm_api.cmGetClusterInfo
 import net.postchain.chain0.cm_api.cmGetSystemAnchoringChain
 import net.postchain.chain0.common.queries.getClusters
 import net.postchain.chain0.common.queries.getNodeSignerClusterBlockchains
+import net.postchain.chain0.common.queries.getNodesWithProvider
 import net.postchain.chain0.model.BlockchainState
 import net.postchain.chain0.model.ContainerState
 import net.postchain.common.BlockchainRid
+import net.postchain.common.types.WrappedByteArray
 import net.postchain.common.wrap
 import net.postchain.mc.cli.DCBaseCommand
 import net.postchain.mc.cli.util.pmcTable
@@ -31,6 +33,9 @@ class CommandCheckClusterRemovalStatus : DCBaseCommand(
     override fun runDC() {
         if (config.client.getClusters().none { it.name == cluster }) {
             throw CliktError("Cluster '$cluster' does not exist")
+        }
+        if (config.client.getNodesWithProvider().none { it.pubkey == WrappedByteArray(key.data) }) {
+            throw CliktError("Node with pubkey '${key.hex()}' does not exist")
         }
         if (terminal.terminalInfo.outputInteractive) echo("Fetching chains that still has node as signer in latest confirmed configuration...")
         val remainingSignerChains = config.client.getNodeSignerClusterBlockchains(
