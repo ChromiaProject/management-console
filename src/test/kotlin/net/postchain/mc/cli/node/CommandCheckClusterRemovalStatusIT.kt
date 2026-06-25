@@ -1,14 +1,17 @@
 package net.postchain.mc.cli.node
 
 import assertk.assertThat
+import assertk.assertions.contains
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import com.google.gson.Gson
 import com.google.gson.JsonElement
+import net.postchain.chain0.common.queries.ClusterData
 import net.postchain.common.BlockchainRid
 import net.postchain.common.hexStringToByteArray
 import net.postchain.common.toHex
 import net.postchain.gtv.GtvFactory.gtv
+import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.mc.cli.blockchain.buildCmGetClusterInfoResponse
 import net.postchain.mc.cli.blockchain.buildGetLastAnchoredBlockResponse
 import net.postchain.mc.cli.test_helpers.DEFAULT_BRID_CLUSTER_ANCHORING_CHAIN
@@ -25,9 +28,15 @@ class CommandCheckClusterRemovalStatusIT {
     private val nodeKey = ByteArray(33)
     private val cluster = "system"
 
+    private fun ManagedRestTestApi.withClusters(vararg names: String): ManagedRestTestApi =
+            withDCQuery("get_clusters", gtv(names.map {
+                GtvObjectMapper.toGtvDictionary(ClusterData(it, "SYSTEM_P", true, true, null, null, null, null, null, listOf()))
+            }))
+
     @Test
     fun `Report successful removal when no longer signer`(@TempDir dir: Path) {
         ManagedRestTestApi(dir, dcVersion = 99)
+                .withClusters(cluster)
                 .withDCQuery(
                         "get_node_signer_cluster_blockchains",
                         gtv(listOf())
@@ -47,6 +56,7 @@ class CommandCheckClusterRemovalStatusIT {
         val lastAnchorTimeDc = System.currentTimeMillis() - 60_000L
         val lastAnchorTimeCac = System.currentTimeMillis() - 120_000L
         ManagedRestTestApi(dir, dcVersion = 99)
+                .withClusters(cluster)
                 .withDCQuery(
                         "cm_get_cluster_info",
                         buildCmGetClusterInfoResponse(clusterAnchoringBrid = DEFAULT_BRID_CLUSTER_ANCHORING_CHAIN)
@@ -70,6 +80,23 @@ class CommandCheckClusterRemovalStatusIT {
                     outputJson.asJsonArray.forEach {
                         assertThat(it.asJsonObject["Last_anchored_block_time"].asString).isEqualTo(expectedDateTimes[BlockchainRid(it.asJsonObject["Blockchain_RID"].asString.hexStringToByteArray())])
                     }
+                }
+    }
+
+    @Test
+    fun `Fails instead of reporting success when cluster does not exist`(@TempDir dir: Path) {
+        ManagedRestTestApi(dir, dcVersion = 99)
+                .withClusters("system", "dapps0")
+                .withDCQuery(
+                        "get_node_signer_cluster_blockchains",
+                        gtv(listOf())
+                )
+                .testCommand(CommandCheckClusterRemovalStatus(),
+                        "--pubkey", nodeKey.toHex(),
+                        "--cluster", "unknown"
+                ) { result, _ ->
+                    assertThat(result.statusCode).isEqualTo(1)
+                    assertThat(result.stderr).contains("Cluster 'unknown' does not exist")
                 }
     }
 
