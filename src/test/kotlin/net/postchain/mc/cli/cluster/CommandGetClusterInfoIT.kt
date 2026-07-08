@@ -1,11 +1,16 @@
 package net.postchain.mc.cli.cluster
 
+import assertk.assertThat
+import assertk.assertions.doesNotContain
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import net.postchain.chain0.common.queries.ContainerUnitResourceLimits
+import net.postchain.common.BlockchainRid
 import net.postchain.gtv.mapper.GtvObjectMapper
+import net.postchain.mc.cli.blockchain.buildCmGetClusterInfoResponse
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.addDcEmptyListQueries
+import net.postchain.mc.cli.test_helpers.assertCommandSuccess
 import net.postchain.mc.cli.test_helpers.assertCommandSuccessContains
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -20,6 +25,7 @@ class CommandGetClusterInfoIT {
                 .addGetClusterProviders()
                 .addGetClusterNodes()
                 .addDcEmptyListQueries("get_cluster_replica_nodes", "get_cluster_containers", "get_cluster_subnode_images")
+                .withDCQuery("cm_get_cluster_info", buildCmGetClusterInfoResponse())
                 .withDCQuery("get_cluster_container_unit_limits",
                         GtvObjectMapper.toGtvDictionary(ContainerUnitResourceLimits(60, 1500, 10, 5, 1638)))
                 .testCommand(
@@ -52,6 +58,47 @@ class CommandGetClusterInfoIT {
                           }
                         ]
                     """.trimIndent())
+                }
+    }
+
+    @Test
+    fun `cluster info - anchoring chain`(@TempDir dir: Path) {
+        val cacBrid = BlockchainRid.buildRepeat(99)
+        ManagedRestTestApi(dir, dcVersion = 88)
+                .addGetClusterData()
+                .addGetClusterProviders()
+                .addGetClusterNodes()
+                .addDcEmptyListQueries("get_cluster_replica_nodes", "get_cluster_containers", "get_cluster_subnode_images")
+                .withDCQuery("cm_get_cluster_info", buildCmGetClusterInfoResponse(clusterAnchoringBrid = cacBrid))
+                .withDCQuery("get_cluster_container_unit_limits",
+                        GtvObjectMapper.toGtvDictionary(ContainerUnitResourceLimits(60, 1500, 10, 5, 1638)))
+                .testCommand(
+                        CommandGetClusterInfo(),
+                        "--name", "cluster1",
+                ) { result, _ ->
+                    Gson().fromJson(result.stdout, JsonElement::class.java)
+
+                    assertCommandSuccessContains(result, """"Anchoring_chain_RID": "${cacBrid.toHex()}"""")
+                }
+    }
+
+    @Test
+    fun `cluster info - no anchoring chain`(@TempDir dir: Path) {
+        ManagedRestTestApi(dir, dcVersion = 88)
+                .addGetClusterData()
+                .addGetClusterProviders()
+                .addGetClusterNodes()
+                .addDcEmptyListQueries("get_cluster_replica_nodes", "get_cluster_containers", "get_cluster_subnode_images")
+                .withDCQuery("get_cluster_container_unit_limits",
+                        GtvObjectMapper.toGtvDictionary(ContainerUnitResourceLimits(60, 1500, 10, 5, 1638)))
+                .testCommand(
+                        CommandGetClusterInfo(),
+                        "--name", "cluster1",
+                ) { result, _ ->
+                    Gson().fromJson(result.stdout, JsonElement::class.java)
+
+                    assertCommandSuccess(result)
+                    assertThat(result.stdout).doesNotContain("Anchoring_chain_RID")
                 }
     }
 }

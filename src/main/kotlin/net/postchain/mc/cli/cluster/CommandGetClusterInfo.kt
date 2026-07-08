@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.required
+import net.postchain.chain0.cm_api.cmGetClusterInfo
 import net.postchain.chain0.common.queries.getClusterContainerUnitLimits
 import net.postchain.chain0.common.queries.getClusterContainers
 import net.postchain.chain0.common.queries.getClusterData
@@ -41,11 +42,13 @@ fun CliktCommand.showClusterInfo(apiVersion: Long, client: PostchainReadClient, 
         echo(""""basic": """, trailingNewline = false)
     }
     val info = client.getClusterData(name)
+    val anchoringChain = runCatching { client.cmGetClusterInfo(name).anchoringChain }.getOrNull()
     echo(pmcTable {
         body {
             row("Name:", info.name)
             row("Governor:", info.governor)
             row("Is Operational:", info.isOperational.toString())
+            anchoringChain?.let { row("Anchoring chain RID:", it.toHex()) }
             info.numberOfNodes?.let { row("Number of nodes:", it.toString()) }
             info.clusterUnits?.let { row("Cluster Units:", it.toString()) }
             info.extraStorage?.let { row("Extra Storage:", it.toString()) }
