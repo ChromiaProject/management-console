@@ -23,12 +23,14 @@ class CommandGetEconomyConstantsIT {
                     assertLineValue(result.stdout, "Chromia_foundation_fee_share", "0.4")
                     assertLineValue(result.stdout, "Resource_pool_margin_fee_share", "0.5")
                     assertLineValue(result.stdout, "System_provider_risk_share", "0.6")
+                    assertLineValue(result.stdout, "Dapp_provider_risk_share", "0.7")
                     assertLineValue(result.stdout, "Staking_requirements_enabled", "true")
                     assertLineValue(result.stdout, "Staking_requirements_stop_payout_days", "14")
                     assertLineValue(result.stdout, "Staking_requirements_system_node_own", "1.123456")
                     assertLineValue(result.stdout, "Staking_requirements_system_node_total", "2.123456")
                     assertLineValue(result.stdout, "Staking_requirements_dapp_node_own", "3.123456")
                     assertLineValue(result.stdout, "Staking_requirements_dapp_node_total", "4.123456")
+                    assertLineValue(result.stdout, "Bridge_lease_add_min_balance_in_USD", "100")
                 }
     }
 
@@ -45,12 +47,14 @@ class CommandGetEconomyConstantsIT {
                     assertLineValue(result.stdout, "Chromia_foundation_fee_share", "0.4")
                     assertLineValue(result.stdout, "Resource_pool_margin_fee_share", "0.5")
                     assertLineValue(result.stdout, "System_provider_risk_share", "0.6")
+                    assertLineValue(result.stdout, "Dapp_provider_risk_share", "0.7")
                     assertLineValue(result.stdout, "Staking_requirements_enabled", "true")
                     assertLineValue(result.stdout, "Staking_requirements_stop_payout_days", "14")
                     assertLineValue(result.stdout, "Staking_requirements_system_node_own", "1.123456")
                     assertLineValue(result.stdout, "Staking_requirements_system_node_total", "2.123456")
                     assertLineValue(result.stdout, "Staking_requirements_dapp_node_own", "3.123456")
                     assertLineValue(result.stdout, "Staking_requirements_dapp_node_total", "4.123456")
+                    assertLineValue(result.stdout, "Bridge_lease_add_min_balance_in_USD", "100")
                 }
     }
 }
