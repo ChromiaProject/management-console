@@ -29,12 +29,14 @@ class CommandGetEconomyConstants : ECBaseCommand(
                     row("Chromia foundation fee share", economyConstants.chromiaFoundationFeeShare)
                     row("Resource pool margin fee share", economyConstants.resourcePoolMarginFeeShare)
                     row("System provider risk share", economyConstants.systemProviderRiskShare)
+                    row("Dapp provider risk share", economyConstants.dappProviderRiskShare)
                     row("Staking requirements enabled", economyConstants.stakingRequirementsEnabled)
                     row("Staking requirements stop payout days", economyConstants.stakingRequirementStopPayoutDays)
                     row("Staking requirements system node own", formatChr(economyConstants.stakingRequirementSystemNodeOwnStakeChr))
                     row("Staking requirements system node total", formatChr(economyConstants.stakingRequirementSystemNodeTotalStakeChr))
                     row("Staking requirements dapp node own", formatChr(economyConstants.stakingRequirementDappNodeOwnStakeChr))
                     row("Staking requirements dapp node total", formatChr(economyConstants.stakingRequirementDappNodeTotalStakeChr))
+                    row("Bridge lease add min balance in USD", economyConstants.bridgeLeaseAddMinBalanceUsd)
                 }
             })
         } else {
@@ -51,12 +53,14 @@ class CommandGetEconomyConstants : ECBaseCommand(
                     row("Chromia foundation fee share", economyConstants.chromiaFoundationFeeShare)
                     row("Resource pool margin fee share", economyConstants.resourcePoolMarginFeeShare)
                     row("System provider risk share", economyConstants.systemProviderRiskShare)
+                    row("Dapp provider risk share", economyConstants.dappProviderRiskShare)
                     row("Staking requirements enabled", economyConstants.stakingRequirementsEnabled)
                     row("Staking requirements stop payout days", economyConstants.stakingRequirementStopPayoutDays)
                     row("Staking requirements system node own", formatChr(economyConstants.stakingRequirementSystemNodeOwnStakeChr))
                     row("Staking requirements system node total", formatChr(economyConstants.stakingRequirementSystemNodeTotalStakeChr))
                     row("Staking requirements dapp node own", formatChr(economyConstants.stakingRequirementDappNodeOwnStakeChr))
                     row("Staking requirements dapp node total", formatChr(economyConstants.stakingRequirementDappNodeTotalStakeChr))
+                    row("Bridge lease add min balance in USD", economyConstants.bridgeLeaseAddMinBalanceUsd)
                 }
             })
         }
