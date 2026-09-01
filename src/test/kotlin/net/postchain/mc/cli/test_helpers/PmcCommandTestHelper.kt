@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.any
 import assertk.assertions.contains
 import assertk.assertions.containsExactlyInAnyOrder
+import assertk.assertions.doesNotContain
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
@@ -78,6 +79,10 @@ fun assertCommandOutput(output: String, expected: String) {
 
 fun assertCommandOutputContains(output: String, expected: String) {
     assertThat(normalizeCommandOutput(output)).contains(normalizeCommandOutput(expected))
+}
+
+fun assertCommandOutputDoesNotContain(output: String, unexpected: String) {
+    assertThat(normalizeCommandOutput(output)).doesNotContain(normalizeCommandOutput(unexpected))
 }
 
 fun assertCommandSuccessContains(result: CliktCommandTestResult, expected: String) {

@@ -7,20 +7,27 @@ import net.postchain.anchoring.common_helpers.resource_usage_statistics.Resource
 import net.postchain.common.hexStringToByteArray
 import net.postchain.common.wrap
 import net.postchain.gtv.GtvFactory.gtv
+import net.postchain.gtv.GtvNull
 import net.postchain.gtv.mapper.GtvObjectMapper
 import net.postchain.mc.cli.base.CLUSTER_ANCHORING_CHAIN_RESOURCE_USAGE_VERSION
 import net.postchain.mc.cli.blockchain.buildCmGetClusterInfoResponse
 import net.postchain.mc.cli.test_helpers.ManagedRestTestApi
 import net.postchain.mc.cli.test_helpers.assertCommandFailureContains
 import net.postchain.mc.cli.test_helpers.assertCommandOutputContains
+import net.postchain.mc.cli.test_helpers.assertCommandOutputDoesNotContain
 import net.postchain.mc.cli.test_helpers.assertCommandSuccessContains
 import net.postchain.mc.cli.test_helpers.buildGetContainerDataResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.math.BigDecimal
 import java.nio.file.Path
+import java.time.Instant
+import java.util.Date
 
 class CommandGetContainerInfoIT {
+
+    private val expireTimeMillis = 1767225600000L // 2026-01-01T00:00:00Z
+    private val expireTime = Date.from(Instant.ofEpochMilli(expireTimeMillis)).toString()
 
     @Test
     fun `container info`(@TempDir dir: Path) {
@@ -28,6 +35,7 @@ class CommandGetContainerInfoIT {
                 .withDCQuery("get_container_data", buildGetContainerDataResponse())
                 .withDCQuery("nm_get_container_limits", buildNmGetContainerLimits())
                 .withDCQuery("get_container_blockchain", buildGetContainerBlockchain())
+                .withECQuery("get_lease_by_container_name", buildGetLeaseByContainerName(expireTimeMillis))
                 .testCommand(CommandGetContainerInfo(),
                         "--name", "container1",
                 ) { result, _ ->
@@ -41,7 +49,8 @@ class CommandGetContainerInfoIT {
                           "Deployer": "deployer01",
                           "Proposed_by": "03F7AB0AD49CC99773832549222E140603EF85B0904B78554BE5B87236712DF37E / proposed-by-name01",
                           "System": "false",
-                          "State": "RUNNING"
+                          "State": "RUNNING",
+                          "Lease_expires": "$expireTime"
                         }
                         ,"resource_limits": [
                           {
@@ -87,6 +96,35 @@ class CommandGetContainerInfoIT {
     }
 
     @Test
+    fun `container info - expired lease`(@TempDir dir: Path) {
+        ManagedRestTestApi(dir)
+                .withDCQuery("get_container_data", buildGetContainerDataResponse())
+                .withDCQuery("nm_get_container_limits", buildNmGetContainerLimits())
+                .withDCQuery("get_container_blockchain", buildGetContainerBlockchain())
+                .withECQuery("get_lease_by_container_name", buildGetLeaseByContainerName(expireTimeMillis, expired = true))
+                .testCommand(CommandGetContainerInfo(),
+                        "--name", "container1",
+                ) { result, _ ->
+                    assertCommandSuccessContains(result, """"Lease_expires": "$expireTime (expired)"""")
+                }
+    }
+
+    @Test
+    fun `container info - no economy chain`(@TempDir dir: Path) {
+        ManagedRestTestApi(dir)
+                .withDCQuery("get_container_data", buildGetContainerDataResponse())
+                .withDCQuery("nm_get_container_limits", buildNmGetContainerLimits())
+                .withDCQuery("get_container_blockchain", buildGetContainerBlockchain())
+                .withDCQuery("get_economy_chain_rid", GtvNull)
+                .testCommand(CommandGetContainerInfo(),
+                        "--name", "container1",
+                ) { result, _ ->
+                    assertCommandSuccessContains(result, """"State": "RUNNING"""")
+                    assertCommandOutputDoesNotContain(result.output, "Lease_expires")
+                }
+    }
+
+    @Test
     fun `container info - resource usage`(@TempDir dir: Path) {
         val resourceUsage = gtv(
                 listOf(
@@ -102,6 +140,7 @@ class CommandGetContainerInfoIT {
                 .withDCQuery("get_container_data", buildGetContainerDataResponse())
                 .withDCQuery("nm_get_container_limits", buildNmGetContainerLimits())
                 .withDCQuery("get_container_blockchain", buildGetContainerBlockchain())
+                .withECQuery("get_lease_by_container_name", buildGetLeaseByContainerName(expireTimeMillis))
                 .afterServerBeforeTest {
                     it.withDCQuery("cm_get_cluster_info", buildCmGetClusterInfoResponse(it.apiUrl, it.cacBcRid))
                 }
@@ -147,6 +186,7 @@ class CommandGetContainerInfoIT {
                 .withDCQuery("get_container_data", buildGetContainerDataResponse())
                 .withDCQuery("nm_get_container_limits", buildNmGetContainerLimits())
                 .withDCQuery("get_container_blockchain", buildGetContainerBlockchain())
+                .withECQuery("get_lease_by_container_name", buildGetLeaseByContainerName(expireTimeMillis))
                 .afterServerBeforeTest {
                     it.withDCQuery("cm_get_cluster_info", buildCmGetClusterInfoResponse(it.apiUrl, it.cacBcRid))
                 }

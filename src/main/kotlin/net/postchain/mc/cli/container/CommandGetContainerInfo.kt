@@ -13,9 +13,12 @@ import net.postchain.chain0.common.queries.getContainerBlockchain
 import net.postchain.chain0.common.queries.getContainerData
 import net.postchain.chain0.nm_api.nmGetContainerLimits
 import net.postchain.chain0.version.apiVersion
-import net.postchain.d1.client.StandardChromiaClient
+import net.postchain.economy.economy_chain.LeaseData
+import net.postchain.economy.economy_chain.getLeaseByContainerName
 import net.postchain.mc.cli.PmcCommand
 import net.postchain.mc.cli.base.CLUSTER_ANCHORING_CHAIN_RESOURCE_USAGE_VERSION
+import net.postchain.mc.cli.economy.getEconomyChainClientOrNull
+import net.postchain.mc.cli.util.PmcClientConfigOption
 import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
@@ -34,17 +37,18 @@ class CommandGetContainerInfo : PmcCommand(
             .flag()
 
     override fun run() {
-        showContainerInfo(config.chromiaClient, name, resourceUsage)
+        showContainerInfo(config, name, resourceUsage)
     }
 }
 
 fun CliktCommand.showContainerInfo(
-        chromiaClient: StandardChromiaClient,
+        config: PmcClientConfigOption,
         name: String,
         resourceUsage: Boolean = false
 ) {
-    val client = chromiaClient.getDirectoryChainClient()
+    val client = config.chromiaClient.getDirectoryChainClient()
     val info = client.getContainerData(name)
+    val lease = getEconomyChainClientOrNull(config)?.getLeaseByContainerName(name)
 
     if (!terminal.terminalInfo.outputInteractive) {
         echo("{")
@@ -68,6 +72,7 @@ fun CliktCommand.showContainerInfo(
                 row("Subnode JAR extensions:", info.jarExtensions.joinToString(", "))
             }
             info.state?.let { row("State:", it.toString()) }
+            lease?.let { row("$LEASE_EXPIRES_HEADER:", formatLeaseExpiration(it)) }
         }
     })
 
@@ -91,7 +96,7 @@ fun CliktCommand.showContainerInfo(
     ))
 
     if (resourceUsage) {
-        val clusterAnchoringClient = chromiaClient.getClusterAnchoringClient(info.cluster)
+        val clusterAnchoringClient = config.chromiaClient.getClusterAnchoringClient(info.cluster)
         if (clusterAnchoringClient.apiVersion() < CLUSTER_ANCHORING_CHAIN_RESOURCE_USAGE_VERSION) {
             throw CliktError("The cluster is running an older version of the cluster anchoring chain, which does not support resource usage statistics")
         } else {
@@ -133,6 +138,11 @@ fun CliktCommand.showContainerInfo(
         echo("}")
     }
 }
+
+const val LEASE_EXPIRES_HEADER = "Lease expires"
+
+fun formatLeaseExpiration(lease: LeaseData): String =
+        Date.from(Instant.ofEpochMilli(lease.expireTimeMillis)).toString() + if (lease.expired) " (expired)" else ""
 
 enum class ContainerResourceLimitType {
     max_blockchains,

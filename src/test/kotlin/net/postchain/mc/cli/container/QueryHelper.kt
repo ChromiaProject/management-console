@@ -2,6 +2,7 @@ package net.postchain.mc.cli.container
 
 import net.postchain.chain0.common.queries.GetContainerBlockchainResult
 import net.postchain.chain0.model.BlockchainState
+import net.postchain.economy.economy_chain.LeaseData
 import net.postchain.gtv.GtvArray
 import net.postchain.gtv.GtvDictionary
 import net.postchain.gtv.GtvFactory.gtv
@@ -29,5 +30,22 @@ fun buildNmGetContainerLimits(): GtvDictionary {
             "ram" to gtv(2048),
             "io_read" to gtv(25),
             "io_write" to gtv(20),
+    ))
+}
+
+fun buildGetLeaseByContainerName(expireTimeMillis: Long, expired: Boolean = false): GtvDictionary {
+    return GtvObjectMapper.toGtvDictionary(LeaseData(
+            "container01",
+            "cluster01",
+            1,
+            0,
+            expireTimeMillis,
+            expired,
+            true,
+            "subnode-image01",
+            listOf(),
+            listOf(),
+            null,
+            null
     ))
 }
