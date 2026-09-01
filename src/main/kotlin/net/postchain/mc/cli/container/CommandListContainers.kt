@@ -66,7 +66,7 @@ class CommandListContainers : PmcCommand(
 
     private fun headers(withExpiration: Boolean) =
             listOf("Name", "Cluster", "Deployer voter set") +
-                    (if (withExpiration) listOf(LEASE_EXPIRES_HEADER) else listOf()) +
+                    (if (withExpiration) listOf("Lease expires") else listOf()) +
                     listOf("Blockchains")
 
     private fun expirationColumn(leases: Map<String, LeaseData?>?, containerName: String) =

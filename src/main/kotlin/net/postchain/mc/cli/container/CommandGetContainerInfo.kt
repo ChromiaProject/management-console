@@ -23,6 +23,8 @@ import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Date
 
 class CommandGetContainerInfo : PmcCommand(
@@ -72,7 +74,7 @@ fun CliktCommand.showContainerInfo(
                 row("Subnode JAR extensions:", info.jarExtensions.joinToString(", "))
             }
             info.state?.let { row("State:", it.toString()) }
-            lease?.let { row("$LEASE_EXPIRES_HEADER:", formatLeaseExpiration(it)) }
+            lease?.let { row("Lease expires:", formatLeaseExpiration(it)) }
         }
     })
 
@@ -139,10 +141,10 @@ fun CliktCommand.showContainerInfo(
     }
 }
 
-const val LEASE_EXPIRES_HEADER = "Lease expires"
+private val expirationFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault())
 
 fun formatLeaseExpiration(lease: LeaseData): String =
-        Date.from(Instant.ofEpochMilli(lease.expireTimeMillis)).toString() + if (lease.expired) " (expired)" else ""
+        expirationFormatter.format(Instant.ofEpochMilli(lease.expireTimeMillis)) + if (lease.expired) " (expired)" else ""
 
 enum class ContainerResourceLimitType {
     max_blockchains,

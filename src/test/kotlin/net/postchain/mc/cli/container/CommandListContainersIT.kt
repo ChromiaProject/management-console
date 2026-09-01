@@ -14,12 +14,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.time.Instant
-import java.util.Date
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class CommandListContainersIT {
 
     private val expireTimeMillis = 1767225600000L // 2026-01-01T00:00:00Z
-    private val expireTime = Date.from(Instant.ofEpochMilli(expireTimeMillis)).toString()
+    private val expireTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+            .withZone(ZoneId.systemDefault())
+            .format(Instant.ofEpochMilli(expireTimeMillis))
 
     @Test
     fun `list containers`(@TempDir dir: Path) {
