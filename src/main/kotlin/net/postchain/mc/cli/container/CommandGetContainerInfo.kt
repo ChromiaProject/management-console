@@ -23,7 +23,7 @@ import net.postchain.mc.cli.util.nameOption
 import net.postchain.mc.cli.util.pmcConfigOption
 import net.postchain.mc.cli.util.pmcTable
 import java.time.Instant
-import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Date
 
@@ -141,7 +141,7 @@ fun CliktCommand.showContainerInfo(
     }
 }
 
-private val expirationFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault())
+private val expirationFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneOffset.UTC)
 
 fun formatLeaseExpiration(lease: LeaseData): String =
         expirationFormatter.format(Instant.ofEpochMilli(lease.expireTimeMillis)) + if (lease.expired) " (expired)" else ""
