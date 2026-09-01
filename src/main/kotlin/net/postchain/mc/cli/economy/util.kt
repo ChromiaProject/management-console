@@ -23,11 +23,26 @@ fun getEconomyChainClient(config: PmcClientConfigOption): PostchainClient {
     val economyChainBrid = config.client.getEconomyChainRid()
             ?: throw CliktError("Economy chain is not initialized")
 
-    return if (config.lookupNodes)
-        config.chromiaClient.getSystemChainClient(BlockchainRid(economyChainBrid), addNop = true)
-    else
-        config.chromiaClient.getSystemChainClientForForwardingReplica(BlockchainRid(economyChainBrid), addNop = true)
+    return economyChainClient(config, economyChainBrid)
 }
+
+/**
+ * Same as [getEconomyChainClient], but returns null instead of failing if the network has no economy chain.
+ */
+fun getEconomyChainClientOrNull(config: PmcClientConfigOption): PostchainClient? {
+
+    if (Version(config.client).version < DIRECTORY_CHAIN_ECONOMY_CHAIN_VERSION) return null
+
+    val economyChainBrid = config.client.getEconomyChainRid() ?: return null
+
+    return economyChainClient(config, economyChainBrid)
+}
+
+private fun economyChainClient(config: PmcClientConfigOption, economyChainBrid: ByteArray): PostchainClient =
+        if (config.lookupNodes)
+            config.chromiaClient.getSystemChainClient(BlockchainRid(economyChainBrid), addNop = true)
+        else
+            config.chromiaClient.getSystemChainClientForForwardingReplica(BlockchainRid(economyChainBrid), addNop = true)
 
 fun formatUsd(chr: Long?): String = formatCurrency(chr, UNITS_PER_USD)
 
