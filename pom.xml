@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.chromia</groupId>
         <artifactId>chromia-parent</artifactId>
-        <version>0.2.12</version>
+        <version>0.2.13</version>
     </parent>
 
     <groupId>net.postchain.mc</groupId>
@@ -341,33 +341,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>get-the-git-infos</id>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <useNativeGit>true</useNativeGit> <!-- git worktree does not work with JGit implementation -->
-                    <includeOnlyProperties>
-                        <includeOnlyProperty>^git\.branch$</includeOnlyProperty>
-                        <includeOnlyProperty>^git\.build\.(time|version)$</includeOnlyProperty>
-                        <includeOnlyProperty>^git\.commit\.id\.(abbrev|full)$</includeOnlyProperty>
-                        <includeOnlyProperty>^git\.commit\.message\.(full|short)$</includeOnlyProperty>
-                        <includeOnlyProperty>^git\.commit\.time$</includeOnlyProperty>
-                        <includeOnlyProperty>^git\.dirty$</includeOnlyProperty>
-                    </includeOnlyProperties>
-                    <commitIdGenerationMode>full</commitIdGenerationMode>
-                    <dateFormatTimeZone>UTC</dateFormatTimeZone>
-                    <dateFormat>yyyy-MM-dd'T'HH:mm:ssX</dateFormat>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
