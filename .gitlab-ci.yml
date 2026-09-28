@@ -12,7 +12,7 @@ include:
 # rather than GitLab.com shared runners. The chromaway tag is unique to our fleet.
 default:
   tags:
-    - linux-small-amd64
+    - linux-medium-amd64
     - chromaway
 
 .setup:
