@@ -8,6 +8,13 @@ include:
       - templates/maven-dependency-scanning.yml
       - templates/container-dependency-scanning.yml
 
+# Run every job, including those from the included templates, on our own runners
+# rather than GitLab.com shared runners. The chromaway tag is unique to our fleet.
+default:
+  tags:
+    - linux-small-amd64
+    - chromaway
+
 .setup:
   services:
     - name: docker:23.0.4-dind
