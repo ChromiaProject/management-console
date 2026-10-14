@@ -19,14 +19,16 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.49.21</postchain.version>
+        <postchain.version>3.49.22</postchain.version>
         <postchain.client.version>3.39.7</postchain.client.version>
         <directory.chain.version>1.110.11</directory.chain.version>
-        <cli.tools.version>0.12.5</cli.tools.version>
+        <cli.tools.version>0.13.2</cli.tools.version>
         <rell.maven.plugin.version>1.2.3</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
 
+        <!-- Overrides the Apache MINA SSHD version used by jgit.ssh.apache for security fixes -->
+        <sshd.version>2.20.0</sshd.version>
         <main-class>net.postchain.mc.Directory1Kt</main-class>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -45,6 +47,16 @@
     </properties>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.apache.sshd</groupId>
+                <artifactId>sshd-osgi</artifactId>
+                <version>${sshd.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.sshd</groupId>
+                <artifactId>sshd-sftp</artifactId>
+                <version>${sshd.version}</version>
+            </dependency>
             <dependency>
                 <groupId>net.postchain</groupId>
                 <artifactId>postchain</artifactId>
