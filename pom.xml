@@ -19,7 +19,7 @@
 
     <properties>
         <revision>dev</revision>
-        <postchain.version>3.49.22</postchain.version>
+        <postchain.version>3.49.23</postchain.version>
         <postchain.client.version>3.39.7</postchain.client.version>
         <directory.chain.version>1.110.11</directory.chain.version>
         <cli.tools.version>0.13.2</cli.tools.version>
