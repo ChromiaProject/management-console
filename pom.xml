@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.chromia</groupId>
         <artifactId>chromia-parent</artifactId>
-        <version>0.3.0</version>
+        <version>0.3.1</version>
     </parent>
 
     <groupId>net.postchain.mc</groupId>
@@ -22,7 +22,7 @@
         <postchain.version>3.49.23</postchain.version>
         <postchain.client.version>3.39.7</postchain.client.version>
         <directory.chain.version>1.110.11</directory.chain.version>
-        <cli.tools.version>0.13.2</cli.tools.version>
+        <cli.tools.version>0.13.3</cli.tools.version>
         <rell.maven.plugin.version>1.2.3</rell.maven.plugin.version>
         <directory.source>${project.build.directory}/directory-chain/src</directory.source>
         <directory.config>${project.build.directory}/directory-chain/chromia.yml</directory.config>
@@ -409,7 +409,7 @@
                     <configuration>
                         <allowInsecureRegistries>false</allowInsecureRegistries>
                         <from>
-                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java21:1.0.21@sha256:4dc74e9017704f290e1374ce25610eb4f2200b430d3f1a613d3df3f11cee8ebc</image>
+                            <image>registry.gitlab.com/chromaway/core-tools/chromia-images/java21:1.0.22@sha256:c85e7ae2367336e483d86fdae752faad793be5cd19e78659cde86189892888ea</image>
                         </from>
                         <to>
                             <image>${image.name}</image>
